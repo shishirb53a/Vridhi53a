@@ -1,0 +1,55 @@
+(function(){
+window.repSel=function(){const A=S.assets,ids=UI.rsel;const all=A.map(function(x,i){return i});
+if(!ids)return{all:true,min:false,none:false,idx:all};
+const idx=all.filter(function(i){return ids.indexOf(String(A[i].id))>-1});
+if(idx.length===A.length)return{all:true,min:false,none:false,idx:idx};
+if(!idx.length)return{all:false,min:false,none:true,idx:[]};
+return{all:false,min:true,none:false,idx:idx}};
+window.repNone=function(){return'<div class="em">Please select at least one investment.</div>'};
+window.rsPanel=function(){const A=S.assets,SEL=repSel();
+const msg=SEL.all?'All investments shown. Pick one or more to see only those.':SEL.none?'No investment selected.':SEL.idx.length+' of '+A.length+' selected, showing only their values.';
+const cb=CATS.filter(function(c){return A.some(function(x){return x.cat===c})}).map(function(c){const ids=A.map(function(x,i){return x.cat===c?i:-1}).filter(function(i){return i>-1}),on=ids.every(function(i){return SEL.idx.indexOf(i)>-1});return'<button type="button" class="lgb" data-rcat="'+esc(c)+'" aria-pressed="'+on+'"><b>'+esc(c)+'</b><span class="mu">'+ids.length+'</span></button>'}).join('');
+return'<div class="rsel" role="group" aria-label="Choose which investments to show"><div class="rsh"><b class="rpft">Filter Asset Classes</b><span class="sr-only">'+msg+'</span><span class="rsa"><button type="button" data-rsel="all">Select All</button><button type="button" data-rsel="none">Clear</button></span></div>'
++'<div class="lg">'+cb+'</div><div class="rsh" style="margin:12px 0 8px"><b class="rpft">Filter Holdings</b></div>'
++'<div class="lg">'+A.map(function(x,i){const on=SEL.idx.indexOf(i)>-1;return'<button type="button" class="lgb" data-rsel="'+esc(String(x.id))+'" aria-pressed="'+on+'" title="'+escn(x.name)+' · '+(x.ret*100).toFixed(2)+'%'+(x.type||!(x.add>0)?'':' · '+f(x.add)+' / year')+'"><i style="background:'+COL[i%10]+'"></i><b>'+escn(x.name)+'</b><span class="mu">'+(x.ret*100).toFixed(2)+'%</span></button>'}).join('')+'</div></div>'};
+window.selDI=function(r,mon,idx,rows){const A=S.assets;let dep=0;
+if(mon){dep=idx.reduce(function(t,i){return t+(r.ad?r.ad[i]:0)},0);let c=0,any=false;idx.forEach(function(i){if(r.v[i]!=null&&r.pv&&r.pv[i]!=null){c+=r.v[i]-r.pv[i];any=true}});return[dep,any?c-dep:null]}
+if(r.a>1)dep=idx.reduce(function(t,i){const x=A[i];if(x.type==='gratuity')return t;const k=fyInfo(x,S,r.a);return t+(k.act?(k.yp?x.add:0)+(x.madd||0)*k.n:0)},0);
+const st=function(q){let t=0,any=false;idx.forEach(function(i){if(q.v[i]!=null){any=true;t+=q.v[i]}});return any?t:null};
+return[dep,r.a>1&&st(r)!=null&&st(rows[r.a-2])!=null?st(r)-st(rows[r.a-2])-dep:null]};
+window.repMin=function(rows,o){const A=S.assets,idx=repSel().idx,q=UI.rq.trim().toLowerCase(),multi=idx.length>0,YR=!!o.yr,Ms=S.members,kids=Ms.map(function(m,i){return m.role==='Child'?i:-1}).filter(function(i){return i>=0});
+const st=function(r){var any=false,t=0;idx.forEach(function(i){if(r.v[i]!=null){any=true;t+=r.v[i]}});return any?t:null};
+const rate=function(r){const t=st(r);return t>0?idx.reduce(function(s,i){return s+r.v[i]*A[i].ret},0)/t:null};
+const sChg=function(r){return r.a>1?st(r)-st(rows[r.a-2]):null};
+const sAdd=function(r){return YR?depShow(r.a,idx,rows.length):window.selDI(r,!YR,idx,rows)[0]},sInt=function(r){return window.selDI(r,!YR,idx,rows)[1]},yIn=function(r){return sInt(r)==null?'—':(allMat(idx,r,!YR)?'-':rf(sInt(r)))},mIn=function(r){const mi=RCOLS.annualMonthlyIncome(sInt(r),r.pay,allMat(idx,r,!YR));return mi==null?(sInt(r)==null?'—':'-'):rf(mi)};
+const pc=function(x){return x==null?'—':(x*100).toFixed(2)+'%'};
+const ok=['a','year'].concat(YR?['age'].concat(kids.map(function(k){return's'+k})):[],idx.map(function(i){return'v'+i}),(multi?['tot','roi','add','int'].concat(YR?['chg','hi']:[]):[]).concat(YR?['int','mi']:[]));const rk=ok.indexOf(UI.rk)>-1?UI.rk:'a';
+const key=function(r){return rk==='a'||rk==='year'||rk[0]==='s'?r.a:rk==='age'?r.age[0]:rk==='tot'||rk==='hi'?st(r):rk==='roi'?(rate(r)==null?-1:rate(r)):rk==='chg'?sChg(r):rk==='add'?sAdd(r):(rk==='int'||rk==='mi')?(sInt(r)==null?-1e18:sInt(r)):r.v[+rk.slice(1)]};
+const L=rows.filter(function(r){return!q||[r.a,o.lab(r)].concat(idx.map(function(i){return f(r.v[i])}),multi?[f(st(r)),pc(rate(r))]:[],YR?[r.age.join(' '),r.st.join(' ')]:[]).join(' ').toLowerCase().indexOf(q)>-1});
+L.sort(function(x,y){const a=key(x),b=key(y);return(a>b?1:a<b?-1:0)*UI.rd});
+if(!L.length)return'<div class="em">No '+o.noun+' match your search.</div>';
+const th=function(k,t){return'<th aria-sort="'+(rk===k?(UI.rd>0?'ascending':'descending'):'none')+'"><button data-rk="'+k+'">'+t+(rk===k?(UI.rd>0?' ▲':' ▼'):'')+'</button></th>'};
+const cls=function(r){return(o.hl(r)?'a':'')+(UI.sel===r.a?' sel':'')};
+const f0=rows[0],f1=rows[rows.length-1];
+const sum=multi?'<div class="rsum" aria-label="Selected investments summary">'+[[o.lab(f0),f0],[o.lab(f1),f1]].map(function(p){return'<div><span class="mu">Total · '+p[0]+'</span><b>'+rf(st(p[1]))+'</b></div><div><span class="mu">Blended ROI · '+p[0]+'</span><b>'+pc(rate(p[1]))+'</b></div>'}).join('')+'</div>':'';
+return'<table class="rt rs"><tr>'+th('a','S.No')+th('year',o.label)+(YR?th('age','Ages<br>'+Ms.map(function(m){return escn(m.name)}).join(' / '))+kids.map(function(k){return th('s'+k,escn(Ms[k].name)+'<br>stage')}).join(''):'')+idx.map(function(i){return th('v'+i,escn(A[i].name)+'<br>(₹ L)')}).join('')+(YR?th('int','Yearly<br>income (₹)')+th('mi','Monthly<br>income (₹)')+(VRPolicy.hasPayouts('goal')?th('pay','Policy<br>payouts (₹)')+th('ti','Total<br>income (₹)'):''):'')+(multi?th('tot',YR?'Year end<br>balance (₹)':'Month end<br>balance (₹ L)')+th('roi','Blended<br>ROI')+th('add','Amount<br>Deposited (₹)')+(YR?'':th('int','Interest<br>Earned (₹)'))+(YR?th('chg','Change<br>(₹ L)')+th('hi','Total (हिन्दी)'):''):'')+'</tr>\n'
++L.map(function(r){return'<tr data-r="'+r.a+'" class="'+cls(r)+'" tabindex="0" aria-selected="'+(UI.sel===r.a)+'"><td>'+r.a+'</td><td class="nw">'+o.lab(r)+'</td>'+(YR?'<td class="nw">'+r.age.join(' / ')+'</td>'+kids.map(function(k){return'<td class="l">'+sh(r.st[k])+'</td>'}).join(''):'')+idx.map(function(i){return'<td title="'+rf(r.v[i])+'">'+lk(r.v[i])+'</td>'}).join('')+(YR?'<td class="nw">'+yIn(r)+'</td><td class="nw">'+mIn(r)+'</td>'+(VRPolicy.hasPayouts('goal')?'<td class="nw">'+(r.pay>0?rf(r.pay):'—')+'</td><td class="nw"><b>'+polTiTxt(sInt(r),allMat(idx,r,!YR),r.pay)+'</b></td>':''):'')+(multi?(YR?'<td class="nw" title="'+rf(st(r))+'"><b>'+rf(st(r))+'</b></td>':'<td title="'+rf(st(r))+'"><b>'+lk(st(r))+'</b></td>')+'<td><b>'+(allMat(idx,r,!YR)?'-':pc(rate(r)))+'</b></td><td class="nw">'+rf(sAdd(r))+'</td>'+(YR?'':'<td class="nw">'+yIn(r)+'</td>')+(YR?'<td>'+(r.a>1?lk(sChg(r)):'—')+'</td><td class="l">'+hin(st(r))+'</td>':''):'')+'</tr>'}).join('')+'</table>\n'
++'<div class="rc">'+L.map(function(r){return'<details class="yc '+cls(r)+'" data-r="'+r.a+'"><summary><b>'+o.lab(r)+'</b><br>'+(multi?'<span class="mu">'+(YR?'Year end balance':'Month end balance')+'</span> <b>'+rf(st(r))+'</b> · <span class="mu">ROI</span> <b>'+pc(rate(r))+'</b>':'<span class="mu">'+esc(A[idx[0]].name)+'</span> <b>'+rf(r.v[idx[0]])+'</b>')+'</summary><div class="kv">'+idx.map(function(i){return'<span>'+escn(A[i].name)+'</span><b>'+rf(r.v[i])+'</b>'}).join('')+(YR?'<span>Yearly income</span><b>'+yIn(r)+'</b><span>Monthly income</span><b>'+mIn(r)+'</b>'+(VRPolicy.hasPayouts('goal')?'<span>Policy payouts</span><b>'+(r.pay>0?rf(r.pay):'—')+'</b><span>Total income</span><b>'+polTiTxt(sInt(r),allMat(idx,r,!YR),r.pay)+'</b>':''):'')+(multi?'<span>'+(YR?'Year end balance':'Month end balance')+'</span><b>'+rf(st(r))+'</b><span>Blended ROI</span><b>'+pc(rate(r))+'</b><span>Amount deposited</span><b>'+rf(sAdd(r))+'</b>'+(YR?'':'<span>Interest earned</span><b>'+yIn(r)+'</b>')+(YR?'<span>Yearly change</span><b>'+(r.a>1?rf(sChg(r)):'—')+'</b>':''):'')+'</div></details>'}).join('')+'</div>'};
+window.repSelCSV=function(){const yl=function(r){return'1 Apr '+r.year};const q=function(v){return'"'+String(v).replace(/"/g,'""')+'"'},mon=UI.rv==='month',A=S.assets,idx=repSel().idx,multi=idx.length>0,rows=mon?monthData().rows:calc(S).rows;
+const st=function(r){var any=false,t=0;idx.forEach(function(i){if(r.v[i]!=null){any=true;t+=r.v[i]}});return any?t:null};
+const rate=function(r){const t=st(r);return t>0?(idx.reduce(function(s,i){return s+r.v[i]*A[i].ret},0)/t*100).toFixed(2):''};
+return[['S.No',mon?'Month':'As on'].concat(idx.map(function(i){return A[i].name}),(multi?[mon?'Month end balance':'Year end balance','Blended ROI %','Amount deposited','Interest earned'].concat(mon?[]:['Monthly income']):(mon?[]:['Yearly income','Monthly income']),(!mon&&VRPolicy.hasPayouts('goal')?['Policy payouts','Total income']:[]))).map(q).join(',')].concat(rows.map(function(r){const si=window.selDI(r,mon,idx,rows)[1],mi=mon?null:RCOLS.annualMonthlyIncome(si,r.pay,allMat(idx,r,false)),base=[r.a,mon?q(r.label):q(yl(r))].concat(idx.map(function(i){return r.v[i]==null?'—':Math.round(r.v[i])}),multi?[st(r)==null?'—':Math.round(st(r)),st(r)==null?'—':rate(r),Math.round(mon?window.selDI(r,mon,idx,rows)[0]:depShow(r.a,idx,rows.length)),si==null?'—':Math.round(si)].concat(mon?[]:[mi==null?(si==null?'—':'-'):Math.round(mi)]):(mon?[]:[si==null?'—':Math.round(si),mi==null?(si==null?'—':'-'):Math.round(mi)]));if(!mon&&VRPolicy.hasPayouts('goal'))base.push(Math.round(r.pay||0),Math.round(polTiVal(si,r.pay)));return base.join(',')})).join('\n')};
+document.addEventListener('click',function(e){const b=e.target.closest&&e.target.closest('[data-rsel]');if(!b)return;
+const v=b.dataset.rsel,A=S.assets,cur=repSel();
+UI.rcl=null;
+if(v==='all')UI.rsel=null;
+else if(v==='none')UI.rsel=[];
+else if(cur.all)UI.rsel=[v];
+else{const s=(UI.rsel||[]).map(String),k=s.indexOf(v);if(k>-1)s.splice(k,1);else s.push(v);UI.rsel=(s.length===A.length||s.length===0)?null:s}
+render();const rr=document.getElementById('rr');if(rr){rr.scrollLeft=0;rr.scrollTop=0}const n=document.querySelector('[data-rsel="'+v+'"]');if(n)n.focus()});
+document.addEventListener('click',function(e){const b=e.target.closest&&e.target.closest('[data-rcat]');if(!b)return;
+const c=b.dataset.rcat,A=S.assets,cur=repSel(),ids=A.filter(function(x){return x.cat===c}).map(function(x){return String(x.id)});let s;
+if(cur.all)s=ids.slice();else{s=(UI.rsel||[]).map(String);const on=ids.every(function(i){return s.indexOf(i)>-1});s=on?s.filter(function(i){return ids.indexOf(i)<0}):s.concat(ids.filter(function(i){return s.indexOf(i)<0}))}
+{const wasAll=cur.all,rc=UI.rcl;UI.rcl=wasAll?[c]:(rc?(rc.indexOf(c)>-1?rc.filter(function(z){return z!==c}):rc.concat([c])):null)}
+UI.rsel=(s.length===A.length||s.length===0)?null:s;render();const rr=document.getElementById('rr');if(rr){rr.scrollLeft=0;rr.scrollTop=0}const nb=Array.prototype.find.call(document.querySelectorAll('[data-rcat]'),function(x){return x.dataset.rcat===c});if(nb)nb.focus()});
+})();

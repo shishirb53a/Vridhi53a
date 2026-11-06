@@ -1,0 +1,6 @@
+/* forecast: soft tint like Filter Asset Classes */
+html body .rt th{background:color-mix(in srgb,var(--rpc) 20%,var(--card))!important;color:var(--rpt)!important;border-bottom:2px solid var(--rpc)!important}
+html body .rt th button{color:var(--rpt)!important;font-weight:700}
+html body .rt th button:focus-visible{outline:2px solid var(--rpc)!important}
+html body .rph .seg button[aria-pressed=true],html body .rph button.p,html body .rph2 button.p,html body .rpr button[aria-current=true],html body .rpr button.on{background:color-mix(in srgb,var(--rpc) 20%,var(--card))!important;color:var(--rpt)!important;border-color:var(--rpc)!important;box-shadow:none!important;filter:none!important}
+html body .rph .seg button:not([aria-pressed=true]):hover,html body .rph2 button:hover,html body #rsd:hover,html body #csv:hover{border-color:var(--rpc);color:var(--rpt)}

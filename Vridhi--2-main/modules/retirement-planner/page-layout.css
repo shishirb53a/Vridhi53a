@@ -1,0 +1,19 @@
+
+/* Retirement planner screen: one clean column, compact sub tabs like Goal Planner */
+html body .fh-page{display:flex;flex-direction:column;gap:12px;grid-template-columns:none;max-width:1100px;margin:0 auto}
+html body .fh-page>.card,html body .fh-page .hz-sec{margin:0}
+html body #dsh.fh-dsh{margin:0}
+html body .fh-page .rpb{display:inline-flex;align-self:flex-start;flex-wrap:wrap;max-width:100%;margin:0}
+html body .fh-page .rpb button{min-height:40px;padding:8px 16px;flex:0 0 auto}
+html body .rp-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+html body .rp-head h2{margin:0 0 4px}html body .rp-head p{margin:0;max-width:62ch;line-height:1.5}
+html body .rp-head .acts{margin:0}html body .rp-head .acts button{min-height:42px;padding:0 20px}
+html body .hz-sec .rph2{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+html body .hz-sec .rph2 h2{margin:0 0 4px}html body .hz-sec .rph2 .rpf{color:var(--mu);font-size:14px;line-height:1.45;max-width:60ch}
+html body .hz-t th:first-child,html body .hz-t td:first-child{text-align:left}
+@media (max-width:720px){
+html body .fh-page .rpb{align-self:stretch;display:flex}html body .fh-page .rpb button{flex:1;padding:8px 6px;font-size:14px}
+html body .rp-head{align-items:stretch}html body .rp-head .acts,html body .rp-head .acts button{width:100%}
+html body .hz-sec .rph2 button{width:100%;min-height:42px}
+html body .hz-t td:first-child,html body .hz-t thead tr:nth-child(2) th:first-child{min-width:56px}html body .hz-t td.hz-w,html body .hz-t th.hz-w{min-width:170px;max-width:200px}html body .hz-t thead th{min-width:84px}
+}

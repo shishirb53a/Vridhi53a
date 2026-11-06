@@ -1,0 +1,10 @@
+html body .hd .vr-ver{color:inherit;opacity:.78}
+.vr-ver{font-size:11px;font-weight:600;color:var(--mu);white-space:nowrap;margin-left:4px;vertical-align:middle;letter-spacing:.2px}.vr-ver-lg{text-align:center;font-size:11px;color:var(--mu);margin:14px 0 0}
+html body header.hd #so{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;min-height:40px;padding:0;border-radius:10px;font-size:0}
+html body header.hd #so::before{display:none!important}
+html body header.hd #so svg{display:block;width:20px;height:20px;flex:none}
+#vr-cpm{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+#vr-cpm .bx{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:12px;padding:20px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+#vr-cpm h2{margin:0 0 4px}#vr-cpm label{display:grid;gap:4px;margin-top:12px;font-size:.92em}
+#vr-cpm input[type=password],#vr-cpm input[type=text]{padding:9px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font:inherit}
+#vr-cpm .ac{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}#vr-cpm .er{min-height:1.2em;margin:10px 0 0}

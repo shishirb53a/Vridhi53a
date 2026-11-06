@@ -1,0 +1,9 @@
+
+/* the retirement row is yellow in every report (Yearly, Monthly, Interest & Income Statement, Annual Savings Schedule, holding reports, Retirement Planner year-by-year) */
+:root{--retrow:#ffe97a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--retrow:#6b5a00}}
+:root[data-theme="dark"]{--retrow:#6b5a00}
+html body table tr.a:not(.sel),html body table tr.ret:not(.sel),html body table tr.vr-ret{--tn:var(--retrow)!important}
+html body table tr.a:not(.sel)>td,html body table tr.a:not(.sel)>th,html body table tr.ret:not(.sel)>td,html body table tr.ret:not(.sel)>th,html body #rr table tr.vr-ret>td,html body #rr table tr.vr-ret>th{background:var(--retrow)!important;background-image:none!important}
+html body details.yc.a:not(.sel),html body details.yc.a:not(.sel)>summary,html body .hz-card.ret:not(.sel),html body details.vr-scd.vr-ret,html body details.vr-scd.vr-ret>summary{background:var(--retrow)!important}
+html body table tr.a:not(.sel)>td:first-child,html body table tr.ret:not(.sel)>td:first-child,html body #rr table tr.vr-ret>td:first-child{box-shadow:inset 4px 0 0 #d4a500}

@@ -1,0 +1,131 @@
+
+/* Landing (Retirement Planner + Goal Planner first run). Spacing 4/8/12/16/24/32/48; type 12/14/16/20/28; radius 8/12; 1px borders. */
+html body .vw{--vn:#17294a;--vg:#2f6f57;--vgs:color-mix(in srgb,var(--vg) 12%,var(--card));--vns:color-mix(in srgb,var(--vn) 6%,var(--card));box-sizing:border-box;width:100%;max-width:1080px;margin:0 auto;padding:24px 16px 48px;display:flex;flex-direction:column;gap:32px;text-align:left;color:var(--tx)}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) body .vw{--vn:#a9bfe3;--vg:#6fbf9d}}
+html[data-theme="dark"] body .vw{--vn:#a9bfe3;--vg:#6fbf9d}
+html body .vw *{box-sizing:border-box}
+html body .vw h2,html body .vw h3,html body .vw h4,html body .vw p,html body .vw ul,html body .vw ol,html body .vw dl,html body .vw dd,html body .vw figure{margin:0;padding:0}
+html body .vw .vw-hero{display:grid;gap:24px;grid-template-columns:minmax(0,1fr);align-items:center}
+html body .vw .vw-copy{display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+html body .vw .vw-eye{font-size:12px;line-height:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--vg)}
+html body .vw h2{font-size:clamp(24px,5vw,32px);line-height:1.2;font-weight:700;letter-spacing:-.01em;color:var(--vn)}
+html body .vw .vw-lede{font-size:16px;line-height:1.6;color:var(--mu);max-width:56ch}
+html body .vw .vw-cta{min-height:48px;padding:0 24px;border-radius:8px;font-size:16px;font-weight:600;width:100%;max-width:none;margin:0}
+html body .vw .vw-ben{list-style:none;display:flex;flex-direction:column;gap:8px}
+html body .vw .vw-ben li{display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:var(--tx)}
+html body .vw .vw-ic{flex:none;color:var(--vg)}
+html body .vw .vw-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;min-width:0}
+html body .vw .vw-snap figcaption,html body .vw .vw-sh{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+html body .vw .vw-snap figcaption{margin-bottom:12px;font-size:14px;line-height:20px;font-weight:600;color:var(--tx)}
+html body .vw .vw-snap em,html body .vw .vw-tag{font-style:normal;font-size:12px;line-height:16px;font-weight:600;padding:4px 8px;border-radius:99px;border:1px solid var(--bd);background:var(--vns);color:var(--mu)}
+html body .vw .vw-chart{display:block;width:100%;height:auto}
+html body .vw .vw-grid{stroke:var(--bd);stroke-width:1}
+html body .vw .vw-area{fill:var(--vg);opacity:.12}
+html body .vw .vw-line{fill:none;stroke:var(--vn);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+html body .vw .vw-mk{stroke:var(--bd);stroke-width:1;stroke-dasharray:3 3}
+html body .vw .vw-dot{fill:var(--card);stroke:var(--vg);stroke-width:2}
+html body .vw .vw-ax{font-size:11px;fill:var(--mu);font-family:inherit}
+html body .vw .vw-kp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
+html body .vw .vw-kp dt{font-size:12px;line-height:16px;color:var(--mu)}
+html body .vw .vw-kp dd{font-size:16px;line-height:24px;font-weight:700;color:var(--tx);font-variant-numeric:tabular-nums}
+html body .vw .vw-sec{display:flex;flex-direction:column;gap:16px}
+html body .vw h3{font-size:20px;line-height:28px;font-weight:700;color:var(--vn)}
+html body .vw h4{font-size:14px;line-height:20px;font-weight:600;color:var(--mu);margin-bottom:12px}
+html body .vw .vw-steps{list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+html body .vw .vw-steps li{position:relative;display:grid;grid-template-columns:32px minmax(0,1fr);gap:16px}
+html body .vw .vw-steps li:not(:last-child)::after{content:"";position:absolute;left:15px;top:36px;bottom:-20px;width:1px;background:var(--bd)}
+html body .vw .vw-n{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--vn);color:var(--card);font-size:14px;font-weight:700}
+html body .vw .vw-steps b{display:flex;align-items:center;gap:8px;font-size:16px;line-height:24px;font-weight:600;color:var(--tx)}
+html body .vw .vw-steps p{margin-top:4px;font-size:14px;line-height:20px;color:var(--mu)}
+html body .vw .vw-sub{font-size:14px;line-height:20px;color:var(--mu);max-width:72ch}
+html body .vw .vw-grid3{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+html body .vw .vw-big{font-size:28px;line-height:36px;font-weight:700}
+html body .vw .vw-ok{color:var(--vg)}
+html body .vw .vw-kpv{grid-template-columns:minmax(0,1fr);gap:12px}
+html body .vw .vw-kpv>div{display:flex;justify-content:space-between;gap:16px;align-items:baseline}
+html body .vw .vw-bars{list-style:none;display:flex;flex-direction:column;gap:12px}
+html body .vw .vw-bl{display:flex;justify-content:space-between;gap:8px;font-size:14px;line-height:20px;margin-bottom:4px}
+html body .vw .vw-bl b{font-variant-numeric:tabular-nums}
+html body .vw .vw-bt{height:8px;border-radius:99px;background:var(--bd);overflow:hidden}
+html body .vw .vw-bt i{display:block;height:100%;border-radius:99px;background:var(--vg)}
+html body .vw .vw-bt i.vw-part{background:var(--vn);opacity:.55}
+html body .vw .vw-note{margin-top:12px;font-size:12px;line-height:16px;color:var(--mu)}
+html body .vw .vw-tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+html body .vw .vw-tb{width:100%;min-width:0;border-collapse:collapse;font-size:14px;line-height:20px;font-variant-numeric:tabular-nums}
+html body .vw .vw-tb th,html body .vw .vw-tb td{padding:8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+html body .vw .vw-tb thead th{font-size:12px;font-weight:600;color:var(--mu);background:var(--vns)}
+html body .vw .vw-tb tbody th,html body .vw .vw-tb tbody td{background:transparent;font-weight:400;color:var(--tx)}html body .vw .vw-tb tbody th{font-weight:600}
+html body .vw .vw-tb .vw-r{text-align:right}
+html body .vw .vw-tb tbody tr:last-child>*{border-bottom:0}
+html body .vw .vw-ex{font-size:14px;line-height:20px;color:var(--tx);padding:12px 16px;border:1px solid var(--bd);border-radius:8px;background:var(--vgs)}
+html body .vw .vw-ft{display:flex;flex-direction:column;gap:12px;padding-top:24px;border-top:1px solid var(--bd)}
+html body .vw .vw-priv{display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:20px;color:var(--tx)}
+html body .vw .vw-priv .vw-ic{margin-top:0}
+html body .vw .vw-fine{font-size:12px;line-height:16px;color:var(--mu)}
+html body .vw .vw-cta:focus-visible,html body .vw .vw-tw:focus-visible{outline:2px solid var(--vn);outline-offset:2px}
+@media (min-width:768px){html body .vw{padding:32px 24px 64px;gap:48px}}
+html body .fh-page.rp2-page:has(>.vw){max-width:1080px}html body .fh-page>.vw{padding-left:0;padding-right:0}
+html body .vw{container-type:inline-size}
+@container (min-width:520px){html body .vw .vw-cta{width:auto}html body .vw .vw-ben{flex-direction:row;flex-wrap:wrap;gap:8px 24px}}
+@container (min-width:640px){html body .vw .vw-grid3{grid-template-columns:repeat(2,minmax(0,1fr))}html body .vw .vw-wide{grid-column:1/-1}}
+@container (min-width:820px){html body .vw .vw-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px}
+ html body .vw .vw-steps{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+ html body .vw .vw-steps li{display:block}
+ html body .vw .vw-steps li>div{margin-top:12px}
+ html body .vw .vw-steps li:not(:last-child)::after{left:44px;right:-12px;top:16px;bottom:auto;width:auto;height:1px}
+ html body .vw .vw-grid3{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}}
+html body .hyd .hyb{overscroll-behavior:contain}
+/* Enterprise skin draws the logo glyph navy but left the tile navy too, so the icon vanished: use a white tile, as on the sign-in screen */
+html[data-skin="enterprise"] body header.hd .logo:not(#nx){background:#fff!important;border-color:#fff!important}
+/* sign-in logo: always a white tile with a dark icon, whatever look, theme or accent is chosen */
+html body #lg .ll:not(#nx){background:#fff!important;border-color:#fff!important}
+html body #lg .ll:not(#nx) :is(rect,path,circle){fill:#0b1220!important}
+html body #rr tr.vr-ret>*{background:color-mix(in srgb,var(--brand,var(--ac)) 12%,var(--card))}
+html body .vr-sc{display:none}
+@media (max-width:720px){html body #rr.mw:has(.vr-sc){max-height:none!important;overflow:visible!important}
+html body .vr-sc{display:flex;flex-direction:column;gap:8px}
+html body .vr-sc+*,html body #rr table.rs[aria-label="Annual savings schedule"]{display:none!important}
+html body .vr-scd{border:1px solid var(--bd);border-radius:8px;background:var(--card);padding:0 12px}
+html body .vr-scd summary{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:12px 0;cursor:pointer;list-style:none;min-height:44px}
+html body .vr-scd summary b{font-size:15px}html body .vr-scd summary span{grid-column:1;font-size:12px;color:var(--mu)}
+html body .vr-scd summary em{grid-column:2;grid-row:1/3;align-self:center;font-style:normal;font-weight:600;text-align:right}
+html body .vr-scd dl{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0 0 12px;padding-top:8px;border-top:1px solid var(--bd);font-size:14px}
+html body .vr-scd dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+html body .vr-scd.vr-ret{border-color:var(--brand,var(--ac))}
+html body .vr-scd p.rtg{display:inline-block;margin:0 0 12px}}
+html body #rr tr.vr-tot>*{border-top:2px solid var(--bd);background:color-mix(in srgb,var(--brand,var(--ac)) 8%,var(--card))}
+html body .vr-scd.vr-tc{padding:12px}html body .vr-scd.vr-tc dl{border-top:0;margin:8px 0 0;padding-top:0}
+html body .vr-savpg .msd[data-msd="cols"]{display:none}
+/* Retirement report pop-up: full size when maximised */
+html body dialog#dg.hf.fh.fh-full:not(#nx){width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;inset:0}
+html body dialog#dg.hf.fh.fh-full:not(#nx) form{display:flex;flex-direction:column;min-height:100dvh}
+html body dialog#dg.hf.fh.fh-full:not(#nx) #fh-bn{margin-top:auto}
+html body #fh-max{display:inline-flex;align-items:center;gap:6px}
+html body #fh-max[hidden]{display:none!important}
+@media (max-width:640px){html body #fh-max span{display:none}}
+/* Goal Planner > Reports: full size with Maximize / Restore */
+html body .rp-max,html body .hy-max{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+html body .rp-max:hover,html body .hy-max:hover{border-color:var(--ac)}
+html body .rp-max:focus-visible,html body .hy-max:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+html body #rp-max{width:34px;min-width:34px;height:34px;min-height:34px;padding:0!important;justify-content:center;flex:none}
+html body main#m.vr-rmax{position:fixed;inset:0;z-index:60;width:auto;max-width:none!important;margin:0!important;padding:0 24px 92px!important;overflow:auto;border-radius:0;background:var(--vr-bg,#f1f5f9)}
+html body main#m.vr-rmax .rph2[data-rpx]{position:sticky;top:0;z-index:5;margin:0 0 4px;padding:8px 0;background:var(--card)}
+html body main#m.vr-rmax #rr.mw{max-height:calc(100dvh - 300px)}
+@media (max-width:720px){html body main#m.vr-rmax{padding:0 12px 92px!important}html body .rp-max span,html body .hy-max span{display:none}html body .rp-max,html body .hy-max{padding:0 10px}}
+html body dialog#hydlg.hy-full[open]{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;inset:0;display:flex;flex-direction:column}
+html body dialog#hydlg.hy-full[open] .hyh{flex:none}
+html body dialog#hydlg.hy-full[open] .hyb{flex:1 1 auto;min-height:0;max-height:none!important}
+html body .hyh:has(#hy-max){display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+html body #hy-max{margin-left:auto}
+html body dialog.hf.fh .fh-fam .fh-crow select{width:100%;min-width:0}
+html body dialog.hf.fh .fh-fam .fh-crow input:disabled{opacity:.55;cursor:not-allowed}
+html body dialog.hf.fh .fh-fam .fh-stg-note{margin:8px 0 0}
+@media (max-width:640px){html body dialog.hf.fh .fh-fam .fh-crow select{padding:0 2px 0 6px;font-size:13px;text-overflow:clip}html body dialog.hf.fh .fh-fam .fh-crow input::placeholder{font-size:11px}html body dialog.hf.fh .fh-fam .fh-crow input{padding:0 4px}}
+html body .hyd .hyb:focus:not(:focus-visible){outline:none}
+/* one scroller only: the table wrapper no longer scrolls on its own, so wheel, touch and keys over table rows always move the pop-up body (a nested overflow box with overscroll contain traps them in some browsers) */
+html body dialog.hyd .hy-sc{overflow:visible!important;max-height:none!important;overscroll-behavior:auto!important}
+html body button#hg.hp-tgl{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;min-width:44px;min-height:44px;padding:0 8px;border:1px solid transparent!important;border-radius:12px;background:transparent!important;color:var(--mu)!important;cursor:pointer;box-shadow:none}
+html body button#hg.hp-tgl:hover{background:color-mix(in srgb,var(--tx) 6%,transparent)!important}
+html body button#hg.hp-tgl:focus-visible{outline:2px solid var(--ac,currentColor);outline-offset:2px}
+html body button#hg.hp-tgl[aria-pressed="true"]{color:var(--tx)!important}
+@media (prefers-reduced-motion:reduce){html body .vw *{transition:none!important;animation:none!important}}

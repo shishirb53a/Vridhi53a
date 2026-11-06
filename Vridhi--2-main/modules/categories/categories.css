@@ -1,0 +1,19 @@
+
+.cdlg{border:1px solid var(--bd);border-radius:12px;padding:18px 18px 14px;width:min(520px,calc(100% - 28px));background:var(--card);color:var(--tx)}
+.cdlg::backdrop{background:#0006}
+.cdlg h2{margin:0 0 6px;font-size:16px}.cdlg h3{margin:14px 0 8px;font-size:14px}
+.cdlg .cl{list-style:none;margin:10px 0 0;padding:0;max-height:34vh;overflow:auto;border:1px solid var(--bd);border-radius:12px}
+.cdlg .cl li{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid var(--bd)}
+.cdlg .cl li:last-child{border-bottom:0}
+.cdlg .cl .mu{margin-left:auto;font-size:12px}
+.cdlg .cl .ca{display:flex;gap:6px}.cdlg .cl .ca button{min-height:0;padding:3px 10px;font-size:12px}
+.cdlg .ccf{display:flex;gap:8px;align-items:center}
+.cdlg .ccf #cin{flex:1;min-width:0}
+.cdlg .ccf #cic{width:46px;height:38px;padding:2px;border-radius:8px}
+.cdlg .tb{margin-top:12px;justify-content:flex-end}
+
+.cdlg .cl .cdot{width:10px;height:10px;border-radius:50%;flex:none}
+.cdlg .cl{max-height:40vh}
+.cdlg .cl .ca button.cdb{color:var(--er);border-color:color-mix(in srgb,var(--er) 45%,var(--bd))}
+.cdlg .cdq{margin:12px 0 0;padding:12px 14px;border:1px solid color-mix(in srgb,var(--er) 45%,var(--bd));border-radius:12px;background:color-mix(in srgb,var(--er) 8%,var(--card));font-size:14px}
+.cdlg .cdq .tb{margin-top:10px}

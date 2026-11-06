@@ -1,0 +1,13 @@
+
+.rsel{margin:0 0 12px;padding:10px 12px;border:1px solid var(--bd);border-radius:12px;background:color-mix(in srgb,var(--brand) 7%,var(--card))}
+.rsel .rsh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-bottom:8px;font-size:14px}
+.rsel .rsa{margin-left:auto;display:flex;gap:6px}
+.rsel .rsa button{min-height:0;padding:4px 10px;font-size:12px;border-radius:8px}
+.rsel .lg{display:flex;flex-wrap:wrap;gap:6px}
+.lgb{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:4px 11px;border-radius:99px;border:1px solid var(--bd);background:var(--card);font-size:12px;cursor:pointer;opacity:.7}
+.lgb i{width:9px;height:9px;border-radius:50%;flex:none}
+.lgb[aria-pressed=true]{opacity:1;background:color-mix(in srgb,var(--brand) 24%,var(--card));border-color:var(--brand);font-weight:600}
+html body .rt.rs :is(th,td):nth-child(n+3){text-align:right;white-space:nowrap;min-width:0}
+.rsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:0 0 10px}
+.rsum>div{padding:8px 12px;border:1px solid var(--bd);border-radius:8px;background:color-mix(in srgb,var(--brand) 9%,var(--card));display:flex;flex-direction:column;gap:2px}
+.rsum .mu{font-size:11px}.rsum b{font-size:16px;font-variant-numeric:tabular-nums}

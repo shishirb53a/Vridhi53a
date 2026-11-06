@@ -1,0 +1,8 @@
+/* dashboard KPI tiles, summary strip, readiness meter: soft theme tint */
+html body #dsh .dz-kpi,html body #dsh .dz-rm,html body #dsh .dz-sum{background:color-mix(in srgb,var(--rpc) 12%,var(--card));border-color:color-mix(in srgb,var(--rpc) 55%,var(--bd))}
+html body #dsh .dz-sum>div{border-color:color-mix(in srgb,var(--rpc) 40%,var(--bd))}
+html body #dsh .dz-ey,html body #dsh .dz-mini,html body #dsh .dz-rs{color:var(--rpt)}
+html body #dsh .dz-kv:not(.dz-o):not(.dz-b):not(.dz-w),html body #dsh .dz-sv:not(.dz-o):not(.dz-b):not(.dz-w):not(.dz-a),html body #dsh .dz-rsc{color:var(--rpt)}
+html body #dsh .dz-kc:not(.dz-o):not(.dz-b):not(.dz-w),html body #dsh .dz-sn:not(.dz-o):not(.dz-b):not(.dz-w){color:var(--mu)}
+html body #dsh .dz-rb{background:color-mix(in srgb,var(--rpc) 22%,var(--card))}
+html body #dsh .dz-pill{background:color-mix(in srgb,var(--rpc) 20%,var(--card));color:var(--rpt)}

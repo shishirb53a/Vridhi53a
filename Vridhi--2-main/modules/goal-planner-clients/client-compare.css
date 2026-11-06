@@ -1,0 +1,134 @@
+/* Semantic colours reuse the app's own chip colours (.fhp-ok / .fhp-bad); the skins flatten --ok to a neutral, so they are scoped here. */
+html body .gpp-drawer{--cmp-ok:#0f7a4e;--cmp-bad:#be123c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body .gpp-drawer{--cmp-ok:#4ade80;--cmp-bad:#fb7185}}
+:root[data-theme="dark"] body .gpp-drawer{--cmp-ok:#4ade80;--cmp-bad:#fb7185}
+/* Clients screen: comparison table + side-by-side compare (Option 2). Theme variables only; no hardcoded palette. */
+
+html body .gpp-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+html body .gpp-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px;margin-bottom:12px}
+html body .gpp-toolbar .gpp-search{padding:0;flex:1 1 220px;max-width:360px}
+html body .gpp-tb-right{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-left:auto}
+html body .gpp-sel-hint{color:var(--mu);font-size:13px}
+html body .gpp-compare-btn{min-height:42px;padding:0 20px;border:1px solid var(--ac);border-radius:8px;background:var(--ac);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+html body .gpp-compare-btn:disabled{background:transparent;color:var(--mu);border-color:var(--bd);cursor:not-allowed}
+html body .gpp-compare-btn:not(:disabled):hover{filter:brightness(1.08)}
+html body .gpp-act{min-height:36px;padding:0 12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+html body .gpp-act:hover:not(:disabled),html body .gpp-act[aria-expanded=true]{border-color:var(--ac);color:var(--ac)}
+html body .gpp-act:disabled{opacity:.5;cursor:not-allowed}
+html body .gpp-act-del:hover:not(:disabled){border-color:var(--cmp-bad);color:var(--cmp-bad)}
+html body .gpp-drawer :focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+
+html body .gpp-table-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+html body .gpp-table,html body .gpp-cmp-table{width:100%;border-collapse:collapse;font-size:14px}
+html body .gpp-table th,html body .gpp-cmp-table thead th{padding:10px 12px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--mu);background:color-mix(in srgb,var(--ac) 7%,var(--card));border-bottom:1px solid var(--bd);white-space:nowrap}
+html body .gpp-table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--bd);vertical-align:middle}
+html body .gpp-table tbody tr:last-child td{border-bottom:0}
+html body .gpp-table td.num,html body .gpp-table th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+html body .gpp-row:hover td{background:color-mix(in srgb,var(--ac) 5%,var(--card))}
+html body .gpp-row.is-active td:first-child{box-shadow:inset 3px 0 0 var(--ac)}
+html body .gpp-row.is-selected td{background:color-mix(in srgb,var(--ac) 10%,var(--card))}
+html body .gpp-row[hidden],html body .gpp-detail-row[hidden]{display:none}
+html body .gpp-c-sel{width:44px;text-align:center}
+html body .gpp-chk{width:20px;height:20px;cursor:pointer;accent-color:var(--ac)}
+html body .gpp-c-name{min-width:170px}
+html body .gpp-c-name .gpp-client-select{flex:none;display:inline-block;max-width:100%;text-align:left;cursor:pointer;color:var(--tx);text-decoration:underline;text-decoration-color:transparent}
+html body .gpp-c-name .gpp-client-select:hover{color:var(--ac);text-decoration-color:currentColor}
+html body .gpp-c-name .fhp-chip,html body .gpp-best-tag{margin-left:6px;vertical-align:middle}
+html body .gpp-best-tag{display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:700;color:var(--cmp-ok);background:color-mix(in srgb,var(--cmp-ok) 12%,var(--card));border:1px solid color-mix(in srgb,var(--cmp-ok) 45%,var(--bd));white-space:nowrap}
+html body .gpp-status.is-ok{color:var(--cmp-ok);border-color:color-mix(in srgb,var(--cmp-ok) 45%,var(--bd));background:color-mix(in srgb,var(--cmp-ok) 10%,var(--card))}
+html body .gpp-status.is-bad{color:var(--cmp-bad);border-color:color-mix(in srgb,var(--cmp-bad) 40%,var(--bd));background:color-mix(in srgb,var(--cmp-bad) 8%,var(--card))}
+html body .gpp-c-prog{min-width:150px}
+html body .gpp-prog-wrap{display:grid;gap:5px}
+html body .gpp-pct{font-weight:700;font-variant-numeric:tabular-nums}
+html body .gpp-progress.is-ok span{background:var(--cmp-ok)}
+html body .gpp-acts{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
+html body .gpp-detail-row td{background:color-mix(in srgb,var(--bg) 60%,var(--card))}
+html body .gpp-none{margin:12px 4px;color:var(--mu);text-align:center}
+
+/* comparison view */
+html body .gpp-compare{display:grid;gap:12px}
+html body .gpp-cmp-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+html body .gpp-cmp-bar h3{margin:0;font-size:18px}
+html body .gpp-count{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:99px;background:var(--ac);color:#fff;font-size:13px;vertical-align:middle}
+html body .gpp-best-banner{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--cmp-ok) 50%,var(--bd));border-radius:12px;background:color-mix(in srgb,var(--cmp-ok) 10%,var(--card))}
+html body .gpp-best-ico{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:var(--cmp-ok);color:#fff;font-size:17px}
+html body .gpp-cmp-table th,html body .gpp-cmp-table td{padding:12px 14px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}
+html body .gpp-cmp-table tbody tr:last-child>*{border-bottom:0}
+html body .gpp-cmp-table thead th{text-transform:none;letter-spacing:0;font-size:14px;color:var(--tx);white-space:normal;min-width:150px;vertical-align:top}
+html body .gpp-cmp-table thead th .gpp-cmp-name{display:block;font-weight:700;margin-bottom:6px;overflow-wrap:anywhere}
+html body .gpp-cmp-table thead th .gpp-best-tag{margin:0 0 6px;display:flex;width:max-content}
+html body .gpp-cmp-corner,html body .gpp-cmp-table tbody th{position:sticky;left:0;z-index:1;background:var(--card);min-width:140px;font-size:13px;font-weight:700;color:var(--mu)}
+html body .gpp-cmp-table thead .gpp-cmp-corner{background:color-mix(in srgb,var(--ac) 7%,var(--card));text-transform:uppercase;font-size:12px}
+html body .gpp-cmp-table td{position:relative;font-variant-numeric:tabular-nums}
+html body .gpp-cmp-table td b{display:block;font-size:15px}
+html body .gpp-cmp-table td small{display:block;margin-top:2px;color:var(--mu);font-size:12px}
+html body .gpp-cmp-table td .gpp-progress{margin-top:6px;max-width:140px}
+html body .gpp-cmp-table .is-best-col,html body .gpp-cmp-table thead th.is-best{background:color-mix(in srgb,var(--cmp-ok) 7%,var(--card))}
+html body .gpp-cmp-table thead th.is-best{box-shadow:inset 0 3px 0 var(--cmp-ok)}
+html body .gpp-cmp-table td.is-top b{color:var(--cmp-ok)}
+html body .gpp-cmp-table td.is-top{background:color-mix(in srgb,var(--cmp-ok) 14%,var(--card))}
+html body .gpp-cmp-table td.is-pos b{color:var(--cmp-ok)}
+html body .gpp-cmp-table td.is-neg b{color:var(--cmp-bad)}
+html body .gpp-top-mark{position:absolute;top:8px;right:10px;color:var(--cmp-ok);font-size:13px}
+html body .gpp-foot{margin:0;color:var(--mu);font-size:12px;line-height:1.5}
+
+/* phones: the plans table becomes one card per plan; the comparison keeps its columns and scrolls sideways with a frozen metric column */
+@media (max-width:900px){
+  html body .gpp-toolbar .gpp-search{max-width:none;flex-basis:100%}
+  html body .gpp-tb-right{width:100%;margin-left:0}
+  html body .gpp-tb-right .gpp-compare-btn{flex:1 1 auto}
+  html body .gpp-table-wrap.gpp-plans,html body .gpp-table-wrap:has(.gpp-table){border:0;background:transparent;overflow:visible}
+  html body .gpp-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  html body .gpp-table,html body .gpp-table tbody{display:block}
+  html body .gpp-table tr.gpp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;position:relative;margin:0 0 10px;padding:12px 12px 12px 48px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+  html body .gpp-table tr.gpp-row.is-active{border:2px solid var(--ac);padding:11px 11px 11px 47px}
+  html body .gpp-table tr.gpp-row.is-selected{background:color-mix(in srgb,var(--ac) 8%,var(--card))}
+  html body .gpp-table tr.gpp-row td{display:block;padding:0;border:0;background:transparent!important;box-shadow:none!important;text-align:left}
+  html body .gpp-table td[data-label]:not([data-label=""])::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+  html body .gpp-table td.num{text-align:left}
+  html body .gpp-table td.gpp-c-sel{position:absolute;left:12px;top:12px;width:auto}
+  html body .gpp-table td.gpp-c-name{grid-column:1/-1;min-width:0}
+  html body .gpp-table td.gpp-c-prog,html body .gpp-table td.gpp-c-act{grid-column:1/-1;min-width:0}
+  html body .gpp-acts{flex-wrap:wrap}
+  html body .gpp-acts .gpp-act{flex:1 1 auto}
+  html body .gpp-table tr.gpp-detail-row{display:block;margin:-4px 0 10px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+  html body .gpp-table tr.gpp-detail-row td{display:block;padding:10px 12px}
+  html body .gpp-cmp-table thead th,html body .gpp-cmp-table td{min-width:132px;padding:10px}
+  html body .gpp-cmp-corner,html body .gpp-cmp-table tbody th{min-width:104px;max-width:104px;font-size:12px}
+}
+html body .gpp-cmp-table th,html body .gpp-cmp-table td{vertical-align:middle}
+html body .gpp-cmp-table thead th{vertical-align:top}
+html body .gpp-cmp-table thead th .gpp-cmp-name{font-size:15px;font-weight:800;color:var(--tx)}
+html body .gpp-cmp-table tbody th{font-size:13px}
+html body .gpp-drawer .gpp-client-select{background:transparent;border:0;box-shadow:none;border-radius:0;min-height:36px;padding:2px 0}
+html body .gpp-drawer .gpp-table{min-width:0}
+html body .gpp-drawer .gpp-cmp-table{min-width:0}
+@media (max-width:900px){
+  html body .gpp-drawer .gpp-table,html body .gpp-drawer .gpp-table tbody,html body .gpp-drawer .gpp-table tr.gpp-row{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+  html body .gpp-drawer .gpp-table tr.gpp-row>td{min-width:0}
+  html body .gpp-drawer .gpp-cmp-table{width:max-content;min-width:100%}
+  html body .gpp-drawer .gpp-client-list{overflow-x:hidden}
+}
+/* the skins style every td/button; keep the plan cells and names clean inside this drawer */
+html body .gpp-drawer .gpp-client-select{background:transparent!important;border:0!important;box-shadow:none!important}
+@media (max-width:900px){
+  html body .gpp-drawer .gpp-table tr.gpp-row>td{border:0!important;box-shadow:none!important;background:transparent!important}
+  html body .gpp-drawer .gpp-table tr.gpp-row{padding-left:44px}
+}
+html body .gpp-drawer .gpp-compare-btn:not(:disabled){background:var(--ac)!important;color:#fff!important;border-color:var(--ac)!important}
+html body .gpp-drawer .gpp-compare-btn:disabled{background:transparent!important;color:var(--mu)!important}
+
+/* Clients opens as a complete page (not a side drawer) */
+html body .gpp-overlay{display:block;background:var(--bg)}
+html body .gpp-overlay[hidden]{display:none}
+html body .gpp-drawer.gpp-drawer-wide{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;border:0;border-radius:0;box-shadow:none;animation:none;background:var(--bg)}
+html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-header{padding:16px max(16px,calc((100% - 1200px)/2));background:var(--card)}
+html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-header h2{font-size:24px}
+html body .gpp-drawer.gpp-drawer-wide .gpp-client-list{padding:16px max(16px,calc((100% - 1200px)/2));max-height:none}
+html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-footer{padding-left:max(16px,calc((100% - 1200px)/2));padding-right:max(16px,calc((100% - 1200px)/2))}
+html body .gpp-drawer.gpp-drawer-wide .gpp-add-client{max-width:320px;margin-left:auto}
+@media (max-width:639px){html body .gpp-drawer.gpp-drawer-wide{height:100%;max-height:none;border-radius:0}html body .gpp-drawer.gpp-drawer-wide .gpp-client-list{max-height:none}}
+
+/* Row action menu: opened menus are fixed-position (set from JS) so the scrolling table wrapper can never clip them */
+html body .gpp-kebab[open]>.gpp-menu{position:fixed;z-index:60;max-width:calc(100vw - 16px)}
+html body .gpp-kebab[open]>summary{border-color:var(--ac);color:var(--ac)}

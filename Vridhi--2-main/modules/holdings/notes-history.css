@@ -1,0 +1,28 @@
+
+.ntl0{margin:2px 0 0;font-size:14px}
+@media (max-width:640px){html body dialog.hf .wzt{gap:3px}html body dialog.hf .wzt button{font-size:12px;padding:0 2px}html body dialog.hf .wzt .wzn{display:none}}
+/* Notes & History (per holding) */
+#ntx>summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;list-style:none;padding:2px 0}
+#ntx>summary::-webkit-details-marker{display:none}
+#ntx>summary h3{margin:0}
+#ntx>summary::after{content:"▾";margin-left:auto;font-size:14px;color:var(--mu);transition:transform .15s}
+#ntx[open]>summary::after{transform:rotate(180deg)}
+.ntn{font-weight:700;color:var(--ac)}
+.ntf{margin-top:12px;display:grid;gap:10px}
+.ntf textarea,.ntedit textarea{width:100%;min-height:84px;resize:vertical;border-radius:12px;padding:10px 12px;font:inherit;box-sizing:border-box}
+.ntr{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.ntr .hf1{flex:1 1 180px;margin:0}
+html body .ntr button.p{min-height:44px;padding:0 22px;border-radius:99px;font-weight:700}
+.ntl{margin:14px 0 2px;max-height:340px;overflow:auto;padding:4px 6px 2px 30px}
+.ntc{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin:0 0 12px;box-shadow:0 1px 2px #0f172a0d}
+.ntc::after{content:"";position:absolute;left:-21px;top:30px;bottom:-14px;width:2px;background:color-mix(in srgb,var(--ac) 35%,var(--bd))}
+.ntc:last-child::after{display:none}
+.ntc::before{content:"";position:absolute;left:-26px;top:15px;z-index:1;width:12px;height:12px;border-radius:50%;background:var(--ac);border:3px solid var(--card);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 45%,var(--bd))}
+.nth{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--ac);letter-spacing:.02em}
+.ntg{font-size:11px;padding:1px 8px;border-radius:99px;background:color-mix(in srgb,var(--ac) 12%,transparent)}
+.ntp{margin:6px 0 8px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--tx);line-height:1.5}
+.nta2{display:flex;gap:8px;justify-content:flex-end}
+.ntm{color:var(--mu);padding:6px 0 10px;font-size:14px}
+.ntedit{display:grid;gap:8px}
+html body .ntb{display:inline-flex;align-items:center;gap:4px;margin:4px 0 0 6px;padding:1px 9px;min-height:0;border-radius:99px;font-size:12px;font-weight:700;background:transparent;border:1px solid var(--bd);color:var(--ac);cursor:pointer}
+html body .ntb:hover{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 10%,transparent)}

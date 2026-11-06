@@ -1,0 +1,54 @@
+
+dialog{overflow-x:hidden}
+dialog form{min-width:0;max-width:100%}
+dialog input,dialog select,dialog textarea{min-width:0;max-width:100%;box-sizing:border-box}
+dialog input[type=date],dialog input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;text-align:left}
+dialog input[type=date]::-webkit-date-and-time-value,dialog input[type=month]::-webkit-date-and-time-value{text-align:left;min-width:0}
+dialog p,dialog label{min-width:0;overflow-wrap:anywhere}
+/* holdings table: fit the screen, no sideways scroll */
+html body .ht{overflow-x:visible}
+html body .ht table{min-width:0;width:100%;table-layout:auto}
+html body .ht table th,html body .ht table td{padding:9px 7px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+html body .ht table th button{white-space:normal;text-align:right}
+html body .ht table td.nw{white-space:normal}
+html body .ht table td:last-child .tbs{margin:2px 2px 2px 0}
+html body .ht table td:last-child{min-width:132px}
+html body .ht table td.vv{min-width:110px}
+@media (max-width:900px){html body .ht{display:none}html body .hc{display:block}html body .mo{display:inline-block}}
+/* login gate */
+#lg{display:none;position:fixed;inset:0;z-index:99999;align-items:center;justify-content:center;padding:20px;background:var(--bg);color:var(--tx);overflow:auto}
+html.lk #lg{display:flex}
+html.lk body>*:not(#lg){display:none!important}
+#lg .lc{width:min(380px,100%);background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:26px 24px;box-shadow:0 24px 64px #0f172a26}
+#lg .lb{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+#lg{align-items:flex-start}#lg .lc{margin:auto}
+html body #lg .lgb{display:block;width:100%;height:auto;margin:12px 0 8px;padding:0;border:0;border-radius:12px;background:none;box-shadow:none;outline:0}
+#lg .lgt{margin:0;font-size:14px;line-height:1.5;color:var(--mu)}
+#lg .lgc{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:14px 0 0;padding:0}
+#lg .lgc li{padding:4px 10px;border:1px solid var(--bd);border-radius:99px;font-size:12px;font-weight:700;color:var(--tx)}
+
+#lg .ll{width:44px;height:44px;border-radius:12px;background:var(--brand,var(--ac));display:flex;align-items:center;justify-content:center}
+#lg .lw{font-size:20px;font-weight:800}html body #lg .lw b{color:var(--ac);font-size:inherit;font-weight:800;letter-spacing:inherit}
+#lg h1{font-size:16px;margin:14px 0 4px}#lg .mu{margin:0 0 16px}
+#lg label{display:block;margin:12px 0 4px}
+#lg .pw{position:relative}#lg .pw input{padding-right:64px}
+#lg .pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);min-height:0;padding:5px 9px;font-size:12px;border-radius:8px}
+#lg .go{width:100%;margin-top:18px;min-height:44px;font-size:16px}
+#lg .er{min-height:18px;margin:10px 0 0}
+/* build 73: login polish - roomier card, floating labels, softer shadow */
+html body #lg .lc{padding:40px 30px 32px;border-radius:12px;border-color:color-mix(in srgb,var(--bd) 60%,transparent);box-shadow:0 24px 60px -16px #0f172a2e,0 8px 24px -10px #0f172a1a}
+html body #lg .lb{margin-bottom:14px}
+html body #lg .lgc{margin-top:20px}
+html body #lg .lgv{margin:26px 0 0;text-align:center}
+html body #lg .fl{position:relative;right:auto;bottom:auto;margin:14px 0 0}
+html body #lg .fl input{display:block;width:100%;box-sizing:border-box;height:56px;min-height:56px;padding:22px 14px 6px;font-size:16px;border:1.5px solid var(--bd);border-radius:12px;background:var(--card);transition:border-color .15s,box-shadow .15s}
+html body #lg .fl.pw input{padding-right:72px}
+html body #lg .fl input::placeholder{color:transparent}
+html body #lg .fl input:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 22%,transparent)}
+html body #lg .fl label{position:absolute;left:15px;top:50%;margin:0;transform:translateY(-50%);font-size:16px;font-weight:500;color:var(--mu);pointer-events:none;transition:top .15s,font-size .15s,transform .15s,color .15s}
+html body #lg .fl input:focus+label,html body #lg .fl input:not(:placeholder-shown)+label,html body #lg .fl input:-webkit-autofill+label{top:10px;transform:none;font-size:12px;font-weight:700}
+html body #lg .fl input:focus+label{color:var(--ac)}
+@media (prefers-reduced-motion:reduce){html body #lg .fl input,html body #lg .fl label{transition:none}}
+@media (max-width:380px){html body #lg .lc{padding:34px 22px 28px}}
+#so{margin-left:10px;min-height:0;padding:6px 12px;font-size:12px;border-radius:99px;white-space:nowrap}
+@media (max-width:720px){#so{margin-left:6px;padding:5px 9px}}

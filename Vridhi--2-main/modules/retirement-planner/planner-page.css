@@ -1,0 +1,367 @@
+
+html body dialog.hf.fh form.fh-sumv{overflow:visible}
+/* Retirement planner page (build 50): single column, thumb-friendly */
+html body .rp2-page{display:flex;flex-direction:column;gap:14px;max-width:560px;margin:0 auto;padding:4px 0 calc(84px + env(safe-area-inset-bottom,0px));grid-template-columns:none}
+html body .rp2-pagew{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+html body .rp2{--rb:color-mix(in srgb,var(--mu) 22%,var(--card));--rs:color-mix(in srgb,var(--mu) 7%,var(--card));gap:16px}
+html body .rp2 .rp2-st{display:flex;flex-direction:column;gap:2px}
+html body .rp2 .rp2-sr{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+html body .rp2 .rp2-sr b{font-size:20px;font-weight:800;letter-spacing:-.01em}
+html body .rp2 .rp2-am{font-size:16px;font-weight:700}
+html body .rp2 .rp2-dot{width:14px;height:14px;border-radius:99px;flex:none}
+html body .rp2 .rp2-dot.rp2-ok,html body .rp2 .rp2-bar.rp2-ok i{background:var(--sxg)}html body .rp2 .rp2-dot.rp2-mid,html body .rp2 .rp2-bar.rp2-mid i{background:var(--sxa)}html body .rp2 .rp2-dot.rp2-bad,html body .rp2 .rp2-bar.rp2-bad i{background:var(--sxr)}
+html body .rp2 .rp2-am.rp2-ok{color:var(--sxg)}html body .rp2 .rp2-am.rp2-mid{color:var(--sxa)}html body .rp2 .rp2-am.rp2-bad{color:var(--sxr)}
+html body .rp2 .rp2-sv{margin-left:auto}
+html body .rp2 .rp2-mh{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:6px}
+html body .rp2 .rp2-mh span{color:var(--mu);font-weight:700;font-size:11px;letter-spacing:.07em;text-transform:uppercase}html body .rp2 .rp2-mh b{font-size:16px}
+html body .rp2 .rp2-bar{position:relative;height:10px;border-radius:99px;background:var(--rs);border:1px solid var(--rb)}
+html body .rp2 .rp2-bar i{display:block;height:100%;border-radius:99px}
+html body .rp2 .rp2-bar s{position:absolute;top:-5px;width:2px;height:18px;margin-left:-1px;background:var(--tx);opacity:.55;text-decoration:none}
+html body .rp2 .rp2-ms{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--mu)}
+html body .rp2 .rp2-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html body .rp2 .rp2-tile{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:44px;min-width:0;padding:9px 10px;border:1px solid var(--rb) !important;border-radius:12px;background:var(--rs) !important;color:var(--tx) !important;text-align:left;box-shadow:none !important;cursor:pointer;transform:none}
+html body .rp2 .rp2-tile small{font-size:11px;line-height:1.25;color:var(--mu)}
+html body .rp2 .rp2-tile small:first-child{letter-spacing:.07em;text-transform:uppercase;font-weight:700}
+html body .rp2 .rp2-tile b{font-size:16px;line-height:1.2;font-weight:800;white-space:nowrap}
+html body .rp2 .rp2-tile b.sx-hi{color:var(--sxg)}html body .rp2 .rp2-tile b.sx-lo{color:var(--sxr)}
+html body .rp2 .rp2-h{margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);font-weight:800}
+html body .rp2 ul.rp2-ev{list-style:none;margin:0;padding:0;border-top:1px solid var(--rb)}
+html body .rp2 ul.rp2-ev li{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:start;padding:9px 2px;border-bottom:1px solid var(--rb);font-size:14px}
+html body .rp2 .rp2-ey{display:flex;flex-direction:column}html body .rp2 .rp2-ey b{font-weight:800}
+html body dialog .rp2-more,html body .rp2 .rp2-more{display:flex;align-items:center;min-height:44px;padding:0 2px;border:0 !important;background:none !important;box-shadow:none !important;color:var(--rpc) !important;font-weight:700;font-size:14px;cursor:pointer}
+html body .rp2 .rp2-chips{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 8px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html body .rp2 .rp2-chips::-webkit-scrollbar{display:none}
+html body .rp2 .rp2-chips button{flex:none;min-height:44px;min-width:44px;padding:0 16px;border:1px solid var(--rb) !important;border-radius:99px;background:var(--card) !important;color:var(--tx) !important;font-size:14px;font-weight:700;scroll-snap-align:start;box-shadow:none !important;transform:none;cursor:pointer}
+html body .rp2 .rp2-chips button[aria-pressed="true"]{background:var(--rpc) !important;color:var(--on,#fff) !important;border-color:var(--rpc) !important}
+html body .rp2 .rp2-sl{display:flex;align-items:center;gap:10px;margin:2px 0 4px}
+html body .rp2 .rp2-sl input{flex:1;min-width:0}
+html body .rp2 .rp2-sl button{flex:none;width:44px;height:44px;min-height:44px;padding:0;border-radius:99px;font-size:20px;line-height:1}
+html body .rp2 .rp2-ol{display:block;margin:0 0 10px;font-size:12px;color:var(--mu);text-align:center}
+html body .rp2 details.rp2-ac{border:1px solid var(--rb);border-radius:12px;background:var(--card);margin-top:8px}
+html body .rp2 details.rp2-ac>summary{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 14px;cursor:pointer;list-style:none;font-size:14px;font-weight:700}
+html body .rp2 details.rp2-ac>summary::-webkit-details-marker{display:none}
+html body .rp2 details.rp2-ac>summary small{margin-left:auto;font-weight:400}
+html body .rp2 details.rp2-ac>summary::after{content:"\25be";color:var(--mu);transition:transform .15s}
+html body .rp2 details.rp2-ac[open]>summary::after{transform:rotate(180deg)}
+html body .rp2 .rp2-ab{padding:6px 12px 12px;border-top:1px solid var(--rb)}
+html body .rp2 .rp2-tw{max-height:56vh;overflow:auto}
+html body .rp2 table.sx-t tfoot td{font-weight:800;border-top:1px solid var(--rb)}
+html body .rp2 table.sx-t td.sx-wa{color:var(--sxa);font-weight:700}
+html body .rp2 table.sx-t td small{display:block;font-weight:400}
+html body .rp2 tr.rp2-tot td{font-weight:800;border-top:1px solid var(--rb)}
+html body .rp2 .rp2-hs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+html body .rp2 .rp2-hs>div{display:flex;flex-direction:column;padding:8px 10px;border:1px solid var(--rb);border-radius:8px;background:var(--rs)}
+html body .rp2 .rp2-hs b{font-size:14px}
+html body .rp2 .rp2-dsh .dz-card.rp2-flat{border:0;box-shadow:none;background:none;padding:0;margin:0}
+html body .rp2 .rp2-dsh .dz-ch>div:first-child{display:none}
+html body .rp2 .rp2-dsh .dz-ch{justify-content:flex-start;margin:0 0 8px}
+html body .rp2 .rp2-dsh .dz-al{grid-template-columns:1fr}
+html body #dsh.rp2-dsh .seg button{min-height:44px;min-width:44px;padding:0 16px}
+html body .rp2-none{padding:24px 8px;text-align:center}
+html body .rp2-none button{min-height:48px;padding:0 24px;border-radius:12px}
+html body .rp2-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:40;width:min(100%,560px);box-sizing:border-box;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:4px 8px calc(4px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid color-mix(in srgb,var(--mu) 22%,var(--card))}
+/* build 93: toasts (and their Undo button) were drawn behind the fixed bottom bar on wide screens; lift them above it when the bar is shown */
+html body:has(.rp2-nav) #toast{bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:60}
+html body .rp2-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;min-width:44px;padding:4px;border:0 !important;border-radius:12px;background:transparent !important;color:var(--mu) !important;font-size:11px;font-weight:700;box-shadow:none !important;transform:none;cursor:pointer}
+html body .rp2-nav button::before,html body .rp2-nav button::after{display:none !important;content:none !important}
+html body .rp2-nav button span{display:block;line-height:1.2}html body .rp2-nav button span:first-child{font-size:20px;height:24px;line-height:24px}
+html body .rp2-nav button[aria-current="page"]{color:var(--rpc) !important;background:color-mix(in srgb,var(--rpc) 10%,var(--card)) !important}
+html body:has(.rp2-nav) #bv{bottom:calc(64px + env(safe-area-inset-bottom,0px)) !important}
+
+html body dialog.hf.fh h2::before{display:none}
+html body dialog.hf.fh h2{gap:10px;font-size:20px}
+html body dialog.hf.fh h2 #fh-title{font-weight:800;letter-spacing:-.02em}
+html body dialog.hf.fh .fh-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:.04em;color:#fff;white-space:nowrap}
+html body dialog.hf.fh .fh-pill[hidden]{display:none}
+html body dialog.hf.fh .fh-pill.sx-ok{background:#10b981}html body dialog.hf.fh .fh-pill.sx-mid{background:#f59e0b}html body dialog.hf.fh .fh-pill.sx-bad{background:#f43f5e}
+html body dialog.hf.fh .fh-hact{margin-left:auto;display:flex;gap:6px;align-items:center}
+html body dialog.hf.fh .fh-hact button{min-height:36px;min-width:0;padding:0 12px;border:1.5px solid var(--bd) !important;border-radius:99px;background:var(--card) !important;color:var(--tx) !important;font-size:14px;font-weight:700;box-shadow:none !important;cursor:pointer;white-space:nowrap}
+html body dialog.hf.fh .fh-hact #fh-hx{width:36px;padding:0;font-size:14px}
+html body dialog.hf.fh .fh-hact{flex-wrap:wrap;justify-content:flex-end}
+html body dialog.hf.fh .fh-hact button[hidden]{display:none !important}
+html body dialog.hf.fh .fh-hact #fh-sx-add[aria-pressed=true]{color:var(--ok,#1a7f4b) !important;border-color:currentColor !important}
+@media (max-width:899px){
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])){column-gap:6px}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact{display:contents}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-hx{order:1;margin-left:auto}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden]))::after{content:"";order:2;flex-basis:100%;height:0;margin-top:-6px}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact button:not(#fh-hx):not(#fh-max){order:3}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-max{order:1;margin-left:auto}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-max+#fh-hx,html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-hx{margin-left:0}
+@media (max-width:640px){html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact button:not(#fh-hx):not(#fh-max){padding:0 8px}}
+}
+html body dialog.hf.fh .tb[hidden]{display:none !important}
+/* build 97: Summary on wide screens is one page, no vertical scrollbar: wider pop-up, two columns, tighter spacing */
+html body .sx .sx-l,html body .sx .sx-r{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (min-width:900px){
+html body dialog.hf.fh:has(#fh-s-summary:not([hidden])){width:min(1060px,96vw) !important;max-width:96vw !important;scrollbar-width:none}
+html body dialog.hf.fh:has(#fh-s-summary:not([hidden]))::-webkit-scrollbar{display:none}
+html body dialog.hf.fh:has(#fh-s-summary:not([hidden])) .sx{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start;min-height:480px}
+html body dialog.hf.fh:has(#fh-s-summary:not([hidden])) .sx .sx-hero{padding:12px 14px}
+html body dialog.hf.fh:has(#fh-s-summary:not([hidden])) .sx .sx-l,html body dialog.hf.fh:has(#fh-s-summary:not([hidden])) .sx .sx-r{gap:10px}
+html body dialog.hf.fh:has(#fh-s-summary:not([hidden])) .pt{margin:0}
+html body dialog.hf.fh:has(#fh-s-summary:not([hidden])) h2{padding-top:12px;padding-bottom:12px;margin-bottom:8px}html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])){width:min(1060px,96vw) !important;max-width:96vw !important;scrollbar-width:none}
+html body dialog.hf.fh:has(#fh-s-milestones:not([hidden]))::-webkit-scrollbar{display:none}
+html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])) .sx{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start;min-height:480px}
+html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])) .sx .sx-hero{padding:12px 14px}
+html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])) .sx .sx-l,html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])) .sx .sx-r{gap:10px}
+html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])) .pt{margin:0}
+html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])) h2{padding-top:12px;padding-bottom:12px;margin-bottom:8px}html body dialog.hf.fh:has(#fh-s-milestones:not([hidden])) .sx{grid-template-columns:minmax(0,4fr) minmax(0,8fr);min-height:0}
+html body dialog.hf.fh #fh-s-milestones ol.sx-tl{border-left:0;margin:6px 0 0;padding:0;column-count:2;column-gap:22px}
+html body dialog.hf.fh #fh-s-milestones ol.sx-tl li{break-inside:avoid;border-left:2px solid var(--bd);margin-left:6px;padding:0 0 12px 14px}
+html body dialog.hf.fh #fh-s-milestones ol.sx-tl li::before{left:-7px}
+}
+html body dialog.hf.fh .fh-bn[hidden]{display:none !important}
+html body dialog.hf.fh .fh-bn{position:sticky;bottom:0;z-index:4;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:12px -26px 0;padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -10px 24px -16px #0f172a66}
+html body dialog.hf.fh .fh-bn button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:58px;min-width:0;padding:5px 4px;border:0 !important;border-radius:12px;background:transparent !important;color:var(--mu) !important;font-size:12px;font-weight:700;box-shadow:none !important;transform:none;cursor:pointer}
+html body dialog.hf.fh .fh-bn button::before,html body dialog.hf.fh .fh-bn button::after{display:none !important;content:none !important}
+html body dialog.hf.fh .fh-bn button span{display:block;line-height:1.2;margin:0;padding:0}
+html body dialog.hf.fh .fh-bn button span:first-child{font-size:20px;height:24px;line-height:24px}
+html body dialog.hf.fh .fh-bn button[aria-current="page"]{color:var(--rpc) !important;background:color-mix(in srgb,var(--rpc) 10%,var(--card)) !important}
+html body .sx .sx-hero[data-fh-hero]{cursor:pointer}
+html body .sx .sx-hero[data-fh-hero]:focus-visible{outline:3px solid var(--rpc);outline-offset:2px}
+/* build 108: the score card without the coverage line is a compact card: KPI figures sized to fit */
+html body .sx .sx-hero{padding:12px 16px}
+html body .sx .sx-big b{font-size:20px}
+html body .sx .sx-bar{margin-top:10px}
+html body .sx .sx-cue{margin-left:auto;font-size:12px;font-weight:700;opacity:.95;white-space:nowrap}
+html body .sx ol.sx-tl{list-style:none;margin:6px 0 0 6px;padding:0 0 0 14px;border-left:2px solid var(--bd)}
+html body .sx ol.sx-tl li{position:relative;padding:0 0 14px 4px;display:flex;flex-direction:column;gap:1px;font-size:14px}
+html body .sx ol.sx-tl li::before{content:"";position:absolute;left:-22px;top:4px;width:10px;height:10px;border-radius:99px;background:var(--rpc);box-shadow:0 0 0 3px var(--card)}
+html body .sx ol.sx-tl li.sx-tlb::before{background:var(--sxr)}
+html body .sx ol.sx-tl li b{font-weight:800}
+@media (max-width:640px){html body dialog.hf.fh .fh-bn{margin:12px -16px 0}html body dialog.hf.fh h2{font-size:16px;padding:12px 16px}html body dialog.hf.fh .fh-hact button{padding:0 10px;font-size:12px}}
+
+html body dialog.hf.fh .tb.fh-act{justify-content:stretch}
+html body dialog.hf.fh .tb.fh-act button{flex:1 1 0;min-width:0;min-height:50px;padding:0 10px;font-size:16px}
+html body .rptv{max-width:560px;margin:0 auto;padding:4px 0 28px}
+/* build 102: the Retirement Planner page (Summary) uses the same two-column layout as the Summary pop-up on wide screens; phones and narrow windows keep one column */
+@media (min-width:900px){
+html body .rp2-page:has(.rptv){max-width:min(1060px,96vw)}
+html body .rp2-page:has(.rptv) .rptv{max-width:none;padding:4px 0 12px}
+html body .rp2-page:has(.rptv) .rp2-nav{width:min(100%,760px)}
+html body .rptv .sx{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+html body .rptv .sx .sx-hero{padding:12px 14px}
+html body .rptv .sx .sx-l,html body .rptv .sx .sx-r{gap:10px}
+html body .rptv .sx .pt{margin:0}
+}
+/* build 104: Retirement planner follows the Goal Planner look: compact title banner, theme-tinted KPI tickers and summary strips, no visible page scrollbar */
+html body .rp-ban{display:flex;align-items:center;gap:12px;padding:8px 16px;border-radius:12px;background:color-mix(in srgb,var(--rpc) 20%,var(--card));color:var(--tx);border:1px solid var(--rpc);margin:0 0 4px;width:100%;box-sizing:border-box;min-width:0}
+html body .rp-ban .fhp-av:not(button):not(.p){color:#fff !important;background:var(--rpc,var(--ac,#111))}
+html body .rp-ban .dz-nr .fhp-nm{font-size:16px;line-height:1.1;margin:0;color:var(--tx)}
+html body .rp-ban .dz-nr .fhp-sub{margin:0;font-size:12px;line-height:1.1}
+html body .sx .sx-pill{background:color-mix(in srgb,var(--rpc) 12%,var(--card));border-color:color-mix(in srgb,var(--rpc) 55%,var(--bd));border-radius:12px;padding:9px 12px}
+html body .sx .sx-pill small{color:var(--rpt,var(--rpc))}
+html body .sx .sx-pill b{color:var(--rpt,var(--rpc))}
+html body .sx .pt,html body .sx .oi{background:color-mix(in srgb,var(--rpc) 12%,var(--card));border-color:color-mix(in srgb,var(--rpc) 55%,var(--bd))}
+html body .sx .pt-h,html body .sx .oi-h{color:var(--rpt,var(--rpc))}
+@media (max-width:560px){html body .rp-ban .dz-nr .fhp-sub{display:none}}
+html:has(.rp2-page .rptv),html:has(.rp2-page .rptv) body{scrollbar-width:none;-ms-overflow-style:none}
+html:has(.rp2-page .rptv)::-webkit-scrollbar,html:has(.rp2-page .rptv) body::-webkit-scrollbar{display:none}
+/* build 105: Corpus Buckets / Children Goals / Monthly Cashflow follow the colour theme (same tint recipe as the KPI tickers) */
+html body .sx .sx-seg{background:color-mix(in srgb,var(--rpc) 12%,var(--card));border:1px solid color-mix(in srgb,var(--rpc) 55%,var(--bd))}
+html body dialog.hf.fh .sx .sx-seg button[aria-selected="true"],html body .rptv .sx .sx-seg button[aria-selected="true"]{background:color-mix(in srgb,var(--rpc) 22%,var(--card)) !important;color:var(--rpt,var(--rpc)) !important;box-shadow:inset 0 0 0 1px var(--rpc) !important}
+html body .sx .sx-r [role="tabpanel"]{background:color-mix(in srgb,var(--rpc) 12%,var(--card));border:1px solid color-mix(in srgb,var(--rpc) 55%,var(--bd));border-radius:12px;padding:8px 12px}
+html body .sx .sx-key{color:var(--rpt,var(--rpc))}
+html body .sx .sx-b+.sx-b{border-top:1px solid color-mix(in srgb,var(--rpc) 28%,var(--bd))}
+html body .sx .sx-tr{background:color-mix(in srgb,var(--rpc) 20%,var(--card))}
+html body .sx .sx-bv b,html body .sx .sx-bn{color:var(--tx)}
+html body .sx .sx-bv b{color:var(--rpt,var(--rpc))}
+html body .sx table.sx-t th{color:var(--rpt,var(--rpc));border-bottom:1px solid color-mix(in srgb,var(--rpc) 55%,var(--bd))}
+html body .sx table.sx-t td{border-bottom:1px solid color-mix(in srgb,var(--rpc) 18%,var(--bd))}
+html body .sx table.sx-t tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--rpc) 8%,var(--card))}
+html body .sx table.sx-t tbody tr:last-child td{border-bottom:0}
+html body .sx .sx-as{background:color-mix(in srgb,var(--rpc) 12%,var(--card));border:1px solid color-mix(in srgb,var(--rpc) 55%,var(--bd));border-radius:12px;color:var(--rpt,var(--rpc))}
+html body .sx .sx-as b{color:var(--tx)}
+/* build 106: complete theme layer for the Retirement planner (same settings the Goal Planner obeys: colour theme, corner shape, button style, table density / header / stripes / row lines, light and dark) */
+html body{--rtr:14px}html[data-ush=sharp] body{--rtr:4px}html[data-ush=pill] body{--rtr:22px}
+/* score card: soft theme tint with theme text, like the Goal Planner hero (was a dark gradient with white text) */
+html body .sx .sx-hero{background:color-mix(in srgb,var(--rpc) 16%,var(--card));color:var(--tx);border:1px solid color-mix(in srgb,var(--rpc) 55%,var(--bd));border-radius:var(--rtr)}
+html body .sx .sx-hero small{color:var(--rpt,var(--rpc));opacity:1}
+html body .sx .sx-hero .sx-cov{color:var(--mu);opacity:1}
+html body .sx .sx-ok .sx-sur b{color:color-mix(in srgb,var(--sxg) 72%,var(--tx))}
+html body .sx .sx-mid .sx-sur b{color:color-mix(in srgb,var(--sxa) 72%,var(--tx))}
+html body .sx .sx-bad .sx-sur b{color:color-mix(in srgb,var(--sxr) 72%,var(--tx))}
+html body .sx .sx-bar{background:color-mix(in srgb,var(--rpc) 22%,var(--card))}
+html body .sx .sx-bar i{background:var(--rpc)}
+/* corner shape setting (Sharp / Rounded / Pill) */
+html body .sx .sx-pill,html body .sx .pt,html body .sx .oi,html body .sx .sx-as,html body .sx .sx-r [role="tabpanel"],html body .sx .sx-seg{border-radius:var(--rtr)}
+html body .sx .sx-seg button{border-radius:max(2px,calc(var(--rtr) - 4px)) !important}
+html body dialog.hf.fh .sx .sx-btn,html body .rptv .sx .sx-btn{border-radius:var(--rb,6px) !important}
+/* button style setting (Filled / Soft / Outline) for Download Report and Add to Planner */
+html[data-ubt=soft] body dialog.hf.fh .sx .sx-btn-p,html[data-ubt=soft] body .rptv .sx .sx-btn-p{background:color-mix(in srgb,var(--ac) 14%,var(--card)) !important;color:var(--ac) !important}
+html[data-ubt=outline] body dialog.hf.fh .sx .sx-btn-p,html[data-ubt=outline] body .rptv .sx .sx-btn-p{background:transparent !important;color:var(--ac) !important}
+/* table settings: density, header style, striped rows, row lines (Children Goals, Monthly Cashflow) */
+html body .sx table.sx-t tbody tr:nth-child(even) td{background:none}
+html[data-utz=on] body .sx table.sx-t tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--rpc) 8%,var(--card))}
+html[data-utd=compact] body .sx table.sx-t td{padding-top:3px;padding-bottom:3px}
+html[data-utd=comfy] body .sx table.sx-t td{padding-top:12px;padding-bottom:12px}
+html[data-uhd=tint] body .sx table.sx-t th{background:color-mix(in srgb,var(--rpc) 16%,var(--card))}
+html[data-uhd=line] body .sx table.sx-t th{border-bottom:1px solid var(--tx)}
+html[data-utl=off] body .sx table.sx-t td{border-bottom-color:transparent}
+/* Milestones: Goals and Timeline sit in the same tinted panels */
+html body dialog.hf.fh #fh-s-milestones .sx .sx-l,html body dialog.hf.fh #fh-s-milestones .sx .sx-r{background:color-mix(in srgb,var(--rpc) 12%,var(--card));border:1px solid color-mix(in srgb,var(--rpc) 55%,var(--bd));border-radius:var(--rtr);padding:10px 12px;box-sizing:border-box}
+html body dialog.hf.fh #fh-s-milestones ol.sx-tl li{border-left-color:color-mix(in srgb,var(--rpc) 40%,var(--bd))}
+html body dialog.hf.fh #fh-s-milestones .sx h4,html body dialog.hf.fh #fh-s-milestones .sx h4 small{color:var(--rpt,var(--rpc))}
+/* Clients page cards and the Year by Year toggle follow the same tint and corners */
+html body .fhp-card{border-radius:var(--rtr)}
+html body .fhp-card.fhp-cur{background:color-mix(in srgb,var(--rpc) 12%,var(--card))}
+/* build 109: the "Age 74" end label of the Planning period bar sat on a white patch; it now takes the strip's tint (and so does the dot ring on the Milestones timeline) */
+html body .sx .pt .pt-end{background:color-mix(in srgb,var(--rpc) 12%,var(--card))}
+html body dialog.hf.fh #fh-s-milestones .sx ol.sx-tl li::before{box-shadow:0 0 0 3px color-mix(in srgb,var(--rpc) 12%,var(--card))}
+/* build 110: table headers (Goal / Inflated / Need now / Set aside, Monthly Cashflow, ...) are part of the theme: a theme-coloured band with theme-coloured text, tied to the Table header setting */
+html body .sx table.sx-t th{background:color-mix(in srgb,var(--rpc) 14%,var(--card)) !important;color:var(--rpt,var(--rpc)) !important;border-bottom:1px solid var(--rpc) !important;padding:6px !important}
+html body .sx table.sx-t td{padding-left:6px;padding-right:6px}
+html body .sx table.sx-t th:first-child{border-top-left-radius:var(--rb,6px)}html body .sx table.sx-t th:last-child{border-top-right-radius:var(--rb,6px)}
+html[data-uhd=tint] body .sx table.sx-t th{background:color-mix(in srgb,var(--rpc) 22%,var(--card)) !important}
+html[data-uhd=line] body .sx table.sx-t th{background:transparent !important;color:var(--tx) !important;border-bottom:1px solid var(--tx) !important}
+html:not([data-uic=off]) body nav button[data-t="RP Reports"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='M7 15v3M12 9v9M17 5v13'/%3E%3C/svg%3E");--icb:currentColor}
+html body .rp2-nav3{grid-template-columns:repeat(3,1fr)}
+html body:has(.rp2-nav3) #m{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+
+/* Year By Year cards on phones: compact header, 3 key amounts, tap-to-open breakdown */
+html body .hz-card{padding:12px 12px 4px}
+html body .hz-chd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+html body .hz-chip{flex:none;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--mu) 12%,var(--card))}
+html body .hz-km{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0 2px}
+html body .hz-ctot .hz-km{grid-template-columns:repeat(2,minmax(0,1fr))}
+html body .hz-km>div{display:flex;flex-direction:column;gap:1px;padding:7px 8px;border:1px solid color-mix(in srgb,var(--mu) 22%,var(--card));border-radius:8px;background:color-mix(in srgb,var(--mu) 7%,var(--card));min-width:0}
+html body .hz-km small{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mu);font-weight:700}
+html body .hz-km b{font-size:14px;font-weight:800;white-space:nowrap}
+html body .hz-dt summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;cursor:pointer;list-style:none;font-size:14px;font-weight:700;color:var(--rpc)}
+html body .hz-dt summary::-webkit-details-marker{display:none}
+html body .hz-dt summary::after{content:"\25be";transition:transform .15s}
+html body .hz-dt[open] summary::after{transform:rotate(180deg)}
+html body .hz-dt[open]{padding-bottom:8px}
+html body .hz-ctot .hz-chd{min-height:24px}
+
+/* Text size (Settings) zooms the page by 0.92 / 1.1 / 1.22; viewport units are not compensated, so pop-ups were wider and taller than the phone screen */
+:root{--z:1}:root[data-size=s]{--z:.92}:root[data-size=l]{--z:1.1}:root[data-size=xl]{--z:1.22}
+html body dialog{max-width:calc(100vw / var(--z))}
+/* build 66: phone pop-ups fill the screen edge to edge from their position (left/right 0), not from viewport units.
+   Browsers disagree on how zoom treats vw/dvh, so width:calc(100vw / var(--z)) overshot the screen on some phones. */
+@media (max-width:640px){
+html body dialog.hf,html body dialog.hf.fh{position:fixed;left:0;right:0;width:auto;max-width:none;margin:auto 0 0;box-sizing:border-box;max-height:calc(100% - 8px);overflow-x:hidden}
+html body dialog.hf.fh form,html body dialog.hf.fh .sx{min-width:0;max-width:100%;box-sizing:border-box}
+}
+html body dialog.hf.fh h2{flex-wrap:wrap;row-gap:6px}
+html body dialog.hf.fh h2 #fh-title{min-width:0}
+/* build 67: first-time welcome card on the Retirement planner screen */
+html body .rp2-wel{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:560px;margin:0 auto;padding:20px 16px 28px}
+html body .rp2-wel .rp2-wel-art{width:100%;max-width:360px;height:auto;display:block;margin:0 0 6px}
+html body .rp2-wel h3{margin:4px 0 0;font-size:20px;line-height:1.25;font-weight:800;color:var(--tx)}
+html body .rp2-wel p{margin:0}
+html body .rp2-wel .rp2-wel-lede{font-size:14px;line-height:1.55;color:var(--mu)}
+html body .rp2-wel .rp2-wel-cta{font-size:14px;line-height:1.5;font-weight:700;color:var(--tx)}
+html body .rp2-wel button{margin-top:6px;width:100%;max-width:340px}
+/* build 69: first-time storyboard (flow + cartoon) */
+html body .rp2-wel{max-width:640px}
+html body .wel-trust{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:6px 0 0;padding:0}
+html body .wel-trust li{padding:6px 12px;border:1px solid var(--bd);border-radius:99px;background:var(--card);font-size:12px;font-weight:700;color:var(--tx)}
+html body .wel-h{margin:22px 0 4px;font-size:16px;font-weight:800;color:var(--tx)}
+html body .wel-steps{list-style:none;margin:0;padding:0;width:100%;display:grid;grid-template-columns:1fr;gap:26px;text-align:left}
+html body .wel-steps li{position:relative;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+html body .wel-steps li:not(:last-child)::after{content:"\2193";position:absolute;left:50%;bottom:-24px;transform:translateX(-50%);font-size:16px;line-height:1;font-weight:800;color:var(--rpc,var(--ac))}
+html body .wel-art{border-radius:12px 15px 0 0;padding:6px 10px}
+html body .wel-art svg{display:block;width:100%;max-width:300px;height:auto;margin:0 auto}
+html body .wel-tx{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px}
+html body .wel-tx b{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:var(--tx)}
+html body .wel-tx span:not(.wel-n){font-size:14px;line-height:1.5;color:var(--mu)}
+html body .wel-n{display:inline-flex;align-items:center;justify-content:center;flex:none;width:24px;height:24px;border-radius:50%;background:var(--ac);color:var(--ac2);font-size:14px;font-weight:800}
+html body .wel-ex{width:100%;box-sizing:border-box;margin-top:6px;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--ac) 9%,var(--card));border:1px solid var(--bd);text-align:left;font-size:14px;line-height:1.5;color:var(--tx);display:flex;flex-direction:column;gap:2px}
+html body .wel-fine{font-size:12px;color:var(--mu)}
+@media (min-width:720px){html body .wel-steps{grid-template-columns:1fr 1fr;gap:16px}html body .wel-steps li:not(:last-child)::after{display:none}}
+/* build 111: the age slider (Show plan up to age) follows plan status: green = funded, orange = warning, red = money runs out; fill, handle and age label all take the colour (light and dark) */
+:root{--sl-ok:#10b981;--sl-mid:#f59e0b;--sl-bad:#f43f5e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sl-ok:#34d399;--sl-mid:#fbbf24;--sl-bad:#fb7185}}
+:root[data-theme="dark"]{--sl-ok:#34d399;--sl-mid:#fbbf24;--sl-bad:#fb7185}
+html body input#fh-ua{accent-color:var(--sl-ok)}
+html body input#fh-ua[data-st="ok"]{accent-color:var(--sl-ok)}html body input#fh-ua[data-st="mid"]{accent-color:var(--sl-mid)}html body input#fh-ua[data-st="bad"]{accent-color:var(--sl-bad)}
+html body input#fh-ua[data-st="ok"]::-webkit-slider-thumb{background:var(--sl-ok);box-shadow:0 0 0 1px var(--sl-ok),0 4px 10px #0003}html body input#fh-ua[data-st="mid"]::-webkit-slider-thumb{background:var(--sl-mid);box-shadow:0 0 0 1px var(--sl-mid),0 4px 10px #0003}html body input#fh-ua[data-st="bad"]::-webkit-slider-thumb{background:var(--sl-bad);box-shadow:0 0 0 1px var(--sl-bad),0 4px 10px #0003}
+html body input#fh-ua[data-st="ok"]::-moz-range-thumb{background:var(--sl-ok);box-shadow:0 0 0 1px var(--sl-ok)}html body input#fh-ua[data-st="mid"]::-moz-range-thumb{background:var(--sl-mid);box-shadow:0 0 0 1px var(--sl-mid)}html body input#fh-ua[data-st="bad"]::-moz-range-thumb{background:var(--sl-bad);box-shadow:0 0 0 1px var(--sl-bad)}
+html body input#fh-ua::-webkit-slider-runnable-track{background:transparent}
+/* build 112: an amount and its unit (L / Cr) never split across two lines, anywhere in the app */
+html body .nb{white-space:nowrap}
+/* build 126: Vriddhi logo in the header of every pop-up */
+html body .dg-logo{width:32px;height:32px;border-radius:8px;flex:0 0 auto;display:inline-grid;place-items:center;box-shadow:none;vertical-align:middle;margin-right:10px}
+html body .dg-logo svg{width:22px;height:22px}
+html body dialog.hf h2 .dg-logo,html body .hw-h h3 .dg-logo{margin-right:0}
+html body .hw-h h3{display:flex;align-items:center;gap:10px}
+html body dialog h2:has(>.dg-logo)::before,html body dialog h2:has(>.dg-logo)::after{content:none!important;display:none!important}
+/* build 125: "How is this calculated?" link and pop-up */
+html body .sx-howp{margin:10px 0 0;text-align:right}
+html body .sx-lnk{background:none;border:0;padding:6px 2px;color:var(--ac,#4338ca);font-weight:700;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+html body .sx-lnk:focus-visible{outline:2px solid var(--ac,#4338ca);outline-offset:2px;border-radius:4px}
+html body dialog.fh-how{width:min(760px,94vw);max-height:90vh;padding:0;border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx);overflow:hidden}
+html body dialog.fh-how[open]{display:flex;flex-direction:column}
+html body dialog.fh-how::backdrop{background:rgba(0,0,0,.45)}
+html body .hw-w{display:flex;flex-direction:column;min-height:0;max-height:90vh}
+html body .hw-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--bd)}
+html body .hw-h h3{margin:0;font-size:16px;font-weight:800}
+html body .hw-x{min-width:40px;min-height:40px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-size:16px;cursor:pointer}
+html body .hw-b{flex:1 1 auto;overflow:auto;padding:14px 16px;-webkit-overflow-scrolling:touch}
+html body .hw-f{padding:12px 16px;border-top:1px solid var(--bd);text-align:right}
+html body .hw-cl{min-height:44px;padding:0 22px;border:0;border-radius:12px;background:var(--ac,#111);color:var(--on,#fff);font-weight:700;font-size:14px;cursor:pointer}
+html body .hw-key{margin:0 0 14px;padding:12px 14px;border:1px solid var(--bd);border-left:5px solid var(--sl-ok,#10b981);border-radius:12px;background:color-mix(in srgb,var(--sl-ok,#10b981) 9%,var(--card))}
+html body .hw-key b{font-size:14px}html body .hw-key p{margin:6px 0 0;font-size:14px;line-height:1.55}
+html body .hw-ex{color:var(--mu)}
+html body .hw-st{margin:0 0 14px;padding:12px 14px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+html body .hw-st h4{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:16px;font-weight:800}
+html body .hw-n{flex:0 0 auto;width:26px;height:26px;border-radius:12px;background:var(--ac,#111);color:var(--on,#fff);font-size:14px;display:inline-flex;align-items:center;justify-content:center}
+html body .hw-p{margin:6px 0;font-size:14px;line-height:1.55}
+html body .hw-ul{margin:6px 0 6px 18px;padding:0;font-size:14px;line-height:1.6}
+html body .hw-tw{overflow-x:auto;margin:8px 0}
+html body .hw-t{width:100%;min-width:0;border-collapse:collapse;font-size:14px}
+html body .hw-t th,html body .hw-t td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+html body .hw-t th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mu)}
+html body .hw-t .hw-r{text-align:right;font-variant-numeric:tabular-nums}
+html body .hw-t .hw-dots td{text-align:center;color:var(--mu);font-style:italic;white-space:normal}
+html body .hw-res{margin:10px 0 0;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--mu) 12%,var(--card));font-size:14px;font-weight:600}
+html body .hw-fn{margin:4px 0 0;font-size:12px;color:var(--mu)}
+@media (max-width:560px){html body .hw-t th,html body .hw-t td{white-space:normal;padding:6px 4px;font-size:12px;overflow-wrap:anywhere}html body .hw-t th{font-size:11px}html body .hw-b{padding:12px}html body .hw-st{padding:10px 11px}}
+/* build 124: Corpus buckets total row */
+html body .sx-bl .sx-tot{margin-top:8px;padding-top:10px;border-top:2px solid var(--bd)}
+html body .sx-bl .sx-tot .sx-bn,html body .sx-bl .sx-tot .sx-bv{font-weight:800}
+/* build 119: Holdings grouped by category */
+html body .hp-grp{padding:8px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+html body .hp-grp[aria-pressed="true"]{background:var(--ac,#111);color:var(--on,#fff);border-color:var(--ac,#111)}
+html body .hp-sort{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+html body .hp-sort .hp-grp{min-height:44px;padding:0 14px;border-radius:12px;flex:0 0 auto}
+@media (min-width:901px){html body .hp-search{flex:1 1 180px;min-width:160px}}
+@media (max-width:520px){html body .hp-sort .hp-grp{padding:0 10px;font-size:12px}}
+html body .gtg,html body .gtg .pill,html body .gtg small{white-space:nowrap}
+html body .ht th{white-space:nowrap}
+@media (max-width:900px){html body .hp-sort{flex:1 1 100%;flex-wrap:wrap}html body .hp-sort .hp-grp{flex:1 1 auto}}
+html body .hgh b{white-space:nowrap}html body .hgh .gtg{flex-wrap:wrap;min-width:0}
+html body .ht tr.gh td{background:color-mix(in srgb,var(--c,#888) 11%,var(--card));border-top:2px solid var(--c,#888);font-weight:700;padding-top:9px;padding-bottom:9px}
+html body .ht tbody tr.gh:nth-child(even) td{background:color-mix(in srgb,var(--c,#888) 11%,var(--card))}
+html body .gtg{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;color:var(--tx);border-radius:8px;padding:2px 4px}
+html body .gtg:focus-visible{outline:2px solid var(--ac,#111);outline-offset:2px}
+html body .gtg small{font-weight:500;color:var(--mu);font-size:12px}
+html body .gar{width:14px;text-align:center;color:var(--mu)}
+html body .hgh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 0 8px;padding:8px 12px;border-radius:8px;border-left:4px solid var(--c,#888);background:color-mix(in srgb,var(--c,#888) 11%,var(--card))}
+/* build 116: Planning period figures size to their text so "on what earnings leave over" stays on one line (saves a line); on narrow screens the tiles wrap two per row */
+html body .pt-g{display:flex;flex-wrap:wrap;gap:8px 16px;grid-template-columns:none}
+html body .pt-g>div{flex:1 1 auto;min-width:0}
+html body .pt-g small,html body .pt-g b{white-space:nowrap;overflow-wrap:normal}
+/* build 115: College and Wedding child pages show their four figures in one row to save space */
+html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats .fh-stat{padding:6px 8px;gap:1px}
+html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats .fh-stat span{font-size:11px;line-height:1.25}
+html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats .fh-stat b{font-size:14px;white-space:nowrap;overflow-wrap:normal}
+@media (max-width:520px){html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats{gap:4px}html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats .fh-stat{padding:5px 6px}html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats .fh-stat span{font-size:11px}html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats .fh-stat b{font-size:12px}}
+@media (max-width:380px){html body .sx .sx-big{grid-template-columns:1fr;gap:6px}html body .sx .sx-big b{font-size:20px}html body .sx .sx-pills{grid-template-columns:1fr 1fr}html body .sx .sx-pill b{font-size:14px}}
+/* build 111: yearly expenses line under the age slider */
+html body .fh-exp{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin:8px 0 0;padding:8px 12px;border:1px solid var(--bd);border-left:4px solid var(--sl-ok,#10b981);border-radius:12px;background:color-mix(in srgb,var(--card) 92%,var(--sl-ok,#10b981))}
+html body .fh-exp b{font-size:16px;font-weight:800;color:var(--tx);font-variant-numeric:tabular-nums}html body .fh-exp em{font-style:normal;font-size:12px;font-weight:600;color:var(--mu)}
+html body .fh-exp small{font-size:12px;color:var(--mu);line-height:1.4}html body .fh-exp small:first-child{flex:1 0 100%;text-transform:uppercase;letter-spacing:.05em;font-size:11px;font-weight:700}
+html body .rp2 .fh-exp{margin:0 0 10px}
+html body .fh-exp:has(~ [data-st="mid"]),html body .stp:has(input[data-st="mid"]) ~ .dz-rng ~ .fh-exp{border-left-color:var(--sl-mid,#f59e0b)}
+html body .stp:has(input[data-st="bad"]) ~ .dz-rng ~ .fh-exp,html body #fh-ul[data-st="bad"] ~ .fh-exp{border-left-color:var(--sl-bad,#f43f5e)}
+html body #fh-ul[data-st="mid"] ~ .fh-exp{border-left-color:var(--sl-mid,#f59e0b)}
+/* build 111: timeline circles follow plan status too (green ok, orange warning, red runs out), in the page, the Milestones pop-up and the downloaded report */
+html body .sx ol.sx-tl li.tl-ok::before{background:var(--sl-ok,#10b981)}html body .sx ol.sx-tl li.tl-mid::before{background:var(--sl-mid,#f59e0b)}html body .sx ol.sx-tl li.tl-bad::before,html body .sx ol.sx-tl li.sx-tlb::before{background:var(--sl-bad,#f43f5e)}
+html body dialog.hf.fh #fh-s-milestones .sx ol.sx-tl li.tl-ok::before{background:var(--sl-ok,#10b981)}html body dialog.hf.fh #fh-s-milestones .sx ol.sx-tl li.tl-mid::before{background:var(--sl-mid,#f59e0b)}html body dialog.hf.fh #fh-s-milestones .sx ol.sx-tl li.tl-bad::before{background:var(--sl-bad,#f43f5e)}
+html body #fh-ul[data-st="ok"]{color:var(--sl-ok)}html body #fh-ul[data-st="mid"]{color:var(--sl-mid)}html body #fh-ul[data-st="bad"]{color:var(--sl-bad)}
+html body #fh-ul[data-st]{font-weight:700}
+html body #dsh #fh-ul.dz-pill[data-st="ok"]{background:color-mix(in srgb,var(--sl-ok) 18%,var(--card));border-color:var(--sl-ok)}html body #dsh #fh-ul.dz-pill[data-st="mid"]{background:color-mix(in srgb,var(--sl-mid) 18%,var(--card));border-color:var(--sl-mid)}html body #dsh #fh-ul.dz-pill[data-st="bad"]{background:color-mix(in srgb,var(--sl-bad) 18%,var(--card));border-color:var(--sl-bad)}

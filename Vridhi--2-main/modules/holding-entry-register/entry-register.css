@@ -1,0 +1,11 @@
+
+.ent-cards{display:none;flex-direction:column;gap:8px;margin-top:6px}
+html body .ent-t :is(th,td){text-align:left!important;position:static!important;left:auto!important;border-right:0!important;border-left:0!important;box-shadow:none!important;min-width:0!important}
+html body .ent-t :is(th,td).ent-n{text-align:right!important;white-space:nowrap}
+html body .ent-t th button{white-space:nowrap}
+html body .ent-t td{vertical-align:top}
+@media (max-width:720px){
+ html body .ent-t{display:none!important}
+ html body .ent-cards{display:flex}
+ html body .vr-entpg .mw{max-height:none;overflow:visible}
+}

@@ -1,0 +1,21 @@
+/* shared theme: values come from the Dashboard (parent) */
+:root{--r-card:calc(var(--r,14px) + 10px);--r-box:calc(var(--r,14px) + 4px);--r-ctl:calc(var(--r,14px) - 2px);--pad-card:26px 28px;--pad-box:20px;--shadow-card:0 16px 50px -34px #0f172a66;--fs-h1:clamp(24px,3.4vw,30px);--fs-h2:18px;--fw-h2:800;--fs-eyebrow:11px;--ls-eyebrow:.09em;--pill-bg:color-mix(in srgb,var(--brand) 22%,var(--card));--tag-bg:color-mix(in srgb,var(--brand) 16%,var(--card));--tag-bd:color-mix(in srgb,var(--brand) 45%,var(--bd));--field-bg:color-mix(in srgb,var(--tx) 3%,var(--card))}
+@media(max-width:640px){:root{--pad-card:18px 16px;--pad-box:16px}}
+.card{border-radius:var(--r-card);padding:var(--pad-card);box-shadow:var(--shadow-card)}
+.card h2{font-size:var(--fs-h2);font-weight:var(--fw-h2);line-height:1.25;letter-spacing:-.01em;border:0;padding:0}
+.rph h1,.pb .pt{font-size:var(--fs-h1);font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.rpk-c{border-radius:var(--r-box);padding:18px}
+.rpk-l{font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:var(--ls-eyebrow)}
+.rsel{border-radius:var(--r-box);padding:var(--pad-box);background:var(--card)}
+.rsel [data-rsel]{border-radius:99px;font-weight:700}
+.ht th,.rt th{font-weight:700;letter-spacing:.02em}
+input,select,textarea{border-radius:var(--r-ctl);background:var(--field-bg)}
+input[type=checkbox],input[type=radio],input[type=range],input[type=color]{background:initial}
+button{border-radius:var(--r-ctl)}
+button.p{font-weight:700}
+.pill{font-weight:700}
+dialog{border-radius:var(--r-card);box-shadow:var(--shadow-card);padding:22px}
+@media(max-width:640px){dialog{padding:16px}}
+.agebar{border-radius:var(--r-box)}
+.em{border:1px dashed var(--bd);border-radius:var(--r-box);background:var(--field-bg)}
+.lc{border-radius:var(--r-card);box-shadow:var(--shadow-card)}

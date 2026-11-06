@@ -1,0 +1,28 @@
+
+/* Year by Year table: built like the Goal Planner Reports table (theme header, header sort, row highlight, shared Freeze) */
+html body .hz-sec{margin-top:6px}
+html body .hz-t.rt{font-size:12px}
+html body .hz-t.rt thead th{white-space:normal;vertical-align:bottom;line-height:1.25;min-width:92px;max-width:140px}html body .hz-t.rt thead th:nth-child(-n+3){max-width:none}html body .hz-t.rt th button{display:block;width:100%}
+html body .hz-t.rt td:last-child,html body .hz-t.rt th:last-child{min-width:0;text-align:center}
+html body .hz-t.rt th.hz-w,html body .hz-t.rt td.hz-w{white-space:normal;min-width:240px;max-width:320px;text-align:left;line-height:1.35}
+html body .hz-t.rt th button{font:inherit;font-weight:inherit;background:none;border:0;padding:0;margin:0;color:inherit;text-align:inherit;cursor:pointer;white-space:normal;min-height:0}
+html body .hz-t.rt tbody tr[data-hzr]{cursor:pointer}
+html body .hz-t.rt tbody tr[data-hzr]:hover{--tn:color-mix(in srgb,var(--ac) 7%,transparent)}
+html body .hz-t.rt tbody tr.sel{--tn:color-mix(in srgb,var(--ac) 20%,transparent)}
+html body .hz-t.rt tfoot td{border-top:1px solid var(--bd);font-weight:400}
+html body .hz-hint{margin:0 0 8px;font-size:12px;line-height:1.45}
+html body .hz-t .dz-o,html body .hz-card .dz-o{color:#15803d}html body .hz-t .dz-w,html body .hz-card .dz-w{color:#b45309}html body .hz-t .dz-b,html body .hz-card .dz-b{color:#dc2626}
+html body .hz-t .hz-expense,html body .hz-card .hz-expense{color:#dc2626;font-weight:600}
+html body .hz-t .hz-income,html body .hz-card .hz-income{color:#15803d;font-weight:600}
+html body .hz-t .hz-ev,html body .hz-card .hz-ev{font-style:italic;font-weight:600;color:#0f766e}:root[data-theme=dark] .hz-t .hz-ev,:root[data-theme=dark] .hz-card .hz-ev{color:#5eead4}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .hz-t .hz-ev,:root:not([data-theme=light]) .hz-card .hz-ev{color:#5eead4}}
+html body .hz-cards{display:none}
+html body .hz-card{border:1px solid var(--bd);border-radius:12px;padding:10px 14px;margin:0 0 10px;background:var(--card);cursor:pointer}
+html body .hz-card.sel{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,var(--card))}
+html body .hz-ct{font-size:16px;margin:0 0 2px}html body .hz-cn{color:var(--mu);font-size:12px;line-height:1.4;margin:0 0 6px}
+html body .hz-cr{display:flex;justify-content:space-between;gap:14px;padding:4px 0;font-size:14px}html body .hz-cr span:first-child{color:var(--mu);text-align:left}html body .hz-cr span:last-child{text-align:right;white-space:nowrap}html body .hz-cr span:first-child{flex:1 1 auto}
+html body .hz-ctot{cursor:default}
+html body .fh-page .hz-tb{margin-bottom:10px}html body .fh-page .hz-tb input{flex:1 1 220px;min-width:0}
+html body .fh-page .hz-tb select{flex:1 1 150px;min-width:0;max-width:100%;text-overflow:ellipsis}
+html body .fh-page .hz-tb #fzs{max-width:190px}
+html body .fh-page .card{min-width:0}
+@media (max-width:1040px){html body .hz-cards{display:block}html body .hz-wrap{display:none}}

@@ -1,0 +1,86 @@
+/* Add/Edit Holding: visual polish only (no markup, logic or calculation changes) */
+@keyframes hfin{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){html body dialog.hf[open]{animation:none}}
+html body dialog.hf{width:min(700px,96vw);padding:0;border:1px solid color-mix(in srgb,var(--rpc) 35%,var(--bd));border-radius:12px;background:var(--card);box-shadow:0 30px 80px -20px #0f172a66,0 0 0 1px #ffffff10 inset;max-height:92vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+html body dialog.hf[open]{animation:hfin .22s cubic-bezier(.16,1,.3,1)}
+html body dialog.hf::backdrop{background:#0f172a8c;backdrop-filter:blur(5px)}
+html body dialog.hf form{padding:0 26px;counter-reset:st}
+/* header */
+html body dialog.hf h2{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:14px;margin:0 -26px 20px;padding:20px 26px;font-size:20px;font-weight:800;letter-spacing:-.02em;line-height:1.2;color:var(--tx);background:linear-gradient(135deg,color-mix(in srgb,var(--rpc) 24%,var(--card)),color-mix(in srgb,var(--rpc) 10%,var(--card)));border:0;border-bottom:1px solid color-mix(in srgb,var(--rpc) 45%,var(--bd));padding-left:26px}
+html body dialog.hf h2::before{content:"₹";flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--rpc);color:var(--on,#fff);font-size:20px;font-weight:800;box-shadow:0 6px 16px -6px var(--rpc)}
+/* sections as numbered cards */
+html body dialog.hf .hs{margin:0 0 16px;padding:18px 20px 8px;border:1px solid color-mix(in srgb,var(--rpc) 28%,var(--bd));border-radius:12px;background:color-mix(in srgb,var(--rpc) 5%,var(--card));box-shadow:0 1px 2px #0f172a0a}
+html body dialog.hf .hs>h3{display:flex;align-items:center;gap:10px;margin:0 0 16px;font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--rpt)}
+html body dialog.hf .hs>h3::before{counter-increment:st;content:counter(st);flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--rpc) 26%,var(--card));border:1px solid var(--rpc);color:var(--rpt);font-size:12px;font-weight:800;letter-spacing:0}
+html body dialog.hf .hs>h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--rpc) 45%,transparent),transparent)}
+html body dialog.hf .hg{grid-template-columns:1fr 1fr;gap:0 16px}
+html body dialog.hf .hf1{margin:0 0 16px}
+/* labels + inputs */
+html body dialog.hf label{display:block;margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.01em;color:var(--tx)}
+html body dialog.hf input:not([type=radio]):not([type=checkbox]),html body dialog.hf select{width:100%;min-height:46px;padding:10px 14px;border:1.5px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx);font-size:16px;font-weight:550;box-shadow:inset 0 1px 2px #0f172a0a;transition:border-color .15s,box-shadow .15s,background .15s}
+html body dialog.hf input:not([type=radio]):not([type=checkbox])::placeholder{color:var(--mu);font-weight:400;opacity:.8}
+html body dialog.hf input:not([type=radio]):not([type=checkbox]):hover,html body dialog.hf select:hover{border-color:color-mix(in srgb,var(--rpc) 60%,var(--bd))}
+html body dialog.hf input:not([type=radio]):not([type=checkbox]):focus,html body dialog.hf select:focus{outline:0;border-color:var(--rpc);box-shadow:0 0 0 4px color-mix(in srgb,var(--rpc) 22%,transparent);background:var(--card)}
+html body dialog.hf select{-webkit-appearance:none;appearance:none;padding-right:42px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center}
+html body dialog.hf input[type=number]{font-variant-numeric:tabular-nums}
+/* helper text; live value hints become soft chips */
+html body dialog.hf small.hh{display:block;margin-top:6px;min-height:0;font-size:12px;line-height:1.4;color:var(--mu)}
+html body dialog.hf small.hh:empty{display:none}
+html body dialog.hf small.hh[id]{display:inline-block;margin-top:7px;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--rpc) 14%,var(--card));color:var(--rpt);font-weight:700;font-size:12px}
+html body dialog.hf small.hh[id]:empty{display:none}
+html body dialog.hf .hn{margin:2px 0 16px;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--rpc) 8%,var(--card));border:1px dashed color-mix(in srgb,var(--rpc) 45%,var(--bd));font-size:12px;line-height:1.5;color:var(--mu)}
+html body dialog.hf .ln{margin:0 0 0 6px;padding:3px 12px;min-height:0;border-radius:99px;font-size:12px;font-weight:700}
+/* read-only "runs until" chip */
+html body dialog.hf .yn{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;min-height:46px;padding:10px 14px;border:1.5px dashed color-mix(in srgb,var(--rpc) 55%,var(--bd));border-radius:12px;background:color-mix(in srgb,var(--rpc) 10%,var(--card));color:var(--rpt);font-size:14px;font-weight:700}
+html body dialog.hf .yn small{color:var(--mu);font-weight:500}
+/* month picker */
+html body dialog.hf .mch{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+html body dialog.hf .mc span{display:block;padding:10px 0;border:1.5px solid var(--bd);border-radius:12px;background:var(--card);text-align:center;font-size:14px;font-weight:650;color:var(--mu);transition:all .15s}
+html body dialog.hf .mc:hover span{border-color:var(--rpc);color:var(--rpt);transform:translateY(-1px)}
+html body dialog.hf .mc input:checked+span{border-color:var(--rpc);background:color-mix(in srgb,var(--rpc) 24%,var(--card));color:var(--rpt);font-weight:800;box-shadow:0 0 0 3px color-mix(in srgb,var(--rpc) 22%,transparent),0 6px 14px -8px var(--rpc)}
+html body dialog.hf .mc input:focus-visible+span,html body dialog.hf .cc input:focus-visible+span{outline:2px solid var(--rpc);outline-offset:2px}
+html body dialog.hf #hy.off .mch{opacity:.4;filter:grayscale(.4)}
+/* interest calculation: radio cards */
+html body dialog.hf .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+html body dialog.hf .cc span{position:relative;display:block;height:100%;padding:13px 44px 13px 14px;border:1.5px solid var(--bd);border-radius:12px;background:var(--card);transition:all .15s}
+html body dialog.hf .cc span::after{content:"";position:absolute;right:14px;top:14px;width:18px;height:18px;border-radius:50%;border:2px solid var(--bd);background:var(--card);transition:all .15s}
+html body dialog.hf .cc:hover span{border-color:color-mix(in srgb,var(--rpc) 70%,var(--bd));transform:translateY(-1px)}
+html body dialog.hf .cc b{display:block;font-size:14px;font-weight:800;color:var(--tx)}
+html body dialog.hf .cc small{display:block;margin-top:4px;font-size:12px;line-height:1.45;color:var(--mu);font-weight:450}
+html body dialog.hf .cc input:checked+span{border-color:var(--rpc);background:color-mix(in srgb,var(--rpc) 14%,var(--card));box-shadow:0 0 0 3px color-mix(in srgb,var(--rpc) 20%,transparent)}
+html body dialog.hf .cc input:checked+span::after{border-color:var(--rpc);background:radial-gradient(circle,var(--card) 0 30%,var(--rpc) 34%)}
+html body dialog.hf .cc input:checked+span b{color:var(--rpt)}
+/* preview */
+html body dialog.hf .pvbox{margin:4px 0 14px;padding:16px 20px;border:1.5px solid var(--rpc);border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--rpc) 18%,var(--card)),color-mix(in srgb,var(--rpc) 6%,var(--card)));box-shadow:0 12px 28px -18px var(--rpc)}
+html body dialog.hf .pvt{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--rpt)}
+html body dialog.hf .pvt::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rpc);box-shadow:0 0 0 4px color-mix(in srgb,var(--rpc) 25%,transparent)}
+html body dialog.hf .pvr{padding:8px 0;font-size:14px;color:var(--mu);border-top:1px solid color-mix(in srgb,var(--rpc) 25%,transparent)}
+html body dialog.hf .pvt+.pvr{border-top:0}
+html body dialog.hf .pvr b{font-size:14px;color:var(--tx)}
+html body dialog.hf .pvr:last-child{margin-top:4px;padding-top:12px;border-top:1.5px solid color-mix(in srgb,var(--rpc) 55%,transparent);color:var(--tx);font-weight:700}
+html body dialog.hf .pvr:last-child b{font-size:20px;font-weight:800;color:var(--rpt)}
+/* validation message */
+html body dialog.hf .hw{padding:11px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--er) 45%,var(--bd));border-left:4px solid var(--er);background:color-mix(in srgb,var(--er) 9%,var(--card));color:var(--er);font-size:14px;font-weight:600;line-height:1.5}
+html body dialog.hf #fe{margin:0 0 4px;font-weight:600}
+html body dialog.hf .tsx{margin:0 0 6px;text-align:right;color:var(--mu)}
+/* sticky footer actions */
+html body dialog.hf .tb{position:sticky;bottom:0;z-index:4;display:flex;justify-content:flex-end;gap:12px;margin:12px -26px 0;padding:16px 26px;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(8px);border-top:1px solid color-mix(in srgb,var(--rpc) 35%,var(--bd));box-shadow:0 -10px 24px -16px #0f172a40}
+html body dialog.hf .tb button{flex:0 0 auto;min-width:120px;min-height:46px;padding:0 22px;border-radius:12px;font-size:14px;font-weight:700}
+html body dialog.hf .tb button.p{min-width:170px;background:var(--rpc);color:var(--on,#fff);border-color:var(--rpc);box-shadow:0 10px 22px -10px var(--rpc)}
+html body dialog.hf .tb button.p:hover:not(:disabled){filter:brightness(1.07);background:var(--rpc);transform:translateY(-1px)}
+html body dialog.hf .tb button:not(.p){background:var(--card);color:var(--mu);border:1.5px solid var(--bd)}
+html body dialog.hf .tb button:not(.p):hover{color:var(--rpt);border-color:var(--rpc);background:color-mix(in srgb,var(--rpc) 8%,var(--card))}
+@media (max-width:640px){
+html body dialog.hf{width:100vw;max-width:100vw;max-height:96vh;border-radius:12px 22px 0 0;margin:auto 0 0}
+html body dialog.hf form{padding:0 16px}
+html body dialog.hf h2{margin:0 -16px 16px;padding:16px;font-size:20px}
+html body dialog.hf h2::before{width:34px;height:34px;font-size:16px}
+html body dialog.hf .hs{padding:14px 14px 4px;border-radius:12px}
+html body dialog.hf .hg{grid-template-columns:1fr}
+html body dialog.hf .mch{grid-template-columns:repeat(4,1fr)}
+html body dialog.hf .cmp{grid-template-columns:1fr}
+html body dialog.hf .tb{margin:10px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+html body dialog.hf .tb button{flex:1;min-width:0}
+}
+
+html body dialog.hf .tb button.p{background:var(--rpc)!important;color:var(--on,#fff)!important;border-color:var(--rpc)!important;box-shadow:0 10px 22px -10px var(--rpc)!important;font-weight:700!important}html body dialog.hf .tb button.p:hover:not(:disabled){filter:brightness(1.07)!important}

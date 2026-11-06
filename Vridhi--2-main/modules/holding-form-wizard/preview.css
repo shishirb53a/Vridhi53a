@@ -1,0 +1,10 @@
+
+html body dialog.hf .hs-pv h3{margin:0 0 6px}
+html body dialog.hf .pvh{margin:6px 0 4px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+html body dialog.hf .pvin{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:3px 18px;margin:0 0 6px;padding:8px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--hd,var(--card))}
+html body dialog.hf .pvi{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--mu);min-width:0}
+html body dialog.hf .pvi span{min-width:0}
+html body dialog.hf .pvi b{color:var(--tx);font-weight:700;text-align:right;overflow-wrap:anywhere}
+html body dialog.hf .hs-pv #hp .pvt{display:none}
+html:not([data-uic=off]) body dialog.hf .hs.hs-pv>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E")}
+@media (max-width:560px){html body dialog.hf .pvin{grid-template-columns:1fr 1fr;gap:3px 10px;padding:7px 9px}html body dialog.hf .pvi{display:block;font-size:11px}html body dialog.hf .pvi b{display:block;text-align:left;font-size:12px}}

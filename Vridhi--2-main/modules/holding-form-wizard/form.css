@@ -1,0 +1,23 @@
+
+dialog.hf{width:min(620px,96vw)}
+.hf .hs{border:1px solid var(--bd);border-radius:12px;padding:12px 14px 4px;margin:0 0 12px}
+.hf .hs>h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:0 0 10px}
+.hf .hg{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.hf .hf1{margin:0 0 10px;min-width:0}.hf label{font-size:14px;font-weight:600;color:var(--tx)}
+.hf small.hh{display:block;color:var(--mu);font-size:12px;margin-top:3px;min-height:14px}
+.hf [hidden]{display:none!important}.hf .hn{font-size:12px;margin:0 0 10px}.hf .ln{min-height:0;padding:2px 8px;font-size:12px;margin-left:4px}
+.hf .mch{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.hf .mc,.hf .cc{position:relative;margin:0;font-weight:500;cursor:pointer}
+.hf .mc input,.hf .cc input{position:absolute;opacity:0;width:1px;height:1px;min-height:0;pointer-events:none}
+.hf .mc span{display:block;text-align:center;border:1px solid var(--bd);border-radius:8px;padding:8px 0;font-size:14px;background:var(--card)}
+.hf .mc input:checked+span,.hf .cc input:checked+span{border-color:var(--ac);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 35%,transparent);background:color-mix(in srgb,var(--ac) 12%,var(--card));font-weight:650}
+.hf .mc input:focus-visible+span,.hf .cc input:focus-visible+span{outline:2px solid var(--ac);outline-offset:2px}
+.hf #hy.off .mch{opacity:.45}
+.hf .cmp{display:grid;gap:8px}.hf .cc span{display:block;border:1px solid var(--bd);border-radius:8px;padding:9px 12px;background:var(--card)}
+.hf .cc b{display:block;font-size:14px}.hf .cc small{display:block;color:var(--mu);font-size:12px;margin-top:2px;font-weight:400}
+.hf .pvbox{display:block;border:1px dashed var(--bd);border-radius:12px;padding:10px 14px;margin:0 0 6px}.hf .pvbox:empty{display:none}
+.hf .pvt{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:4px}
+.hf .pvr{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:14px;padding:2px 0}.hf .pvr span{min-width:0}.hf .pvr b{font-weight:700;white-space:nowrap;text-align:right;flex:none}.hf .hw{color:var(--er);font-size:14px}
+
+.hf .yn{border:1px solid var(--bd);border-radius:6px;padding:8px;background:color-mix(in srgb,var(--card) 90%,var(--mu) 10%);font-size:14px;min-height:38px}.hf .yn small{color:var(--mu)}
+@media(max-width:520px){.hf .hg{grid-template-columns:1fr}.hf .mch{grid-template-columns:repeat(4,1fr)}}

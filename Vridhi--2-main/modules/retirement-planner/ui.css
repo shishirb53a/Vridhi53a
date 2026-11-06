@@ -1,0 +1,193 @@
+
+/* Retirement planner pop-up. It reuses Add holding's dialog classes (hf, hs, hg, hf1, wzt, tb);
+   the rules below only add what Add holding does not have. Tokens: --card --bd --ac --ac2 --mu --tx --hv --er. */
+html body dialog.hf.fh{width:min(560px,96vw)}
+html body dialog.hf.fh [hidden]{display:none!important}
+html:not([data-uic=off]) body dialog.hf.fh h2::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 18h18'/%3E%3Cpath d='M7 18a5 5 0 0 1 10 0'/%3E%3Cpath d='M12 5v3M5 9l2 2M19 9l-2 2'/%3E%3C/svg%3E")}
+.fh-page{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.fh-page .card{margin:0}.fh-page .acts{margin-top:10px}
+#dsh.fh-dsh{margin:16px 0 0}
+/* the Dashboard injects mobile Status/Plan/Insights/Allocation tabs into #dsh; the report shows every card instead */
+html body #dsh.fh-dsh>.mtabs{display:none!important}html body #dsh.fh-dsh>.dz-card{display:block!important}html body #dsh>.fh-wide{grid-column:1/-1}
+#dsh .fh-seg{display:flex;height:14px;margin-top:14px;border-radius:99px;overflow:hidden;background:color-mix(in srgb,var(--tx) 10%,var(--card))}#dsh .fh-seg i{display:block;height:100%}
+#dsh .fh-lg{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}#dsh .fh-lg li{display:grid;grid-template-columns:12px 1fr auto 52px;align-items:center;gap:8px;font-size:12px}
+#dsh .fh-lg li>i{width:10px;height:10px;border-radius:50%}#dsh .fh-lg li b{font-weight:700;white-space:nowrap}#dsh .fh-lg li em{font-style:normal;text-align:right;color:var(--mu)}
+#dsh .fh-tblw{overflow-x:auto;margin-top:12px}#dsh .fh-tblw table{width:100%;border-collapse:collapse;font-size:12px}
+#dsh .fh-tblw th,#dsh .fh-tblw td{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}#dsh .fh-tblw th:first-child,#dsh .fh-tblw td:first-child{text-align:left;white-space:normal}
+#dsh .fh-tblw th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}#dsh .fh-tblw .fh-total td{font-weight:800}
+#dsh .acts{margin-top:12px}
+.fh-top{display:flex;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:12px;color:var(--mu)}
+html body dialog.hf.fh .fh-wzt{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px}
+html body dialog.hf.fh .fh-wzt::-webkit-scrollbar{display:none}
+html body dialog.hf.fh .fh-wzt button{flex:0 0 auto;scroll-snap-align:start;padding:0 12px;white-space:nowrap;font-size:12px;line-height:1.2}
+html body dialog.hf.fh .fh-sub button{white-space:nowrap}
+html body dialog.hf.fh .tb button{white-space:normal;line-height:1.15}
+html body dialog.hf.fh .wzt button:focus-visible,html body dialog.hf.fh .tb button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.fh-note{margin:0 0 10px;font-size:12px;line-height:1.45;color:var(--mu)}
+.fh-lede{margin:0 0 8px;font-size:12px;line-height:1.45;color:var(--mu)}
+.fh-fine{margin:6px 0 10px;font-size:11px;line-height:1.5;color:var(--mu)}
+.fh-diff{margin:0 0 8px;font-size:12px}
+.fh-diff summary{cursor:pointer;color:var(--ac);min-height:36px;padding:6px 0}
+.fh-diff summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:4px}
+.fh-diff p{margin:2px 0 6px;font-size:12px;line-height:1.5;color:var(--mu)}
+.fh-as{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mu);border:1px solid var(--bd);border-radius:99px;padding:0 6px;margin-left:4px;white-space:nowrap;vertical-align:1px}
+html body dialog.hf.fh .fh-err{display:block;min-height:0;margin:3px 0 0;font-size:12px;font-weight:600}
+html body dialog.hf.fh .fh-err:empty{display:none}
+html body dialog.hf.fh input[aria-invalid=true],html body dialog.hf.fh select[aria-invalid=true]{border-color:var(--er)!important}
+html body dialog.hf.fh .fh-panel:focus,html body dialog.hf.fh #fh-done:focus,html body dialog.hf.fh #fh-s-summary:focus{outline:none}
+html body dialog.hf.fh .fh-sections{margin:0 0 10px}
+html body dialog.hf.fh .fh-sections button{white-space:normal;line-height:1.2;min-height:40px;padding:6px 10px;font-size:14px;font-weight:700}
+html body dialog.hf.fh .fh-stats{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:0 0 8px}
+html body dialog.hf.fh .fh-stat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:8px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+html body dialog.hf.fh .fh-stat span{font-size:11px;color:var(--mu)}
+html body dialog.hf.fh .fh-stat b{font-size:16px;color:var(--tx);overflow-wrap:anywhere}
+html body dialog.hf.fh .fh-sum .fh-stat b{font-size:16px}
+html body dialog.hf.fh .fh-grow{grid-column:1/-1}
+html body dialog.hf.fh .fh-grow b{font-size:20px}
+html body dialog.hf.fh .fh-tbl{width:100%;min-width:0;border-collapse:collapse;margin:0 0 8px;font-size:12px}
+html body dialog.hf.fh .fh-tbl th,html body dialog.hf.fh .fh-tbl td{white-space:normal;overflow-wrap:anywhere;text-align:right;padding:7px 6px;border-bottom:1px solid var(--bd)}
+html body dialog.hf.fh .fh-tbl th:first-child,html body dialog.hf.fh .fh-tbl td.fh-pn{text-align:left}
+html body dialog.hf.fh .fh-tbl td:not(.fh-pn){white-space:nowrap}
+html body dialog.hf.fh .fh-total td{font-weight:700}
+@media (max-width:600px){
+ html body dialog.hf.fh .fh-tbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+ html body dialog.hf.fh .fh-tbl,html body dialog.hf.fh .fh-tbl tbody,html body dialog.hf.fh .fh-tbl tr,html body dialog.hf.fh .fh-tbl td{display:block;width:100%}
+ html body dialog.hf.fh .fh-tbl tr{border:1px solid var(--bd);border-radius:12px;padding:6px 10px;margin:0 0 8px}
+ html body dialog.hf.fh .fh-tbl td,html body dialog.hf.fh .fh-tbl td:not(.fh-pn){display:flex;justify-content:space-between;gap:12px;border:0;padding:3px 0;white-space:normal;text-align:right}
+ html body dialog.hf.fh .fh-tbl td::before{content:attr(data-label);color:var(--mu);font-size:12px;text-align:left}
+ html body dialog.hf.fh .fh-tbl td.fh-pn{font-weight:600}
+ html body dialog.hf.fh .fh-tbl td.fh-pn::before{display:none}
+}
+/* Family tab: one compact card - Age | Children on top, then one inline row per child */
+html body dialog.hf.fh .fh-fam .hs{margin:0 0 8px;padding:12px 14px 4px;border:1px solid var(--bd);border-radius:12px;background:var(--card);box-shadow:none}
+html body dialog.hf.fh .fh-fam .hg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+html body dialog.hf.fh .fh-fam .hf1{margin:0 0 8px;min-width:0}
+html body dialog.hf.fh .fh-fam label{display:block;min-height:0;margin:0 0 3px;font-size:12px;font-weight:600;line-height:1.25;color:var(--mu)}
+html body dialog.hf.fh .fh-fam input:not([type=radio]):not([type=checkbox]),html body dialog.hf.fh .fh-fam select{width:100%;box-sizing:border-box;height:38px;min-height:38px;padding:0 10px}
+html body dialog.hf.fh .fh-fam .fh-crow{display:grid;grid-template-columns:56px minmax(0,.9fr) minmax(0,1.5fr) minmax(0,.9fr) minmax(0,1fr);gap:0 10px;align-items:end;padding-top:8px;border-top:1px solid var(--bd)}
+html body dialog.hf.fh .fh-fam .fh-cn{align-self:end;margin:0 0 8px;height:38px;line-height:38px;font-size:12px;font-weight:800;color:var(--tx)}
+@media (max-width:640px){
+ html body dialog.hf.fh .fh-fam .hs{padding:10px 12px 2px;border-radius:12px}
+ html body dialog.hf.fh .fh-fam .fh-crow{grid-template-columns:42px minmax(0,.85fr) minmax(0,1.6fr) minmax(0,.85fr) minmax(0,1fr);gap:0 5px}
+ html body dialog.hf.fh .fh-fam .fh-crow label{font-size:11px}
+ html body dialog.hf.fh .fh-fam .fh-crow input{padding:0 6px;font-size:14px}
+ html body dialog.hf.fh .fh-fam .fh-cn{font-size:12px}
+ html body dialog.hf.fh .fh-fam .fh-crow input::placeholder{font-size:12px;opacity:.7}
+}
+/* Planning Period tab: Retirement Timeline header + badge, 2 x 2 fields, 34 px inputs */
+html body dialog.hf.fh .fh-ph{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}
+html body dialog.hf.fh .fh-ph h3{margin:0;font-size:14px;font-weight:800;color:var(--tx)}
+html body dialog.hf.fh .fh-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--ac) 12%,var(--card));color:var(--ac);font-size:12px;font-weight:800;white-space:nowrap}
+html body dialog.hf.fh .fh-plan .hs{margin:0 0 8px;padding:12px 14px 4px;border:1px solid var(--bd);border-radius:12px;background:var(--card);box-shadow:none}
+html body dialog.hf.fh .fh-plan .hg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;align-items:start}
+html body dialog.hf.fh .fh-plan .hf1{margin:0 0 8px;min-width:0}
+html body dialog.hf.fh .fh-plan label{display:flex;flex-wrap:wrap;align-items:flex-end;gap:0 4px;min-height:0;margin:0 0 3px;font-size:12px;font-weight:600;line-height:1.25;color:var(--mu)}
+html body dialog.hf.fh .fh-plan input:not([type=checkbox]){width:100%;box-sizing:border-box;height:34px;min-height:36px;padding:0 10px}
+html body dialog.hf.fh .fh-plan .fh-defrow{margin:0 0 6px}
+html body dialog.hf.fh .fh-plan .fh-earn{margin-top:4px}
+#fh .fh-earn .fh-defrow{margin:0 0 8px}
+html body dialog.hf.fh .fh-plan .fh-defrow label{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;margin:0;font-size:12px;font-weight:700;color:var(--tx)}
+html body dialog.hf.fh .fh-plan .fh-defrow small{margin:2px 0 0 26px}
+@media (max-width:640px){
+ html body dialog.hf.fh .fh-plan .hs{padding:10px 12px 2px;border-radius:12px}
+ html body dialog.hf.fh .fh-plan .hg{gap:0 8px}
+ html body dialog.hf.fh .fh-plan .hg>.hf1:nth-child(3) label,html body dialog.hf.fh .fh-plan .hg>.hf1:nth-child(4) label{min-height:2.5em}
+}
+/* Money Buckets tab: header pill, 2-column bucket cards (amount + share side by side), Growth Engine across the bottom */
+html body dialog.hf.fh .fh-badge.fh-over{background:color-mix(in srgb,#e11d48 14%,var(--card));color:#be123c}
+html body dialog.hf.fh .fh-bgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
+html body dialog.hf.fh .fh-bk{min-width:0;padding:8px 10px 2px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+html body dialog.hf.fh .fh-bk h4{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 6px;margin:0 0 6px;font-size:12px;font-weight:800;color:var(--tx)}
+html body dialog.hf.fh .fh-chip{padding:1px 8px;border-radius:99px;background:color-mix(in srgb,var(--ac) 12%,var(--card));color:var(--ac);font-size:11px;font-weight:800}
+html body dialog.hf.fh .fh-bf{margin:0 0 6px;min-width:0}
+html body dialog.hf.fh .fh-bf label{display:block;min-height:0;margin:0 0 2px;font-size:11px;font-weight:600;line-height:1.25;color:var(--mu)}
+html body dialog.hf.fh .fh-bi{display:flex;align-items:center;gap:6px;min-width:0}
+html body dialog.hf.fh .fh-bi input{flex:1 1 auto;min-width:0;width:100%;box-sizing:border-box;height:34px;min-height:36px;padding:0 8px}
+html body dialog.hf.fh .fh-pct{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:46px;height:34px;padding:0 6px;box-sizing:border-box;border-radius:8px;background:color-mix(in srgb,var(--ac) 10%,var(--card));color:var(--ac);font-size:12px;font-weight:800}
+html body dialog.hf.fh .fh-bk-g{grid-column:1/-1;padding-bottom:8px}
+html body dialog.hf.fh .fh-bk-g .fh-bi b{flex:1;font-size:16px}
+@media (max-width:640px){html body dialog.hf.fh .fh-bgrid{gap:6px}html body dialog.hf.fh .fh-bk{padding:7px 8px 1px}html body dialog.hf.fh .fh-bi{gap:4px}html body dialog.hf.fh .fh-bi input{padding:0 6px;font-size:14px}html body dialog.hf.fh .fh-pct{min-width:40px;padding:0 4px;font-size:12px}}
+@media (max-height:700px){html body dialog.hf.fh .fh-bk{padding:5px 8px 0}html body dialog.hf.fh .fh-bk h4{margin:0 0 3px}html body dialog.hf.fh .fh-bf{margin:0 0 4px}html body dialog.hf.fh .fh-bf label{margin:0 0 1px}html body dialog.hf.fh .fh-bk-g{padding-bottom:5px}html body dialog.hf.fh .fh-ph{margin:0 0 5px}}
+/* Household tab: segmented Expenses | Income switch with the net-per-month pill beside it, 2-column fields */
+html body dialog.hf.fh .fh-hrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}
+html body dialog.hf.fh .fh-hrow .fh-sub{display:inline-flex;gap:2px;margin:0;padding:2px;border-radius:99px;background:color-mix(in srgb,var(--bd) 70%,var(--bg))}
+html body dialog.hf.fh .fh-hrow .fh-sub button{flex:none;min-height:30px;height:30px;padding:0 14px;border:0;border-radius:99px;background:none;color:var(--mu);font-size:12px;font-weight:700;box-shadow:none}
+html body dialog.hf.fh .fh-hrow .fh-sub button[aria-selected=true]{background:var(--card);color:var(--ac);box-shadow:0 1px 2px #0f172a24}
+@media (max-width:640px){html body dialog.hf.fh .fh-hh .hg>.hf1:nth-child(1) label,html body dialog.hf.fh .fh-hh .hg>.hf1:nth-child(2) label{min-height:2.5em}html body dialog.hf.fh .fh-hrow .fh-sub button{padding:0 11px}}
+/* College / Weddings tabs: Child 1 | Child 2 switch with a needs-today pill, shared 2-column grid */
+html body dialog.hf.fh .fh-cw .hg{align-items:end}
+html body dialog.hf.fh .fh-cw .fh-cpw{display:contents}
+html body dialog.hf.fh .fh-cw .fh-cpw>.fh-stats{grid-column:1/-1;gap:6px;margin:0 0 8px}
+html body dialog.hf.fh .fh-cw .fh-stat{padding:6px 10px}
+html body dialog.hf.fh .fh-cw .fh-stat b{font-size:14px}
+html body dialog.hf.fh .fh-cw .fh-stat span{font-size:11px}
+@media (max-width:380px){html body dialog.hf.fh .fh-wzt button{white-space:nowrap;font-size:11px;padding:0 10px}}   /* same 11px as Add holding; these six pills scroll instead of wrapping */
+/* section icons (Add holding supplies five by position; these are chosen by meaning) */
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="fam"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='10' cy='7' r='4'/%3E%3Cpath d='M21 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="wal"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='6' width='20' height='14' rx='2'/%3E%3Cpath d='M2 10h20M16 15h2'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="hom"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11l9-8 9 8'/%3E%3Cpath d='M5 10v10h14V10'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="edu"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10L12 5 2 10l10 5 10-5z'/%3E%3Cpath d='M6 12v5c3 2 9 2 12 0v-5'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="wed"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="grw"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 17l6-6 4 4 8-8'/%3E%3Cpath d='M14 7h7v7'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="set"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0'/%3E%3Ccircle cx='16' cy='6' r='2'/%3E%3Ccircle cx='10' cy='12' r='2'/%3E%3Ccircle cx='18' cy='18' r='2'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf.fh .hs[data-ic="res"]>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='M7 15v3M12 9v9M17 5v13'/%3E%3C/svg%3E")}
+/* the phone tab bar now carries seven items */
+@media (max-width:640px){html body nav button{font-size:clamp(8.25px,2.5vw,11px);letter-spacing:-.02em;overflow:hidden}}
+html:not([data-uic=off]) body nav button[data-t="Retirement planner"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 18h18'/%3E%3Cpath d='M7 18a5 5 0 0 1 10 0'/%3E%3Cpath d='M12 5v3M5 9l2 2M19 9l-2 2'/%3E%3C/svg%3E");--icb:currentColor}
+#dsh .fh-sim-t thead th{position:sticky;top:0;background:var(--card);z-index:1}html body #dsh .fh-sim-t table{min-width:0;width:100%;table-layout:auto}#dsh .fh-sim-t th,#dsh .fh-sim-t td{padding:5px 5px}#dsh .fh-sim-t td:last-child{white-space:normal}#dsh .fh-sim-t td:last-child,#dsh .fh-sim-t th:last-child{text-align:left}#dsh .fh-sim-t small{color:var(--mu);font-weight:500}
+/* Plan Simulation: same width as Executive Status (one grid column) and the same height (the table scrolls inside the card) */
+html body #dsh>#fh-sim .fh-sim-t{max-height:420px;overflow:auto}
+html body #dsh:not(:has(>.dz-hero))>#fh-sim{grid-column:1/-1}
+@media (min-width:861px){
+ html body #dsh.fh-dsh:has(>.dz-hero)>#fh-sim.dz-card{display:flex!important;flex-direction:column;contain:size;min-height:0;overflow:hidden}
+ html body #dsh:has(>.dz-hero)>#fh-sim #fh-sim-tbl{flex:1 1 auto;min-height:0;overflow:auto}
+ html body #dsh:has(>.dz-hero)>#fh-sim .fh-sim-t{max-height:none;overflow:visible}
+}
+/* Family Milestones: all education + wedding boxes in one compact ticker row */
+html body #dsh .fh-ms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+html body #dsh .fh-ms .dz-kpi{padding:8px 10px;min-width:0}
+html body #dsh .fh-ms .dz-ey{font-size:11px;letter-spacing:.04em;line-height:1.25}
+html body #dsh .fh-ms .dz-kv{font-size:16px;margin:3px 0 1px}
+html body #dsh .fh-ms .dz-kc{font-size:11px;line-height:1.3;margin:0}
+@media (max-width:560px){html body #dsh .fh-ms{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Fund Allocation + Funding Breakdown: two equal cards side by side (grid rows stretch them to the same height) */
+html body #dsh .fh-tblw table{min-width:0;width:100%;table-layout:auto}
+html body #dsh .fh-tblw td:first-child{white-space:normal}
+html body #dsh #fh-alloc .dz-al{grid-template-columns:1fr 130px;gap:14px;align-items:center}
+html body #dsh #fh-alloc .dz-dw{width:130px!important;height:130px!important}
+/* household expenses strip under the Plan Simulation table */
+html body #dsh .fh-hx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px;flex:none}
+html body #dsh .fh-hx>div{border:1px solid var(--bd);border-radius:12px;padding:6px 8px;min-width:0;background:var(--card)}
+html body #dsh .fh-hx .dz-mini{font-size:11px;letter-spacing:.04em;line-height:1.25;margin:0;text-transform:uppercase;color:var(--mu)}
+html body #dsh .fh-hx .dz-sv{font-size:14px;line-height:1.25;margin:2px 0 0;font-weight:800;overflow-wrap:anywhere}
+html body #dsh .fh-hx .dz-sn{font-size:11px;line-height:1.3;margin:0;color:var(--mu)}
+@media (max-width:560px){html body #dsh .fh-hx{grid-template-columns:1fr}}
+/* Horizon Report (Reports tab) */
+html body #dsh .fh-neg .dz-mini,html body #dsh .fh-neg .dz-dv,html body #dsh .fh-neg .dz-sn{color:#fff!important}
+#fh .fh-defrow{grid-column:1/-1;margin:0 0 8px}
+#fh .fh-defrow small{display:block;border:0;background:none;padding:0;margin:3px 0 0 26px;font-size:12px;line-height:1.4;color:var(--mu)}
+#fh .fh-def{display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer}
+#fh .fh-def input{width:18px;height:18px;min-height:0;flex:none;margin:0}
+/* printing: a copy of the plan (#fh-pa, built on beforeprint) is the only thing printed */
+#fh-pa{display:none}
+@media print{
+ html.fh-on body>*:not(#fh-pa){display:none!important}
+ html.fh-on #fh-pa{display:block!important;color:#000;background:#fff;padding:0}
+ #fh-pa h1{font-size:20px;margin:0 0 4px}
+ #fh-pa .fh-pa-date{font-size:11px;margin:0 0 12px;color:#444}
+ #fh-pa .hs{border:0;padding:0;margin:0 0 10px;break-inside:avoid}
+ #fh-pa .hs>h3{font-size:14px;margin:0 0 6px}
+ #fh-pa .hs>h3::before{display:none}
+ #fh-pa .fh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 8px}
+ #fh-pa .fh-stat{display:flex;flex-direction:column;gap:2px;border:1px solid #999;border-radius:8px;padding:6px 8px}
+ #fh-pa .fh-stat span{font-size:11px;color:#444}
+ #fh-pa .fh-stat b{font-size:14px}
+ #fh-pa .fh-tbl{display:table;width:100%;border-collapse:collapse;font-size:11px}
+ #fh-pa .fh-tbl thead{position:static;width:auto;height:auto;clip:auto;display:table-header-group}
+ #fh-pa .fh-tbl tbody{display:table-row-group}
+ #fh-pa .fh-tbl tr{display:table-row;break-inside:avoid;border:0;padding:0;margin:0}
+ #fh-pa .fh-tbl th,#fh-pa .fh-tbl td{display:table-cell;border-bottom:1px solid #bbb;padding:4px 6px;text-align:right;white-space:nowrap}
+ #fh-pa .fh-tbl th:first-child,#fh-pa .fh-tbl td.fh-pn{text-align:left;white-space:normal}
+ #fh-pa .fh-tbl td::before{display:none}
+ #fh-pa .fh-total td{font-weight:700}
+ #fh-pa .fh-lede,#fh-pa .fh-fine{font-size:11px;color:#333;line-height:1.45}
+}

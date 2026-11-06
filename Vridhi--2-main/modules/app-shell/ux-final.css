@@ -1,0 +1,136 @@
+
+/* ===== build 108: login polish + one professional mobile header for every skin and theme ===== */
+html body #lg .lform .vr-ver-lg{margin:auto 0 0;padding-top:22px;text-align:center;font-size:11px;color:var(--mu)}
+html body #lg label.lgsv{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:14px;color:var(--tx);cursor:pointer;position:static}
+html body #lg label.lgsv input{flex:none;width:18px;height:18px;min-width:18px;margin:0;padding:0;accent-color:var(--ac)}
+html body #lg label.lgsv span{line-height:1.2}
+@media (max-width:760px){
+ html body #lg .lform{padding:24px 22px 20px}
+ html body #lg .lform h1{font-size:24px}
+ html body #lg .lform .go{margin-top:18px}
+ html body #lg .er{min-height:0;margin:8px 0 0}
+}
+@media (max-width:720px){
+ html:not(#vrx) body header.hd .hdi{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto auto;grid-template-areas:"brand who settings so" "nav nav nav nav";align-items:center;column-gap:8px;row-gap:6px;padding:8px 12px 0!important;max-width:none!important;min-height:0!important;flex-wrap:nowrap!important}
+ html:not(#vrx) body header.hd .hdi>*{margin:0!important}
+ html:not(#vrx) body header.hd .brand{grid-area:brand;min-width:0;display:flex!important;align-items:center;gap:10px;flex:none}
+ html:not(#vrx) body header.hd .brand>div:last-child{min-width:0}
+ html:not(#vrx) body header.hd .logo{width:38px;height:38px;flex:none}
+ html:not(#vrx) body header.hd .wm{font-size:18px;font-weight:700;line-height:1.1;white-space:nowrap}
+ html:not(#vrx) body header.hd .wm .vr-ver{display:block;margin:3px 0 0;font-size:10.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis}
+ html:not(#vrx) body header.hd .tg{display:none!important}
+ html:not(#vrx) body header.hd #who{grid-area:who;font-size:0!important;width:38px;height:38px;padding:0!important;max-width:none!important;border-radius:50%!important;display:grid;place-items:center;overflow:hidden;color:inherit!important;background:color-mix(in srgb,currentColor 14%,transparent)!important;border:1px solid color-mix(in srgb,currentColor 35%,transparent)!important}
+ html:not(#vrx) body header.hd #who::before{content:attr(data-ini);font-size:14px;font-weight:700;line-height:1}
+ html:not(#vrx) body header.hd #who[hidden]{display:none!important}
+ html:not(#vrx) body header.hd #so{grid-area:so;height:38px;min-height:38px!important;width:38px;min-width:38px!important;padding:0!important;border-radius:10px!important;display:inline-flex!important;align-items:center;justify-content:center;color:inherit!important;background:color-mix(in srgb,currentColor 10%,transparent)!important;border:1px solid color-mix(in srgb,currentColor 35%,transparent)!important;box-shadow:none!important}
+ html:not(#vrx) body header.hd #settings-menu-wrap{grid-area:settings}
+ html:not(#vrx) body header.hd #settings-menu-wrap[hidden]{display:none!important}
+ html:not(#vrx) body header.hd #settings-menu-wrap>[data-settings-toggle]{height:38px!important;min-height:38px!important;width:38px;min-width:38px!important;padding:0!important;border-radius:10px!important;display:inline-flex!important;align-items:center;justify-content:center;color:inherit!important;background:color-mix(in srgb,currentColor 10%,transparent)!important;border:1px solid color-mix(in srgb,currentColor 35%,transparent)!important;box-shadow:none!important}
+ html:not(#vrx) body header.hd #settings-menu-wrap>[data-settings-toggle] span{font-size:24px;line-height:1}
+ html:not(#vrx) body header.hd #so svg{width:20px;height:20px}
+ html:not(#vrx) body header.hd nav{grid-area:nav;display:flex!important;gap:0!important;width:100%!important;margin:0!important;padding:0 64% 0 0!important;border:0!important;border-top:1px solid color-mix(in srgb,currentColor 16%,transparent)!important;border-radius:0!important;background:none!important;box-shadow:none!important;overflow:visible;position:static!important}
+ html:not(#vrx) body header.hd #fhp{grid-area:nav;align-self:center;justify-self:end;z-index:2;display:flex!important;align-items:center;justify-content:flex-end;gap:4px;width:64%;margin:0!important;padding:2px 0 2px 6px;overflow:hidden}
+ html:not(#vrx) body header.hd #fhp[hidden]{display:none!important}
+ html:not(#vrx) body header.hd #fhp .fhp-l{display:none!important}
+ html:not(#vrx) body header.hd #fhp select{flex:1 1 auto;width:1px;min-width:0;max-width:none;height:38px;min-height:38px;padding:0 5px;font-size:12px!important}
+ html:not(#vrx) body header.hd #fhp button{flex:0 0 auto;height:38px;min-height:38px!important;max-width:48%;padding:0 7px!important;font-size:11px!important;white-space:nowrap}
+ html:not(#vrx) body header.hd nav button{flex:1 1 0!important;min-width:0;height:auto!important;min-height:46px!important;padding:6px 4px!important;margin:0!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0!important;border-bottom:3px solid transparent!important;border-radius:0!important;background:none!important;box-shadow:none!important;color:inherit!important;opacity:.72;font-size:12px!important;font-weight:500;line-height:1.15;white-space:normal;text-align:center}
+ html:not(#vrx) body header.hd nav button::before{margin:0!important}
+ html:not(#vrx) body header.hd nav button[aria-current]{opacity:1;font-weight:700;border-bottom-color:currentColor!important;background:color-mix(in srgb,currentColor 10%,transparent)!important}
+}
+@media (max-width:380px){
+ html:not(#vrx) body header.hd #who{display:none!important}
+}
+
+html:not(#vrx) body header.hd #nav .nav-modules{position:relative;display:flex;align-items:stretch;flex:0 0 auto}
+html:not(#vrx) body header.hd #nav [data-modules-toggle]{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+html:not(#vrx) body header.hd #nav .module-menu{position:absolute;top:100%;left:0;z-index:40;display:flex;flex-direction:column;gap:2px;min-width:210px;padding:5px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;box-shadow:0 8px 24px #0003}
+html:not(#vrx) body header.hd #nav .module-menu[hidden]{display:none!important}
+html:not(#vrx) body header.hd #nav .module-menu button{display:flex!important;flex:0 0 auto!important;align-items:center;justify-content:flex-start;width:100%;height:auto!important;min-height:40px!important;padding:8px 12px!important;border:0!important;border-radius:5px!important;background:transparent!important;color:var(--tx)!important;opacity:1!important;text-align:left;font-size:14px!important}
+html:not(#vrx) body header.hd #nav .module-menu button:hover,html:not(#vrx) body header.hd #nav .module-menu button[aria-current]{background:color-mix(in srgb,var(--ac) 12%,var(--card))!important;color:var(--tx)!important}
+html:not(#vrx) body header.hd #fhp{margin-left:auto!important;flex:0 0 auto;min-width:0}
+html:not(#vrx) body header.hd #fhp[hidden]{display:none!important}
+html:not(#vrx) body header.hd #fhp .fhp-l{white-space:nowrap;color:inherit}
+html:not(#vrx) body header.hd #fhp select{width:auto;min-width:90px;max-width:150px;height:32px;min-height:32px;padding:0 8px;font-size:12px}
+html:not(#vrx) body header.hd #fhp button{height:32px;min-height:32px;padding:0 9px;font-size:12px;white-space:nowrap}
+html:not(#vrx) body header.hd #settings-menu-wrap{position:relative;display:flex;align-items:center;flex:none}
+html:not(#vrx) body header.hd #settings-menu-wrap[hidden]{display:none!important}
+html:not(#vrx) body header.hd #settings-menu-wrap>[data-settings-toggle]{display:inline-flex;align-items:center;justify-content:center;width:34px;height:36px;min-height:36px;padding:0;border:1px solid color-mix(in srgb,currentColor 30%,transparent);border-radius:8px;background:transparent;color:inherit;cursor:pointer}
+html:not(#vrx) body header.hd #settings-menu-wrap>[data-settings-toggle] span{font-size:25px;line-height:1}
+html:not(#vrx) body header.hd #settings-menu-wrap .settings-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:40;display:flex;flex-direction:column;min-width:150px;padding:5px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);box-shadow:0 8px 24px #0003}
+html:not(#vrx) body header.hd #settings-menu-wrap .settings-menu[hidden]{display:none!important}
+html:not(#vrx) body header.hd #settings-menu-wrap .settings-menu button{display:flex;align-items:center;width:100%;height:auto;min-height:40px;padding:8px 12px;border:0;border-radius:5px;background:transparent;color:var(--tx);text-align:left}
+html:not(#vrx) body header.hd #settings-menu-wrap .settings-menu button:hover{background:color-mix(in srgb,var(--ac) 12%,var(--card))}
+
+@media (max-width:720px){
+ html:not(#vrx) body #lk-sw{bottom:calc(80px + env(safe-area-inset-bottom,0px))!important}
+ html:not(#vrx) body header.hd #nav{overflow:visible!important}
+ html:not(#vrx) body header.hd #nav .nav-modules{flex:0 1 36%;min-width:0}
+ html:not(#vrx) body header.hd #fhp{width:64%;flex:0 0 64%;display:flex!important;align-items:center;gap:4px;padding:2px 0 2px 6px;overflow:hidden}
+ html:not(#vrx) body header.hd #fhp[hidden]{display:none!important}
+ html:not(#vrx) body header.hd #fhp .fhp-l{display:none!important}
+ html:not(#vrx) body header.hd #fhp select{flex:1 1 auto;width:1px;min-width:0;max-width:none;height:38px;min-height:38px;padding:0 5px;font-size:12px!important}
+ html:not(#vrx) body header.hd #fhp button{flex:0 0 auto;height:38px;min-height:38px!important;max-width:42%;padding:0 7px!important;font-size:11px!important}
+ html:not(#vrx) body header.hd #nav [data-modules-toggle]{width:100%;min-width:0;padding:6px 4px!important}
+ html:not(#vrx) body header.hd #nav .module-menu{min-width:min(210px,calc(100vw - 24px))}
+ html:not(#vrx) body:has(.hp-card) .w{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))!important}
+ html:not(#vrx) body:has(.hp-card) #lk-sw{right:12px!important;bottom:calc(66px + env(safe-area-inset-bottom,0px))!important;z-index:6!important}
+ html[data-skin=enterprise]:not(#vrx) body .msd-b{justify-content:space-between!important;min-height:44px!important;padding:0 14px!important;text-align:left!important;color:var(--tx)!important;background:var(--card)!important;border:1px solid color-mix(in srgb,currentColor 24%,transparent)!important;border-radius:8px!important}
+ html[data-skin=enterprise]:not(#vrx) body .tb{justify-content:flex-start!important;align-items:stretch!important;gap:10px!important}
+ html[data-skin=enterprise]:not(#vrx) body .tb>:is(input,select,button){min-height:44px!important;box-sizing:border-box}
+ html[data-skin=enterprise]:not(#vrx) body .tb>button{min-width:44px!important;padding:0 10px!important;color:var(--tx)!important;background:var(--card)!important;border:1px solid color-mix(in srgb,currentColor 24%,transparent)!important;border-radius:8px!important}
+}
+
+/* ===== build 152: professional top row, Goal Planner menu no longer cut on phones, one Client switcher =====
+   Phones: the Goal Planner client switcher opens its drawer; the Retirement Planner switcher and add action stay at the top,
+   so the copy squeezed into the header is hidden. The module menu gets the full row, so "Goal Planner" is never cut. */
+@media (max-width:720px){
+ html:not(#vrx) body header.hd #fhp,
+ html:not(#vrx) body header.hd #fhp[hidden]{display:none!important}
+ html:not(#vrx) body header.hd nav{padding:0!important;min-width:0}
+ html:not(#vrx) body header.hd #nav .nav-modules{flex:1 1 100%;width:100%;min-width:0}
+ html:not(#vrx) body header.hd #nav [data-modules-toggle]{width:100%;min-width:0;min-height:48px!important;flex-direction:row!important;justify-content:space-between;gap:10px;padding:8px 14px!important;font-size:15px!important;font-weight:700;letter-spacing:.01em;white-space:nowrap;text-align:left;text-decoration:none!important;border-bottom:3px solid currentColor!important;background:color-mix(in srgb,currentColor 10%,transparent)!important}
+ html:not(#vrx) body header.hd #nav [data-modules-toggle]::before{display:none!important}
+ html:not(#vrx) body header.hd #nav [data-modules-toggle] *{text-decoration:none!important}
+ html:not(#vrx) body header.hd #nav [data-modules-toggle] span[aria-hidden]{font-size:12px;opacity:.85;flex:none}
+ html:not(#vrx) body header.hd #nav .module-menu{left:0;right:0;min-width:0;width:auto;padding:6px;gap:2px}
+ html:not(#vrx) body header.hd #nav .module-menu button{flex-direction:row!important;justify-content:flex-start!important;align-items:center;gap:12px!important;min-height:48px!important;padding:8px 14px!important;font-size:15px!important;text-align:left;border-bottom:0!important;border-radius:8px!important;text-decoration:none!important;color:var(--tx)!important;background:transparent!important}
+ html:not(#vrx) body header.hd #nav .module-menu button[aria-current]{background:color-mix(in srgb,var(--ac) 12%,var(--card))!important;font-weight:700;box-shadow:inset 3px 0 0 var(--ac)}
+ /* the page-level client bar: a clean card with the label above the controls */
+ html:not(#vrx) body .fhp.fhp-m{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"lab lab" "sel add";column-gap:8px;row-gap:6px;align-items:center;width:100%;margin:0 0 14px;padding:10px 12px 12px;box-sizing:border-box;background:var(--card);border:1px solid var(--bd);border-radius:12px;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+ html:not(#vrx) body .fhp.fhp-m .fhp-l{grid-area:lab;display:block!important;margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+ html:not(#vrx) body .fhp.fhp-m select{grid-area:sel;width:100%;min-width:0;max-width:none;height:44px;min-height:44px;padding:0 12px;font-size:15px;font-weight:600;border:1px solid var(--bd);border-radius:10px;background-color:var(--card);color:var(--tx)}
+ html:not(#vrx) body .fhp.fhp-m .fhp-add{grid-area:add;height:44px;min-height:44px;padding:0 16px;font-size:14px;font-weight:700;white-space:nowrap;border-radius:10px;border:1px solid transparent!important;background:var(--ac,#12304f)!important;color:#fff!important;box-shadow:none}
+}
+@media (max-width:360px){
+ html:not(#vrx) body .fhp.fhp-m{grid-template-columns:1fr;grid-template-areas:"lab" "sel" "add"}
+ html:not(#vrx) body .fhp.fhp-m .fhp-add{width:100%}
+}
+
+/* Tablet / desktop top row: one control height, even spacing, clear grouping */
+@media (min-width:721px){
+ html:not(#vrx) body header.hd .hdi{align-items:center;gap:12px}
+ html:not(#vrx) body header.hd #nav [data-modules-toggle],html:not(#vrx) body header.hd #nav [data-modules-toggle] *{text-decoration:none!important}
+ html:not(#vrx) body header.hd #nav [data-modules-toggle]{min-height:40px;padding:0 14px;font-weight:700;letter-spacing:.01em;border-radius:8px}
+ html:not(#vrx) body header.hd #fhp{display:flex;align-items:center;gap:8px;margin-left:auto!important;padding:0 14px 0 0;border-right:1px solid color-mix(in srgb,currentColor 22%,transparent)}
+ html:not(#vrx) body header.hd #fhp[hidden]{display:none!important}
+ html:not(#vrx) body header.hd #fhp .fhp-l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+ html:not(#vrx) body header.hd #fhp select{height:38px;min-height:38px;min-width:130px;max-width:190px;padding:0 10px;font-size:13px;font-weight:600;border-radius:8px}
+ html:not(#vrx) body header.hd #fhp button{height:38px;min-height:38px;padding:0 14px;font-size:13px;font-weight:700;border-radius:8px}
+ html:not(#vrx) body header.hd #who{height:38px;display:inline-flex;align-items:center;border-radius:8px}
+ html:not(#vrx) body header.hd #settings-menu-wrap>[data-settings-toggle],
+ html:not(#vrx) body header.hd #so{width:38px;height:38px;min-height:38px;border-radius:8px}
+}
+
+html:not(#vrx) body #fhp .client-picker{position:relative;flex:none;min-width:0;overflow:visible}
+html:not(#vrx) body #fhp .client-trigger{flex:0 0 150px;width:150px;min-width:150px;max-width:150px;height:38px;min-height:38px;padding:0 10px!important;border:1px solid var(--bd)!important;border-radius:8px;background:var(--card)!important;color:var(--tx)!important;font-size:14px!important;font-weight:600!important;box-shadow:none!important}
+html:not(#vrx) body #fhp .client-popup{right:0;max-width:min(320px,calc(100vw - 24px));background:var(--card);color:var(--tx)}
+html:not(#vrx) body #fhp .client-option{flex:none;width:100%;height:auto;max-width:none;min-height:42px;padding:7px 9px!important;border:0!important;border-radius:7px;background:transparent!important;color:var(--tx)!important;font-size:14px!important;font-weight:400!important}
+html:not(#vrx) body #fhp .client-option[aria-selected=true]{font-weight:600!important}
+html:not(#vrx) body #fhp .client-add{flex:none;width:100%;height:auto;min-height:42px;padding:7px 9px!important;border:0!important;border-radius:7px;background:transparent!important;color:var(--ac)!important;font-size:14px!important;font-weight:600!important}
+@media (max-width:720px){
+ html:not(#vrx) body .fhp.fhp-m{grid-template-columns:minmax(0,1fr);grid-template-areas:"lab" "sel"}
+ html:not(#vrx) body .fhp.fhp-m .client-picker{grid-area:sel;width:100%}
+ html:not(#vrx) body .fhp.fhp-m .client-trigger{width:100%;min-width:0;max-width:none;height:44px;min-height:44px}
+ html:not(#vrx) body .fhp.fhp-m .client-popup{right:0;max-width:calc(100vw - 24px)}
+}

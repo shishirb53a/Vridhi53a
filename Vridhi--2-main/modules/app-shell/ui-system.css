@@ -1,0 +1,273 @@
+
+:root{color-scheme:light dark}
+html body{--acl:#111;--acd:#f5f5f5;--onl:#fff;--ond:#000;--bgl:#f5f5f5;--bgd:#000;--cdl:#fff;--cdd:#0b0b0b;--txl:#111;--txd:#f5f5f5;
+--bg:var(--bgl);--card:var(--cdl);--tx:var(--txl);--ac:var(--acl);--ac2:var(--onl);--on:var(--onl);
+--mu:#555;--bd:#e5e5e5;--bd2:#cfcfcf;--hv:#f3f3f3;--hd:transparent;--hl:transparent;--hl2:transparent;--er:#b91c1c;--ok:var(--tx);
+--sh:none;--r:8px;--rb:6px;--ri:6px;--ff:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+--acb:var(--ac);--brand:var(--ac);--rpc:var(--ac);--rpt:var(--ac);--tc:var(--ac);--b1:var(--ac);--b2:var(--ac);--thc:var(--ac);--sun:var(--ac);--sk1:var(--ac);--sk2:var(--ac);--sk3:var(--ac);--h1:var(--ac);--h2:var(--ac);--h3:var(--ac);--pth:var(--hl);--shd:var(--tx);
+background:var(--bg);color:var(--tx);font-size:14px;accent-color:var(--ac)}
+@media (prefers-color-scheme:dark){html:not([data-theme=light]) body{--bg:var(--bgd);--card:var(--cdd);--tx:var(--txd);--ac:var(--acd);--ac2:var(--ond);--on:var(--ond);--mu:#a3a3a3;--bd:#262626;--bd2:#3a3a3a;--hv:#171717;--er:#f87171}}
+html[data-theme=dark] body{--bg:var(--bgd);--card:var(--cdd);--tx:var(--txd);--ac:var(--acd);--ac2:var(--ond);--on:var(--ond);--mu:#a3a3a3;--bd:#262626;--bd2:#3a3a3a;--hv:#171717;--er:#f87171}
+/* appearance presets (Settings > Appearance) */
+html[data-uth=ocean] body{--acl:#0369a1;--acd:#38bdf8;--bgl:#f0f6fb;--bgd:#07121c;--cdd:#0d1b2a;--ond:#04121c}
+html[data-uth=emerald] body{--acl:#047857;--acd:#34d399;--bgl:#f0f8f5;--bgd:#06130f;--cdd:#0c1f18;--ond:#04130d}
+html[data-uth=indigo] body{--acl:#4338ca;--acd:#a5b4fc;--bgl:#f3f4fd;--bgd:#0b0c1a;--cdd:#14152b;--ond:#0b0c1a}
+html[data-uth=amber] body{--acl:#b45309;--acd:#fbbf24;--bgl:#fbf7f0;--bgd:#130e05;--cdd:#1f170a;--ond:#130e05}
+html[data-utx=charcoal] body{--txl:#1f2937;--txd:#e5e7eb}
+html[data-utx=navy] body{--txl:#0f2a4a;--txd:#dbeafe}
+html[data-utx=forest] body{--txl:#14342b;--txd:#d1fae5}
+html[data-ufn=inter] body{--ff:Inter,system-ui,Arial,sans-serif}
+html[data-ufn=serif] body{--ff:Georgia,"Times New Roman",serif}
+html[data-ufn=humanist] body{--ff:"Trebuchet MS",Verdana,"Segoe UI",sans-serif}
+html[data-ufn=mono] body{--ff:ui-monospace,"SF Mono",Consolas,"Liberation Mono",monospace}
+html[data-ush=sharp] body{--rb:2px;--ri:2px}
+html[data-ush=pill] body{--rb:999px;--ri:10px}
+html body *{box-shadow:none!important;text-shadow:none!important;animation:none!important;transition:none!important}
+html body :focus-visible{outline:2px solid var(--ac)!important;outline-offset:1px}
+html body :is(.card,.tw,dialog,.pb,.k,.rdy,.hero,.bn,#dsh .dz-hero,#dsh .dz-in article,.rp-ban){background:var(--card)!important;color:var(--tx);border:1px solid var(--bd);border-radius:8px!important}
+html body :is(.hero,.bn,#dsh .dz-hero,.rp-ban) :not(button):not(.p){color:var(--tx)!important}
+html body :is(.hsh,.hero::before,.hero::after){display:none!important}
+html body :is(.logo,#lg .ll,.swc,#dsh .dz-rb i,#dsh .dz-tf){background:var(--ac)!important}
+html body :is(.logo,#lg .ll) svg *{fill:var(--on)}
+/* type */
+html body,html body *{font-weight:400!important}
+html body :is(mark,.ch,.hl,.yc.a,.yc.sel){background:transparent!important;color:inherit!important}
+html body :is(h1,h2,h3,.wm,#lg .lw,.k .v,b,strong,th){letter-spacing:0!important}
+html body :is(.tg,.k .t,label,th){letter-spacing:0!important;text-transform:none!important}
+html body .mu,html body label{color:var(--mu)}
+/* buttons */
+html body button{background:var(--card);color:var(--tx);border:1px solid var(--bd2);border-radius:6px!important;font-weight:400;min-height:36px;padding:0 12px}
+html body :is(th,td) button{min-height:28px}
+html body button:hover:not(:disabled){background:var(--hv)}
+html body button:disabled{opacity:.5;cursor:not-allowed}
+html body button.p,html body button.p:hover:not(:disabled){background:var(--ac)!important;color:var(--ac2)!important;border-color:var(--ac)!important;}
+html body button.d{color:var(--er)}
+/* inputs */
+html body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){min-height:36px;background-color:var(--card);color:var(--tx);border:1px solid var(--bd2);border-radius:6px!important;padding:6px 10px}
+html body textarea{min-height:72px}
+/* tabs */
+html body nav{border-bottom:1px solid var(--bd)}
+html body nav button{background:none!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;color:var(--mu);min-height:40px}
+html body nav button[aria-current=page]{color:var(--tx);border-bottom-color:var(--tx)!important}
+/* tables */
+html body table{border-collapse:collapse;font-variant-numeric:tabular-nums}
+html body :is(th,thead td){background:transparent!important;color:var(--tx)!important;font-size:12px;border-bottom:1px solid var(--tx)!important}
+html body td{border-bottom:1px solid var(--bd);background:transparent}
+html body tbody tr:hover td{background:var(--hv)}
+html body .tw{overflow-x:auto}
+/* Add/Edit Holding dialog */
+html body dialog.hf{width:min(860px,96vw);max-height:calc(100dvh - 16px);scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior:contain}
+html body dialog.hf::-webkit-scrollbar{display:none}
+html body dialog.hf form{padding:0 18px}
+html body dialog.hf h2{margin:0 -18px 12px;padding:12px 18px;font-size:16px;border-bottom:1px solid var(--bd);background:var(--card)!important;border-radius:0!important}
+html body dialog.hf h2::before,html body dialog.hf .hs>h3::before,html body dialog.hf .hs>h3::after{display:none}
+html body dialog.hf .hs{margin:0 0 12px;padding:12px 12px 4px;background:var(--card)!important}
+html body dialog.hf .hs>h3{margin:0 0 8px;font-size:14px;letter-spacing:0;text-transform:none;color:var(--tx)}
+html body dialog.hf .hg{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 12px}
+html body dialog.hf :is(.hn,.yn,.hw,small.hh[id]){margin:0 0 8px;padding:6px 10px;min-height:0;border-radius:6px;font-size:12px;background:var(--hd);border:1px solid var(--bd);color:var(--mu)}
+html body dialog.hf .hw{color:var(--er);border-left:3px solid var(--er)}
+html body dialog.hf :is(.mc span,.cc span){padding:6px 0;border:1px solid var(--bd2);border-radius:6px;font-weight:400;background:var(--card);color:var(--tx)}
+html body dialog.hf .cc span{padding:8px 36px 8px 10px}
+html body dialog.hf :is(.mc input:checked+span,.cc input:checked+span){border-color:var(--ac);background:transparent;color:var(--tx);border-width:2px}
+html body dialog.hf .mch,html body dialog.hf .cmp{gap:6px}
+html body dialog.hf .tb{margin:8px -18px 0;padding:10px 18px calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);backdrop-filter:none;border-top:1px solid var(--bd)}
+html body dialog.hf .tb button{min-width:96px;padding:0 16px}
+@media (max-width:640px){
+html body{font-size:14px}
+html body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){font-size:16px;min-height:44px}
+html body button{min-height:44px}
+html body :is(th,td) button{min-height:36px}
+html body dialog.hf{width:100vw;max-width:100vw;max-height:calc(100dvh - 8px);border-radius:8px 8px 0 0!important}
+html body dialog.hf form{padding:0 12px}
+html body dialog.hf h2{margin:0 -12px 8px;padding:10px 12px;font-size:16px}
+html body dialog.hf .hg,html body dialog.hf .cmp{grid-template-columns:1fr 1fr;gap:0 8px}
+html body dialog.hf .mch{grid-template-columns:repeat(6,1fr)}
+html body dialog.hf .tb{margin:6px -12px 0;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))}
+html body dialog.hf .tb button{flex:1;min-width:0}}
+/* flat buttons, borderless table headers */
+html body button:not(.c):not(.mc *):not(.cc *),html body dialog.hf .tb button:not(.p){border:0!important;background:var(--hv);color:var(--tx)}
+html body button:not(.c):not(.p):hover:not(:disabled){background:var(--bd)}
+html body button[aria-pressed=true],html body button.on{background:var(--ac)!important;color:var(--ac2)!important}
+html body button.p{background:var(--ac)!important;color:var(--ac2)!important}
+html body button.d{color:var(--er)}
+html body :is(th,thead td){border:0!important;background:var(--card)!important;color:var(--mu)!important;box-shadow:none!important}
+html body th button{background:none!important;color:inherit!important}
+html body nav button{background:none!important;border:0!important;border-radius:0!important;color:var(--mu);text-decoration:none}
+html body nav button[aria-current=page]{color:var(--tx);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:10px;border:0!important}
+html body :is(td button,.tb button){border-radius:6px!important}
+html body :is(h1,h2){color:var(--tx)}html body h2{font-size:16px}
+html body .vps{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:12px;color:var(--mu)}
+html body .vps select{width:auto;min-height:30px;padding:2px 8px;font-size:12px}
+/* Add/Edit Holding: info text on demand, so the form fits one screen */
+html body dialog.hf small.hh:not([id]),html body dialog.hf .hn:not(#minfo){display:none}
+html body dialog.hf .hf1:focus-within small.hh:not([id]){display:block}
+html body dialog.hf .hs:focus-within .hn:not(#minfo){display:block}
+html body dialog.hf .hn:empty{display:none}
+html body dialog.hf .cc:not(:has(input:checked)) small{display:none}
+html body dialog.hf .cmp{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+html body dialog.hf .cc span{padding:6px 30px 6px 10px}
+html body dialog.hf .cc span::after{top:8px;right:8px;width:14px;height:14px}
+html body dialog.hf .hs{margin:0 0 8px;padding:8px 10px 0}
+html body dialog.hf .hs>h3{margin:0 0 6px}
+html body dialog.hf .hf1{margin:0 0 8px}
+html body dialog.hf h2{margin:0 -18px 8px;padding:10px 18px}
+html body dialog.hf #hp{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:2px 16px;margin:0 0 8px;padding:8px 10px;font-size:12px}
+html body dialog.hf #hp:empty{display:none}
+html body dialog.hf #hp .pvt{grid-column:1/-1;font-size:12px;color:var(--mu)}
+html body dialog.hf #hp .pvr{display:flex;justify-content:space-between;gap:8px;padding:0}
+html body dialog.hf #hp .hw{grid-column:1/-1}
+@media (max-width:640px){
+html body dialog.hf :is(input:not([type=checkbox]):not([type=radio]),select){min-height:38px}
+html body dialog.hf .hs{padding:6px 8px 0}
+html body dialog.hf .cmp{grid-template-columns:1fr 1fr}
+html body dialog.hf #hp{grid-template-columns:1fr}}
+/* appearance options */
+html body :is(button,td button,.tb button,dialog.hf .tb button){border-radius:var(--rb)!important}
+html body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){border-radius:var(--ri)!important}
+html[data-ubt=soft] body button.p,html[data-ubt=soft] body dialog.hf .tb button.p{background:color-mix(in srgb,var(--ac) 14%,var(--card))!important;color:var(--ac)!important;border:0!important}
+html[data-ubt=outline] body button.p,html[data-ubt=outline] body dialog.hf .tb button.p{background:transparent!important;color:var(--ac)!important;border:1px solid var(--ac)!important}
+html[data-ubt=outline] body button:not(.c):not(.mc *):not(.cc *):not(.p):not(th button):not(nav button){background:transparent;border:1px solid var(--bd2)!important}
+html[data-uin=filled] body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){background-color:var(--hv);border-color:transparent}
+html[data-uin=underline] body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){background-color:transparent;border-width:0 0 1px;border-radius:0!important}
+html[data-utd=compact] body table :is(th,td){padding-top:3px;padding-bottom:3px}
+html[data-utd=comfy] body table :is(th,td){padding-top:12px;padding-bottom:12px}
+html[data-uhd=tint] body :is(th,thead td){background:color-mix(in srgb,var(--ac) 8%,var(--card))!important}
+html[data-uhd=line] body :is(th,thead td){border-bottom:1px solid var(--tx)!important}
+html[data-utz=on] body tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--ac) 4%,transparent)}
+html[data-utl=off] body table :is(th,td){border-bottom-color:transparent!important}
+html[data-utc=on] body table :is(th,td){border-right:1px solid var(--bd)!important}
+html[data-utc=off] body table :is(th,td){border-right-color:transparent!important}
+html body .uip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 12px;margin:6px 0}
+html body .uip select{width:100%}
+div:has(>.seg>[data-lk^="dens:"]),.sub2:has(+.thm){display:none!important}
+/* line icons (CSS only; Settings > Appearance > Icons turns them off) */
+html:not([data-uic=off]) body :is(nav button,.mtabs button,.vsub button,#ex,#im,#csv,#so,#ordb,#rs,#clr)::before{content:"";display:inline-block;width:16px;height:16px;margin-right:6px;vertical-align:-3px;background:var(--icb,transparent);-webkit-mask:var(--ic,none) center/contain no-repeat;mask:var(--ic,none) center/contain no-repeat}
+html:not([data-uic=off]) body nav button[data-t=Dashboard]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='9' rx='1'/%3E%3Crect x='14' y='3' width='7' height='5' rx='1'/%3E%3Crect x='14' y='12' width='7' height='9' rx='1'/%3E%3Crect x='3' y='16' width='7' height='5' rx='1'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body nav button[data-t="Goal Planner"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='9' rx='1'/%3E%3Crect x='14' y='3' width='7' height='5' rx='1'/%3E%3Crect x='14' y='12' width='7' height='9' rx='1'/%3E%3Crect x='3' y='16' width='7' height='5' rx='1'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body nav button[data-t=Policies]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E");--icb:currentColor}
+html body .gpb{margin:0 0 10px;max-width:100%;flex-wrap:wrap}
+html:not([data-uic=off]) body nav button[data-t=Holdings]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='7' width='20' height='14' rx='2'/%3E%3Cpath d='M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body nav button[data-t=Reports]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v18h18'/%3E%3Cpath d='M7 15v3M12 9v9M17 5v13'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body nav button[data-t=Settings]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0'/%3E%3Ccircle cx='16' cy='6' r='2'/%3E%3Ccircle cx='10' cy='12' r='2'/%3E%3Ccircle cx='18' cy='18' r='2'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body nav button[data-t=Help]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body nav button[data-t=Users]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='10' cy='7' r='4'/%3E%3Cpath d='M21 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .mtabs button[data-mtab=status]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-4l-3 9L9 3l-3 9H2'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .mtabs button[data-mtab=plan]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='6'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .mtabs button[data-mtab=insights]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .mtabs button[data-mtab=alloc]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12A9 9 0 1 1 12 3v9z'/%3E%3Cpath d='M15 3.5A9 9 0 0 1 20.5 9H15z'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .vsub button[data-vsp="0"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='10' cy='7' r='4'/%3E%3Cpath d='M21 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .vsub button[data-vsp="1"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0'/%3E%3Ccircle cx='16' cy='6' r='2'/%3E%3Ccircle cx='10' cy='12' r='2'/%3E%3Ccircle cx='18' cy='18' r='2'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .vsub button[data-vsp="2"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='16' rx='2'/%3E%3Cpath d='M9 4v16M15 4v16'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .vsub button[data-vsp="3"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.4A3.6 3.6 0 0 0 21 11.1C21 6.6 17 3 12 3z'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .vsub button[data-vsp="4"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7V4h16v3M9 20h6M12 4v16'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body .vsub button[data-vsp="5"]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='12' cy='5' rx='9' ry='3'/%3E%3Cpath d='M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5M3 12c0 1.7 4 3 9 3s9-1.3 9-3'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body #ex{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body #im{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body #csv{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body #so{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body #ordb{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body #rs{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5'/%3E%3C/svg%3E");--icb:currentColor}
+html:not([data-uic=off]) body #clr{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6'/%3E%3C/svg%3E");--icb:currentColor}
+html body :is(nav button,.mtabs button,.vsub button){display:inline-flex;align-items:center}
+/* icons on mobile: bottom nav stacks icon over label */
+html body :is(#ex,#im,#csv,#so,#ordb,#rs,#clr){display:inline-flex;align-items:center;justify-content:center}
+@media (max-width:720px){
+html body nav button{flex-direction:column;justify-content:center;gap:3px;min-width:0;padding:6px 2px;font-size:11px;line-height:1.1}
+html:not([data-uic=off]) body nav button::before{width:22px;height:22px;margin:0}
+html:not([data-uic=off]) body :is(.mtabs,.vsub) button::before{width:14px;height:14px;margin-right:4px}
+html body .mtabs button{font-size:12px;white-space:nowrap}
+html body .vsub{overflow-x:auto;scrollbar-width:none}
+html body .vsub::-webkit-scrollbar{display:none}
+html body .vsub button{flex:1 0 auto}
+html:not([data-uic=off]) body #so{font-size:0;padding:8px 10px;min-width:40px;min-height:40px}
+html:not([data-uic=off]) body #so::before{margin:0;width:18px;height:18px}
+}
+/* Reports/Holdings table header: no bottom line (older .rt/.ht rules used 2px accent) */
+html body :is(.rt,.ht,.hp-card .ht table) :is(th,thead td){border:0!important;border-radius:0!important}
+/* Add/Edit Holding styled like the Dashboard: icon section cards, KPI-style preview tiles */
+html body dialog.hf .hs{border-radius:12px;padding:12px 14px 4px}
+html body dialog.hf .hs>h3{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:14px;color:var(--tx)}
+html:not([data-uic=off]) body dialog.hf .hs>h3::before,html:not([data-uic=off]) body dialog.hf h2::before{content:"";display:inline-block;flex:none;width:18px;height:18px;background:var(--ac);-webkit-mask:var(--ic,none) center/contain no-repeat;mask:var(--ic,none) center/contain no-repeat}
+html:not([data-uic=off]) body dialog.hf h2{display:flex;align-items:center;gap:10px}
+html:not([data-uic=off]) body dialog.hf h2::before{width:22px;height:22px;--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='4'/%3E%3Cpath d='M12 8v8M8 12h8'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf .hs:nth-of-type(1)>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='7' width='20' height='14' rx='2'/%3E%3Cpath d='M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf .hs:nth-of-type(2)>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 7H5a2 2 0 0 1 0-4h13v4'/%3E%3Cpath d='M3 5v14a2 2 0 0 0 2 2h15V7'/%3E%3Ccircle cx='16' cy='14' r='1'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf .hs:nth-of-type(3)>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 5L5 19'/%3E%3Ccircle cx='6.5' cy='6.5' r='2.5'/%3E%3Ccircle cx='17.5' cy='17.5' r='2.5'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf .hs:nth-of-type(4)>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E")}
+html:not([data-uic=off]) body dialog.hf .hs:nth-of-type(5)>h3::before{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 5L5 19'/%3E%3Ccircle cx='6.5' cy='6.5' r='2.5'/%3E%3Ccircle cx='17.5' cy='17.5' r='2.5'/%3E%3C/svg%3E")}
+html body dialog.hf #hp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding:0;border:0;background:none}
+html body dialog.hf #hp .pvr{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px;padding:8px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+html body dialog.hf #hp .pvr span{font-size:11px;color:var(--mu)}
+html body dialog.hf #hp .pvr b{font-size:16px;color:var(--tx)}
+html body dialog.hf :is(.mc span,.cc span){border-radius:12px}
+@media (max-width:640px){html body dialog.hf #hp{grid-template-columns:1fr 1fr}html body dialog.hf .hs{padding:10px 10px 2px}}
+/* Add/Edit Holding: 3-step flow (visibility only; every field stays in the form) */
+html body dialog.hf form[data-wz="1"] [data-ws]:not([data-ws="1"]){display:none!important}
+html body dialog.hf form[data-wz="2"] [data-ws]:not([data-ws="2"]){display:none!important}
+html body dialog.hf form[data-wz="3"] [data-ws]:not([data-ws="3"]){display:none!important}
+html body dialog.hf form[data-wz="4"] [data-ws]:not([data-ws="4"]){display:none!important}
+html body dialog.hf form[data-wz="5"] [data-ws]:not([data-ws="5"]){display:none!important}
+html body dialog.hf :is(form[data-wz="1"] [data-wzb],form[data-wz="5"] [data-wzn],form[data-wz="0"] [data-wzb],form[data-wz="0"] [data-wzn]){display:none!important}
+html body dialog.hf .wzt{display:flex;gap:6px;margin:0 0 10px}
+html body dialog.hf .wzt button{flex:1;min-height:38px;padding:0 8px;background:var(--hv);color:var(--mu);white-space:nowrap}
+html body dialog.hf .wzt button[aria-selected=true]{background:var(--ac)!important;color:var(--ac2)!important}
+html body dialog.hf form[data-wz="1"] .tb button.p:not([data-wzn]){background:var(--hv)!important;color:var(--tx)!important;border:0!important}
+html body dialog.hf form[data-wz="4"] .tb button.p:not([data-wzn]){background:var(--hv)!important;color:var(--tx)!important;border:0!important}
+html body dialog.hf form[data-wz="3"] .tb button.p:not([data-wzn]){background:var(--hv)!important;color:var(--tx)!important;border:0!important}
+html body dialog.hf form[data-wz="2"] .tb button.p:not([data-wzn]){background:var(--hv)!important;color:var(--tx)!important;border:0!important}
+@media (max-width:640px){html body dialog.hf .wzt button{font-size:12px;padding:0 4px}}
+@media (min-width:641px){html body dialog.hf{width:min(620px,96vw)}}
+/* Contribution: one-line rows, Paid In Month as dropdown, smaller text and controls */
+@media (min-width:641px){html body dialog.hf {width:min(560px,96vw)}}
+html body dialog.hf [data-wzh]{display:none!important}
+html body dialog.hf #bm.hg,html body dialog.hf #by>.hg{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 8px}
+html body dialog.hf #bm>.hf1:empty,html body dialog.hf #by>.hg>.hf1:empty{display:none}
+html body dialog.hf #bm label,html body dialog.hf #by .hg label{display:flex;align-items:flex-end;min-height:28px;line-height:1.15}
+html body dialog.hf #hy{max-width:50%}
+html body dialog.hf label{font-size:12px;margin:0 0 2px}
+html body dialog.hf small.hh,html body dialog.hf .hn,html body dialog.hf .cc small,html body dialog.hf .hw,html body dialog.hf .pvt{font-size:11px!important;line-height:1.3}
+html body dialog.hf #minfo,html body dialog.hf #yinfo{font-size:11px!important;margin:2px 0 6px!important}
+html body dialog.hf :is(input:not([type=radio]):not([type=checkbox]),select){min-height:36px!important;padding:3px 8px!important;font-size:14px!important}
+html body dialog.hf select{padding-right:26px!important}
+html body dialog.hf .cc span{padding:5px 28px 5px 8px}
+html body dialog.hf .cc b{font-size:12px}
+html body dialog.hf h2{font-size:14px;padding:8px 14px;margin:0 -14px 8px}
+html body dialog.hf form{padding:0 14px}
+html body dialog.hf .hs{padding:8px 10px 0}
+html body dialog.hf .hf1{margin:0 0 6px}
+html body dialog.hf .wzt button{min-height:36px;font-size:12px}
+html body dialog.hf .tb{margin:4px -14px 0;padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px))}
+html body dialog.hf .tb button{min-height:36px!important;font-size:14px}
+@media (max-width:640px){html body dialog.hf {max-height:calc(100dvh - 24px)}
+html body dialog.hf form{padding:0 10px}
+html body dialog.hf h2{margin:0 -10px 6px;padding:8px 10px}
+html body dialog.hf .tb{margin:4px -10px 0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+html body dialog.hf .hs{padding:8px 8px 0}
+html body dialog.hf #bm.hg,html body dialog.hf #by>.hg{gap:0 6px}
+html body dialog.hf #hy{max-width:100%}
+html body dialog.hf :is(input:not([type=radio]):not([type=checkbox]),select){min-height:36px!important;font-size:14px!important;padding:3px 6px!important}}
+/* consistent vertical rhythm; Holding Details pinned on top of every step */
+html body dialog.hf .hg{margin:0}
+html body dialog.hf .hf1{margin:0 0 6px}
+html body dialog.hf #hy{margin:0 0 6px}
+html body dialog.hf :is(small.hh,.hn,.hw,.yn):empty{margin:0;padding:0;border:0;min-height:0}
+html body dialog.hf small.hh[id]:not(:empty),html body dialog.hf .hw{margin:0 0 6px;padding:3px 8px}
+html body dialog.hf .hs{margin:0 0 8px;padding:8px 10px 2px}
+html body dialog.hf .hs>h3{margin:0 0 6px}
+html body dialog.hf .hs.hs-top{border:0;background:none!important;border-radius:0;padding:0;margin:0 0 6px}
+html body dialog.hf .hs-top>h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0;padding:0}
+html body dialog.hf .hs-top .hg{grid-template-columns:1fr 1fr;gap:0 8px}
+/* no section labels on Details/Contribution; yearly fields on one line; compact footer */
+html body dialog.hf .hs.hs-nl{border:0;background:none!important;border-radius:0;padding:0;margin:0 0 6px}
+html body dialog.hf .hs-nl>h3,html body dialog.hf #fkl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0;padding:0;white-space:nowrap}
+html body dialog.hf #by:not([hidden]){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 6px}
+html body dialog.hf #by>.hg{display:contents}
+html body dialog.hf #by #hy{max-width:none;margin:0 0 6px}
+html body dialog.hf #by #yinfo{grid-column:1/-1}
+html body dialog.hf #hy>label{display:flex;align-items:flex-end;min-height:28px;line-height:1.15}
+html body dialog.hf .tb{display:flex;flex-wrap:nowrap;gap:6px}
+html body dialog.hf .tb button{flex:1 1 0;min-width:0;padding:0 6px;font-size:12px;white-space:nowrap}
+/* Contribution: hide the how-to paragraph */
+html body dialog.hf .hs>p.hn:not([id]){display:none!important}
+/* pickers removed: one theme */
+.thm,.fonts,.sub2:has(+.fonts),div:has(>.seg>[data-lk^="rad:"]),div:has(>.seg>[data-lk^="font:"]){display:none!important}

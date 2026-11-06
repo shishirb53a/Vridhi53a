@@ -1,0 +1,42 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Generate incremental build version
+        env:
+          BUILD_RUN_NUMBER: ${{ github.run_number }}
+          BASE_BUILD: '151'
+        run: |
+          build_number=$((BASE_BUILD + BUILD_RUN_NUMBER))
+          build_date="$(date -u +%F)"
+          printf "window.VR_BUILD_NO=%s;\nwindow.VR_BUILD_DATE='%s';\n" "$build_number" "$build_date" > modules/auth/build-info.js
+          sed -i "s/build-info.js?v=151/build-info.js?v=${build_number}/" index.html
+          sed -i "s/auth.js?v=151/auth.js?v=${build_number}/" index.html
+          sed -i "s/login.css?v=151/login.css?v=${build_number}/" index.html
+          sed -i "s/login.js?v=151/login.js?v=${build_number}/" index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

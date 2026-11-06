@@ -1,0 +1,36 @@
+
+/* Holding report popup: click a holding name to see its year-by-year report */
+html body a.hyl{color:var(--ac);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-weight:inherit}
+html body a.hyl:hover{text-decoration-thickness:2px}
+html body a.hyl:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:3px}
+html body dialog.hyd{width:min(1100px,96vw);max-height:92vh;padding:0;overflow:hidden;display:none;flex-direction:column}
+html body dialog.hyd[open]{display:flex}
+.hyd .hyh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 20px 12px;border-bottom:1px solid var(--bd)}
+.hyd .hyh h2{margin:0 0 6px;font-size:16px;overflow-wrap:anywhere}
+.hyd .hyc{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:var(--mu)}
+.hyd .hyb{padding:12px 20px 18px;overflow:auto;min-height:0}
+.hyd .hy-sc{overflow:auto;max-height:62vh}
+html body .hyd .hy-sc .rt th{top:0!important}
+body[data-fz]:not([data-fz="0"]) .hy-sc .rt :is(th,td):nth-child(2){min-width:86px;max-width:86px}
+body[data-fz="3"] .hy-sc .rt :is(th,td):nth-child(3){left:138px}
+body[data-fz] .hy-sc .rt :is(th,td):nth-child(2),body[data-fz] .hy-sc .rt :is(th,td):nth-child(3){box-shadow:none!important}
+.hyd .hyv{margin-bottom:10px}
+/* no scrollbars in the popup: the table is fitted to the popup width, and the content still scrolls by wheel, touch and keyboard */
+html body dialog.hyd .hyb,html body dialog.hyd .hy-sc{overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior:contain}
+html body dialog.hyd .hyb::-webkit-scrollbar,html body dialog.hyd .hy-sc::-webkit-scrollbar{display:none;width:0;height:0}
+html body dialog.hyd .hy-sc table.rt.rt.rt.rt{width:100%;min-width:0!important;table-layout:auto;font-size:12px}
+html body dialog.hyd .hy-sc table.rt.rt.rt.rt :is(th,td){min-width:0!important;max-width:none!important;left:auto!important;padding:7px 8px;white-space:normal;overflow-wrap:anywhere}
+html body dialog.hyd .hy-sc table.rt.rt.rt.rt td{position:static!important}
+html body dialog.hyd .hy-sc table.rt.rt.rt.rt th{position:sticky!important;top:0!important}
+html body dialog.hyd .hy-sc table.rt.rt.rt.rt :is(.nw,td.nw){white-space:nowrap}
+html body dialog.hyd .hy-sc table.rt.rt.rt.rt th button{white-space:normal}
+.hyd .hyn{margin-top:8px;font-size:12px;color:var(--mu)}
+@media (max-width:720px){html body dialog.hyd{width:100vw;max-width:100vw;height:100vh;height:100dvh;max-height:100dvh;margin:0;border-radius:0;border:0}
+.hyd .hyh{padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;position:sticky;top:0;background:var(--card);z-index:5}
+.hyd .hyh h2{font-size:16px}
+.hyd .hyh button{min-height:40px;padding:0 14px;flex:0 0 auto}
+.hyd .hyb{padding:10px 12px calc(16px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+.hyd .hy-sc{max-height:none;overflow:visible}
+.hyd .hyv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.hyd .hyv button{white-space:normal;min-height:44px;padding:6px 4px;font-size:12px;line-height:1.2;text-align:center}
+.hyd .hyc{gap:6px}}
