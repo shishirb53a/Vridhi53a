@@ -165,7 +165,7 @@ t('new Policy clients start empty and switching isolates their policies', () => 
 t('Policies sharing lists existing Goal and Retirement Planner clients', () => {
   win.__setS({
     polClients: { active: 'policy-a', profiles: { 'policy-a': {
-      name: 'Policy client', policies: [], enabled: { goal: true, retirement: true },
+      name: 'Policy client', policies: [], enabled: { goal: false, retirement: false },
       share: { goal: ['goal-a'], retirement: ['ret-a'] }
     } } },
     gpp: { active: 'goal-a', profiles: { 'goal-a': { name: 'Goal client' } } },
@@ -174,8 +174,10 @@ t('Policies sharing lists existing Goal and Retirement Planner clients', () => {
   const goal = shareClients('goal', 'Goal Planner');
   const retirement = shareClients('retirement', 'Retirement Planner');
   assert.ok(goal.includes('Goal client') && goal.includes('value="goal-a"') && goal.includes(' checked'));
+  assert.ok(!goal.includes(' hidden'), 'Goal Planner client choices remain visible while sharing is off');
   assert.ok(!goal.includes('No Goal Planner clients are available yet.'));
   assert.ok(retirement.includes('Retirement client') && retirement.includes('value="ret-a"') && retirement.includes(' checked'));
+  assert.ok(!retirement.includes(' hidden'), 'Retirement Planner client choices remain visible while sharing is off');
   assert.ok(!retirement.includes('No Retirement Planner clients are available yet.'));
 });
 console.log('\n' + n + ' checks passed' + (process.exitCode ? ' (some FAILED)' : ''));

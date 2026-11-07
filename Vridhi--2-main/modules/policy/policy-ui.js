@@ -45,7 +45,7 @@
   function shareClients(who, title) {
     var p = V.clients().filter(function (c) { return c.active; })[0], selected = p && p.share && p.share[who] || [];
     var clients = V.plannerClients(who), key = who === 'goal' ? 'goal' : 'retirement';
-    return '<div class="vp-share-clients"' + (V.usedBy(who) ? '' : ' hidden') + '><b>' + title + ' clients</b>'
+    return '<div class="vp-share-clients"><b>' + title + ' clients</b>'
       + (clients.length ? clients.map(function (c) {
         return '<label><input type="checkbox" data-vpclient="' + key + '" value="' + esc(c.id) + '"' + (selected.indexOf(c.id) >= 0 ? ' checked' : '') + '><span>' + esc(c.name) + '</span></label>';
       }).join('') : '<p class="mu">No ' + title + ' clients are available yet.</p>') + '</div>';
@@ -86,11 +86,11 @@
   /* ---------- DASHBOARD ---------- */
   function pDash() {
     var P = V.list(), top = head('Policies', 'Premiums, payouts and maturity of every policy, in one place.', addBtn());
-    if (!P.length) return top + empty() + sharing();
+    if (!P.length) return top + sharing() + empty();
     var s = V.summary(), t = today(), hasPrem = s.premTotal > 0, bs = s.byStatus;
     var stText = [bs.paying && bs.paying + ' paying premium', bs.payout && bs.payout + ' in payout phase', bs.upcoming && bs.upcoming + ' not started', bs.matured && bs.matured + ' matured'].filter(Boolean).join(' · ');
     var np = s.nextPayout, nm = s.nextMaturity, nx = s.nextPremium;
-    var html = top;
+    var html = top + sharing();
     if (s.premOverdueCount) html += '<div class="vp-alert" role="alert"><b>' + plural(s.premOverdueCount, 'premium') + ' overdue</b> <span>' + f(s.premOverdue) + ' not yet marked as paid.</span><button type="button" data-vpp="prem">Review premiums</button></div>';
     html += '<div class="vp-kpis n6">'
       + kpi('Policies', String(s.count), esc(stText))
@@ -124,7 +124,7 @@
       + sorted().map(function (o) {
           var T = V.totals(o.x), nxt = V.events().filter(function (e) { return e.index === o.i && e.date > t && !(e.kind === 'premium' && e.paid); })[0];
           return '<tr><td><b>' + EN(o.x.name) + '</b>' + (o.x.insurer ? '<div class="mu">' + EN(o.x.insurer) + '</div>' : '') + '</td><td>' + chip(V.status(o.x, t)) + '</td><td class="nw">' + (nxt ? V.fmtDate(nxt.date) + '<div class="mu">' + (nxt.kind === 'premium' ? 'Premium ' : nxt.kind === 'lump' ? 'Maturity ' : 'Payout ') + f(nxt.amt) + '</div>' : '\u2014') + '</td><td class="vp-r nw"><b>' + f(T.pay + T.lump) + '</b></td></tr>'; }).join('')
-      + '</table></div></div>' + sharing();
+      + '</table></div></div>';
     return html;
   }
 
