@@ -16,8 +16,8 @@ html body #vp-pg .seg{background:var(--card);border:1px solid var(--bd);flex-wra
 html body .rp2-nav.vp-nav{grid-template-columns:repeat(6,1fr);width:min(100%,680px)}
 html body .rp2-nav.vp-nav button{font-size:10.5px;min-width:0;padding:4px 2px}
 html body .rp2-nav.vp-nav button span:first-child{font-size:18px}
-@media (min-width:900px){html body .rp2-nav.vp-nav{display:none}}      /* the top bar is enough on wide screens */
-@media (max-width:899px){html body .vp-bar{display:none}}                /* on phones the bottom bar is the navigation */
+html body .vp-bar{display:none}   /* the bottom bar is the navigation, as in the Goal and Retirement Planners */
+html body #vp-pg{padding-bottom:76px}
 html body #vp-pg .rph{align-items:flex-start;gap:12px}
 html body #vp-pg .rph .rpr{display:flex;gap:8px;flex-wrap:wrap}
 html body #vp-pg .vp-sub{margin:2px 0 0;color:var(--mu);font-size:14px}
@@ -113,3 +113,23 @@ html body .pol-sch .tw{max-height:52vh;overflow:auto}
 @media (max-width:420px){html body #m .vp-kpis{grid-template-columns:1fr 1fr}html body .vp-kpi .vp-v{font-size:18px}}
 html body #pfm .pvbox{margin:8px 0}
 html body #pfm .hs h3 small{font-weight:400;color:var(--mu);margin-left:6px}
+
+/* ---- redesign: same controls as Goal Planner / Retirement Planner ---- */
+html body .vp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+html body .vp-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1px solid var(--bd);border-radius:var(--r-box,14px);padding:10px 16px;margin:0 0 14px}
+html body .vp-av{flex:none;width:34px;height:34px;border-radius:50%;background:var(--ac);color:var(--ac2);display:grid;place-items:center;font-weight:700;font-size:13px}
+html body .vp-bt{flex:1;min-width:200px}html body .vp-eb{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);font-weight:700}
+html body .vp-bn{display:flex;align-items:center;gap:10px;flex-wrap:wrap}html body .vp-bn select{width:auto;min-width:160px;min-height:32px;font-weight:700;font-size:15px;border:0;background:transparent;padding:0 4px}
+html body .vp-bb{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+html body .vp-live{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bd);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:600}html body .vp-live:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--vp-pay)}
+html body .vp-kpi{background:color-mix(in srgb,var(--ac) 5%,var(--card));border-color:color-mix(in srgb,var(--ac) 22%,var(--bd));border-radius:var(--r-box,14px)}
+html body .vp-card,html body #vp-pg .card{border-radius:var(--r-box,14px)}
+html body .vp-acts{display:flex;gap:6px;flex-wrap:nowrap}html body .vp-ai{min-width:34px;min-height:34px;padding:0;display:inline-grid;place-items:center}
+html body #pol .hcard .vp-acts{margin-top:10px}
+html body #vpr,html body #vp-pg .rph2{margin-top:0}html body #vp-pg .rph2 h2{border-left:4px solid var(--ac);padding-left:10px;margin:0}
+html body #vp-pg .rph2{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+/* tabbed policy form */
+html body #pfm .vp-tabs{display:flex;gap:2px;border-bottom:1px solid var(--bd);margin:0 0 12px;overflow-x:auto}
+html body #pfm .vp-tab{background:transparent!important;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 14px;color:var(--mu);font-weight:600;white-space:nowrap}
+html body #pfm .vp-tab[aria-selected=true]{color:var(--ac);border-bottom-color:var(--ac)}
+html body #pfm [data-vpt][hidden],html body #pfm #pnx[hidden]{display:none!important}
