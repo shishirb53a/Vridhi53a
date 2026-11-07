@@ -125,16 +125,34 @@
       });
       return out;
     };
-    var rowT = function (o) {
-      var T = V.totals(o.x);
-      return '<tr><td>' + nm(o) + '</td><td>' + (o.x.prem ? esc(premLine(o.x)) : '<span class="mu">\u2014</span>') + '</td><td>' + (o.x.amt > 0 ? f(o.x.amt) + '<br><span class="mu">' + esc(fl(o.x.freq)).toLowerCase() + '</span>' : '\u2014') + '</td><td class="nw">' + V.fmtDate(o.x.start) + '<br><span class="mu">' + plural(o.x.yrs, 'year') + (T.count ? ' \u00b7 ' + plural(T.count, 'payout') : '') + '</span></td><td>' + lump(o.x) + '</td><td class="vp-r"><b>' + f(T.pay + T.lump) + '</b></td><td class="nw">' + bt(o) + '</td></tr>'; };
-    var rowC = function (o) {
-      var T = V.totals(o.x), m = V.maturity(o.x);
-      return '<div class="hcard" style="--c:#7c3aed"><div class="hh">' + nm(o) + '<div class="vv"><b>' + f(T.pay + T.lump) + '</b><div class="mu">Total expected</div></div></div><div class="kv">'
-        + (o.x.prem ? '<span>Premium</span><b>' + esc(premLine(o.x)) + '</b>' : '') + '<span>Payout</span><b>' + (o.x.amt > 0 ? f(o.x.amt) + ' \u00b7 ' + esc(fl(o.x.freq)).toLowerCase() : '\u2014') + '</b><span>Starts</span><b>' + V.fmtDate(o.x.start) + '</b><span>Duration</span><b>' + plural(o.x.yrs, 'year') + (T.count ? ' \u00b7 ' + plural(T.count, 'payout') : '') + '</b><span>Maturity</span><b>' + (m ? V.fmtDate(m.date) + (o.x.lump > 0 ? ' \u00b7 ' + f(o.x.lump) : '') : '\u2014') + '</b></div><div class="tb">' + bt(o) + '</div></div>'; };
+    /* Option B: one card per policy, with a timeline of its life (premiums -> payouts -> maturity) */
+    var dn = function (d) { var q = V.pDate(d); return q ? Date.UTC(q.y, q.mo - 1, q.d) / 864e5 : null; };
+    var dy = function (d, n) { var q = V.pDate(d); return q ? Date.UTC(q.y + n, q.mo - 1, q.d) / 864e5 : null; };
+    var timeline = function (x, m) {
+      var q = x.prem, pS = q ? dn(q.start) : null, pE = q ? (q.freq === 'single' ? pS : dy(q.start, q.yrs)) : null;
+      var aS = x.amt > 0 ? dn(x.start) : null, aE = x.amt > 0 ? dy(x.start, x.yrs) : null, mD = m ? dn(m.date) : null;
+      var pts = [pS, pE, aS, aE, mD].filter(function (v) { return v != null; }); if (!pts.length) return '';
+      var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), sp = hi - lo || 1;
+      var seg = function (a, b, c) { return a == null ? '' : '<i class="' + c + '" style="left:' + ((a - lo) / sp * 100).toFixed(2) + '%;width:' + Math.max((b - a) / sp * 100, 1.5).toFixed(2) + '%"></i>'; };
+      var key = function (c, t, d) { return '<span><i class="vp-dot ' + c + '" aria-hidden="true"></i>' + t + ' ' + V.fmtDate(d) + '</span>'; };
+      return '<div><div class="vp-tl" role="img" aria-label="Timeline of ' + esc(x.name) + ': premiums, payouts and maturity">' + seg(pS, pE, 'pm') + seg(aS, aE, 'po') + (mD != null ? seg(mD, mD, 'mt') : '') + '</div>'
+        + '<div class="vp-tll">' + (q ? key('pm', 'Premiums from', q.start) : '') + (aS != null ? key('po', 'Payouts from', x.start) : '') + (m ? key('mt', x.lump > 0 ? 'Maturity' : 'Ends', m.date) : '') + '</div></div>';
+    };
+    var btB = function (o) {
+      var a = function (act, label, cls) { return '<button type="button" class="tbs ' + (cls || '') + '" data-vp="' + act + '" data-i="' + o.i + '" aria-label="' + label + ' ' + esc(o.x.name) + '">' + label + '</button>'; };
+      return '<div class="vp-btns">' + a('sched', 'Payouts') + (o.x.prem ? a('premsch', 'Premiums') : '') + a('edit', 'Edit') + a('del', 'Delete', 'd') + '</div>';
+    };
+    var rowB = function (o) {
+      var T = V.totals(o.x), m = V.maturity(o.x), dash = '<span class="mu">\u2014</span>';
+      return '<article class="vp-pc"><div class="vp-pc-h">' + nm(o) + '<div class="vv"><b>' + f(T.pay + T.lump) + '</b><div class="mu">Total expected</div></div></div>'
+        + timeline(o.x, m)
+        + '<div class="vp-3"><div class="pm"><span>Premium</span><b>' + (o.x.prem ? esc(premLine(o.x)) : dash) + '</b></div>'
+        + '<div class="po"><span>Payout</span><b>' + (o.x.amt > 0 ? f(o.x.amt) + ' ' + esc(fl(o.x.freq)).toLowerCase() + '</b><small>' + plural(T.count, 'payout') + ' from ' + V.fmtDate(o.x.start) + '</small>' : dash + '</b>') + '</div>'
+        + '<div class="mt"><span>Maturity</span><b>' + (o.x.lump > 0 && m ? f(o.x.lump) + '</b><small>on ' + V.fmtDate(m.date) + '</small>' : dash + '</b>') + '</div></div>'
+        + btB(o) + '</article>';
+    };
     var tl = L.reduce(function (a, o) { return a + V.totals(o.x).lump; }, 0), tp = L.reduce(function (a, o) { return a + V.totals(o.x).pay; }, 0);
-    return '<div class="card hp-card" id="pol"><div class="ht tw"><table aria-label="Policies"><tr><th>Policy</th><th>Premium</th><th>Payout</th><th>Starts</th><th>Maturity</th><th class="vp-r">Total expected</th><th>Actions</th></tr>'
-      + grouped(rowT, 't').join('') + '<tr class="t"><td>Total (' + L.length + (L.length !== all ? ' of ' + all : '') + ')</td><td></td><td></td><td></td><td>' + f(tl) + '</td><td class="vp-r">' + f(tp + tl) + '</td><td></td></tr></table></div><div class="hc">' + grouped(rowC, 'c').join('') + '</div></div>';
+    return '<div class="vp-cards" id="pol">' + grouped(rowB, 'c').join('') + '</div><p class="vp-tot"><b>Total (' + L.length + (L.length !== all ? ' of ' + all : '') + ')</b> \u00b7 ' + f(tp + tl) + ' expected \u00b7 ' + f(tp) + ' regular payouts' + (tl ? ' + ' + f(tl) + ' maturity' : '') + '</p>';
   }
 
   /* ---------- premium status helpers (used by the premium schedule dialog on the Policies page) ---------- */

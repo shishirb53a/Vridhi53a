@@ -133,3 +133,24 @@ html body #pfm .vp-tabs{display:flex;gap:2px;border-bottom:1px solid var(--bd);m
 html body #pfm .vp-tab{background:transparent!important;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 14px;color:var(--mu);font-weight:600;white-space:nowrap}
 html body #pfm .vp-tab[aria-selected=true]{color:var(--ac);border-bottom-color:var(--ac)}
 html body #pfm [data-vpt][hidden],html body #pfm #pnx[hidden]{display:none!important}
+
+/* Policies page · card layout (one card per policy, with a life-of-policy timeline) */
+html body .vp-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,430px),1fr));gap:14px;margin:0 0 12px}
+html body .vp-cards .hgh{grid-column:1/-1}
+html body .vp-pc{display:flex;flex-direction:column;gap:14px;min-width:0;padding:16px;border:1px solid var(--bd);border-radius:14px;background:var(--card)}
+html body .vp-pc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+html body .vp-pc-h .vv{text-align:right;flex:none}html body .vp-pc-h .vv b{font-size:19px}
+html body .vp-tl{position:relative;height:12px;border-radius:6px;background:color-mix(in srgb,var(--mu) 16%,var(--card))}
+html body .vp-tl i{position:absolute;top:0;bottom:0;min-width:4px;border-radius:6px}
+html body .vp-tl .pm,html body .vp-dot.pm{background:var(--vp-prem)}html body .vp-tl .po,html body .vp-dot.po{background:var(--vp-pay)}html body .vp-tl .mt,html body .vp-dot.mt{background:var(--vp-mat)}
+html body .vp-tl .mt{min-width:8px;border-radius:50%;box-shadow:0 0 0 2px var(--card)}
+html body .vp-tll{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;font-size:12px;color:var(--mu)}
+html body .vp-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+html body .vp-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+html body .vp-3 span,html body .vp-3 small{display:block;font-size:12px;color:var(--mu)}
+html body .vp-3 b{display:block;font-size:13.5px;font-weight:700;margin-top:2px}
+html body .vp-3 .pm b{color:var(--vp-prem)}html body .vp-3 .po b{color:var(--vp-pay)}html body .vp-3 .mt b{color:var(--vp-mat)}
+html body .vp-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+html body .vp-btns .tbs{min-height:40px;padding:0 14px;font-weight:600}html body .vp-btns .tbs.d{color:var(--vp-late)}
+html body .vp-tot{margin:0 0 14px;font-size:13.5px;color:var(--mu)}html body .vp-tot b{color:var(--tx)}
+@media (max-width:620px){html body .vp-3{grid-template-columns:minmax(0,1fr)}}
