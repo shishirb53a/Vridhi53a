@@ -53,6 +53,11 @@ if(!(e>S.start)){e=Math.min(S.start+23,mx);MSG='End year must be after the start
 else if(e>mx){e=mx;MSG='End year limited to '+mx+' (maximum 60 years, and your age cannot pass 100).'}
 S.end=e;const N=S.end-S.start+1;S.ret=Math.min(Math.max(S.retP??S.ret,a0),a0+N-1)}
 const UK=(function(){try{return sessionStorage.getItem('fs-user')||''}catch(e){return ''}})();window.__UK=UK;const KEY=UK?'fwt2-'+UK:'fwt2';let S,UI={tab:'Holdings',q:'',cat:'All',k:'name',d:1,rq:'',rk:'a',rd:1,sel:null,fq:'',hq:'',frl:'All',fk:'role',fd:1,hv:null,hdt:'overview'};
+/* Holdings view state that must survive logout/login (the page reloads): collapsed categories, kept per user; grouping flag read before the first render */
+const GCK='vr-gc'+(UK?'-'+UK:'');
+function gcLoad(){try{const o=JSON.parse(localStorage.getItem(GCK)||'{}'),r={};if(o&&typeof o==='object')Object.keys(o).forEach(k=>{if(o[k]===true)r[k]=true});return r}catch(e){return {}}}
+function gcSave(){try{localStorage.setItem(GCK,JSON.stringify(UI.gc||{}))}catch(e){}}
+UI.gc=gcLoad();try{UI.g=localStorage.getItem('vr-grp')!=='0'}catch(e){UI.g=true}
 const clone=o=>JSON.parse(JSON.stringify(o));
 const num=(v,lo,hi,dv)=>{v=+v;return isFinite(v)?Math.min(hi,Math.max(lo,v)):dv};
 function cleanFh(f){if(!f||typeof f!=='object'||!f.v||typeof f.v!=='object')return null;const v={};let n=0;for(const k of Object.keys(f.v)){if(n>=160||!/^[A-Za-z][A-Za-z0-9]{0,29}$/.test(k)||k in Object.prototype)continue;const x=f.v[k];if((typeof x==='number'&&isFinite(x))||typeof x==='string'){v[k]=String(x).slice(0,24);n++}}return n?{v,t:num(f.t,0,9e12,0),rep:f.rep?1:0}:null}
@@ -328,7 +333,7 @@ document.addEventListener('click',e=>{const c=e.target.closest&&e.target.closest
 if(c.id==='hg'){UI.g=!UI.g;try{localStorage.setItem('vr-grp',UI.g?'1':'0')}catch(x){}render();return}
 else if(c.hasAttribute('data-gh-all')){UI.gc=UI.gc||{};S.assets.forEach(x=>{UI.gc[x.cat]=c.dataset.ghAll!=='expand'})}
 else{const k=c.getAttribute('data-gh');UI.gc=UI.gc||{};UI.gc[k]=!UI.gc[k]}
-h.innerHTML=holdRows();const fk=c.getAttribute&&c.getAttribute('data-gh'),all=c.getAttribute&&c.getAttribute('data-gh-all');if(fk||all){const sel=fk?'[data-gh="'+CSS.escape(fk)+'"]':'[data-gh-all="'+all+'"]',nb=h.parentElement.querySelector(sel);if(nb)nb.focus()}});
+gcSave();h.innerHTML=holdRows();const fk=c.getAttribute&&c.getAttribute('data-gh'),all=c.getAttribute&&c.getAttribute('data-gh-all');if(fk||all){const sel=fk?'[data-gh="'+CSS.escape(fk)+'"]':'[data-gh-all="'+all+'"]',nb=h.parentElement.querySelector(sel);if(nb)nb.focus()}});
 const matT=(x,s)=>{const m=matOf(x,S);return m?s+'Matures '+MSN[m.mo-1]+' '+x.mat:''};
 const ayT=(x,s,fr)=>{const r=ayT0(x,s,fr);return fr&&typeof r==='string'?r.replace(/([A-Z][a-z]{2}) (\d{4}) \u2013 ([A-Z][a-z]{2}) (\d{4})/,'<span style="white-space:nowrap">$1 $2 \u2013 $3 $4</span>'):r},ayT0=(x,s,fr)=>{if(x.type)return'—';if(!x.add&&!x.madd)return'No additions';const e=entry(x,S),st=e.y*12+e.mo-1,t=mIx(x.mto);
 if(t!=null&&x.madd>0&&!(x.add>0)){const f0=mIx(x.mfrom),sIx=f0!=null?Math.max(f0,st):st,n=t-sIx+1;return n<1?'None':n+(n>1?' months':' month')+s+(fr?MSN[sIx%12]+' '+Math.floor(sIx/12)+' \u2013 '+mfmt(x.mto):'till '+mfmt(x.mto))}
