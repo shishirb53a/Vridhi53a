@@ -13,7 +13,7 @@ html body .vp-bar{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 12px;background
 html body .vp-bar button,html body #vp-pg .seg button{background:transparent!important;color:var(--tx)!important;border:0;min-height:34px;padding:4px 14px;border-radius:8px;font-weight:600;box-shadow:none}
 html body .vp-bar button[aria-pressed=true],html body #vp-pg .seg button[aria-pressed=true]{background:var(--ac)!important;color:var(--ac2)!important;box-shadow:none}
 html body #vp-pg .seg{background:var(--card);border:1px solid var(--bd);flex-wrap:wrap}
-html body .rp2-nav.vp-nav{grid-template-columns:repeat(6,1fr);width:min(100%,680px)}
+html body .rp2-nav.vp-nav{grid-template-columns:repeat(2,1fr);width:min(100%,680px)}
 html body .rp2-nav.vp-nav button{font-size:10.5px;min-width:0;padding:4px 2px}
 html body .rp2-nav.vp-nav button span:first-child{font-size:18px}
 html body .vp-bar{display:none}   /* the bottom bar is the navigation, as in the Goal and Retirement Planners */

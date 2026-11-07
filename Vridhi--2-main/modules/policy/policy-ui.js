@@ -1,16 +1,15 @@
 /* =====================================================================================================================
    Vriddhi · POLICY MODULE · SCREENS        modules/policy/policy-ui.js
 
-   The Policies section: its own navigation and six screens (Dashboard, Policies, Premiums, Maturity, Payouts, Reports).
+   The Policies section: its own navigation and two screens (Policies, Reports).
    It reads and changes policy data ONLY through window.VRPolicy (modules/policy/policy-core.js) and registers itself with
    the app through window.VRMODULES, so nothing else in the app needs to know how the Policies section works.
    ===================================================================================================================== */
 (function () {
   'use strict';
   var V = window.VRPolicy, TAB = 'Policies';
-  var PAGES = [['dash', 'Summary', '\ud83d\udcca'], ['list', 'Policies', '\ud83d\udee1\ufe0f'], ['prem', 'Premiums', '\ud83d\udcb3'],
-               ['mat', 'Maturity', '\ud83c\udfaf'], ['pay', 'Payouts', '\ud83d\udcc5'], ['rep', 'Reports', '\ud83d\udcc4']];
-  var ST = { page: 'dash', q: '', grp: false, gc: {}, sf: 'all', prP: 'all', prS: 'open', prN: 60, mat: 'all', pyV: 'events', pyP: 'all', pyS: 'all', pyK: 'all', pyN: 60, rep: 'payout', rq: '' };
+  var PAGES = [['list', 'Policies', '\ud83d\udee1\ufe0f'], ['rep', 'Reports', '\ud83d\udcc4']];
+  var ST = { page: 'list', q: '', grp: false, gc: {}, sf: 'all', rep: 'payout', rq: '' };
 
   /* ---------- helpers ---------- */
   var $$ = function (id) { return document.getElementById(id); };
@@ -78,57 +77,12 @@
   }
   function body() {
     switch (ST.page) {
-      case 'list': return pList(); case 'prem': return pPrem(); case 'mat': return pMat(); case 'pay': return pPay(); case 'rep': return pRep(); default: return pDash();
+      case 'rep': return pRep(); default: return pList();
     }
   }
   function page() { return '<div id="vp-pg">' + clientBar() + body() + '</div>'; }
   function refresh() { var el = $$('vp-pg'); if (el) el.innerHTML = clientBar() + body(); else render(); }
   function go(p) { ST.page = p; render(); window.scrollTo(0, 0); }
-
-  /* ---------- DASHBOARD ---------- */
-  function pDash() {
-    var P = V.list(), top = head('Policies', 'Premiums, payouts and maturity of every policy, in one place.', addBtn());
-    if (!P.length) return top + sharing() + empty();
-    var s = V.summary(), t = today(), hasPrem = s.premTotal > 0, bs = s.byStatus;
-    var stText = [bs.paying && bs.paying + ' paying premium', bs.payout && bs.payout + ' in payout phase', bs.upcoming && bs.upcoming + ' not started', bs.matured && bs.matured + ' matured'].filter(Boolean).join(' · ');
-    var np = s.nextPayout, nm = s.nextMaturity, nx = s.nextPremium;
-    var html = top;
-    if (s.premOverdueCount) html += '<div class="vp-alert" role="alert"><b>' + plural(s.premOverdueCount, 'premium') + ' overdue</b> <span>' + f(s.premOverdue) + ' not yet marked as paid.</span><button type="button" data-vpp="prem">Review premiums</button></div>';
-    html += '<div class="vp-kpis n6">'
-      + kpi('Policies', String(s.count), esc(stText))
-      + kpi('Premium per year', hasPrem ? f(s.annualPremium) : '\u2014', hasPrem ? 'Paid so far ' + f(s.premPaid) + ' of ' + f(s.premTotal) : 'Add premium details to a policy to track them')
-      + kpi('Payouts received', f(s.payReceived), 'of ' + f(s.payRegular + s.payLump) + ' expected in all')
-      + kpi('Still to receive', f(s.payToCome), np ? 'Next ' + f(np.amt) + ' on ' + V.fmtDate(np.date) : 'Nothing scheduled')
-      + kpi('Next maturity', nm ? V.fmtDate(nm.date) : '\u2014', nm ? EN(nm.name) + (nm.amount > 0 ? ' · ' + f(nm.amount) : '') : 'No upcoming maturity')
-      + kpi('Next premium due', nx ? V.fmtDate(nx.date) : '\u2014', nx ? EN(nx.name) + ' · ' + f(nx.amt) : hasPrem ? 'All premiums are up to date' : 'No premiums tracked')
-      + '</div>';
-    /* by financial year */
-    var rows = V.byFinancialYear(), fy0 = Math.floor((new Date().getFullYear() * 12 + new Date().getMonth() - 3) / 12);
-    rows = rows.filter(function (r) { return r.fy >= fy0; }).slice(0, 18);
-    var mx = Math.max.apply(null, rows.map(function (r) { return Math.max(r.payout + r.lump, r.premDue); }).concat([1]));
-    var chart = rows.length ? '<div class="vp-bars" role="img" aria-label="Payouts and premiums by financial year">' + rows.map(function (r) {
-        var pv = r.payout + r.lump;
-        return '<div class="vp-bg" title="' + esc(r.label + ': payouts ' + f(pv) + ', premiums ' + f(r.premDue)) + '"><div class="vp-bp"><div class="vp-b pay" style="height:' + (pv / mx * 100).toFixed(1) + '%"></div><div class="vp-b prem" style="height:' + (r.premDue / mx * 100).toFixed(1) + '%"></div></div></div>'; }).join('')
-      + '</div><div class="vp-bl">' + rows.map(function (r) { return '<span>' + String(r.fy).slice(2) + '-' + String(r.fy + 1).slice(2) + '</span>'; }).join('') + '</div>'
-      : '<p class="mu">Nothing is scheduled from this financial year onwards.</p>';
-    /* the next 12 months */
-    var end = new Date(); end.setFullYear(end.getFullYear() + 1);
-    var endS = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
-    var up = V.events().filter(function (e) { return e.date > t && e.date <= endS && !(e.kind === 'premium' && e.paid); }).slice(0, 12);
-    var list = up.length ? '<ul class="vp-up">' + up.map(function (e) {
-        var k = e.kind === 'premium' ? ['', '\ud83d\udcb3', 'Premium due'] : e.kind === 'lump' ? ['mat', '\ud83c\udfaf', 'Maturity'] : ['pay', '\ud83d\udcb0', 'Payout'], d = days(t, e.date);
-        return '<li><span class="vp-ic ' + k[0] + '" aria-hidden="true">' + k[1] + '</span><span class="vp-tt"><b>' + EN(e.name) + '</b><small>' + k[2] + ' · ' + V.fmtDate(e.date) + '</small></span><span class="vp-ta">' + (e.kind === 'premium' ? '\u2212' : '+') + f(e.amt) + '<small>' + (d === 1 ? 'tomorrow' : 'in ' + d + ' days') + '</small></span></li>'; }).join('') + '</ul>'
-      : '<p class="mu">No premiums, payouts or maturities fall in the next 12 months.</p>';
-    html += '<div class="vp-two"><div class="vp-card"><div class="vp-h"><h2>By financial year</h2><div class="vp-leg"><span><i style="background:var(--vp-pay)"></i>Payouts and maturity</span><span><i style="background:var(--vp-prem)"></i>Premiums</span></div></div>' + chart + '</div>'
-      + '<div class="vp-card"><div class="vp-h"><h2>Coming up</h2><button type="button" class="tbs" data-vpp="pay">All payouts</button></div>' + list + '</div></div>';
-    /* policies at a glance */
-    html += '<div class="vp-card"><div class="vp-h"><h2>Policies at a glance</h2><button type="button" class="tbs" data-vpp="list">Manage policies</button></div><div class="vp-tw"><table class="vp-t" aria-label="Policies at a glance"><tr><th>Policy</th><th>Status</th><th>Next event</th><th class="vp-r">Total expected</th></tr>'
-      + sorted().map(function (o) {
-          var T = V.totals(o.x), nxt = V.events().filter(function (e) { return e.index === o.i && e.date > t && !(e.kind === 'premium' && e.paid); })[0];
-          return '<tr><td><b>' + EN(o.x.name) + '</b>' + (o.x.insurer ? '<div class="mu">' + EN(o.x.insurer) + '</div>' : '') + '</td><td>' + chip(V.status(o.x, t)) + '</td><td class="nw">' + (nxt ? V.fmtDate(nxt.date) + '<div class="mu">' + (nxt.kind === 'premium' ? 'Premium ' : nxt.kind === 'lump' ? 'Maturity ' : 'Payout ') + f(nxt.amt) + '</div>' : '\u2014') + '</td><td class="vp-r nw"><b>' + f(T.pay + T.lump) + '</b></td></tr>'; }).join('')
-      + '</table></div></div>';
-    return html + sharing();
-  }
 
   /* ---------- POLICIES (management) ---------- */
   function pList() {
@@ -183,98 +137,9 @@
       + grouped(rowT, 't').join('') + '<tr class="t"><td>Total (' + L.length + (L.length !== all ? ' of ' + all : '') + ')</td><td></td><td></td><td></td><td>' + f(tl) + '</td><td class="vp-r">' + f(tp + tl) + '</td><td></td></tr></table></div><div class="hc">' + grouped(rowC, 'c').join('') + '</div></div>';
   }
 
-  /* ---------- PREMIUMS (tracking) ---------- */
+  /* ---------- premium status helpers (used by the premium schedule dialog on the Policies page) ---------- */
   var PSL = { paid: 'Paid', overdue: 'Overdue', soon: 'Due soon', upcoming: 'Upcoming' };
-  function addYear(t) { var d = V.pDate(t); return (d.y + 1) + '-' + String(d.mo).padStart(2, '0') + '-' + String(d.d).padStart(2, '0'); }
   function pstat(e, t) { return e.paid ? 'paid' : e.date < t ? 'overdue' : days(t, e.date) <= 30 ? 'soon' : 'upcoming'; }
-  function polOpts(sel) { return '<option value="all">All policies</option>' + sorted().map(function (o) { return '<option value="' + o.i + '"' + (String(sel) === String(o.i) ? ' selected' : '') + '>' + esc(o.x.name) + '</option>'; }).join(''); }
-  function pPrem() {
-    var P = sorted(), t = today(), top = head('Premiums', 'Track the premium of every policy and mark each one as paid.', addBtn());
-    if (!P.length) return top + empty();
-    var withP = P.filter(function (o) { return o.x.prem; });
-    if (!withP.length) return top + '<div class="vp-card vp-empty"><h2>No premium details yet</h2><p class="mu">Edit a policy and fill in its premium (amount, how often, first date and how many years) to track every due date here.</p></div>'
-      + '<div class="vp-card"><div class="vp-h"><h2>Your policies</h2></div>' + P.map(function (o) { return '<div class="vp-sw"><span style="flex:1"><b>' + EN(o.x.name) + '</b><small>' + EN(o.x.insurer || 'No premium recorded') + '</small></span><button type="button" class="tbs" data-vp="edit" data-i="' + o.i + '">Add premium</button></div>'; }).join('') + '</div>';
-    var s = V.summary();
-    var html = top + '<div class="vp-kpis n5">' + kpi('Total premiums', f(s.premTotal), 'Over the full term of ' + plural(withP.length, 'policy', 'policies'))
-      + kpi('Paid', f(s.premPaid), s.premTotal ? Math.round(s.premPaid / s.premTotal * 100) + '% of the total' : '')
-      + kpi('Remaining', f(s.premRemaining), 'Still to be paid')
-      + kpi('Overdue', f(s.premOverdue), s.premOverdueCount ? plural(s.premOverdueCount, 'premium') + ' not marked as paid' : 'Nothing overdue', s.premOverdueCount ? 'late' : '')
-      + kpi('Next due', s.nextPremium ? V.fmtDate(s.nextPremium.date) : '\u2014', s.nextPremium ? EN(s.nextPremium.name) + ' · ' + f(s.nextPremium.amt) : 'No upcoming premium') + '</div>';
-    html += '<div class="vp-card"><div class="vp-h"><h2>By policy</h2></div><div class="vp-tw"><table class="vp-t" aria-label="Premiums by policy"><tr><th>Policy</th><th>Premium plan</th><th class="vp-r">Total</th><th class="vp-r">Paid</th><th class="vp-r">Remaining</th><th>Next due</th><th>Actions</th></tr>'
-      + withP.map(function (o) {
-          var T = V.premTotals(o.x);
-          return '<tr><td><b>' + EN(o.x.name) + '</b></td><td>' + esc(premLine(o.x)) + '</td><td class="vp-r nw">' + f(T.total) + '</td><td class="vp-r nw">' + f(T.paid) + '</td><td class="vp-r nw"><b>' + f(T.remaining) + '</b></td><td class="nw">' + (T.overdue ? '<span class="vp-chip overdue">' + plural(T.overdue, 'overdue', 'overdue') + '</span>' : T.next ? V.fmtDate(T.next.date) : '\u2014') + '</td><td class="nw">'
-            + (T.overdue ? '<button type="button" class="tbs" data-vp="paidall" data-i="' + o.i + '">Mark due as paid</button> ' : '') + '<button type="button" class="tbs" data-vp="premsch" data-i="' + o.i + '">Schedule</button></td></tr>'; }).join('') + '</table></div></div>';
-    var ev = V.events({ kinds: ['premium'] }).filter(function (e) { return ST.prP === 'all' || String(e.index) === ST.prP; }), end = addYear(t);
-    ev = ev.filter(function (e) {
-      var st = pstat(e, t);
-      return ST.prS === 'all' ? true : ST.prS === 'paid' ? e.paid : ST.prS === 'overdue' ? st === 'overdue' : ST.prS === 'upcoming' ? (!e.paid && e.date >= t) : (!e.paid && e.date <= end);
-    });
-    var shown = ev.slice(0, ST.prN);
-    html += '<div class="vp-card"><div class="vp-h"><h2>Premium due dates</h2></div><div class="vp-tools"><select id="vp-prP" aria-label="Policy">' + polOpts(ST.prP) + '</select><select id="vp-prS" aria-label="Show">'
-      + [['open', 'Unpaid, next 12 months'], ['overdue', 'Overdue'], ['upcoming', 'All upcoming'], ['paid', 'Paid'], ['all', 'Everything']].map(function (k) { return '<option value="' + k[0] + '"' + (ST.prS === k[0] ? ' selected' : '') + '>' + k[1] + '</option>'; }).join('') + '</select></div>'
-      + (shown.length ? '<div class="vp-tw"><table class="vp-t" aria-label="Premium due dates"><tr><th>Due date</th><th>Policy</th><th>Financial year</th><th class="vp-r">Amount</th><th>Status</th><th></th></tr>'
-        + shown.map(function (e) {
-            var st = pstat(e, t);
-            return '<tr><td class="nw"><b>' + V.fmtDate(e.date) + '</b></td><td>' + EN(e.name) + '</td><td class="nw">' + V.fyLabel(e.fy) + '</td><td class="vp-r nw">' + f(e.amt) + '</td><td><span class="vp-chip ' + st + '">' + PSL[st] + '</span></td><td class="nw"><button type="button" class="tbs" data-vp="paid" data-i="' + e.index + '" data-d="' + e.date + '" data-v="' + (e.paid ? 0 : 1) + '" aria-label="' + (e.paid ? 'Mark unpaid' : 'Mark paid') + ' ' + esc(e.name) + ' ' + e.date + '">' + (e.paid ? 'Undo' : 'Mark paid') + '</button></td></tr>'; }).join('') + '</table></div>'
-        + (ev.length > shown.length ? '<div class="vp-more"><button type="button" class="tbs" data-vp="prmore">Show more (' + (ev.length - shown.length) + ' left)</button></div>' : '')
-        : '<div class="em">No premiums match this filter.</div>') + '</div>';
-    return html;
-  }
-
-  /* ---------- MATURITY ---------- */
-  function pMat() {
-    var P = sorted(), t = today(), top = head('Maturity', 'When each policy matures and what it is worth in all.', addBtn());
-    if (!P.length) return top + empty();
-    var R = P.map(function (o) { return { o: o, m: V.maturity(o.x), T: V.totals(o.x), st: V.status(o.x, t) }; }).filter(function (r) { return r.m; })
-      .sort(function (a, b) { return a.m.date < b.m.date ? -1 : a.m.date > b.m.date ? 1 : a.o.i - b.o.i; });
-    var live = R.filter(function (r) { return r.m.date > t; }), s = V.summary(), end = addYear(t);
-    var in12 = live.filter(function (r) { return r.m.date <= end; });
-    var html = top + '<div class="vp-kpis">' + kpi('Next maturity', live[0] ? V.fmtDate(live[0].m.date) : '\u2014', live[0] ? EN(live[0].o.x.name) + (live[0].m.amount > 0 ? ' · ' + f(live[0].m.amount) : '') : 'None upcoming')
-      + kpi('Maturing in 12 months', String(in12.length), in12.length ? f(in12.reduce(function (a, r) { return a + r.m.amount; }, 0)) + ' lump sums' : 'Nothing matures soon')
-      + kpi('Maturity amounts to come', f(live.reduce(function (a, r) { return a + r.m.amount; }, 0)), plural(live.length, 'policy', 'policies') + ' still to mature')
-      + kpi('Matured', String(s.byStatus.matured), 'Policies past their maturity date') + '</div>';
-    html += '<div class="vp-card"><div class="vp-h"><h2>Maturity details</h2></div><div class="vp-tw"><table class="vp-t" aria-label="Maturity details"><tr><th>Policy</th><th>Status</th><th>Maturity date</th><th>Term</th><th class="vp-r">Maturity amount</th><th class="vp-r">Regular payouts</th><th class="vp-r">Total benefit</th><th class="vp-r">Premiums</th><th class="vp-r">Net gain</th></tr>'
-      + R.map(function (r) {
-          var x = r.o.x, begin = [x.start, x.prem && x.prem.start].filter(Boolean).sort()[0], span = Math.max(1, days(begin, r.m.date)), pct = Math.max(0, Math.min(100, days(begin, t) / span * 100)), left = days(t, r.m.date);
-          return '<tr><td><b>' + EN(x.name) + '</b>' + (x.insurer ? '<div class="mu">' + EN(x.insurer) + '</div>' : '') + '</td><td>' + chip(r.st) + '</td><td class="nw"><b>' + V.fmtDate(r.m.date) + '</b><div class="mu">' + (left > 0 ? (left > 365 ? (left / 365.25).toFixed(1) + ' years left' : plural(left, 'day') + ' left') : 'Matured') + '</div></td>'
-            + '<td><div class="vp-prog" role="img" aria-label="' + Math.round(pct) + '% of the term has passed"><i style="width:' + pct.toFixed(0) + '%"></i></div><div class="mu">' + plural(x.yrs, 'year') + '</div></td><td class="vp-r nw">' + (r.m.amount > 0 ? f(r.m.amount) : '\u2014') + '</td><td class="vp-r nw">' + (r.T.pay > 0 ? f(r.T.pay) : '\u2014') + '</td><td class="vp-r nw"><b>' + f(r.m.benefit) + '</b></td><td class="vp-r nw">' + (r.m.hasPremium ? f(r.m.premiums) : '\u2014') + '</td><td class="vp-r nw">' + (r.m.hasPremium ? '<b>' + f(r.m.net) + '</b>' : '\u2014') + '</td></tr>'; }).join('')
-      + '</table></div><p class="mu" style="margin:8px 0 0">Maturity is one period after the last regular payout (start date + duration). Net gain is the total benefit minus all premiums, shown when premiums are recorded.</p></div>';
-    return html;
-  }
-
-  /* ---------- PAYOUTS (schedules) ---------- */
-  function pPay() {
-    var t = today(), top = head('Payouts', 'Every payout and maturity amount, with its date and status.', addBtn());
-    if (!V.count()) return top + empty();
-    var s = V.summary(), all = V.events({ kinds: ['payout', 'lump'] });
-    var html = top + '<div class="vp-kpis">' + kpi('Received so far', f(s.payReceived), 'Payouts and maturity dated up to today')
-      + kpi('Still to receive', f(s.payToCome), s.nextPayout ? 'Next ' + f(s.nextPayout.amt) + ' on ' + V.fmtDate(s.nextPayout.date) : 'Nothing scheduled')
-      + kpi('Regular payouts', f(s.payRegular), 'In all') + kpi('Maturity lump sums', f(s.payLump), 'In all') + '</div>';
-    html += '<div class="seg" role="group" aria-label="Payout view" style="margin-bottom:12px">' + [['events', 'All payouts'], ['fy', 'By financial year']].map(function (k) { return '<button type="button" data-vp="pyview" data-t="' + k[0] + '" aria-pressed="' + (ST.pyV === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>';
-    if (ST.pyV === 'fy') {
-      var m = {}; all.forEach(function (e) { var r = m[e.fy] || (m[e.fy] = { fy: e.fy, pay: 0, lump: 0, got: 0, left: 0 }); if (e.kind === 'lump') r.lump += e.amt; else r.pay += e.amt; if (e.date <= t) r.got += e.amt; else r.left += e.amt; });
-      var rows = Object.keys(m).map(Number).sort(function (a, b) { return a - b; }).map(function (k) { return m[k]; }), tt = { pay: 0, lump: 0, got: 0, left: 0 };
-      rows.forEach(function (r) { tt.pay += r.pay; tt.lump += r.lump; tt.got += r.got; tt.left += r.left; });
-      return html + '<div class="vp-card"><div class="vp-h"><h2>Payouts by financial year</h2></div><div class="vp-tw"><table class="vp-t" aria-label="Payouts by financial year"><tr><th>Financial year</th><th class="vp-r">Regular payouts</th><th class="vp-r">Maturity</th><th class="vp-r">Total</th><th class="vp-r">Received</th><th class="vp-r">To come</th></tr>'
-        + rows.map(function (r) { return '<tr><td class="nw"><b>' + V.fyLabel(r.fy) + '</b></td><td class="vp-r nw">' + (r.pay ? f(r.pay) : '') + '</td><td class="vp-r nw">' + (r.lump ? f(r.lump) : '') + '</td><td class="vp-r nw"><b>' + f(r.pay + r.lump) + '</b></td><td class="vp-r nw">' + (r.got ? f(r.got) : '') + '</td><td class="vp-r nw">' + (r.left ? f(r.left) : '') + '</td></tr>'; }).join('')
-        + '<tr class="t"><td>Total</td><td class="vp-r">' + f(tt.pay) + '</td><td class="vp-r">' + f(tt.lump) + '</td><td class="vp-r">' + f(tt.pay + tt.lump) + '</td><td class="vp-r">' + f(tt.got) + '</td><td class="vp-r">' + f(tt.left) + '</td></tr></table></div></div>';
-    }
-    var ev = all.filter(function (e) {
-      return (ST.pyP === 'all' || String(e.index) === ST.pyP) && (ST.pyK === 'all' || e.kind === ST.pyK) && (ST.pyS === 'all' || (ST.pyS === 'received' ? e.date <= t : e.date > t));
-    }), shown = ev.slice(0, ST.pyN);
-    html += '<div class="vp-card"><div class="vp-h"><h2>Payout schedule</h2><button type="button" class="tbs" data-vp="paycsv">Export CSV</button></div><div class="vp-tools"><select id="vp-pyP" aria-label="Policy">' + polOpts(ST.pyP) + '</select>'
-      + '<select id="vp-pyK" aria-label="Type">' + [['all', 'Payouts and maturity'], ['payout', 'Regular payouts'], ['lump', 'Maturity only']].map(function (k) { return '<option value="' + k[0] + '"' + (ST.pyK === k[0] ? ' selected' : '') + '>' + k[1] + '</option>'; }).join('') + '</select>'
-      + '<select id="vp-pyS" aria-label="Status">' + [['all', 'Received and upcoming'], ['received', 'Received'], ['upcoming', 'Upcoming']].map(function (k) { return '<option value="' + k[0] + '"' + (ST.pyS === k[0] ? ' selected' : '') + '>' + k[1] + '</option>'; }).join('') + '</select></div>'
-      + (shown.length ? '<div class="vp-tw"><table class="vp-t" aria-label="Payout schedule"><tr><th>Date</th><th>Financial year</th><th>Policy</th><th>Type</th><th class="vp-r">Amount</th><th>Status</th></tr>'
-        + shown.map(function (e) { return '<tr><td class="nw"><b>' + V.fmtDate(e.date) + '</b></td><td class="nw">' + V.fyLabel(e.fy) + '</td><td>' + EN(e.name) + '</td><td>' + (e.kind === 'lump' ? 'Maturity lump sum' : 'Payout') + '</td><td class="vp-r nw"><b>' + f(e.amt) + '</b></td><td><span class="vp-chip ' + (e.date <= t ? 'paid' : 'upcoming') + '">' + (e.date <= t ? 'Received' : 'Upcoming') + '</span></td></tr>'; }).join('') + '</table></div>'
-        + (ev.length > shown.length ? '<div class="vp-more"><button type="button" class="tbs" data-vp="pymore">Show more (' + (ev.length - shown.length) + ' left)</button></div>' : '') : '<div class="em">No payouts match this filter.</div>') + '</div>';
-    return html;
-  }
-  function payCsv() {
-    var t = today(); return toCsv([['Date', 'Financial year', 'Policy', 'Type', 'Amount', 'Status']].concat(V.events({ kinds: ['payout', 'lump'] }).map(function (e) {
-      return [e.date, V.fyLabel(e.fy), e.name, e.kind === 'lump' ? 'Maturity lump sum' : 'Payout', e.amt, e.date <= t ? 'Received' : 'Upcoming']; })));
-  }
 
   /* ---------- REPORTS ---------- */
   var REPS = [['payout', 'Policy Payout Details'], ['fy', 'Premiums & Payouts by Year'], ['mat', 'Maturity Report'], ['sum', 'Policy Summary']];
@@ -447,12 +312,8 @@
       case 'gtog': ST.gc[b.dataset.g] = !ST.gc[b.dataset.g]; listRefresh(); { var nb = document.querySelector('[data-vp="gtog"][data-g="' + b.dataset.g + '"]'); if (nb) nb.focus(); } break;
       case 'paid': if (V.setPaid(i, b.dataset.d, b.dataset.v === '1')) { refresh(); redrawPremDlg(); } break;
       case 'paidall': { var n = V.markPaidUpTo(i, today()); toast(n ? plural(n, 'premium') + ' marked as paid' : 'Nothing to mark'); refresh(); redrawPremDlg(); break; }
-      case 'prmore': ST.prN += 60; refresh(); break;
-      case 'pymore': ST.pyN += 60; refresh(); break;
-      case 'pyview': ST.pyV = b.dataset.t; refresh(); break;
       case 'rtype': ST.rep = b.dataset.t; refresh(); break;
       case 'csv': text(REPS.filter(function (k) { return k[0] === ST.rep; })[0][1] + ' CSV', repCsv()); break;
-      case 'paycsv': text('Payout schedule CSV', payCsv()); break;
     }
   }
   document.addEventListener('click', function (e) {
@@ -474,8 +335,7 @@
       var selected = Array.from(document.querySelectorAll('[data-vpclient="' + t.dataset.vpclient + '"]:checked')).map(function (x) { return x.value; });
       V.setClients(t.dataset.vpclient, selected); render(); return;
     }
-    var m = { 'vp-sf': ['sf'], 'vp-prP': ['prP'], 'vp-prS': ['prS'], 'vp-pyP': ['pyP'], 'vp-pyK': ['pyK'], 'vp-pyS': ['pyS'] }[t.id];
-    if (m) { ST[m[0]] = t.value; if (t.id === 'vp-prP' || t.id === 'vp-prS') ST.prN = 60; if (t.id.indexOf('vp-py') === 0) ST.pyN = 60; refresh(); }
+    if (t.id === 'vp-sf') { ST.sf = t.value; refresh(); }
   });
 
   /* register with the app: it adds the Policies tab, and shows our bar, page and bottom navigation on it */
