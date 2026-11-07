@@ -50,15 +50,10 @@
       }).join('') : '<p class="mu">No ' + title + ' clients are available yet.</p>') + '</div>';
   }
   function sharing() {
-    var p = V.clients().filter(function (c) { return c.active; })[0], sh = p && p.share || {};
-    var sw = function (who, title, what) {
-      var n = (sh[who] || []).length, all = V.plannerClients(who).length;
-      return '<div class="vp-sw2"><label class="vp-sw"><input type="checkbox" data-vpset="' + who + '" ' + (V.usedBy(who) ? 'checked' : '') + '><span><b>' + title + '</b><small>' + what + '</small><small class="vp-cnt">' + n + ' of ' + plural(all, 'client') + ' selected</small></span></label>'
-        + '<details class="vp-pick" data-pk="' + who + '"' + (ST.pk[who] ? ' open' : '') + '><summary>Choose clients</summary>' + shareClients(who, title) + '</details></div>';
-    };
-    return '<div class="vp-card" id="vp-share"><div class="vp-shl"><h2>Use policy data in other modules</h2><p class="mu">Other modules read your policies only when you allow it here. Premiums are never passed on.</p></div>'
-      + sw('goal', 'Goal Planner', 'Adds payouts to the Annual and Monthly Portfolio Projection reports.')
-      + sw('retirement', 'Retirement Planner', 'Counts future payouts as fixed income, which lowers the money you need today.') + '</div>';
+    var tg = function (who, title) { return '<label class="vp-tg"><input type="checkbox" data-vpset="' + who + '" ' + (V.usedBy(who) ? 'checked' : '') + '><span>' + title + '</span></label>'; };
+    return '<div class="vp-card" id="vp-share"><div class="vp-sr1"><b>Share with planners</b>' + tg('goal', 'Goal') + tg('retirement', 'Retirement') + '<span class="vp-sp"></span>'
+      + '<button type="button" class="tbs" data-vp="pick" aria-expanded="' + !!ST.pk.all + '">Choose clients</button></div>'
+      + (ST.pk.all ? '<div class="vp-picks">' + shareClients('goal', 'Goal Planner') + shareClients('retirement', 'Retirement Planner') + '</div>' : '') + '</div>';
   }
 
   /* ---------- shell: top bar, bottom navigation, page router ---------- */
@@ -71,13 +66,12 @@
       return '<button type="button" data-vpp="' + p[0] + '"' + (ST.page === p[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + p[2] + '</span><span>' + p[1] + '</span></button>'; }).join('') + '</div>';
   }
   function clientBar() {
-    var L = V.clients(), active = L.filter(function (c) { return c.active; })[0], n = V.list().length, nm = active ? active.name : '';
+    var L = V.clients(), active = L.filter(function (c) { return c.active; })[0], nm = active ? active.name : '';
     var ini = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || 'P';
-    var meta = plural(n, 'policy', 'policies') + (n ? ' \u00b7 ' + f(V.summary().payRegular + V.summary().payLump) + ' expected' : '');
-    return '<div class="vp-banner"><span class="vp-av" aria-hidden="true">' + esc(ini) + '</span><div class="vp-bt"><div class="vp-eb">Policy plan prepared for</div><div class="vp-bn"><label for="vp-client" class="vp-sr">Policy client</label><select id="vp-client" aria-label="Policy client">'
+    return '<div class="vp-top"><span class="vp-av" aria-hidden="true">' + esc(ini) + '</span><label for="vp-client" class="vp-sr">Policy client</label><select id="vp-client" aria-label="Policy client">'
       + L.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.active ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('')
-      + '</select><span class="mu">' + esc(meta) + '</span></div></div><div class="vp-bb"><button type="button" class="tbs" data-vpc="add">Add client</button>'
-      + (active ? '<button type="button" class="tbs" data-vpc="rename">Rename</button>' : '') + '<span class="vp-live">Live</span><span class="mu">' + esc(V.fmtDate(today())) + '</span></div></div>';
+      + '</select><details class="vp-more vp-cm"><summary aria-label="Client options">\u22ef</summary><div class="vp-menu"><button type="button" data-vpc="add">Add client</button>' + (active ? '<button type="button" data-vpc="rename">Rename</button>' : '') + '</div></details>'
+      + '<span class="vp-sp"></span>' + (ST.page === 'list' && V.list().length ? addBtn() : '') + '</div>';
   }
   function body() {
     switch (ST.page) {
@@ -90,29 +84,25 @@
 
   /* ---------- POLICIES (management) ---------- */
   function pList() {
-    var P = sorted(), t = today(), q = ST.q.trim().toLowerCase();
+    var P = sorted(), t = today(), q = ST.q.trim().toLowerCase(), out = '<h1 class="vp-sr">Policies</h1>';
+    if (!P.length) return out + empty() + sharing();
+    var cnt = {}; P.forEach(function (o) { var k = V.status(o.x, t); cnt[k] = (cnt[k] || 0) + 1; });
+    if (ST.sf !== 'all' && !cnt[ST.sf]) ST.sf = 'all';
     var L = P.filter(function (o) {
       if (ST.sf !== 'all' && V.status(o.x, t) !== ST.sf) return false;
       return !q || [o.x.name, o.x.insurer, o.x.no, o.x.note].join(' ').toLowerCase().indexOf(q) > -1;
     });
-    var tp = L.reduce(function (a, o) { return a + V.totals(o.x).pay; }, 0), tl = L.reduce(function (a, o) { return a + V.totals(o.x).lump; }, 0);
-    var tools = '<div class="vp-tools"><input type="search" id="vp-q" placeholder="Search name, insurer, policy number\u2026" aria-label="Search policies" value="' + esc(ST.q) + '">'
-      + '<select id="vp-sf" aria-label="Filter by status"><option value="all">All statuses</option>' + Object.keys(V.STATUS).map(function (k) { return '<option value="' + k + '"' + (ST.sf === k ? ' selected' : '') + '>' + esc(V.STATUS[k]) + '</option>'; }).join('') + '</select>'
-      + '</div>';
-    var sub = P.length ? plural(P.length, 'policy', 'policies') + ' · ' + f(tp) + ' regular payouts' + (tl ? ' + ' + f(tl) + ' maturity' : '') : 'Add the insurance policies you hold.';
-    var out = head('Policies', esc(sub), (P.length ? '<button type="button" class="tbs" data-vp="grp" aria-pressed="' + ST.grp + '">' + (ST.grp ? 'Ungroup' : 'Group by frequency') + '</button>' : '') + addBtn());
-    if (!P.length) return out + empty() + sharing();
-    return out + tools + '<div id="vp-list">' + listBody(L, P.length) + '</div>' + sharing();
+    var lab = { paying: 'Paying', payout: 'Payout', upcoming: 'Upcoming', matured: 'Matured' };
+    var chips = [['all', 'All', P.length]].concat(Object.keys(V.STATUS).filter(function (k) { return cnt[k]; }).map(function (k) { return [k, lab[k] || V.STATUS[k], cnt[k]]; }));
+    var s = V.summary(), np = s.nextPayout, box = function (k, v) { return '<div class="vp-st3"><span>' + k + '</span><b>' + v + '</b></div>'; };
+    var stats = '<div class="vp-stats">' + box('Total back', f(s.payRegular + s.payLump)) + box('Premium / year', s.premTotal > 0 ? f(s.annualPremium) : '\u2014') + box('Next payout', np ? V.fmtDate(np.date) : '\u2014') + '</div>';
+    var tools = '<div class="vp-tools"><input type="search" id="vp-q" placeholder="Search" aria-label="Search policies" value="' + esc(ST.q) + '"><div class="vp-chips" role="group" aria-label="Filter by status">'
+      + chips.map(function (c) { return '<button type="button" class="vp-chipb" data-vp="sf" data-v="' + c[0] + '" aria-pressed="' + (ST.sf === c[0]) + '">' + c[1] + ' <small>' + c[2] + '</small></button>'; }).join('') + '</div></div>';
+    return out + stats + tools + '<div id="vp-list">' + listBody(L, P.length) + '</div>' + sharing();
   }
   function listBody(L, all) {
     if (!L.length) return '<div class="card"><div class="em">No policy matches. Clear the search or the status filter.</div></div>';
     var t = today();
-    var bt = function (o) {
-      return '<div class="vp-acts">' + '<button type="button" class="tbs hp-act-icon vp-ai" data-vp="sched" data-i="' + o.i + '" aria-label="Payout schedule of ' + esc(o.x.name) + '" title="Payout schedule of">' + ic('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>') + '</button>' + (o.x.prem ? '<button type="button" class="tbs hp-act-icon vp-ai" data-vp="premsch" data-i="' + o.i + '" aria-label="Premiums of ' + esc(o.x.name) + '" title="Premiums of">' + ic('<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/>') + '</button>' : '') + '<button type="button" class="tbs hp-act-icon vp-ai" data-vp="edit" data-i="' + o.i + '" aria-label="Edit ' + esc(o.x.name) + '" title="Edit">' + ic('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>') + '</button>' + '<button type="button" class="tbs hp-act-icon vp-ai d" data-vp="del" data-i="' + o.i + '" aria-label="Delete ' + esc(o.x.name) + '" title="Delete">' + ic('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>') + '</button>' + '</div>'; };
-    var nm = function (o) {
-      return '<div class="nm"><div><b>' + EN(o.x.name) + '</b><div>' + chip(V.status(o.x, t)) + (o.x.amt > 0 ? ' <span class="pill" style="--c:#7c3aed">' + esc(fl(o.x.freq)) + '</span>' : '') + '</div>'
-        + (o.x.insurer || o.x.no ? '<div class="mu tsx">' + EN([o.x.insurer, o.x.no && ('No. ' + o.x.no)].filter(Boolean).join(' · ')) + '</div>' : '') + (o.x.note ? '<div class="mu tsx">' + EN(o.x.note) + '</div>' : '') + '</div></div>'; };
-    var lump = function (x) { var m = V.maturity(x); return x.lump > 0 ? f(x.lump) + '<br><span class="mu">on ' + V.fmtDate(m.date) + '</span>' : (m ? '<span class="mu">ends ' + V.fmtDate(m.date) + '</span>' : '\u2014'); };
     var tot = function (o) { var T = V.totals(o.x); return T.pay + T.lump; };
     var key = function (o) { return o.x.amt > 0 ? o.x.freq : 'none'; };
     var grouped = function (fn, kind) {
@@ -129,35 +119,32 @@
       });
       return out;
     };
-    /* Option B: one card per policy, with a timeline of its life (premiums -> payouts -> maturity) */
+    /* one card per policy: status, total, a Pay -> Get -> Mature timeline, one main button and a menu */
     var dn = function (d) { var q = V.pDate(d); return q ? Date.UTC(q.y, q.mo - 1, q.d) / 864e5 : null; };
     var dy = function (d, n) { var q = V.pDate(d); return q ? Date.UTC(q.y + n, q.mo - 1, q.d) / 864e5 : null; };
+    var yr = function (d) { return String(d).slice(0, 4); };
     var timeline = function (x, m) {
       var q = x.prem, pS = q ? dn(q.start) : null, pE = q ? (q.freq === 'single' ? pS : dy(q.start, q.yrs)) : null;
       var aS = x.amt > 0 ? dn(x.start) : null, aE = x.amt > 0 ? dy(x.start, x.yrs) : null, mD = m ? dn(m.date) : null;
       var pts = [pS, pE, aS, aE, mD].filter(function (v) { return v != null; }); if (!pts.length) return '';
       var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), sp = hi - lo || 1;
       var seg = function (a, b, c) { return a == null ? '' : '<i class="' + c + '" style="left:' + ((a - lo) / sp * 100).toFixed(2) + '%;width:' + Math.max((b - a) / sp * 100, 1.5).toFixed(2) + '%"></i>'; };
-      var key = function (c, t, d) { return '<span><i class="vp-dot ' + c + '" aria-hidden="true"></i>' + t + ' ' + V.fmtDate(d) + '</span>'; };
-      return '<div><div class="vp-tl" role="img" aria-label="Timeline of ' + esc(x.name) + ': premiums, payouts and maturity">' + seg(pS, pE, 'pm') + seg(aS, aE, 'po') + (mD != null ? seg(mD, mD, 'mt') : '') + '</div>'
-        + '<div class="vp-tll">' + (q ? key('pm', 'Premiums from', q.start) : '') + (aS != null ? key('po', 'Payouts from', x.start) : '') + (m ? key('mt', x.lump > 0 ? 'Maturity' : 'Ends', m.date) : '') + '</div></div>';
+      var lb = function (c, t, d) { return '<span title="' + esc(V.fmtDate(d)) + '"><i class="vp-dot ' + c + '" aria-hidden="true"></i>' + t + ' ' + yr(d) + '</span>'; };
+      return '<div><div class="vp-tl" role="img" aria-label="Timeline of ' + esc(x.name) + ': pay, get, mature">' + seg(pS, pE, 'pm') + seg(aS, aE, 'po') + (mD != null ? seg(mD, mD, 'mt') : '') + '</div>'
+        + '<div class="vp-tll">' + (q ? lb('pm', 'Pay', q.start) : '') + (aS != null ? lb('po', 'Get', x.start) : '') + (m ? lb('mt', x.lump > 0 ? 'Mature' : 'End', m.date) : '') + '</div></div>';
     };
-    var btB = function (o) {
-      var a = function (act, label, cls) { return '<button type="button" class="tbs ' + (cls || '') + '" data-vp="' + act + '" data-i="' + o.i + '" aria-label="' + label + ' ' + esc(o.x.name) + '">' + label + '</button>'; };
-      return '<div class="vp-btns">' + a('sched', 'Payouts') + (o.x.prem ? a('premsch', 'Premiums') : '') + a('edit', 'Edit') + a('del', 'Delete', 'd') + '</div>';
-    };
+    var STW = { paying: 'Paying', payout: 'Payout', upcoming: 'Upcoming', matured: 'Matured' };
     var rowB = function (o) {
-      var T = V.totals(o.x), m = V.maturity(o.x), dash = '<span class="mu">\u2014</span>';
-      return '<article class="vp-pc"><div class="vp-pc-h">' + nm(o) + '<div class="vv"><b>' + f(T.pay + T.lump) + '</b><div class="mu">Total expected</div></div></div>'
-        + timeline(o.x, m)
-        + '<div class="vp-3"><div class="pm"><span>Premium</span><b>' + (o.x.prem ? esc(premLine(o.x)) : dash) + '</b></div>'
-        + '<div class="po"><span>Payout</span><b>' + (o.x.amt > 0 ? f(o.x.amt) + ' ' + esc(fl(o.x.freq)).toLowerCase() + '</b><small>' + plural(T.count, 'payout') + ' from ' + V.fmtDate(o.x.start) + '</small>' : dash + '</b>') + '</div>'
-        + '<div class="mt"><span>Maturity</span><b>' + (o.x.lump > 0 && m ? f(o.x.lump) + '</b><small>on ' + V.fmtDate(m.date) + '</small>' : dash + '</b>') + '</div></div>'
-        + btB(o) + '</article>';
+      var T = V.totals(o.x), m = V.maturity(o.x), st = V.status(o.x, t), i = o.i, nmx = esc(o.x.name);
+      var b = function (act, label, cls) { return '<button type="button"' + (cls ? ' class="' + cls + '"' : '') + ' data-vp="' + act + '" data-i="' + i + '">' + label + '</button>'; };
+      var main = o.x.amt > 0 || o.x.lump > 0 || !o.x.prem ? 'sched' : 'premsch';
+      return '<article class="vp-pc"><div class="vp-pc-h"><div><h3>' + EN(o.x.name) + '</h3><span class="vp-sttx ' + st + '">' + esc(STW[st] || V.STATUS[st]) + '</span>' + (o.x.insurer ? '<div class="mu">' + EN(o.x.insurer) + '</div>' : '') + '</div>'
+        + '<div class="vv"><b>' + f(T.pay + T.lump) + '</b><div class="mu">Total back</div></div></div>' + timeline(o.x, m)
+        + '<div class="vp-foot"><button type="button" class="tbs" data-vp="' + main + '" data-i="' + i + '" aria-label="Schedule of ' + nmx + '">Schedule</button>'
+        + '<details class="vp-more"><summary aria-label="More actions for ' + nmx + '">\u22ef</summary><div class="vp-menu">'
+        + (main === 'sched' && o.x.prem ? b('premsch', 'Premiums') : '') + (main === 'premsch' ? b('sched', 'Payouts') : '') + b('edit', 'Edit') + b('del', 'Delete', 'd') + '</div></details></div></article>';
     };
-    var tl = L.reduce(function (a, o) { return a + V.totals(o.x).lump; }, 0), tp = L.reduce(function (a, o) { return a + V.totals(o.x).pay; }, 0);
-    return '<div class="vp-cards" id="pol">' + grouped(rowB, 'c').join('') + '</div><p class="vp-tot"><b>Total (' + L.length + (L.length !== all ? ' of ' + all : '') + ')</b> \u00b7 ' + f(tp + tl) + ' expected \u00b7 ' + f(tp) + ' regular payouts' + (tl ? ' + ' + f(tl) + ' maturity' : '') + '</p>';
-  }
+    return '<div class="vp-cards" id="pol">' + grouped(rowB, 'c').join('') + '</div>';  }
 
   /* ---------- premium status helpers (used by the premium schedule dialog on the Policies page) ---------- */
   var PSL = { paid: 'Paid', overdue: 'Overdue', soon: 'Due soon', upcoming: 'Upcoming' };
@@ -332,6 +319,8 @@
       case 'premsch': premsch(i); break;
       case 'del': { var x = V.get(i); if (!x) return; confirmBox('Delete policy \u201c' + x.name + '\u201d? Its premiums, payouts and maturity will be removed from every report and forecast.', function () { var u = undoer(); V.remove(i); refresh(); toast('Policy deleted', u); }); break; }
       case 'grp': ST.grp = !ST.grp; refresh(); break;
+      case 'sf': ST.sf = b.dataset.v; refresh(); break;
+      case 'pick': ST.pk.all = !ST.pk.all; refresh(); break;
       case 'gtog': ST.gc[b.dataset.g] = !ST.gc[b.dataset.g]; listRefresh(); { var nb = document.querySelector('[data-vp="gtog"][data-g="' + b.dataset.g + '"]'); if (nb) nb.focus(); } break;
       case 'paid': if (V.setPaid(i, b.dataset.d, b.dataset.v === '1')) { refresh(); redrawPremDlg(); } break;
       case 'paidall': { var n = V.markPaidUpTo(i, today()); toast(n ? plural(n, 'premium') + ' marked as paid' : 'Nothing to mark'); refresh(); redrawPremDlg(); break; }
@@ -340,12 +329,13 @@
     }
   }
   document.addEventListener('click', function (e) {
+    Array.prototype.forEach.call(document.querySelectorAll('.vp-more[open]'), function (d) { if (!d.contains(e.target)) d.open = false; });
     var b = e.target.closest && e.target.closest('[data-vp],[data-vpp],[data-vpc]'); if (!b) return;
+    var mn = b.closest && b.closest('.vp-more'); if (mn) mn.open = false;
     if (b.dataset.vpc) { clientForm(b.dataset.vpc); return; }
     if (b.dataset.vpp) { if (typeof UI !== 'undefined' && UI.tab === TAB) go(b.dataset.vpp); return; }
     act(b.dataset.vp, b);
   });
-  document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.classList && d.classList.contains('vp-pick')) ST.pk[d.dataset.pk] = d.open; }, true);
   document.addEventListener('input', function (e) {
     var t = e.target; if (!t || !t.id) return;
     if (t.id === 'vp-q') { ST.q = t.value; listRefresh(); }
@@ -359,7 +349,6 @@
       var selected = Array.from(document.querySelectorAll('[data-vpclient="' + t.dataset.vpclient + '"]:checked')).map(function (x) { return x.value; });
       V.setClients(t.dataset.vpclient, selected); render(); return;
     }
-    if (t.id === 'vp-sf') { ST.sf = t.value; refresh(); }
   });
 
   /* register with the app: it adds the Policies tab, and shows our bar, page and bottom navigation on it */

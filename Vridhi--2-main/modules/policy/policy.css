@@ -171,3 +171,36 @@ html body .vp-pills{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 html body .vp-pills button{min-height:40px;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--tx);font-size:13.5px;font-weight:600;cursor:pointer}
 html body .vp-pills button[aria-pressed=true]{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
 html body #vp-pg .vp-card .vp-h h2{border-left:4px solid var(--ac);padding-left:10px}
+
+/* Policies page · final layout: switcher, three numbers, chips, cards, slim share row */
+html body .vp-sp{flex:1}
+html body .vp-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px}
+html body .vp-top .vp-av{width:40px;height:40px}
+html body #vp-client{min-height:44px;min-width:200px;max-width:100%;border-radius:10px}
+html body #vp-pg #padd{min-height:44px}
+html body .vp-more{position:relative;display:inline-block}
+html body .vp-more summary{list-style:none;min-width:44px;min-height:44px;display:grid;place-items:center;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);cursor:pointer;font-size:20px;font-weight:700}
+html body .vp-more summary::-webkit-details-marker{display:none}
+html body .vp-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:170px;display:flex;flex-direction:column;padding:6px;background:var(--card);border:1px solid var(--bd);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+html body .vp-cm .vp-menu{left:0;right:auto}
+html body .vp-menu button{min-height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--tx);text-align:left;font-size:14px;font-weight:600;cursor:pointer}
+html body .vp-menu button:hover{background:color-mix(in srgb,var(--mu) 12%,var(--card))}html body .vp-menu button.d{color:var(--vp-late)}
+html body .vp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:0 0 16px}
+html body .vp-st3{padding:14px 18px;border:1px solid var(--bd);border-radius:14px;background:var(--card)}
+html body .vp-st3 span{display:block;font-size:12.5px;color:var(--mu)}html body .vp-st3 b{display:block;margin-top:2px;font-size:22px}
+html body .vp-tools input[type=search]{min-height:44px}
+html body .vp-chips{display:flex;gap:8px;flex-wrap:wrap}
+html body .vp-chipb{min-height:40px;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--tx);font-size:13.5px;font-weight:600;cursor:pointer}
+html body .vp-chipb small{margin-left:4px;opacity:.75}
+html body .vp-chipb[aria-pressed=true]{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
+html body .vp-pc-h h3{margin:0 0 2px;font-size:17px}
+html body .vp-sttx{display:inline-block;font-size:12.5px;font-weight:700}html body .vp-sttx:before{content:"\25cf ";font-size:10px}
+html body .vp-sttx.paying{color:var(--vp-prem)}html body .vp-sttx.payout{color:var(--vp-pay)}html body .vp-sttx.upcoming,html body .vp-sttx.matured{color:var(--mu)}
+html body .vp-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+html body .vp-foot .tbs{min-height:44px;padding:0 20px;font-weight:600}
+html body #vp-share{display:block;padding:12px 20px}
+html body .vp-sr1{display:flex;align-items:center;gap:8px 24px;flex-wrap:wrap}
+html body .vp-tg{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px;font-weight:600}html body .vp-tg input{width:20px;height:20px;margin:0}
+html body .vp-sr1 .tbs{min-height:44px;padding:0 18px;font-weight:600}
+html body .vp-picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:10px;padding-top:12px;border-top:1px solid var(--bd)}
+html body .vp-picks .vp-share-clients{padding:0}
