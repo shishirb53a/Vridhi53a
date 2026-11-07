@@ -50,10 +50,16 @@
       }).join('') : '<p class="mu">No ' + title + ' clients are available yet.</p>') + '</div>';
   }
   function sharing() {
-    var tg = function (who, title) { return '<label class="vp-tg"><input type="checkbox" data-vpset="' + who + '" ' + (V.usedBy(who) ? 'checked' : '') + '><span>' + title + '</span></label>'; };
-    return '<div class="vp-card" id="vp-share"><div class="vp-sr1"><b>Share with planners</b>' + tg('goal', 'Goal') + tg('retirement', 'Retirement') + '<span class="vp-sp"></span>'
-      + '<button type="button" class="tbs" data-vp="pick" aria-expanded="' + !!ST.pk.all + '">Choose clients</button></div>'
-      + (ST.pk.all ? '<div class="vp-picks">' + shareClients('goal', 'Goal Planner') + shareClients('retirement', 'Retirement Planner') + '</div>' : '') + '</div>';
+    var p = V.clients().filter(function (c) { return c.active; })[0], sh = p && p.share || {};
+    var col = function (who, title, what) {
+      var n = (sh[who] || []).length, all = V.plannerClients(who).length, open = !!ST.pk[who];
+      return '<div class="vp-pl"><label class="vp-tg"><input type="checkbox" data-vpset="' + who + '" ' + (V.usedBy(who) ? 'checked' : '') + '><span class="vp-tx"><b>' + title + '</b><small>' + what + '</small></span></label>'
+        + '<div class="vp-pr"><span class="vp-cnt">' + n + ' of ' + plural(all, 'client') + ' selected</span><button type="button" class="tbs" data-vp="pick" data-w="' + who + '" aria-expanded="' + open + '">' + (open ? 'Hide clients' : 'Choose clients') + '</button></div>'
+        + (open ? '<div class="vp-picks">' + shareClients(who, title) + '</div>' : '') + '</div>';
+    };
+    return '<section class="vp-card" id="vp-share" aria-label="Use policy data in other modules"><div class="vp-shh"><h2>Use policy data in other modules</h2><p>Other modules read your policies only when you allow it here. Premiums are never passed on.</p></div>'
+      + '<div class="vp-shg">' + col('goal', 'Goal Planner', 'Adds payouts to the Annual and Monthly Portfolio Projection reports.')
+      + col('retirement', 'Retirement Planner', 'Counts future payouts as fixed income, which lowers the money you need today.') + '</div></section>';
   }
 
   /* ---------- shell: top bar, bottom navigation, page router ---------- */
@@ -66,12 +72,12 @@
       return '<button type="button" data-vpp="' + p[0] + '"' + (ST.page === p[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + p[2] + '</span><span>' + p[1] + '</span></button>'; }).join('') + '</div>';
   }
   function clientBar() {
-    var L = V.clients(), active = L.filter(function (c) { return c.active; })[0], nm = active ? active.name : '';
+    var L = V.clients(), active = L.filter(function (c) { return c.active; })[0], n = V.list().length, nm = active ? active.name : '';
     var ini = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || 'P';
-    return '<div class="vp-top"><span class="vp-av" aria-hidden="true">' + esc(ini) + '</span><label for="vp-client" class="vp-sr">Policy client</label><select id="vp-client" aria-label="Policy client">'
+    return '<div class="vp-top"><span class="vp-av" aria-hidden="true">' + esc(ini) + '</span><div class="vp-who"><span class="vp-eb">Policy plan prepared for</span><div class="vp-wr"><label for="vp-client" class="vp-sr">Policy client</label><select id="vp-client" aria-label="Policy client">'
       + L.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.active ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('')
-      + '</select><details class="vp-more vp-cm"><summary aria-label="Client options">\u22ef</summary><div class="vp-menu"><button type="button" data-vpc="add">Add client</button>' + (active ? '<button type="button" data-vpc="rename">Rename</button>' : '') + '</div></details>'
-      + '<span class="vp-sp"></span>' + (ST.page === 'list' && V.list().length ? addBtn() : '') + '</div>';
+      + '</select><details class="vp-more vp-cm"><summary aria-label="Client options">\u22ef</summary><div class="vp-menu"><button type="button" data-vpc="add">Add client</button>' + (active ? '<button type="button" data-vpc="rename">Rename</button>' : '') + '</div></details></div></div>'
+      + '<span class="vp-sp"></span><span class="vp-meta">' + plural(n, 'policy', 'policies') + '</span></div>';
   }
   function body() {
     switch (ST.page) {
@@ -84,8 +90,8 @@
 
   /* ---------- POLICIES (management) ---------- */
   function pList() {
-    var P = sorted(), t = today(), q = ST.q.trim().toLowerCase(), out = '<h1 class="vp-sr">Policies</h1>';
-    if (!P.length) return out + empty() + sharing();
+    var P = sorted(), t = today(), q = ST.q.trim().toLowerCase(), out = '';
+    if (!P.length) return head('Policies', 'Add the insurance policies you hold.', '') + empty() + sharing();
     var cnt = {}; P.forEach(function (o) { var k = V.status(o.x, t); cnt[k] = (cnt[k] || 0) + 1; });
     if (ST.sf !== 'all' && !cnt[ST.sf]) ST.sf = 'all';
     var L = P.filter(function (o) {
@@ -94,11 +100,17 @@
     });
     var lab = { paying: 'Paying', payout: 'Payout', upcoming: 'Upcoming', matured: 'Matured' };
     var chips = [['all', 'All', P.length]].concat(Object.keys(V.STATUS).filter(function (k) { return cnt[k]; }).map(function (k) { return [k, lab[k] || V.STATUS[k], cnt[k]]; }));
-    var s = V.summary(), np = s.nextPayout, box = function (k, v) { return '<div class="vp-st3"><span>' + k + '</span><b>' + v + '</b></div>'; };
-    var stats = '<div class="vp-stats">' + box('Total back', f(s.payRegular + s.payLump)) + box('Premium / year', s.premTotal > 0 ? f(s.annualPremium) : '\u2014') + box('Next payout', np ? V.fmtDate(np.date) : '\u2014') + '</div>';
+    var s = V.summary(), np = s.nextPayout, nm = s.nextMaturity, hasP = s.premTotal > 0;
+    var box = function (ico, cls, k, v, sub) { return '<div class="vp-st3"><span class="vp-si ' + cls + '" aria-hidden="true">' + ic(ico) + '</span><div><span class="vp-k2">' + k + '</span><b>' + v + '</b><small>' + sub + '</small></div></div>'; };
+    var stats = '<div class="vp-stats">'
+      + box('<path d="M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7l12-3v3M16 14h2"/>', 'po', 'Total back', f(s.payRegular + s.payLump), f(s.payRegular) + ' payouts + ' + f(s.payLump) + ' maturity')
+      + box('<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/>', 'pm', 'Premium per year', hasP ? f(s.annualPremium) : '\u2014', hasP ? 'Paid ' + f(s.premPaid) + ' of ' + f(s.premTotal) : 'No premiums tracked')
+      + box('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>', 'po', 'Next payout', np ? V.fmtDate(np.date) : '\u2014', np ? f(np.amt) + ' expected' : 'Nothing scheduled')
+      + box('<path d="M5 21V4M5 4h12l-2 4 2 4H5"/>', 'mt', 'Next maturity', nm ? V.fmtDate(nm.date) : '\u2014', nm ? EN(nm.name) + (nm.amount > 0 ? ' \u00b7 ' + f(nm.amount) : '') : 'No upcoming maturity') + '</div>';
     var tools = '<div class="vp-tools"><input type="search" id="vp-q" placeholder="Search" aria-label="Search policies" value="' + esc(ST.q) + '"><div class="vp-chips" role="group" aria-label="Filter by status">'
       + chips.map(function (c) { return '<button type="button" class="vp-chipb" data-vp="sf" data-v="' + c[0] + '" aria-pressed="' + (ST.sf === c[0]) + '">' + c[1] + ' <small>' + c[2] + '</small></button>'; }).join('') + '</div></div>';
-    return out + stats + tools + '<div id="vp-list">' + listBody(L, P.length) + '</div>' + sharing();
+    var S0 = V.summary(), hd = head('Policies', plural(P.length, 'policy', 'policies') + ' \u00b7 ' + f(S0.payRegular) + ' regular payouts' + (S0.payLump ? ' + ' + f(S0.payLump) + ' maturity' : ''), addBtn());
+    return hd + stats + tools + '<div id="vp-list">' + listBody(L, P.length) + '</div>' + sharing();
   }
   function listBody(L, all) {
     if (!L.length) return '<div class="card"><div class="em">No policy matches. Clear the search or the status filter.</div></div>';
@@ -133,16 +145,23 @@
       return '<div><div class="vp-tl" role="img" aria-label="Timeline of ' + esc(x.name) + ': pay, get, mature">' + seg(pS, pE, 'pm') + seg(aS, aE, 'po') + (mD != null ? seg(mD, mD, 'mt') : '') + '</div>'
         + '<div class="vp-tll">' + (q ? lb('pm', 'Pay', q.start) : '') + (aS != null ? lb('po', 'Get', x.start) : '') + (m ? lb('mt', x.lump > 0 ? 'Mature' : 'End', m.date) : '') + '</div></div>';
     };
-    var STW = { paying: 'Paying', payout: 'Payout', upcoming: 'Upcoming', matured: 'Matured' };
+    var STW = { paying: 'Paying premium', payout: 'Payout phase', upcoming: 'Not started', matured: 'Matured' };
     var rowB = function (o) {
-      var T = V.totals(o.x), m = V.maturity(o.x), st = V.status(o.x, t), i = o.i, nmx = esc(o.x.name);
+      var x = o.x, T = V.totals(x), m = V.maturity(x), st = V.status(x, t), i = o.i, nmx = esc(x.name), q = x.prem, dash = '\u2014';
       var b = function (act, label, cls) { return '<button type="button"' + (cls ? ' class="' + cls + '"' : '') + ' data-vp="' + act + '" data-i="' + i + '">' + label + '</button>'; };
-      var main = o.x.amt > 0 || o.x.lump > 0 || !o.x.prem ? 'sched' : 'premsch';
-      return '<article class="vp-pc"><div class="vp-pc-h"><div><h3>' + EN(o.x.name) + '</h3><span class="vp-sttx ' + st + '">' + esc(STW[st] || V.STATUS[st]) + '</span>' + (o.x.insurer ? '<div class="mu">' + EN(o.x.insurer) + '</div>' : '') + '</div>'
-        + '<div class="vv"><b>' + f(T.pay + T.lump) + '</b><div class="mu">Total back</div></div></div>' + timeline(o.x, m)
-        + '<div class="vp-foot"><button type="button" class="tbs" data-vp="' + main + '" data-i="' + i + '" aria-label="Schedule of ' + nmx + '">Schedule</button>'
+      var main = x.amt > 0 || x.lump > 0 || !q ? 'sched' : 'premsch';
+      var fld = function (cls, k, v, sub) { return '<div class="vp-fl ' + cls + '"><span>' + k + '</span><b>' + v + '</b><small>' + sub + '</small></div>'; };
+      var prem = q ? fld('pm', 'Premium', f(q.amt) + ' \u00b7 ' + (q.freq === 'single' ? 'single' : fl(q.freq).toLowerCase()), q.freq === 'single' ? 'On ' + V.fmtDate(q.start) : plural(q.yrs, 'year') + ' from ' + V.fmtDate(q.start)) : fld('pm', 'Premium', dash, 'Not tracked');
+      var pay = x.amt > 0 ? fld('po', 'Payout', f(x.amt) + ' \u00b7 ' + fl(x.freq).toLowerCase(), plural(T.count, 'payout') + ' from ' + V.fmtDate(x.start)) : fld('po', 'Payout', dash, 'None scheduled');
+      var mat = x.lump > 0 && m ? fld('mt', 'Maturity', f(x.lump), 'On ' + V.fmtDate(m.date)) : fld('mt', 'Maturity', dash, m ? 'Ends ' + V.fmtDate(m.date) : 'No maturity');
+      var foot = m && m.hasPremium ? 'Net after premiums <b>' + f(m.net) + '</b>' : plural(T.count, 'payout') + ' scheduled';
+      return '<article class="vp-pc"><div class="vp-pc-h"><div class="vp-pn"><h3>' + EN(x.name) + '</h3><div class="vp-sub2"><span class="vp-sttx ' + st + '">' + esc(STW[st] || V.STATUS[st]) + '</span>'
+        + (x.insurer || x.no ? '<span class="mu">' + EN([x.insurer, x.no && ('No. ' + x.no)].filter(Boolean).join(' \u00b7 ')) + '</span>' : '') + '</div></div>'
+        + '<div class="vv"><span>Total back</span><b>' + f(T.pay + T.lump) + '</b></div></div>' + timeline(x, m)
+        + '<div class="vp-fields">' + prem + pay + mat + '</div>'
+        + '<div class="vp-foot"><span class="mu">' + foot + '</span><div class="vp-fa"><button type="button" class="tbs" data-vp="' + main + '" data-i="' + i + '" aria-label="Schedule of ' + nmx + '">' + ic('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>') + 'Schedule</button>'
         + '<details class="vp-more"><summary aria-label="More actions for ' + nmx + '">\u22ef</summary><div class="vp-menu">'
-        + (main === 'sched' && o.x.prem ? b('premsch', 'Premiums') : '') + (main === 'premsch' ? b('sched', 'Payouts') : '') + b('edit', 'Edit') + b('del', 'Delete', 'd') + '</div></details></div></article>';
+        + (main === 'sched' && q ? b('premsch', 'Premiums') : '') + (main === 'premsch' ? b('sched', 'Payouts') : '') + b('edit', 'Edit') + b('del', 'Delete', 'd') + '</div></details></div></div></article>';
     };
     return '<div class="vp-cards" id="pol">' + grouped(rowB, 'c').join('') + '</div>';  }
 
@@ -320,7 +339,7 @@
       case 'del': { var x = V.get(i); if (!x) return; confirmBox('Delete policy \u201c' + x.name + '\u201d? Its premiums, payouts and maturity will be removed from every report and forecast.', function () { var u = undoer(); V.remove(i); refresh(); toast('Policy deleted', u); }); break; }
       case 'grp': ST.grp = !ST.grp; refresh(); break;
       case 'sf': ST.sf = b.dataset.v; refresh(); break;
-      case 'pick': ST.pk.all = !ST.pk.all; refresh(); break;
+      case 'pick': ST.pk[b.dataset.w] = !ST.pk[b.dataset.w]; refresh(); break;
       case 'gtog': ST.gc[b.dataset.g] = !ST.gc[b.dataset.g]; listRefresh(); { var nb = document.querySelector('[data-vp="gtog"][data-g="' + b.dataset.g + '"]'); if (nb) nb.focus(); } break;
       case 'paid': if (V.setPaid(i, b.dataset.d, b.dataset.v === '1')) { refresh(); redrawPremDlg(); } break;
       case 'paidall': { var n = V.markPaidUpTo(i, today()); toast(n ? plural(n, 'premium') + ' marked as paid' : 'Nothing to mark'); refresh(); redrawPremDlg(); break; }
