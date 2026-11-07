@@ -154,3 +154,20 @@ html body .vp-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
 html body .vp-btns .tbs{min-height:40px;padding:0 14px;font-weight:600}html body .vp-btns .tbs.d{color:var(--vp-late)}
 html body .vp-tot{margin:0 0 14px;font-size:13.5px;color:var(--mu)}html body .vp-tot b{color:var(--tx)}
 @media (max-width:620px){html body .vp-3{grid-template-columns:minmax(0,1fr)}}
+
+/* Option B · page header actions, compact "use in other modules" row, report pills */
+html body #vp-pg .rpr{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+html body #vp-pg .rpr .tbs{min-height:44px;padding:0 16px;font-weight:600}
+html body #vp-share{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-start;padding:18px 20px}
+html body #vp-share .vp-shl{flex:1 1 260px;min-width:0}html body #vp-share .vp-shl h2{font-size:16px}html body #vp-share .vp-shl p{margin:4px 0 0;font-size:13px}
+html body .vp-sw2{flex:1 1 280px;min-width:0}
+html body .vp-sw2 .vp-sw{border-top:0;padding:2px 0 6px}
+html body .vp-sw small{display:block;font-size:12px;line-height:1.4}html body .vp-sw small.vp-cnt{margin-top:2px;font-weight:600;color:var(--tx)}
+html body .vp-pick summary{display:inline-flex;align-items:center;min-height:40px;margin-left:32px;padding:0 14px;border:1px solid var(--bd);border-radius:10px;background:var(--card);font-size:13.5px;font-weight:600;cursor:pointer;list-style:none}
+html body .vp-pick summary::-webkit-details-marker{display:none}
+html body .vp-pick summary:after{content:"\25be";margin-left:8px}html body .vp-pick[open] summary:after{content:"\25b4"}
+html body .vp-pick .vp-share-clients{padding:12px 0 2px 32px}
+html body .vp-pills{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+html body .vp-pills button{min-height:40px;padding:0 16px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--tx);font-size:13.5px;font-weight:600;cursor:pointer}
+html body .vp-pills button[aria-pressed=true]{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
+html body #vp-pg .vp-card .vp-h h2{border-left:4px solid var(--ac);padding-left:10px}

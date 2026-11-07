@@ -9,7 +9,7 @@
   'use strict';
   var V = window.VRPolicy, TAB = 'Policies';
   var PAGES = [['list', 'Policies', '\ud83d\udee1\ufe0f'], ['rep', 'Reports', '\ud83d\udcc4']];
-  var ST = { page: 'list', q: '', grp: false, gc: {}, sf: 'all', rep: 'payout', rq: '' };
+  var ST = { page: 'list', q: '', grp: false, gc: {}, sf: 'all', rep: 'payout', rq: '', pk: {} };
 
   /* ---------- helpers ---------- */
   var $$ = function (id) { return document.getElementById(id); };
@@ -50,11 +50,15 @@
       }).join('') : '<p class="mu">No ' + title + ' clients are available yet.</p>') + '</div>';
   }
   function sharing() {
-    return '<div class="vp-card" id="vp-share"><div class="vp-h"><h2>Use policy data in other modules</h2></div><p class="mu" style="margin:0 0 4px">The Policies module owns all policy data. Other modules read it only when you allow it here. Premiums are never passed on.</p>'
-      + '<label class="vp-sw"><input type="checkbox" data-vpset="goal" ' + (V.usedBy('goal') ? 'checked' : '') + '><span><b>Goal Planner</b><small>Adds payouts as Policy payouts and Total income columns in the Annual and Monthly Portfolio Projection reports, and counts payouts already received in the Summary corpus and allocation.</small></span></label>'
-      + shareClients('goal', 'Goal Planner')
-      + '<label class="vp-sw"><input type="checkbox" data-vpset="retirement" ' + (V.usedBy('retirement') ? 'checked' : '') + '><span><b>Retirement Planner</b><small>Counts future payouts as fixed-rupee income in the year each one arrives, which lowers the money you need today.</small></span></label>'
-      + shareClients('retirement', 'Retirement Planner') + '</div>';
+    var p = V.clients().filter(function (c) { return c.active; })[0], sh = p && p.share || {};
+    var sw = function (who, title, what) {
+      var n = (sh[who] || []).length, all = V.plannerClients(who).length;
+      return '<div class="vp-sw2"><label class="vp-sw"><input type="checkbox" data-vpset="' + who + '" ' + (V.usedBy(who) ? 'checked' : '') + '><span><b>' + title + '</b><small>' + what + '</small><small class="vp-cnt">' + n + ' of ' + plural(all, 'client') + ' selected</small></span></label>'
+        + '<details class="vp-pick" data-pk="' + who + '"' + (ST.pk[who] ? ' open' : '') + '><summary>Choose clients</summary>' + shareClients(who, title) + '</details></div>';
+    };
+    return '<div class="vp-card" id="vp-share"><div class="vp-shl"><h2>Use policy data in other modules</h2><p class="mu">Other modules read your policies only when you allow it here. Premiums are never passed on.</p></div>'
+      + sw('goal', 'Goal Planner', 'Adds payouts to the Annual and Monthly Portfolio Projection reports.')
+      + sw('retirement', 'Retirement Planner', 'Counts future payouts as fixed income, which lowers the money you need today.') + '</div>';
   }
 
   /* ---------- shell: top bar, bottom navigation, page router ---------- */
@@ -94,9 +98,9 @@
     var tp = L.reduce(function (a, o) { return a + V.totals(o.x).pay; }, 0), tl = L.reduce(function (a, o) { return a + V.totals(o.x).lump; }, 0);
     var tools = '<div class="vp-tools"><input type="search" id="vp-q" placeholder="Search name, insurer, policy number\u2026" aria-label="Search policies" value="' + esc(ST.q) + '">'
       + '<select id="vp-sf" aria-label="Filter by status"><option value="all">All statuses</option>' + Object.keys(V.STATUS).map(function (k) { return '<option value="' + k + '"' + (ST.sf === k ? ' selected' : '') + '>' + esc(V.STATUS[k]) + '</option>'; }).join('') + '</select>'
-      + '<button type="button" class="tbs" data-vp="grp" aria-pressed="' + ST.grp + '">' + (ST.grp ? 'Ungroup' : 'Group by frequency') + '</button></div>';
+      + '</div>';
     var sub = P.length ? plural(P.length, 'policy', 'policies') + ' · ' + f(tp) + ' regular payouts' + (tl ? ' + ' + f(tl) + ' maturity' : '') : 'Add the insurance policies you hold.';
-    var out = head('Policies', esc(sub), addBtn());
+    var out = head('Policies', esc(sub), (P.length ? '<button type="button" class="tbs" data-vp="grp" aria-pressed="' + ST.grp + '">' + (ST.grp ? 'Ungroup' : 'Group by frequency') + '</button>' : '') + addBtn());
     if (!P.length) return out + empty() + sharing();
     return out + tools + '<div id="vp-list">' + listBody(L, P.length) + '</div>' + sharing();
   }
@@ -162,11 +166,12 @@
   /* ---------- REPORTS ---------- */
   var REPS = [['payout', 'Policy Payout Details'], ['fy', 'Premiums & Payouts by Year'], ['mat', 'Maturity Report'], ['sum', 'Policy Summary']];
   function pRep() {
-    var top = head('Policy reports', 'Reports built from your policy data. Export any of them as CSV.', '');
+    var csvBtn = '<button type="button" class="p hp-add" id="csv" data-vp="csv">Export CSV</button>';
+    var top = head('Policy reports', 'Reports built from your policy data. Export any of them as CSV.', V.count() ? csvBtn : '');
     if (!V.count()) return top + empty();
-    var search = ST.rep === 'payout' ? '<div class="tb"><input id="vp-rq" type="search" placeholder="Search year or policy\u2026" aria-label="Search policy payout report" value="' + esc(ST.rq) + '"></div>' : '';
-    return top + '<div class="seg" role="group" aria-label="Report type" style="margin-bottom:14px">' + REPS.map(function (k) { return '<button type="button" data-vp="rtype" data-t="' + k[0] + '" aria-pressed="' + (ST.rep === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>'
-      + '<div class="card"><div class="rph2"><h2>' + esc(REPS.filter(function (k) { return k[0] === ST.rep; })[0][1]) + '</h2><button type="button" id="csv" data-vp="csv">Export CSV</button></div>' + search + '<div id="vpr">' + repHtml() + '</div></div>';
+    var search = ST.rep === 'payout' ? '<div class="vp-tools"><input id="vp-rq" type="search" placeholder="Search year or policy\u2026" aria-label="Search policy payout report" value="' + esc(ST.rq) + '"></div>' : '';
+    return top + '<div class="vp-pills" role="group" aria-label="Report type">' + REPS.map(function (k) { return '<button type="button" data-vp="rtype" data-t="' + k[0] + '" aria-pressed="' + (ST.rep === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>'
+      + '<div class="vp-card"><div class="vp-h"><h2>' + esc(REPS.filter(function (k) { return k[0] === ST.rep; })[0][1]) + '</h2></div>' + search + '<div id="vpr">' + repHtml() + '</div></div>';
   }
   function repHtml() {
     var t = today();
@@ -340,6 +345,7 @@
     if (b.dataset.vpp) { if (typeof UI !== 'undefined' && UI.tab === TAB) go(b.dataset.vpp); return; }
     act(b.dataset.vp, b);
   });
+  document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.classList && d.classList.contains('vp-pick')) ST.pk[d.dataset.pk] = d.open; }, true);
   document.addEventListener('input', function (e) {
     var t = e.target; if (!t || !t.id) return;
     if (t.id === 'vp-q') { ST.q = t.value; listRefresh(); }
