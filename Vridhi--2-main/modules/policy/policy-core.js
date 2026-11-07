@@ -57,7 +57,7 @@
     if (p) return p.policies;
     var s = cur(); return s && Array.isArray(s.policies) ? s.policies : [];
   }
-  function plannerClients(s, who) {
+  function plannerClients(who, s) {
     s = s || cur();
     var P = s && (who === 'goal' ? s.gpp : s.fhp);
     return P && P.profiles ? Object.keys(P.profiles).map(function (id) { return { id: id, name: P.profiles[id].name }; }) : [];
@@ -120,7 +120,7 @@
     P.profiles[id].name = nm; persist(); return { ok: true };
   }
   function setClients(who, ids) {
-    var P = policyStore(), p = activeClient(), available = plannerClients(cur(), who);
+    var P = policyStore(), p = activeClient(), available = plannerClients(who);
     if (!P || !p || (who !== 'goal' && who !== 'retirement')) return false;
     var valid = {};
     available.forEach(function (c) { valid[c.id] = true; });
@@ -366,8 +366,8 @@
   }
   function cleanClients(raw, source, s) {
     var out = {}, goalIds = {}, retirementIds = {}, names = {};
-    plannerClients(s, 'goal').forEach(function (c) { goalIds[c.id] = true; });
-    plannerClients(s, 'retirement').forEach(function (c) { retirementIds[c.id] = true; });
+    plannerClients('goal', s).forEach(function (c) { goalIds[c.id] = true; });
+    plannerClients('retirement', s).forEach(function (c) { retirementIds[c.id] = true; });
     function cleanIds(ids, valid) {
       return Array.from(new Set((Array.isArray(ids) ? ids : []).map(String))).filter(function (id) { return valid[id]; });
     }

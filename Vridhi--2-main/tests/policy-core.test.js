@@ -7,8 +7,15 @@ const fs = require('fs'), vm = require('vm'), path = require('path'), assert = r
 const win = { document: { dispatchEvent() {} }, CustomEvent: function () {} }; win.window = win;
 vm.createContext(win);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'modules', 'policy', 'policy-core.js'), 'utf8') + '\n;this.__S=function(v){S=v};', win);
+win.esc = value => String(value);
+const policyUI = fs.readFileSync(path.join(__dirname, '..', 'modules', 'policy', 'policy-ui.js'), 'utf8');
+const shareStart = policyUI.indexOf('function shareClients(who, title) {');
+const shareEnd = policyUI.indexOf('\n  function sharing()', shareStart);
+assert.ok(shareStart >= 0 && shareEnd > shareStart, 'Policy sharing client renderer exists');
+const shareClients = vm.runInContext('(' + policyUI.slice(shareStart, shareEnd) + ')', win);
 vm.runInContext('var S={policies:[],start:2026,polFh:true,polGp:true};this.__setS=function(v){S=v};this.__getS=function(){return S}', win);
 const V = win.VRPolicy; let n = 0;
+win.V = V;
 const t = (name, fn) => { try { fn(); n++; console.log('  ok  ', name); } catch (e) { console.log('  FAIL', name, '\n      ', e.message); process.exitCode = 1; } };
 /* objects made inside the sandbox have another Object prototype, so compare them as JSON (which is what the app stores) */
 const same = (a, b) => assert.strictEqual(JSON.stringify(a), JSON.stringify(b));
@@ -154,5 +161,21 @@ t('new Policy clients start empty and switching isolates their policies', () => 
   assert.ok(V.selectClient(added.id));
   assert.strictEqual(V.count(), 1);
   assert.ok(V.renameClient(added.id, 'Alice S.').ok);
+});
+t('Policies sharing lists existing Goal and Retirement Planner clients', () => {
+  win.__setS({
+    polClients: { active: 'policy-a', profiles: { 'policy-a': {
+      name: 'Policy client', policies: [], enabled: { goal: true, retirement: true },
+      share: { goal: ['goal-a'], retirement: ['ret-a'] }
+    } } },
+    gpp: { active: 'goal-a', profiles: { 'goal-a': { name: 'Goal client' } } },
+    fhp: { active: 'ret-a', profiles: { 'ret-a': { name: 'Retirement client' } } }
+  });
+  const goal = shareClients('goal', 'Goal Planner');
+  const retirement = shareClients('retirement', 'Retirement Planner');
+  assert.ok(goal.includes('Goal client') && goal.includes('value="goal-a"') && goal.includes(' checked'));
+  assert.ok(!goal.includes('No Goal Planner clients are available yet.'));
+  assert.ok(retirement.includes('Retirement client') && retirement.includes('value="ret-a"') && retirement.includes(' checked'));
+  assert.ok(!retirement.includes('No Retirement Planner clients are available yet.'));
 });
 console.log('\n' + n + ' checks passed' + (process.exitCode ? ' (some FAILED)' : ''));
