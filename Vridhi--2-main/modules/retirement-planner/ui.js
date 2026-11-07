@@ -1948,7 +1948,8 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
   /* top bar: client switcher + "+ Add Person" (shown on the Retirement Planner screens) */
   window.fhpBar = function () {
     const el = document.getElementById("fhp"); if (!el) return;
-    if (typeof GP !== "undefined" && typeof UI !== "undefined" && GP.includes(UI.tab) && typeof window.gppBarHTML === "function") { el.hidden = false; el.innerHTML = window.gppBarHTML(true); return; }
+    /* Policies are stored inside the open client's plan (S.policies), so the Client switcher is shown there too, exactly as on the Goal Planner tabs */
+    if (typeof GP !== "undefined" && typeof UI !== "undefined" && (GP.includes(UI.tab) || UI.tab === "Policies") && typeof window.gppBarHTML === "function") { el.hidden = false; el.innerHTML = window.gppBarHTML(true); return; }
     const on = typeof UI !== "undefined" && (UI.tab === "Retirement planner" || UI.tab === "RP Reports");
     const P = on ? fhpEnsure() : null;
     el.hidden = !P; if (!P) return;
