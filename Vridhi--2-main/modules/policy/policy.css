@@ -133,6 +133,12 @@ html body #pfm .vp-tabs{display:flex;gap:2px;border-bottom:1px solid var(--bd);m
 html body #pfm .vp-tab{background:transparent!important;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 14px;color:var(--mu);font-weight:600;white-space:nowrap}
 html body #pfm .vp-tab[aria-selected=true]{color:var(--ac);border-bottom-color:var(--ac)}
 html body #pfm [data-vpt][hidden],html body #pfm #pnx[hidden]{display:none!important}
+html body #pfm .vp-maturity-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) auto;gap:10px;align-items:end;margin:0 0 10px}
+html body #pfm .vp-maturity-row label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700}
+html body #pfm .vp-maturity-row label span{color:var(--mu)}
+html body #pfm .vp-maturity-row input{width:100%;min-width:0}
+html body #pfm .vp-maturity-remove{min-height:40px}
+@media (max-width:520px){html body #pfm .vp-maturity-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}html body #pfm .vp-maturity-row button{grid-column:1/-1;min-height:40px}}
 
 /* Policies page · card layout (one card per policy, with a life-of-policy timeline) */
 html body .vp-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,430px),1fr));gap:14px;margin:0 0 12px}

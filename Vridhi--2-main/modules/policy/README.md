@@ -30,11 +30,13 @@ tests/policy-core.test.js   unit tests for the core (node tests/policy-core.test
 | `id, name, note, ca, ma` | identity, free text, created / modified time |
 | `amt, freq, start, yrs` | payout: `amt` every period (`monthly` `quarterly` `halfyearly` `yearly`) from `start` for `yrs` years |
 | `lump` | maturity lump sum, paid one period after the last regular payout (`start` + `yrs` years) |
+| `maturities` | optional list of individually dated benefits `{ date, amt }`, for LIC and other policies with varying payouts |
 | `insurer, no, sa` | optional: insurer, policy number, sum assured |
 | `prem` | optional premium plan `{amt, freq, start, yrs}`; `freq` may also be `single` |
 | `paid` | optional map of premium due dates the owner marked paid `{ 'YYYY-MM-DD': 1 }` |
 
-A policy with only a premium (a term plan) is allowed: it takes `start` and `yrs` from its premium plan.
+A policy with only a premium (a term plan) is allowed: it takes `start` and `yrs` from its premium plan. Dated maturity benefits
+can be entered independently of the premium-paying term; each benefit is included in payout schedules, totals and reports.
 Plans saved before this module existed contain only the first four rows and load unchanged.
 
 ## What other modules may call (`window.VRPolicy`)

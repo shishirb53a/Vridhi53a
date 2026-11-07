@@ -92,6 +92,32 @@ t('a premium-only policy (term plan) is allowed and borrows its dates from the p
   assert.strictEqual(c.length, 1); assert.strictEqual(c[0].amt, 0); assert.strictEqual(c[0].start, '2025-04-01'); assert.strictEqual(c[0].yrs, 20);
   assert.strictEqual(V.schedule(c[0]).length, 0); assert.strictEqual(V.premSchedule(c[0]).length, 20);
 });
+t('LIC maturity benefits accept individually dated amounts and retain the independent premium term', () => {
+  const benefits = [
+    { date: '2028-11-21', amt: 75000 }, { date: '2029-11-21', amt: 30000 },
+    { date: '2030-11-21', amt: 30000 }, { date: '2031-11-21', amt: 30000 },
+    { date: '2032-11-21', amt: 30000 }, { date: '2033-11-21', amt: 150000 }
+  ];
+  const lic = V.clean([{ name: 'LIC', prem: { amt: 12000, freq: 'yearly', start: '2012-11-21', yrs: 17 }, maturities: benefits }])[0];
+  const schedule = V.schedule(lic), total = V.totals(lic), maturity = V.maturity(lic);
+  assert.strictEqual(V.premSchedule(lic).length, 17);
+  assert.strictEqual(schedule.length, 6);
+  same(schedule.map(e => [e.date, e.amt, e.kind]), benefits.map(e => [e.date, e.amt, 'maturity']));
+  assert.strictEqual(total.pay, 0); assert.strictEqual(total.lump, 345000);
+  assert.strictEqual(maturity.date, '2033-11-21'); assert.strictEqual(maturity.amount, 150000);
+  assert.strictEqual(maturity.benefit, 345000); assert.strictEqual(maturity.net, 141000);
+  const single = V.clean([{ name: 'Single maturity', start: '2028-11-21', maturities: [{ date: '2028-11-21', amt: 75000 }] }])[0];
+  assert.strictEqual(V.maturity(single).date, '2028-11-21'); assert.strictEqual(V.maturity(single).amount, 75000);
+
+  const state = { start: 2028, polGp: true, policies: [lic] }, rows = Array.from({ length: 8 }, () => ({}));
+  V.applyToRows(state, rows);
+  assert.strictEqual(rows[1].pay, 75000); assert.strictEqual(rows[1].payL, 75000);
+  assert.strictEqual(rows[2].pay, 30000); assert.strictEqual(rows[6].pay, 150000);
+  win.__setS(state);
+  assert.strictEqual(V.events().filter(e => e.kind === 'maturity').length, 6);
+  assert.strictEqual(V.byFinancialYear().find(r => r.fy === 2028).lump, 75000);
+  assert.strictEqual(V.payoutMatrix().rows.find(r => r.year === 2028).vals.LIC, 75000);
+});
 t('at most 30 policies; ids stay unique', () => {
   const many = Array.from({ length: 40 }, (_, i) => mk({ id: 'same', name: 'P' + i })), c = V.clean(many);
   assert.strictEqual(c.length, 30); assert.strictEqual(new Set(c.map(x => x.id)).size, 30);

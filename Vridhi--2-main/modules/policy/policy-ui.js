@@ -26,9 +26,15 @@
   var toCsv = function (rows) { return rows.map(function (r) { return r.map(csvq).join(','); }).join('\n'); };
   /* a plain-English line describing the payouts of a policy */
   function line(x) {
-    var T = V.totals(x), n = T.count, S0 = V.schedule(x), pay = S0.filter(function (e) { return e.kind === 'payout'; }), lump = S0.filter(function (e) { return e.kind === 'lump'; });
-    return (x.amt > 0 ? n + ' payout' + (n === 1 ? '' : 's') + ' of ' + f(x.amt) + ' (' + fl(x.freq).toLowerCase() + '), ' + V.fmtDate(x.start) + ' to ' + V.fmtDate(pay.length ? pay[pay.length - 1].date : x.start) : '')
-         + (x.lump > 0 ? (x.amt > 0 ? ', then a ' : 'A ') + 'lump sum of ' + f(x.lump) + ' on ' + V.fmtDate(lump.length ? lump[0].date : x.start) : '');
+    var T = V.totals(x), n = T.count, S0 = V.schedule(x), pay = S0.filter(function (e) { return e.kind === 'payout'; });
+    var parts = [];
+    if (x.amt > 0) parts.push(n + ' payout' + (n === 1 ? '' : 's') + ' of ' + f(x.amt) + ' (' + fl(x.freq).toLowerCase() + '), ' + V.fmtDate(x.start) + ' to ' + V.fmtDate(pay.length ? pay[pay.length - 1].date : x.start));
+    if (x.lump > 0) parts.push((parts.length ? 'then a ' : 'A ') + 'lump sum of ' + f(x.lump));
+    if (Array.isArray(x.maturities) && x.maturities.length) {
+      var benefits = x.maturities.slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; }), first = benefits[0], last = benefits[benefits.length - 1], total = benefits.reduce(function (sum, m) { return sum + m.amt; }, 0);
+      parts.push(x.maturities.length + ' scheduled maturity benefit' + (x.maturities.length === 1 ? '' : 's') + ' totaling ' + f(total) + ', ' + V.fmtDate(first.date) + ' to ' + V.fmtDate(last.date));
+    }
+    return parts.join(', ');
   }
   function premLine(x) {
     var q = x.prem; if (!q) return '';
@@ -149,11 +155,11 @@
     var rowB = function (o) {
       var x = o.x, T = V.totals(x), m = V.maturity(x), st = V.status(x, t), i = o.i, nmx = esc(x.name), q = x.prem, dash = '\u2014';
       var b = function (act, label, cls) { return '<button type="button"' + (cls ? ' class="' + cls + '"' : '') + ' data-vp="' + act + '" data-i="' + i + '">' + label + '</button>'; };
-      var main = x.amt > 0 || x.lump > 0 || !q ? 'sched' : 'premsch';
+      var main = x.amt > 0 || x.lump > 0 || (x.maturities && x.maturities.length) || !q ? 'sched' : 'premsch';
       var fld = function (cls, k, v, sub) { return '<div class="vp-fl ' + cls + '"><span>' + k + '</span><b>' + v + '</b><small>' + sub + '</small></div>'; };
       var prem = q ? fld('pm', 'Premium', f(q.amt) + ' \u00b7 ' + (q.freq === 'single' ? 'single' : fl(q.freq).toLowerCase()), q.freq === 'single' ? 'On ' + V.fmtDate(q.start) : plural(q.yrs, 'year') + ' from ' + V.fmtDate(q.start)) : fld('pm', 'Premium', dash, 'Not tracked');
       var pay = x.amt > 0 ? fld('po', 'Payout', f(x.amt) + ' \u00b7 ' + fl(x.freq).toLowerCase(), plural(T.count, 'payout') + ' from ' + V.fmtDate(x.start)) : fld('po', 'Payout', dash, 'None scheduled');
-      var mat = x.lump > 0 && m ? fld('mt', 'Maturity', f(x.lump), 'On ' + V.fmtDate(m.date)) : fld('mt', 'Maturity', dash, m ? 'Ends ' + V.fmtDate(m.date) : 'No maturity');
+      var mat = T.lump > 0 && m ? fld('mt', 'Maturity', f(T.lump), plural((x.maturities || []).length + (x.lump > 0 ? 1 : 0), 'benefit') + ' through ' + V.fmtDate(m.date)) : fld('mt', 'Maturity', dash, m ? 'Ends ' + V.fmtDate(m.date) : 'No maturity');
       var foot = m && m.hasPremium ? 'Net after premiums <b>' + f(m.net) + '</b>' : plural(T.count, 'payout') + ' scheduled';
       return '<article class="vp-pc"><div class="vp-pc-h"><div class="vp-pn"><h3>' + EN(x.name) + '</h3><div class="vp-sub2"><span class="vp-sttx ' + st + '">' + esc(STW[st] || V.STATUS[st]) + '</span>'
         + (x.insurer || x.no ? '<span class="mu">' + EN([x.insurer, x.no && ('No. ' + x.no)].filter(Boolean).join(' \u00b7 ')) + '</span>' : '') + '</div></div>'
@@ -226,6 +232,12 @@
     var hf = function (id, l, v, ex, help) { return '<div class="hf1"><label for="' + id + '">' + l + '</label><input id="' + id + '" type="number" inputmode="decimal" value="' + esc(v == null ? '' : v) + '" ' + (ex || '') + '><small class="hh">' + (help || '') + '</small></div>'; };
     var tx = function (id, l, v, ph, max) { return '<div class="hf1"><label for="' + id + '">' + l + '</label><input id="' + id + '" type="text" maxlength="' + max + '" value="' + esc(v || '') + '" placeholder="' + esc(ph) + '"></div>'; };
     var fopts = function (sel, single) { return V.FREQ.concat(single ? [['single', 'Single premium']] : []).map(function (k) { return '<option value="' + k[0] + '"' + (sel === k[0] ? ' selected' : '') + '>' + k[1] + '</option>'; }).join(''); };
+    var maturityRows = function (items) {
+      items = items && items.length ? items : [{ date: '', amt: '' }];
+      return items.map(function (m, k) { return '<div class="vp-maturity-row"><label><span>Date</span><input id="pmat-date-' + k + '" class="vp-md" type="date" value="' + esc(m.date || '') + '" min="1990-01-01" max="2200-12-31" aria-label="Maturity benefit date ' + (k + 1) + '"></label>'
+        + '<label><span>Amount (\u20b9)</span><input id="pmat-amount-' + k + '" class="vp-ma" type="number" inputmode="decimal" min="0.01" max="1000000000000" step="any" value="' + esc(m.amt == null ? '' : m.amt) + '" aria-label="Maturity benefit amount ' + (k + 1) + '"></label>'
+        + '<button type="button" class="tbs vp-maturity-remove" data-vpmat="remove" data-i="' + k + '" aria-label="Remove maturity benefit ' + (k + 1) + '">Remove</button></div>'; }).join('');
+    };
     open('<form id="pfm" novalidate><h2>' + (isNew ? 'Add' : 'Edit') + ' Policy</h2>' + (!isNew && x.ca && typeof stampTxt === 'function' ? '<div class="tsx">' + esc(stampTxt(x)) + '</div>' : '')
       + '<div class="vp-tabs" role="tablist" aria-label="Policy form sections">'
       + ['1. Details', '2. Premium', '3. Payout', '4. Maturity', '5. Preview'].map(function (t, k) { return '<button type="button" role="tab" class="vp-tab" data-vptab="' + k + '" aria-selected="' + (k === 0) + '">' + t + '</button>'; }).join('') + '</div>'
@@ -234,12 +246,13 @@
       + '<div class="hf1"><label for="pmf">Frequency</label><select id="pmf">' + fopts(q.freq, true) + '</select></div><div class="hf1"><label for="pms">First premium date</label><input id="pms" type="date" value="' + esc(q.start) + '" min="1990-01-01" max="2200-12-31"></div>' + hf('pmy', 'Premium paying term (years)', q.yrs, 'min=1 max=60 step=1', 'How many years premiums are paid.') + '</div></section>'
       + '<section class="hs" data-vpt="2"><h3>Payout <small>optional, money the policy pays you</small></h3><div class="hg">' + hf('pa', 'Payout amount (\u20b9 each time)', x.amt, 'min=0 step=any', 'Amount received at every payout.')
       + '<div class="hf1"><label for="pf">Frequency</label><select id="pf">' + fopts(x.freq, false) + '</select></div><div class="hf1"><label for="ps">First payout date</label><input id="ps" type="date" value="' + esc(x.start) + '" min="1990-01-01" max="2200-12-31"><small class="hh">Later payouts follow the frequency from this date.</small></div>' + hf('py', 'Duration (years)', x.yrs, 'min=1 max=60 step=1', 'How many years the regular payouts run.') + '</div></section>'
-      + '<section class="hs" data-vpt="3"><h3>Maturity Lump Sum</h3><div class="hg">' + hf('pl', 'Lump sum at the end (\u20b9, optional)', x.lump, 'min=0 step=any', 'Paid once, one period after the last regular payout (start date + duration). Enter 0 if none.') + '</div></section>'
+      + '<section class="hs" data-vpt="3"><h3>Maturity benefits <small>for LIC and other policies</small></h3><p class="mu">Add each benefit with its payment date and amount. Leave rows blank when there are no scheduled benefits.</p><div id="pmats">' + maturityRows(x.maturities) + '</div><button type="button" class="tbs" id="pmat-add">Add maturity benefit</button><div class="hg" style="margin-top:14px">' + hf('pl', 'Additional lump sum (\u20b9, optional)', x.lump, 'min=0 step=any', 'One lump sum one period after the regular payout term. Use the schedule above for dated or multiple maturity benefits.') + '</div></section>'
       + '<div id="pp" class="pvbox" data-vpt="4" aria-live="polite"></div><div id="pe" class="er" role="alert"></div><div class="tb"><button type="button" id="pcn">Cancel</button><button type="button" class="p" id="pnx">Next</button><button class="p">Save Policy</button></div></form>');
     dg.classList.add('hf');
     var g = $$, val = function () {
       return { name: g('pn').value.replace(/\s+/g, ' ').trim(), insurer: g('pins').value.trim(), no: g('pno').value.trim(), sa: +g('psa').value || 0, note: g('pnt').value.trim(),
-               ma: +g('pma').value || 0, mf: g('pmf').value, ms: g('pms').value, my: Math.round(+g('pmy').value), amt: +g('pa').value || 0, freq: g('pf').value, start: g('ps').value, yrs: Math.round(+g('py').value), lump: +g('pl').value || 0 };
+               ma: +g('pma').value || 0, mf: g('pmf').value, ms: g('pms').value, my: Math.round(+g('pmy').value), amt: +g('pa').value || 0, freq: g('pf').value, start: g('ps').value, yrs: Math.round(+g('py').value), lump: +g('pl').value || 0,
+               maturities: Array.prototype.map.call(document.querySelectorAll('#pmats .vp-maturity-row'), function (row) { return { date: row.querySelector('.vp-md').value, amt: +row.querySelector('.vp-ma').value || 0 }; }) };
     };
     var err = function (v) {
       if (!v.name) return ['pn', 'Enter a policy name.'];
@@ -249,19 +262,27 @@
       if (!(v.amt >= 0) || v.amt > 1e10) return ['pa', 'Payout amount must be between 0 and 1,00,00,00,000.'];
       if (!(v.lump >= 0) || v.lump > 1e12) return ['pl', 'Lump sum must be 0 or more.'];
       if (v.amt > 0 || v.lump > 0) { if (!V.pDate(v.start)) return ['ps', 'Enter a valid first payout date (year 1990 to 2200).']; if (!(v.yrs >= 1 && v.yrs <= 60)) return ['py', 'Duration must be a whole number from 1 to 60 years.']; }
-      if (!(v.ma > 0 || v.amt > 0 || v.lump > 0)) return ['pma', 'Enter a premium, a payout amount or a maturity lump sum.'];
+      var scheduled = v.maturities.filter(function (m) { return m.date || m.amt; });
+      if (scheduled.length > 60) return ['pmat-add', 'You can add up to 60 maturity benefits.'];
+      for (var k = 0; k < v.maturities.length; k++) {
+        var m = v.maturities[k]; if (!m.date && !m.amt) continue;
+        if (!V.pDate(m.date)) return ['pmat-date-' + k, 'Enter a valid date for every maturity benefit.'];
+        if (!(m.amt > 0) || m.amt > 1e12) return ['pmat-amount-' + k, 'Each maturity benefit amount must be greater than 0 and no more than 1,00,00,00,00,000.'];
+      }
+      if (!(v.ma > 0 || v.amt > 0 || v.lump > 0 || scheduled.length > 0)) return ['pma', 'Enter a premium, a payout amount or a maturity benefit.'];
       return null;
     };
     /* what is stored: a policy with no payout takes its dates from the premium plan */
     var raw = function (v) {
       var prem = v.ma > 0 ? { amt: v.ma, freq: v.mf, start: v.ms, yrs: v.mf === 'single' ? 1 : v.my } : null, pays = v.amt > 0 || v.lump > 0;
-      return { name: v.name, insurer: v.insurer, no: v.no, sa: v.sa, note: v.note, prem: prem, amt: pays ? v.amt : 0, lump: pays ? v.lump : 0, freq: pays ? v.freq : 'yearly', start: pays ? v.start : (prem ? prem.start : v.start), yrs: pays ? v.yrs : (prem ? prem.yrs : 1) };
+      var maturities = v.maturities.filter(function (m) { return m.date || m.amt; });
+      return { name: v.name, insurer: v.insurer, no: v.no, sa: v.sa, note: v.note, prem: prem, amt: pays ? v.amt : 0, lump: pays ? v.lump : 0, maturities: maturities, freq: pays ? v.freq : 'yearly', start: pays ? v.start : (prem ? prem.start : (maturities.length ? maturities[0].date : v.start)), yrs: pays ? v.yrs : (prem ? prem.yrs : 1) };
     };
     var pv = function () {
       var v = val(), e = err(v), b = g('pp'); if (e) { b.innerHTML = ''; return; }
       var r = raw(v), T = V.totals(r), m = V.maturity(r), out = [];
       if (r.prem) out.push('Premium: ' + esc(premLine(r)) + ' \u00b7 ' + f(V.premTotals(r).total) + ' in all');
-      if (r.amt > 0 || r.lump > 0) out.push(esc(line(r)));
+      if (r.amt > 0 || r.lump > 0 || r.maturities.length) out.push(esc(line(r)));
       if (m) out.push('Matures on ' + V.fmtDate(m.date));
       out.push('<span class="mu">Total expected: ' + f(T.pay + T.lump) + '</span>');
       b.innerHTML = '<b>Preview</b><br>' + out.join('<br>');
@@ -277,9 +298,18 @@
     showTab(0);
     pv(); g('pcn').onclick = function () { dg.close(); }; g('pn').focus();
     ['pn', 'pins', 'pno', 'psa', 'pma', 'pmf', 'pms', 'pmy', 'pa', 'pf', 'ps', 'py', 'pl'].forEach(function (id) { g(id).addEventListener('input', pv); g(id).addEventListener('change', pv); });
+    g('pmats').addEventListener('input', pv); g('pmats').addEventListener('change', pv);
+    g('pmat-add').onclick = function () {
+      var v = val(); if (v.maturities.length >= 60) { g('pe').textContent = 'You can add up to 60 maturity benefits.'; return; }
+      v.maturities.push({ date: '', amt: '' }); g('pmats').innerHTML = maturityRows(v.maturities); g('pe').textContent = ''; pv();
+    };
+    g('pmats').addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-vpmat="remove"]'); if (!b) return;
+      var v = val(); v.maturities.splice(+b.dataset.i, 1); g('pmats').innerHTML = maturityRows(v.maturities); g('pe').textContent = ''; pv();
+    });
     g('pmf').addEventListener('change', function () { g('pmy').disabled = g('pmf').value === 'single'; }); g('pmy').disabled = g('pmf').value === 'single';
     g('pfm').addEventListener('submit', function (ev) {
-      ev.preventDefault(); var v = val(), e = err(v); if (e) { g('pe').textContent = e[1]; showTab(TABOF[e[0]] || 0); g(e[0]).focus(); return; }
+      ev.preventDefault(); var v = val(), e = err(v); if (e) { g('pe').textContent = e[1]; showTab(e[0].indexOf('pmat-') === 0 ? 3 : (TABOF[e[0]] || 0)); g(e[0]).focus(); return; }
       var r = V.put(raw(v), isNew ? null : i); if (!r.ok) { g('pe').textContent = r.error; return; }
       dg.close(); refresh(); toast(isNew ? 'Policy added' : 'Policy updated');
     });
@@ -290,7 +320,7 @@
     var x = V.get(i); if (!x) return;
     var L = V.schedule(x), t = today(), T = V.totals(x);
     open('<div class="pol-sch"><h2>' + EN(x.name) + ' \u00b7 payout schedule</h2><p class="mu">' + esc(line(x) || 'No payouts: this policy only has premiums.') + '</p><div class="rsum" style="margin:10px 0"><div><span class="mu">Regular payouts</span><b>' + f(T.pay) + '</b></div><div><span class="mu">Maturity lump sum</span><b>' + f(T.lump) + '</b></div><div><span class="mu">Total expected</span><b>' + f(T.pay + T.lump) + '</b></div></div>'
-      + '<div class="tw"><table class="vp-t" aria-label="Payout schedule"><tr><th>#</th><th>Date</th><th>Financial year</th><th>Type</th><th>Amount</th><th>Status</th></tr>' + L.map(function (e) { return '<tr><td>' + e.n + '</td><td class="nw">' + V.fmtDate(e.date) + '</td><td class="nw">' + V.fyLabel(Math.floor((e.ix - 3) / 12)) + '</td><td>' + (e.kind === 'lump' ? 'Maturity lump sum' : 'Payout') + '</td><td class="nw"><b>' + f(e.amt) + '</b></td><td>' + (e.date <= t ? 'Received' : 'Upcoming') + '</td></tr>'; }).join('') + '</table></div><div class="tb"><button type="button" class="p" id="psc">Close</button></div></div>');
+      + '<div class="tw"><table class="vp-t" aria-label="Payout schedule"><tr><th>#</th><th>Date</th><th>Financial year</th><th>Type</th><th>Amount</th><th>Status</th></tr>' + L.map(function (e) { return '<tr><td>' + e.n + '</td><td class="nw">' + V.fmtDate(e.date) + '</td><td class="nw">' + V.fyLabel(Math.floor((e.ix - 3) / 12)) + '</td><td>' + (e.kind === 'maturity' ? 'Maturity benefit' : e.kind === 'lump' ? 'Maturity lump sum' : 'Payout') + '</td><td class="nw"><b>' + f(e.amt) + '</b></td><td>' + (e.date <= t ? 'Received' : 'Upcoming') + '</td></tr>'; }).join('') + '</table></div><div class="tb"><button type="button" class="p" id="psc">Close</button></div></div>');
     dg.classList.add('hf'); $$('psc').onclick = function () { dg.close(); };
   }
   function premBody(i) {

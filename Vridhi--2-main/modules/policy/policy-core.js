@@ -10,8 +10,8 @@
    * Premiums are tracked here for the Policies module only; they never change a Goal Planner or Retirement Planner
      number. Payouts and maturity amounts are INCOME, not investment value: they never enter holding balances.
 
-   A policy:  { id, name, amt, freq, start, yrs, lump, note, ca, ma,               payout side (unchanged since v2.6)
-                insurer, no, sa, prem:{amt,freq,start,yrs}, paid:{'YYYY-MM-DD':1} }   optional, added by this module
+   A policy:  { id, name, amt, freq, start, yrs, lump, maturities:[{date,amt}], note, ca, ma,
+                insurer, no, sa, prem:{amt,freq,start,yrs}, paid:{'YYYY-MM-DD':1} }
      amt     paid every period (monthly | quarterly | halfyearly | yearly) from `start`, for `yrs` years
      lump    one maturity lump sum on start + yrs years (optional)
      prem    premium plan: amt every period (or once when freq is 'single') from prem.start for prem.yrs years
@@ -134,13 +134,20 @@
   }
 
   /* ---------- schedules ---------- */
-  /* payouts: `amt` every period from `start` for `yrs` years, then the optional maturity `lump` on start + yrs years */
+  /* recurring payouts, the legacy lump sum, and optional individually dated maturity benefits */
   function schedule(p) {
     var out = [], st = p && pDate(p.start);
-    if (!st || !PFREQ[p.freq]) return out;
-    var yrs = Math.round(+p.yrs) || 0, n = PFREQ[p.freq] * yrs, step = PSTEP[p.freq];
-    if (p.amt > 0) for (var k = 0; k < n; k++) { var t = pAt(st, k * step); out.push({ n: k + 1, ix: t.ix, date: t.date, amt: +p.amt, kind: 'payout' }); }
-    if (p.lump > 0 && yrs > 0) { var u = pAt(st, yrs * 12); out.push({ n: n + 1, ix: u.ix, date: u.date, amt: +p.lump, kind: 'lump' }); }
+    if (st && PFREQ[p.freq]) {
+      var yrs = Math.round(+p.yrs) || 0, n = PFREQ[p.freq] * yrs, step = PSTEP[p.freq];
+      if (p.amt > 0) for (var k = 0; k < n; k++) { var t = pAt(st, k * step); out.push({ n: k + 1, ix: t.ix, date: t.date, amt: +p.amt, kind: 'payout' }); }
+      if (p.lump > 0 && yrs > 0) { var u = pAt(st, yrs * 12); out.push({ n: n + 1, ix: u.ix, date: u.date, amt: +p.lump, kind: 'lump' }); }
+    }
+    (p && Array.isArray(p.maturities) ? p.maturities : []).forEach(function (m) {
+      var d = pDate(m && m.date), amount = +m.amt;
+      if (d && amount > 0) out.push({ n: out.length + 1, ix: d.y * 12 + d.mo - 1, date: m.date, amt: amount, kind: 'maturity' });
+    });
+    out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.n - b.n; });
+    out.forEach(function (e, i) { e.n = i + 1; });
     return out;
   }
   /* premiums: prem.amt every period from prem.start for prem.yrs years (a single premium is paid once) */
@@ -159,7 +166,7 @@
     return {
       count: L.filter(function (e) { return e.kind === 'payout'; }).length,
       pay: L.reduce(function (q, e) { return q + (e.kind === 'payout' ? e.amt : 0); }, 0),
-      lump: L.reduce(function (q, e) { return q + (e.kind === 'lump' ? e.amt : 0); }, 0),
+      lump: L.reduce(function (q, e) { return q + (e.kind === 'lump' || e.kind === 'maturity' ? e.amt : 0); }, 0),
       first: L.length ? L[0].date : '', last: L.length ? L[L.length - 1].date : ''
     };
   }
@@ -173,12 +180,23 @@
     });
     return { count: L.length, total: total, paid: paid, due: due, overdue: overdue, remaining: total - paid, next: next, first: L.length ? L[0].date : '', last: L.length ? L[L.length - 1].date : '' };
   }
-  /* maturity: one period after the last regular payout (start + duration); the lump sum, if any, is paid then */
+  /* maturity: the end of the regular term or the last individually dated maturity benefit */
   function maturity(p) {
     var st = p && pDate(p.start); if (!st) return null;
     var yrs = Math.round(+p.yrs) || 0; if (yrs < 1) return null;
-    var t = pAt(st, yrs * 12), T = totals(p), P = premTotals(p);
-    return { date: t.date, ix: t.ix, fy: fyStart(t.ix), amount: +p.lump || 0, payouts: T.pay, premiums: P.total,
+    var T = totals(p), P = premTotals(p), custom = Array.isArray(p.maturities) ? p.maturities : [];
+    var t = pAt(st, yrs * 12), amount = +p.lump || 0;
+    if (custom.length && !(p.amt > 0 || p.lump > 0)) {
+      var first = custom.map(function (m) { return pDate(m.date); }).filter(Boolean).sort(function (a, b) { return a.y * 12 + a.mo - b.y * 12 - b.mo || a.d - b.d; })[0];
+      if (first) { t = { date: first.y + '-' + String(first.mo).padStart(2, '0') + '-' + String(first.d).padStart(2, '0'), ix: first.y * 12 + first.mo - 1 }; amount = 0; }
+    }
+    custom.forEach(function (m) {
+      var d = pDate(m.date); if (!d || !(m.amt > 0)) return;
+      var candidate = { date: m.date, ix: d.y * 12 + d.mo - 1 };
+      if (candidate.date > t.date) { t = candidate; amount = +m.amt; }
+      else if (candidate.date === t.date) amount += +m.amt;
+    });
+    return { date: t.date, ix: t.ix, fy: fyStart(t.ix), amount: amount, payouts: T.pay, premiums: P.total,
              benefit: T.pay + T.lump, net: T.pay + T.lump - P.total, hasPremium: P.count > 0 };
   }
   /* where the policy stands today */
@@ -207,7 +225,7 @@
   }
   /* true when the policies should show up in the Goal Planner (there is something to pay out and the module is switched on) */
   function hasPayouts(who) {
-    return policiesFor(who || 'goal').some(function (p) { return p.amt > 0 || p.lump > 0; });
+    return policiesFor(who || 'goal').some(function (p) { return p.amt > 0 || p.lump > 0 || (Array.isArray(p.maturities) && p.maturities.length > 0); });
   }
 
   /* ---------- API for the Goal Planner: payouts by plan row (row 1 = today carries none; a row is a financial year from 1 April) ---------- */
@@ -219,7 +237,7 @@
       schedule(p).forEach(function (e) {
         var a = rowOf(e.ix, s); if (a < 2 || a > rows.length) return;
         var r = rows[a - 1]; r.pay += e.amt;
-        if (e.kind === 'lump') r.payL += e.amt; else r.payR += e.amt;
+        if (e.kind === 'lump' || e.kind === 'maturity') r.payL += e.amt; else r.payR += e.amt;
       });
     });
   }
@@ -242,7 +260,7 @@
       schedule(p).forEach(function (e) {
         var r = rowOf(e.ix, s); if (r < 2) return;
         if (!first || e.date < first) first = e.date;
-        if (r <= a) { var y = e.date.slice(0, 4); m[y] = (m[y] || 0) + e.amt; if (e.kind === 'lump') lump[y] = (lump[y] || 0) + e.amt; }
+        if (r <= a) { var y = e.date.slice(0, 4); m[y] = (m[y] || 0) + e.amt; if (e.kind === 'lump' || e.kind === 'maturity') lump[y] = (lump[y] || 0) + e.amt; }
       });
     });
     return { m: m, lump: lump, first: first };
@@ -263,9 +281,9 @@
   /* ---------- reading across all policies ---------- */
   /* every dated event (payout, maturity lump sum, premium), oldest first */
   function events(opt) {
-    opt = opt || {}; var want = opt.kinds || ['payout', 'lump', 'premium'], out = [];
+    opt = opt || {}; var want = opt.kinds || ['payout', 'lump', 'maturity', 'premium'], out = [];
     all().forEach(function (p, i) {
-      var L = []; if (want.indexOf('payout') > -1 || want.indexOf('lump') > -1) L = L.concat(schedule(p));
+      var L = []; if (want.indexOf('payout') > -1 || want.indexOf('lump') > -1 || want.indexOf('maturity') > -1) L = L.concat(schedule(p));
       if (want.indexOf('premium') > -1) L = L.concat(premSchedule(p));
       L.forEach(function (e) {
         if (want.indexOf(e.kind) < 0) return;
@@ -288,7 +306,7 @@
         o.premTotal += e.amt;
         if (e.paid) o.premPaid += e.amt; else if (e.date <= today) { o.premOverdue += e.amt; o.premOverdueCount++; } else if (!o.nextPremium) o.nextPremium = e;
       } else {
-        if (e.kind === 'lump') o.payLump += e.amt; else o.payRegular += e.amt;
+        if (e.kind === 'lump' || e.kind === 'maturity') o.payLump += e.amt; else o.payRegular += e.amt;
         if (e.date <= today) o.payReceived += e.amt; else { o.payToCome += e.amt; if (!o.nextPayout) o.nextPayout = e; }
       }
     });
@@ -307,7 +325,7 @@
     events().forEach(function (e) {
       var r = m[e.fy] || (m[e.fy] = { fy: e.fy, label: fyLabel(e.fy), premDue: 0, premPaid: 0, payout: 0, lump: 0 });
       if (e.kind === 'premium') { r.premDue += e.amt; if (e.paid) r.premPaid += e.amt; }
-      else if (e.kind === 'lump') r.lump += e.amt; else r.payout += e.amt;
+      else if (e.kind === 'lump' || e.kind === 'maturity') r.lump += e.amt; else r.payout += e.amt;
     });
     return Object.keys(m).map(Number).sort(function (a, b) { return a - b; }).map(function (k) { var r = m[k]; r.net = r.payout + r.lump - r.premDue; return r; });
   }
@@ -337,7 +355,8 @@
       if (out.length >= PMAX || !x || typeof x !== 'object') return;
       var name = String(x.name == null ? '' : x.name).replace(/\s+/g, ' ').trim().slice(0, 40); if (!name) return;
       var prem = cleanPrem(x.prem);
-      var startS = x.start, yrsIn = x.yrs;                          /* a policy with no payout dates borrows them from its premium plan */
+      var startS = x.start, yrsIn = x.yrs;                          /* policies without regular payouts borrow their dates from a maturity or premium plan */
+      if (!pDate(startS) && Array.isArray(x.maturities) && x.maturities.length) startS = x.maturities[0].date;
       if (!pDate(startS) && prem) { startS = prem.start; yrsIn = prem.yrs; }
       if (!pDate(startS)) return;
       var frq = PFREQ[x.freq] ? x.freq : 'yearly';
@@ -345,10 +364,19 @@
       if (!id || seen[id]) id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
       seen[id] = 1;
       var yrs = Math.round(num(yrsIn, 1, 60, 1)), amt = Math.round(num(x.amt, 0, 1e10, 0) * 100) / 100, lump = Math.round(num(x.lump, 0, 1e12, 0) * 100) / 100;
-      if (!(amt > 0 || lump > 0 || prem)) return;                  /* something must be paid in or out */
+      var maturities = [];
+      (Array.isArray(x.maturities) ? x.maturities : []).slice(0, 60).forEach(function (m) {
+        var date = m && m.date, d = pDate(date), benefit = Math.round(num(m && m.amt, 0, 1e12, 0) * 100) / 100;
+        if (!d || !(benefit > 0)) return;
+        var canonicalDate = d.y + '-' + String(d.mo).padStart(2, '0') + '-' + String(d.d).padStart(2, '0');
+        maturities.push({ date: canonicalDate, amt: benefit });
+      });
+      maturities.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.amt - b.amt; });
+      if (!(amt > 0 || lump > 0 || maturities.length || prem)) return; /* something must be paid in or out */
       var p = { id: id, name: name, amt: amt, freq: frq, start: startS, yrs: yrs, lump: lump,
                 note: String(x.note == null ? '' : x.note).replace(/\r\n?/g, '\n').trim().slice(0, 200),
                 ca: num(x.ca, 0, 9e12, 0) || undefined, ma: num(x.ma, 0, 9e12, 0) || undefined };
+      if (maturities.length) p.maturities = maturities;
       var insurer = String(x.insurer == null ? '' : x.insurer).replace(/\s+/g, ' ').trim().slice(0, 60); if (insurer) p.insurer = insurer;
       var no = String(x.no == null ? '' : x.no).replace(/\s+/g, ' ').trim().slice(0, 40); if (no) p.no = no;
       var sa = Math.round(num(x.sa, 0, 1e13, 0) * 100) / 100; if (sa > 0) p.sa = sa;
