@@ -58,7 +58,12 @@
     var s = cur(); return s && Array.isArray(s.policies) ? s.policies : [];
   }
   function plannerClients(who, s) {
+    var useLiveList = s == null;
     s = s || cur();
+    if (useLiveList) {
+      var getClients = who === 'goal' ? window.gppClientList : who === 'retirement' ? window.fhpClientList : null;
+      if (typeof getClients === 'function') return getClients();
+    }
     var P = s && (who === 'goal' ? s.gpp : s.fhp);
     return P && P.profiles ? Object.keys(P.profiles).map(function (id) { return { id: id, name: P.profiles[id].name }; }) : [];
   }

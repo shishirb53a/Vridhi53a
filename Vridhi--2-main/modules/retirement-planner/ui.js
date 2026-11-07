@@ -1857,6 +1857,7 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
     if (P && S.fh) P.profiles[P.active] = Object.assign({}, P.profiles[P.active], { v: Object.assign({}, S.fh.v), t: S.fh.t, rep: S.fh.rep });
   }
   const fhpList = () => { const P = fhpEnsure(); return P ? Object.keys(P.profiles).map(id => Object.assign({ id, active: id === P.active }, P.profiles[id])) : []; };
+  window.fhpClientList = () => fhpList().map(p => ({ id: p.id, name: p.name }));
   const fhpUniqueId = (name, P) => { let base = fhpSlug(name), id = base, i = 2; while (id in Object.prototype || Object.prototype.hasOwnProperty.call(P.profiles, id)) id = base.slice(0, 20) + "-" + i++; return id; };
   const fhpTaken = (name, P, exceptId) => Object.keys(P.profiles).some(id => id !== exceptId && P.profiles[id].name.toLowerCase() === name.toLowerCase());
 

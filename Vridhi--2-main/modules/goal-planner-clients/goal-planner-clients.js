@@ -17,6 +17,7 @@ function ensure(){
   return P}
 window.gppSync=function(){const P=S&&S.gpp;if(P&&P.profiles&&P.profiles[P.active])P.profiles[P.active].d=snap(S)};
 const list=()=>{const P=ensure();return P?Object.keys(P.profiles).map(id=>Object.assign({id,active:id===P.active},P.profiles[id])):[]};
+window.gppClientList=()=>list().map(p=>({id:p.id,name:p.name}));
 const taken=(n,P,ex)=>Object.keys(P.profiles).some(id=>id!==ex&&P.profiles[id].name.toLowerCase()===n.toLowerCase());
 const uid=(n,P)=>{const b=slug(n);let id=b,i=2;while(id in Object.prototype||Object.prototype.hasOwnProperty.call(P.profiles,id))id=b.slice(0,20)+'-'+i++;return id};
 const fresh=n=>{const d=DEF();return{members:[MB(1,n,'Self',d.members[0].age)],start:d.start,end:d.end,ret:d.ret,retP:d.retP,hor:d.hor,goal:d.goal,link:false,grat:{basic:0,svc:0,rem:0,cap:0},policies:[],assets:[]}};

@@ -180,4 +180,13 @@ t('Policies sharing lists existing Goal and Retirement Planner clients', () => {
   assert.ok(!retirement.includes(' hidden'), 'Retirement Planner client choices remain visible while sharing is off');
   assert.ok(!retirement.includes('No Retirement Planner clients are available yet.'));
 });
+t('Policy client lists use planner APIs when client profiles are initialized lazily', () => {
+  win.__setS({ gpp: null, fhp: null });
+  win.gppClientList = () => [{ id: 'goal-a', name: 'Goal client' }];
+  win.fhpClientList = () => [{ id: 'ret-a', name: 'Retirement client' }];
+  assert.strictEqual(V.plannerClients('goal')[0].name, 'Goal client');
+  assert.strictEqual(V.plannerClients('retirement')[0].name, 'Retirement client');
+  delete win.gppClientList;
+  delete win.fhpClientList;
+});
 console.log('\n' + n + ' checks passed' + (process.exitCode ? ' (some FAILED)' : ''));
