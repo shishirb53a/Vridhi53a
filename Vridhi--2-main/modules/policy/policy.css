@@ -4,6 +4,10 @@
 
 /* ---- shell: page bar, bottom navigation (six sections) ---- */
 html body #vp-pg{display:block;min-width:0}
+html body .vp-clientbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+html body .vp-clientbar label{font-size:12px;color:var(--mu);font-weight:700}
+html body .vp-clientbar select{width:auto;min-width:180px;max-width:100%;min-height:36px}
+html body .vp-clientbar .tbs{width:auto}
 html body .vp-bar{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 12px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:3px;width:max-content;max-width:100%}
 /* !important: the Enterprise skin paints every button white with a very specific rule */
 html body .vp-bar button,html body #vp-pg .seg button{background:transparent!important;color:var(--tx)!important;border:0;min-height:34px;padding:4px 14px;border-radius:8px;font-weight:600;box-shadow:none}
@@ -92,6 +96,12 @@ html body .vp-sw{display:flex;gap:12px;align-items:flex-start;padding:10px 0;bor
 html body .vp-sw:first-of-type{border-top:0}
 html body .vp-sw input{flex:none;width:20px;height:20px;margin-top:2px}
 html body .vp-sw b{display:block}html body .vp-sw small{color:var(--mu)}
+html body .vp-share-clients{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;padding:0 0 10px 32px}
+html body .vp-share-clients[hidden]{display:none!important}
+html body .vp-share-clients>b{flex-basis:100%;font-size:12px}
+html body .vp-share-clients label{display:flex;align-items:center;gap:6px;font-size:13px}
+html body .vp-share-clients input{width:16px;height:16px;margin:0}
+html body .vp-share-clients p{margin:0;font-size:12px}
 
 /* ---- policy form + lists (moved here from the Holdings screen) ---- */
 html body #pol .hcard .vv{flex:none;text-align:right}html body #pol .hcard .vv b{white-space:nowrap}html body #pol .hcard .hh{align-items:flex-start;gap:10px}html body #pol .hcard .tb .tbs{white-space:nowrap;padding-left:6px;padding-right:6px;min-width:0;flex:1 1 0}

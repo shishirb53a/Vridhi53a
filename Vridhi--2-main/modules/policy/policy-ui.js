@@ -42,10 +42,20 @@
     return '<div class="vp-card vp-empty"><h2>No policies yet</h2><p class="mu">Keep every insurance policy in one place: its premiums, its payouts and its maturity. Other parts of the app use this data only if you allow it.</p>' + addBtn() + '</div>';
   }
   /* the two switches that decide which other modules may use the policy data */
+  function shareClients(who, title) {
+    var p = V.clients().filter(function (c) { return c.active; })[0], selected = p && p.share && p.share[who] || [];
+    var clients = V.plannerClients(who), key = who === 'goal' ? 'goal' : 'retirement';
+    return '<div class="vp-share-clients"' + (V.usedBy(who) ? '' : ' hidden') + '><b>' + title + ' clients</b>'
+      + (clients.length ? clients.map(function (c) {
+        return '<label><input type="checkbox" data-vpclient="' + key + '" value="' + esc(c.id) + '"' + (selected.indexOf(c.id) >= 0 ? ' checked' : '') + '><span>' + esc(c.name) + '</span></label>';
+      }).join('') : '<p class="mu">No ' + title + ' clients are available yet.</p>') + '</div>';
+  }
   function sharing() {
     return '<div class="vp-card" id="vp-share"><div class="vp-h"><h2>Use policy data in other modules</h2></div><p class="mu" style="margin:0 0 4px">The Policies module owns all policy data. Other modules read it only when you allow it here. Premiums are never passed on.</p>'
       + '<label class="vp-sw"><input type="checkbox" data-vpset="goal" ' + (V.usedBy('goal') ? 'checked' : '') + '><span><b>Goal Planner</b><small>Adds payouts as Policy payouts and Total income columns in the Annual and Monthly Portfolio Projection reports, and counts payouts already received in the Summary corpus and allocation.</small></span></label>'
-      + '<label class="vp-sw"><input type="checkbox" data-vpset="retirement" ' + (V.usedBy('retirement') ? 'checked' : '') + '><span><b>Retirement Planner</b><small>Counts future payouts as fixed-rupee income in the year each one arrives, which lowers the money you need today.</small></span></label></div>';
+      + shareClients('goal', 'Goal Planner')
+      + '<label class="vp-sw"><input type="checkbox" data-vpset="retirement" ' + (V.usedBy('retirement') ? 'checked' : '') + '><span><b>Retirement Planner</b><small>Counts future payouts as fixed-rupee income in the year each one arrives, which lowers the money you need today.</small></span></label>'
+      + shareClients('retirement', 'Retirement Planner') + '</div>';
   }
 
   /* ---------- shell: top bar, bottom navigation, page router ---------- */
@@ -57,13 +67,20 @@
     return '<div class="rp2-nav vp-nav" role="navigation" aria-label="Policies">' + PAGES.map(function (p) {
       return '<button type="button" data-vpp="' + p[0] + '"' + (ST.page === p[0] ? ' aria-current="page"' : '') + '><span aria-hidden="true">' + p[2] + '</span><span>' + p[1] + '</span></button>'; }).join('') + '</div>';
   }
+  function clientBar() {
+    var L = V.clients(), active = L.filter(function (c) { return c.active; })[0];
+    return '<div class="vp-clientbar"><label for="vp-client">Policy client</label><select id="vp-client" aria-label="Policy client">'
+      + L.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.active ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('')
+      + '</select><button type="button" class="tbs" data-vpc="add">Add client</button>'
+      + (active ? '<button type="button" class="tbs" data-vpc="rename">Rename</button>' : '') + '</div>';
+  }
   function body() {
     switch (ST.page) {
       case 'list': return pList(); case 'prem': return pPrem(); case 'mat': return pMat(); case 'pay': return pPay(); case 'rep': return pRep(); default: return pDash();
     }
   }
-  function page() { return '<div id="vp-pg">' + body() + '</div>'; }
-  function refresh() { var el = $$('vp-pg'); if (el) el.innerHTML = body(); else render(); }
+  function page() { return '<div id="vp-pg">' + clientBar() + body() + '</div>'; }
+  function refresh() { var el = $$('vp-pg'); if (el) el.innerHTML = clientBar() + body(); else render(); }
   function go(p) { ST.page = p; render(); window.scrollTo(0, 0); }
 
   /* ---------- DASHBOARD ---------- */
@@ -389,6 +406,24 @@
   function redrawPremDlg() { var w = $$('vp-psd'), h = w && w.closest('[data-pi]'); if (w && h && dg.open) w.innerHTML = premBody(+h.dataset.pi); }
 
   /* ---------- behaviour ---------- */
+  function clientForm(mode) {
+    var active = V.clients().filter(function (c) { return c.active; })[0], name = mode === 'rename' && active ? active.name : '';
+    open('<form id="vpc-form" novalidate data-mode="' + mode + '"><h2>' + (mode === 'rename' ? 'Rename policy client' : 'Add policy client') + '</h2>'
+      + '<p class="mu">' + (mode === 'rename' ? 'Change the name shown in the Policy client list.' : 'Create a separate policy portfolio for this client.') + '</p>'
+      + '<label for="vpc-name">Client name</label><input id="vpc-name" type="text" maxlength="30" autocomplete="off" value="' + esc(name) + '" placeholder="e.g. Meera">'
+      + '<div class="er" id="vpc-err" role="alert"></div><div class="tb"><button type="button" id="vpc-cancel">Cancel</button><button type="submit" class="p">' + (mode === 'rename' ? 'Save name' : 'Add client') + '</button></div></form>');
+    dg.classList.remove('hf');
+    $$('vpc-cancel').onclick = function () { dg.close(); };
+    $$('vpc-name').focus(); $$('vpc-name').select();
+  }
+  document.addEventListener('submit', function (e) {
+    var form = e.target && e.target.id === 'vpc-form' ? e.target : null; if (!form) return;
+    e.preventDefault();
+    var active = V.clients().filter(function (c) { return c.active; })[0];
+    var result = form.dataset.mode === 'rename' && active ? V.renameClient(active.id, $$('vpc-name').value) : V.addClient($$('vpc-name').value);
+    if (!result.ok) { $$('vpc-err').textContent = result.error; return; }
+    dg.close(); refresh();
+  });
   function listRefresh() { var el = $$('vp-list'); if (!el) return; var t = today(), q = ST.q.trim().toLowerCase(), P = sorted(); el.innerHTML = listBody(P.filter(function (o) { return (ST.sf === 'all' || V.status(o.x, t) === ST.sf) && (!q || [o.x.name, o.x.insurer, o.x.no, o.x.note].join(' ').toLowerCase().indexOf(q) > -1); }), P.length); }
   function act(a, b) {
     var i = b.dataset.i != null ? +b.dataset.i : null;
@@ -411,7 +446,8 @@
     }
   }
   document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('[data-vp],[data-vpp]'); if (!b) return;
+    var b = e.target.closest && e.target.closest('[data-vp],[data-vpp],[data-vpc]'); if (!b) return;
+    if (b.dataset.vpc) { clientForm(b.dataset.vpc); return; }
     if (b.dataset.vpp) { if (typeof UI !== 'undefined' && UI.tab === TAB) go(b.dataset.vpp); return; }
     act(b.dataset.vp, b);
   });
@@ -423,6 +459,11 @@
   document.addEventListener('change', function (e) {
     var t = e.target; if (!t) return;
     if (t.dataset && t.dataset.vpset) { V.setUsedBy(t.dataset.vpset, t.checked); toast((t.dataset.vpset === 'goal' ? 'Goal Planner' : 'Retirement Planner') + (t.checked ? ' now uses your policy data' : ' no longer uses your policy data')); render(); return; }
+    if (t.id === 'vp-client') { if (V.selectClient(t.value)) render(); return; }
+    if (t.dataset && t.dataset.vpclient) {
+      var selected = Array.from(document.querySelectorAll('[data-vpclient="' + t.dataset.vpclient + '"]:checked')).map(function (x) { return x.value; });
+      V.setClients(t.dataset.vpclient, selected); render(); return;
+    }
     var m = { 'vp-sf': ['sf'], 'vp-prP': ['prP'], 'vp-prS': ['prS'], 'vp-pyP': ['pyP'], 'vp-pyK': ['pyK'], 'vp-pyS': ['pyS'] }[t.id];
     if (m) { ST[m[0]] = t.value; if (t.id === 'vp-prP' || t.id === 'vp-prS') ST.prN = 60; if (t.id.indexOf('vp-py') === 0) ST.pyN = 60; refresh(); }
   });

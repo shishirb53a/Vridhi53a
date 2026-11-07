@@ -13,12 +13,14 @@ tests/policy-core.test.js   unit tests for the core (node tests/policy-core.test
 
 ## Rules
 
-1. **One owner.** Only `policy-core.js` reads or writes `S.policies`. Nothing else in the app touches it.
-2. **Other modules call the API, only when they need it.** The Goal Planner and Retirement Planner each have a switch
-   (Policies › Dashboard › *Use policy data in other modules*). With a switch off, the core hands that module nothing.
+1. **One owner.** Only `policy-core.js` reads or writes `S.polClients` and its policy records. Legacy `S.policies` values are
+   migrated into a Policy client when a plan is loaded.
+2. **Policy clients are independent.** Each Policy client owns its own policies. In Policies › Dashboard › *Use policy data
+   in other modules*, enable a planner and select the planner clients that should receive this Policy client's payouts.
+   The Goal Planner and Retirement Planner client lists and selections are independent.
 3. **Premiums stay inside this module.** They never change a Goal Planner or Retirement Planner number.
-4. **Policy data is saved with the plan** (`S.policies` in the plan document), so backup, sync, undo and per-client plans work
-   unchanged. No database change is needed.
+4. **Policy clients are saved with the plan** (`S.polClients` in the plan document), so backup, sync, undo and per-client
+   plans work without a database change.
 5. **After editing `index.html` or these files, run** `node tests/policy-core.test.js`.
 
 ## Data (one policy)
@@ -44,9 +46,9 @@ Plans saved before this module existed contain only the first four rows and load
 | `receivedBy(s, row)`, `receivedByYear(s, row)` | Goal Planner dashboard: payouts received so far, year by year |
 | `hasPayouts('goal')` | report columns: show policy columns only when there is something to show |
 | `planStreams(calendarYear)` (also `window.__vrExtraStreams`) | Retirement Planner engine: fixed-rupee income by calendar year |
-| `cleanState(doc, s)` | the plan's `clean()`: validates policies and the two switches when a plan is loaded |
+| `cleanState(doc, s)`, `cleanClients(doc, source, s)` | the plan's `clean()`: migrates legacy policies and validates Policy clients on load |
 
-Inside the module: `list() get() put() remove() setPaid() markPaidUpTo()`, `schedule() premSchedule() totals() premTotals()
+Inside the module: `clients() addClient() renameClient() selectClient() setClients()`, `list() get() put() remove() setPaid() markPaidUpTo()`, `schedule() premSchedule() totals() premTotals()
 maturity() status()`, `events() summary() byFinancialYear() payoutMatrix()`.
 
 ## Adding another section like this

@@ -3,8 +3,8 @@
 
    The SINGLE SOURCE OF TRUTH for insurance-policy data and for every policy calculation.
 
-   * Data      : the policies live in the plan document (S.policies) so they are saved, synced, backed up and undone
-                 together with the rest of the plan. Nothing outside this file reads or writes S.policies directly.
+   * Data      : policies live in client profiles in the plan document (S.polClients), so they are saved, synced,
+                 backed up and undone with the rest of the plan. Legacy S.policies data is migrated on load.
    * Other modules (Goal Planner, Retirement Planner, reports) only ever call the small API at the bottom of this file
      (window.VRPolicy). Each one can be switched off per module in the Policies > Dashboard settings.
    * Premiums are tracked here for the Policies module only; they never change a Goal Planner or Retirement Planner
@@ -47,7 +47,86 @@
   function fyStart(ix) { return Math.floor((ix - 3) / 12); }               /* financial year (1 April) a month index falls in */
   function fyLabel(y) { return 'FY ' + y + '-' + String(y + 1).slice(2); }
   function cur() { return typeof S !== 'undefined' ? S : null; }           /* the open plan (S is the app's state) */
-  function all() { var s = cur(); return s && Array.isArray(s.policies) ? s.policies : []; }
+  function policyStore(s) { s = s || cur(); return s && s.polClients && s.polClients.profiles ? s.polClients : null; }
+  function activeClient(s) {
+    var P = policyStore(s);
+    return P && P.profiles[P.active] ? P.profiles[P.active] : null;
+  }
+  function all() {
+    var p = activeClient();
+    if (p) return p.policies;
+    var s = cur(); return s && Array.isArray(s.policies) ? s.policies : [];
+  }
+  function plannerClients(s, who) {
+    s = s || cur();
+    var P = s && (who === 'goal' ? s.gpp : s.fhp);
+    return P && P.profiles ? Object.keys(P.profiles).map(function (id) { return { id: id, name: P.profiles[id].name }; }) : [];
+  }
+  function policiesFor(who, s) {
+    s = s || cur();
+    if (!s) return [];
+    var moduleOn = usedBy(who, s);
+    if (!moduleOn) return [];
+    var store = policyStore(s);
+    if (!store) return Array.isArray(s.policies) ? s.policies : [];
+    var planner = who === 'goal' ? s.gpp : s.fhp, targetId = planner && planner.active;
+    if (!targetId) return [];
+    return Object.keys(store.profiles).reduce(function (out, id) {
+      var p = store.profiles[id], share = p.share && p.share[who];
+      if (p.enabled && p.enabled[who] && Array.isArray(share) && share.indexOf(targetId) >= 0) out = out.concat(p.policies);
+      return out;
+    }, []);
+  }
+  function clientSlug(name) { return String(name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'client'; }
+  function clientName(name) { return String(name == null ? '' : name).replace(/\s+/g, ' ').trim().slice(0, 30); }
+  function uniqueClientId(name, profiles) {
+    var base = clientSlug(name), id = base, n = 2;
+    while (id in Object.prototype || Object.prototype.hasOwnProperty.call(profiles, id)) id = base.slice(0, 20) + '-' + n++;
+    return id;
+  }
+  function clients() {
+    var s = cur(), P = policyStore(s);
+    if (s && !P) {
+      var id = 'my-policies';
+      s.polClients = { active: id, profiles: { [id]: {
+        name: 'My policies', policies: clean(s.policies), share: { goal: [], retirement: [] },
+        enabled: { goal: false, retirement: false }, created: Date.now()
+      } } };
+      P = s.polClients;
+    }
+    return P ? Object.keys(P.profiles).map(function (id) { return Object.assign({ id: id, active: id === P.active }, P.profiles[id]); }) : [];
+  }
+  function selectClient(id) {
+    var s = cur(), P = policyStore(s);
+    if (!P || !Object.prototype.hasOwnProperty.call(P.profiles, id)) return false;
+    P.active = id; persist(); return true;
+  }
+  function addClient(name) {
+    var s = cur(), P = policyStore(s), nm = clientName(name);
+    if (!P) return { ok: false, error: 'Policy clients are not ready.' };
+    if (!nm) return { ok: false, error: 'Enter a client name.' };
+    if (Object.keys(P.profiles).length >= 30) return { ok: false, error: 'You can keep up to 30 policy clients.' };
+    if (Object.keys(P.profiles).some(function (id) { return P.profiles[id].name.toLowerCase() === nm.toLowerCase(); })) return { ok: false, error: 'A policy client with this name already exists.' };
+    var id = uniqueClientId(nm, P.profiles);
+    P.profiles[id] = { name: nm, policies: [], share: { goal: [], retirement: [] }, enabled: { goal: false, retirement: false }, created: Date.now() };
+    P.active = id; persist();
+    return { ok: true, client: P.profiles[id], id: id };
+  }
+  function renameClient(id, name) {
+    var P = policyStore(), nm = clientName(name);
+    if (!P || !P.profiles[id]) return { ok: false, error: 'That policy client no longer exists.' };
+    if (!nm) return { ok: false, error: 'Enter a client name.' };
+    if (Object.keys(P.profiles).some(function (key) { return key !== id && P.profiles[key].name.toLowerCase() === nm.toLowerCase(); })) return { ok: false, error: 'A policy client with this name already exists.' };
+    P.profiles[id].name = nm; persist(); return { ok: true };
+  }
+  function setClients(who, ids) {
+    var P = policyStore(), p = activeClient(), available = plannerClients(cur(), who);
+    if (!P || !p || (who !== 'goal' && who !== 'retirement')) return false;
+    var valid = {};
+    available.forEach(function (c) { valid[c.id] = true; });
+    p.share[who] = Array.from(new Set((Array.isArray(ids) ? ids : []).map(String))).filter(function (id) { return valid[id]; });
+    persist(); return true;
+  }
 
   /* ---------- schedules ---------- */
   /* payouts: `amt` every period from `start` for `yrs` years, then the optional maturity `lump` on start + yrs years */
@@ -110,21 +189,25 @@
   /* ---------- consumer settings: every other module can be switched off ---------- */
   function usedBy(who, s) {
     s = s || cur(); if (!s) return true;
+    var p = activeClient(s);
+    if (p && p.enabled && typeof p.enabled[who] === 'boolean') return p.enabled[who];
     return who === 'retirement' ? s.polFh !== false : who === 'goal' ? s.polGp !== false : true;
   }
   function setUsedBy(who, on) {
-    var s = cur(); if (!s) return;
-    if (who === 'retirement') s.polFh = !!on; else if (who === 'goal') s.polGp = !!on;
+    var s = cur(); if (!s || (who !== 'retirement' && who !== 'goal')) return;
+    var p = activeClient(s);
+    if (p) { p.enabled[who] = !!on; persist(); return; }
+    if (who === 'retirement') s.polFh = !!on; else s.polGp = !!on;
     persist();
   }
   /* true when the policies should show up in the Goal Planner (there is something to pay out and the module is switched on) */
   function hasPayouts(who) {
-    return usedBy(who || 'goal') && all().some(function (p) { return p.amt > 0 || p.lump > 0; });
+    return policiesFor(who || 'goal').some(function (p) { return p.amt > 0 || p.lump > 0; });
   }
 
   /* ---------- API for the Goal Planner: payouts by plan row (row 1 = today carries none; a row is a financial year from 1 April) ---------- */
   function rowOf(ix, s) { return Math.floor((ix - 3) / 12) - s.start + 2; }
-  function listOf(s) { return s && s.polGp !== false ? (s.policies || []) : []; }
+  function listOf(s) { return policiesFor('goal', s); }
   function applyToRows(s, rows) {
     rows.forEach(function (r) { r.pay = 0; r.payR = 0; r.payL = 0; });
     listOf(s).forEach(function (p) {
@@ -162,9 +245,9 @@
 
   /* ---------- API for the Retirement Planner: fixed-rupee income streams by calendar year (the planner starts next calendar year) ---------- */
   function planStreams(cy) {
-    var s = cur(); if (!s || s.polFh === false) return [];
+    var s = cur(); if (!s) return [];
     var out = [];
-    all().forEach(function (p, k) {
+    policiesFor('retirement', s).forEach(function (p, k) {
       var by = {}, lo = 1e9, hi = 0;
       schedule(p).forEach(function (e) { var y = Math.floor(e.ix / 12); if (y <= cy) return; by[y] = (by[y] || 0) + e.amt; lo = Math.min(lo, y); hi = Math.max(hi, y); });
       if (hi) out.push({ k: 100 + k, name: 'Policy: ' + p.name, amount: 0, g: 0, byYear: by, fromY: lo, toY: hi });
@@ -275,11 +358,78 @@
     });
     return out;
   }
-  /* the plan's clean() hands over its raw document here: policies plus the two "use in other modules" switches */
+  /* The plan cleaner first loads legacy policy fields; cleanClients() then migrates them to client profiles. */
   function cleanState(o, s) {
     s.policies = clean(o && o.policies);
     s.polFh = !o || o.polFh !== false;
     s.polGp = !o || o.polGp !== false;
+  }
+  function cleanClients(raw, source, s) {
+    var out = {}, goalIds = {}, retirementIds = {}, names = {};
+    plannerClients(s, 'goal').forEach(function (c) { goalIds[c.id] = true; });
+    plannerClients(s, 'retirement').forEach(function (c) { retirementIds[c.id] = true; });
+    function cleanIds(ids, valid) {
+      return Array.from(new Set((Array.isArray(ids) ? ids : []).map(String))).filter(function (id) { return valid[id]; });
+    }
+    function addProfile(id, q, fallbackEnabled) {
+      if (!/^[a-z0-9][a-z0-9-]{0,23}$/.test(id) || id in Object.prototype || Object.keys(out).length >= 30 || !q || typeof q !== 'object') return;
+      var name = clientName(q.name);
+      if (!name) return;
+      var key = name.toLowerCase(), base = name, n = 2;
+      while (names[key]) { name = base.slice(0, 25) + ' (' + n++ + ')'; key = name.toLowerCase(); }
+      names[key] = true;
+      var enabled = q.enabled && typeof q.enabled === 'object' ? q.enabled : {};
+      var share = q.share && typeof q.share === 'object' ? q.share : {};
+      out[id] = {
+        name: name,
+        policies: clean(q.policies),
+        share: { goal: cleanIds(share.goal, goalIds), retirement: cleanIds(share.retirement, retirementIds) },
+        enabled: {
+          goal: typeof enabled.goal === 'boolean' ? enabled.goal : fallbackEnabled.goal,
+          retirement: typeof enabled.retirement === 'boolean' ? enabled.retirement : fallbackEnabled.retirement
+        },
+        created: num(q.created, 0, 9e12, 0)
+      };
+    }
+    if (raw && raw.profiles && typeof raw.profiles === 'object') {
+      Object.keys(raw.profiles).forEach(function (id) {
+        var q = raw.profiles[id];
+        addProfile(id, q, { goal: source.polGp !== false, retirement: source.polFh !== false });
+      });
+    } else {
+      var goal = s.gpp && s.gpp.profiles || {}, retirement = s.fhp && s.fhp.profiles || {}, imported = false;
+      Object.keys(goal).forEach(function (id) {
+        var q = goal[id], policies = q && q.d && clean(q.d.policies);
+        if (!policies || !policies.length) return;
+        var matchedRetirement = Object.keys(retirement).filter(function (rid) {
+          return String(retirement[rid].name || '').toLowerCase() === String(q.name || '').toLowerCase();
+        });
+        addProfile(id, {
+          name: q.name, policies: policies, share: { goal: [id], retirement: matchedRetirement },
+          enabled: { goal: source.polGp !== false, retirement: source.polFh !== false }
+        }, { goal: source.polGp !== false, retirement: source.polFh !== false });
+        imported = true;
+      });
+      if (!imported && s.policies.length) {
+        var goalActive = s.gpp && s.gpp.active, retActive = s.fhp && s.fhp.active;
+        var goalName = goalActive && goal[goalActive] && goal[goalActive].name;
+        var retName = retActive && retirement[retActive] && retirement[retActive].name;
+        addProfile(clientSlug(goalName || retName || 'My policies'), {
+          name: goalName || retName || 'My policies', policies: s.policies,
+          share: { goal: goalActive ? [goalActive] : [], retirement: retActive ? [retActive] : [] },
+          enabled: { goal: source.polGp !== false, retirement: source.polFh !== false }
+        }, { goal: source.polGp !== false, retirement: source.polFh !== false });
+      }
+    }
+    if (!Object.keys(out).length) {
+      var fallback = clientSlug('My policies'), i = 2, base = fallback;
+      while (Object.prototype.hasOwnProperty.call(out, fallback)) fallback = base.slice(0, 20) + '-' + i++;
+      out[fallback] = { name: 'My policies', policies: [], share: { goal: [], retirement: [] }, enabled: { goal: false, retirement: false }, created: Date.now() };
+    }
+    var active = raw && Object.prototype.hasOwnProperty.call(out, raw.active) ? raw.active : Object.keys(out)[0];
+    s.polClients = { active: active, profiles: out };
+    s.policies = [];
+    if (s.gpp) Object.keys(s.gpp.profiles).forEach(function (id) { if (s.gpp.profiles[id].d) s.gpp.profiles[id].d.policies = []; });
   }
 
   /* ---------- changing the data (always through here) ---------- */
@@ -328,7 +478,9 @@
     FREQ: FREQ, FREQ_NAME: PFN, STATUS: STATUS, MAX: PMAX, todayISO: todayISO, fmtDate: fmtDate, fyLabel: fyLabel, pDate: pDate,
     /* the data (read) and how to change it (write) */
     list: all, count: function () { return all().length; }, get: function (i) { return all()[i] || null; },
-    put: put, remove: remove, setPaid: setPaid, markPaidUpTo: markPaidUpTo, clean: clean, cleanState: cleanState,
+    put: put, remove: remove, setPaid: setPaid, markPaidUpTo: markPaidUpTo, clean: clean, cleanState: cleanState, cleanClients: cleanClients,
+    clients: clients, activeClient: function () { var P = policyStore(); return P ? P.active : ''; }, selectClient: selectClient,
+    addClient: addClient, renameClient: renameClient, plannerClients: plannerClients, setClients: setClients,
     /* calculations for one policy */
     schedule: schedule, premSchedule: premSchedule, totals: totals, premTotals: premTotals, maturity: maturity, status: status,
     /* calculations across policies */

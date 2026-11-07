@@ -101,4 +101,58 @@ t('cleanState sets both switches on by default and keeps an explicit off', () =>
   const s = {}; V.cleanState({ policies: [mk()] }, s); assert.strictEqual(s.polFh, true); assert.strictEqual(s.polGp, true);
   V.cleanState({ policies: [], polFh: false, polGp: false }, s); assert.strictEqual(s.polFh, false); assert.strictEqual(s.polGp, false);
 });
+t('Policy clients keep policies separate and share only with selected planner clients', () => {
+  const state = {
+    policies: [], polGp: true, polFh: true, start: 2026,
+    gpp: { active: 'goal-a', profiles: { 'goal-a': { name: 'Alice' }, 'goal-b': { name: 'Bob' } } },
+    fhp: { active: 'ret-a', profiles: { 'ret-a': { name: 'Alice' }, 'ret-b': { name: 'Bob' } } }
+  };
+  V.cleanClients({ active: 'policy-a', profiles: {
+    'policy-a': { name: 'Alice policies', policies: [mk()], share: { goal: ['goal-a'], retirement: ['ret-a'] }, enabled: { goal: true, retirement: true } },
+    'policy-b': { name: 'Bob policies', policies: [mk({ id: 'b', name: 'Bob policy', amt: 2000 })], share: { goal: ['goal-b'], retirement: ['ret-b'] }, enabled: { goal: true, retirement: true } }
+  } }, { polGp: true, polFh: true }, state);
+  win.__setS(state);
+  const rows = Array.from({ length: 20 }, () => ({}));
+  V.applyToRows(state, rows);
+  assert.strictEqual(rows[2].pay, 94000);
+  assert.strictEqual(win.__vrExtraStreams(2030)[0].name, 'Policy: Tata');
+
+  state.gpp.active = 'goal-b'; state.fhp.active = 'ret-b';
+  const bobRows = Array.from({ length: 20 }, () => ({}));
+  V.applyToRows(state, bobRows);
+  assert.strictEqual(bobRows[2].pay, 2000);
+  assert.strictEqual(win.__vrExtraStreams(2030)[0].name, 'Policy: Bob policy');
+
+  assert.ok(V.selectClient('policy-a'));
+  assert.strictEqual(V.list()[0].name, 'Tata');
+  assert.ok(V.setClients('goal', ['goal-b', 'not-a-client']));
+  assert.strictEqual(V.clients()[0].share.goal.length, 1);
+  state.gpp.active = 'goal-a';
+  const unshared = Array.from({ length: 20 }, () => ({}));
+  V.applyToRows(state, unshared);
+  assert.ok(unshared.every(r => !r.pay));
+});
+t('legacy Goal Planner policy records migrate to independent Policy clients', () => {
+  const state = {
+    policies: [], polGp: true, polFh: true,
+    gpp: { active: 'alice', profiles: { alice: { name: 'Alice', d: { policies: V.clean([mk()]) } } } },
+    fhp: { active: 'ret-alice', profiles: { 'ret-alice': { name: 'Alice' } } }
+  };
+  V.cleanClients(null, { policies: [], polGp: true, polFh: true }, state);
+  assert.strictEqual(state.policies.length, 0);
+  assert.strictEqual(state.polClients.profiles.alice.policies[0].name, 'Tata');
+  same(state.polClients.profiles.alice.share, { goal: ['alice'], retirement: ['ret-alice'] });
+});
+t('new Policy clients start empty and switching isolates their policies', () => {
+  win.__setS({ policies: [], polGp: true, polFh: true });
+  assert.strictEqual(V.clients()[0].name, 'My policies');
+  const added = V.addClient('  Alice   Smith  ');
+  assert.ok(added.ok); assert.strictEqual(V.clients().find(c => c.active).name, 'Alice Smith');
+  assert.ok(V.put(mk({ name: 'Alice policy' }), null).ok);
+  assert.ok(V.selectClient('my-policies'));
+  assert.strictEqual(V.count(), 0);
+  assert.ok(V.selectClient(added.id));
+  assert.strictEqual(V.count(), 1);
+  assert.ok(V.renameClient(added.id, 'Alice S.').ok);
+});
 console.log('\n' + n + ' checks passed' + (process.exitCode ? ' (some FAILED)' : ''));

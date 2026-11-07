@@ -15,7 +15,7 @@ const appCoreSource = fs.readFileSync(appCorePath, 'utf8');
 const coreStart = appCoreSource.indexOf('//CALC-START');
 const coreEnd = appCoreSource.indexOf('//CALC-END', coreStart);
 const engineTag = html.indexOf('<script src="modules/portfolio-calculations/engine.js?v=136"></script>');
-const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=165"></script>');
+const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=168"></script>');
 assert.ok(coreStart >= 0 && coreEnd > coreStart, 'Goal Planner core block remains clearly bounded');
 assert.ok(engineTag >= 0 && appCoreTag > engineTag, 'Calculation engine loads before app calculation adapters');
 assert.ok(!appCoreSource.slice(coreStart, coreEnd).includes('function fyInfo('), 'Financial-year schedule logic is not duplicated in app core');
