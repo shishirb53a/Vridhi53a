@@ -207,8 +207,8 @@
       return '<div class="vp-tw"><table class="vp-t" aria-label="Maturity report"><tr><th>Policy</th><th>Insurer</th><th>Maturity date</th><th class="vp-r">Maturity amount</th><th class="vp-r">Regular payouts</th><th class="vp-r">Total benefit</th><th class="vp-r">Premiums</th><th class="vp-r">Net gain</th></tr>'
         + P.map(function (o) { var m = V.maturity(o.x); return m ? '<tr><td><b>' + EN(o.x.name) + '</b></td><td>' + EN(o.x.insurer || '') + '</td><td class="nw">' + V.fmtDate(m.date) + '</td><td class="vp-r nw">' + (m.amount ? f(m.amount) : '') + '</td><td class="vp-r nw">' + (m.payouts ? f(m.payouts) : '') + '</td><td class="vp-r nw"><b>' + f(m.benefit) + '</b></td><td class="vp-r nw">' + (m.hasPremium ? f(m.premiums) : '') + '</td><td class="vp-r nw">' + (m.hasPremium ? f(m.net) : '') + '</td></tr>' : ''; }).join('') + '</table></div>';
     }
-    return '<div class="vp-tw"><table class="vp-t" aria-label="Policy summary"><tr><th>Policy</th><th>Insurer</th><th>Policy no.</th><th class="vp-r">Sum assured</th><th>Status</th><th>Premium</th><th>Payout</th><th>Maturity</th><th class="vp-r">Premiums paid</th><th class="vp-r">Total expected</th></tr>'
-      + P.map(function (o) { var x = o.x, T = V.totals(x), m = V.maturity(x), pt = V.premTotals(x); return '<tr><td><b>' + EN(x.name) + '</b></td><td>' + EN(x.insurer || '') + '</td><td>' + EN(x.no || '') + '</td><td class="vp-r nw">' + (x.sa ? f(x.sa) : '') + '</td><td>' + chip(V.status(x, t)) + '</td><td>' + esc(premLine(x)) + '</td><td>' + esc(x.amt > 0 ? f(x.amt) + ' ' + fl(x.freq).toLowerCase() : '') + '</td><td class="nw">' + (m ? V.fmtDate(m.date) : '') + '</td><td class="vp-r nw">' + (pt.count ? f(pt.paid) : '') + '</td><td class="vp-r nw"><b>' + f(T.pay + T.lump) + '</b></td></tr>'; }).join('') + '</table></div>';
+    return '<div class="vp-tw vp-fit"><table class="vp-t vp-sumt" aria-label="Policy summary"><tr><th>Policy</th><th>Insurer</th><th>Policy no.</th><th class="vp-r">Sum assured</th><th>Status</th><th>Premium</th><th>Payout</th><th>Maturity</th><th class="vp-r">Premiums paid</th><th class="vp-r">Total expected</th></tr>'
+      + P.map(function (o) { var x = o.x, T = V.totals(x), m = V.maturity(x), pt = V.premTotals(x); return '<tr><td data-label="Policy"><b>' + EN(x.name) + '</b></td><td data-label="Insurer">' + EN(x.insurer || '') + '</td><td data-label="Policy no.">' + EN(x.no || '') + '</td><td class="vp-r nw" data-label="Sum assured">' + (x.sa ? f(x.sa) : '') + '</td><td data-label="Status">' + chip(V.status(x, t)) + '</td><td data-label="Premium">' + esc(premLine(x)) + '</td><td data-label="Payout">' + esc(x.amt > 0 ? f(x.amt) + ' ' + fl(x.freq).toLowerCase() : '') + '</td><td class="nw" data-label="Maturity">' + (m ? V.fmtDate(m.date) : '') + '</td><td class="vp-r nw" data-label="Premiums paid">' + (pt.count ? f(pt.paid) : '') + '</td><td class="vp-r nw" data-label="Total expected"><b>' + f(T.pay + T.lump) + '</b></td></tr>'; }).join('') + '</table></div>';
   }
   function repCsv() {
     var t = today();
@@ -248,7 +248,7 @@
       + '<div class="hf1"><label for="pf">Frequency</label><select id="pf">' + fopts(x.freq, false) + '</select></div><div class="hf1"><label for="ps">First payout date</label><input id="ps" type="date" value="' + esc(x.start) + '" min="1990-01-01" max="2200-12-31"><small class="hh">Later payouts follow the frequency from this date.</small></div>' + hf('py', 'Duration (years)', x.yrs, 'min=1 max=60 step=1', 'How many years the regular payouts run.') + '</div></section>'
       + '<section class="hs" data-vpt="3"><h3>Maturity benefits <small>for LIC and other policies</small></h3><p class="mu">Add each benefit with its payment date and amount. Leave rows blank when there are no scheduled benefits.</p><div id="pmats">' + maturityRows(x.maturities) + '</div><button type="button" class="tbs" id="pmat-add">Add maturity benefit</button><div class="hg" style="margin-top:14px">' + hf('pl', 'Additional lump sum (\u20b9, optional)', x.lump, 'min=0 step=any', 'One lump sum one period after the regular payout term. Use the schedule above for dated or multiple maturity benefits.') + '</div></section>'
       + '<div id="pp" class="pvbox" data-vpt="4" aria-live="polite"></div><div id="pe" class="er" role="alert"></div><div class="tb"><button type="button" id="pcn">Cancel</button><button type="button" class="p" id="pnx">Next</button><button class="p">Save Policy</button></div></form>');
-    dg.classList.add('hf');
+    dg.classList.remove('vp-sch'); dg.classList.add('hf');
     var g = $$, val = function () {
       return { name: g('pn').value.replace(/\s+/g, ' ').trim(), insurer: g('pins').value.trim(), no: g('pno').value.trim(), sa: +g('psa').value || 0, note: g('pnt').value.trim(),
                ma: +g('pma').value || 0, mf: g('pmf').value, ms: g('pms').value, my: Math.round(+g('pmy').value), amt: +g('pa').value || 0, freq: g('pf').value, start: g('ps').value, yrs: Math.round(+g('py').value), lump: +g('pl').value || 0,
@@ -321,7 +321,7 @@
     var L = V.schedule(x), t = today(), T = V.totals(x);
     open('<div class="pol-sch"><h2>' + EN(x.name) + ' \u00b7 payout schedule</h2><p class="mu">' + esc(line(x) || 'No payouts: this policy only has premiums.') + '</p><div class="rsum" style="margin:10px 0"><div><span class="mu">Regular payouts</span><b>' + f(T.pay) + '</b></div><div><span class="mu">Maturity lump sum</span><b>' + f(T.lump) + '</b></div><div><span class="mu">Total expected</span><b>' + f(T.pay + T.lump) + '</b></div></div>'
       + '<div class="tw"><table class="vp-t" aria-label="Payout schedule"><tr><th>#</th><th>Date</th><th>Financial year</th><th>Type</th><th>Amount</th><th>Status</th></tr>' + L.map(function (e) { return '<tr><td>' + e.n + '</td><td class="nw">' + V.fmtDate(e.date) + '</td><td class="nw">' + V.fyLabel(Math.floor((e.ix - 3) / 12)) + '</td><td>' + (e.kind === 'maturity' ? 'Maturity benefit' : e.kind === 'lump' ? 'Maturity lump sum' : 'Payout') + '</td><td class="nw"><b>' + f(e.amt) + '</b></td><td>' + (e.date <= t ? 'Received' : 'Upcoming') + '</td></tr>'; }).join('') + '</table></div><div class="tb"><button type="button" class="p" id="psc">Close</button></div></div>');
-    dg.classList.add('hf'); $$('psc').onclick = function () { dg.close(); };
+    dg.classList.add('hf', 'vp-sch'); $$('psc').onclick = function () { dg.close(); };
   }
   function premBody(i) {
     var x = V.get(i); if (!x || !x.prem) return '<p class="mu">This policy has no premium plan.</p>';
@@ -335,7 +335,7 @@
   function premsch(i) {
     var x = V.get(i); if (!x) return;
     open('<div class="pol-sch" data-pi="' + i + '"><h2>' + EN(x.name) + ' \u00b7 premiums</h2><div id="vp-psd">' + premBody(i) + '</div><div class="tb"><button type="button" class="p" id="psc">Close</button></div></div>');
-    dg.classList.add('hf'); $$('psc').onclick = function () { dg.close(); };
+    dg.classList.add('hf', 'vp-sch'); $$('psc').onclick = function () { dg.close(); };
   }
   function redrawPremDlg() { var w = $$('vp-psd'), h = w && w.closest('[data-pi]'); if (w && h && dg.open) w.innerHTML = premBody(+h.dataset.pi); }
 
@@ -346,7 +346,7 @@
       + '<p class="mu">' + (mode === 'rename' ? 'Change the name shown in the Policy client list.' : 'Create a separate policy portfolio for this client.') + '</p>'
       + '<label for="vpc-name">Client name</label><input id="vpc-name" type="text" maxlength="30" autocomplete="off" value="' + esc(name) + '" placeholder="e.g. Meera">'
       + '<div class="er" id="vpc-err" role="alert"></div><div class="tb"><button type="button" id="vpc-cancel">Cancel</button><button type="submit" class="p">' + (mode === 'rename' ? 'Save name' : 'Add client') + '</button></div></form>');
-    dg.classList.remove('hf');
+    dg.classList.remove('hf', 'vp-sch');
     $$('vpc-cancel').onclick = function () { dg.close(); };
     $$('vpc-name').focus(); $$('vpc-name').select();
   }
