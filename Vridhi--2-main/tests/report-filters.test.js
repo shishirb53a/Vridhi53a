@@ -13,7 +13,7 @@ const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js')
 const reportShell = appCore.indexOf('function repRows()');
 const moduleScript = html.indexOf('<script src="modules/report-filters/report-filters.js?v=134"></script>');
 const reportColumns = html.indexOf('<script src="modules/report-columns/report-columns.js?v=127"></script>');
-const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=168"></script>');
+const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=169"></script>');
 assert.ok(reportShell >= 0 && appCoreTag >= 0 && moduleScript > appCoreTag && reportColumns > moduleScript, 'Report filters load after the report shell and before report-columns module');
 assert.ok(!html.includes('Reports: multi-select dropdowns for asset class and holding'), 'Report filter logic is no longer duplicated inline');
 assert.ok(html.includes('<style>@import url("modules/report-filters/report-filters.css?v=134");</style>'), 'Filter styles remain at their original cascade position');

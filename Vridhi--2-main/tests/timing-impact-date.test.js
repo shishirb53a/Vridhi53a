@@ -42,7 +42,8 @@ const left = (start, yr, clock) => {
   };
   try { return new Function('S', ln + '; return yrsLeft;')({ start })({ yr }); } finally { global.Date = RealDate; }
 };
-assert.strictEqual(left(2026, 5, '2026-11-07T06:30:00Z'), '4.3 years left', '1 Apr 2031 seen on 7 Nov 2026 is about 4.3 years away, not 5');
+assert.strictEqual(left(2026, 5, '2026-11-07T06:30:00Z'), '4.4 years left', '1 Apr 2031 seen on 7 Nov 2026 is 4 years 4 months 25 days (4.4 years) away, not 5 and not 4.3');
+assert.strictEqual(left(2026, 5, '2026-11-08T06:30:00Z'), '4.4 years left', '8 Nov 2026 to 1 Apr 2031 is 1605 days = 4.39 years');
 assert.strictEqual(left(2026, 5, '2026-04-01T06:30:00Z'), '5 years left', 'on the plan balance date it is exactly 5 years');
 assert.strictEqual(left(2026, 5, '2027-03-20T06:30:00Z'), '4 years left', 'it counts down as time passes');
 assert.strictEqual(left(2026, 6, '2027-04-01T06:30:00Z'), '5 years left');
