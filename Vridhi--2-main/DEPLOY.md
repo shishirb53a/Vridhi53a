@@ -35,7 +35,7 @@ migrated to **Financial Adviser**; other existing logins receive **Client / Indi
 sign-ups should remain off.
 
 1. In Supabase SQL Editor, run the latest `supabase/schema.sql` (safe to re-run). It creates the five
-   built-in user types, the section-access permissions, and migrates existing accounts.
+   built-in user types, the section-access and database-backup permissions, and migrates existing accounts.
 2. Assign your account **Super Admin**. Replace the email below and run this query:
 
        update public.app_user_roles ur set role_id = 'super_admin', assigned_at = now()
@@ -151,6 +151,16 @@ Each report has one name, used on its tab, its page title, the CSV window, Setti
 
 The Annual Portfolio Projection no longer has a separate **Financial year** column: it repeated the **As on** date of the same row (the financial year is shown with the date on the phone cards and is still searchable). The Monthly Portfolio Projection keeps its Financial year column because a month is not the same thing as a year.
 
+## 3h. Full PostgreSQL backups and restore
+
+The **Settings → Database backups** panel creates full server-side PostgreSQL bundles, uploads existing bundles into history, downloads them, and restores a selected bundle after confirmation. It is separate from **Export backup**, which only exports the signed-in browser workspace as JSON.
+
+The feature requires a trusted server because native `pg_dump`, `pg_dumpall`, `pg_restore`, and `psql` cannot run in this static site or a Supabase Edge Function. Deploy [backup-service/README.md](backup-service/README.md) on a secured host with native client tools matching the database major version, a direct database connection, a persistent encrypted backup volume, and HTTPS. Configure its `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and pinned `ALLOWED_ORIGINS` server-side. Never place the database URL or database password in `config.js`. Set `databaseBackupUrl` in `config.js` to the service's HTTPS URL.
+
+Run the latest `supabase/schema.sql`. Super Admin and Admin receive `manage_database_backups`; other roles do not by default. Both the UI and service enforce this permission. Keep the service to one replica, monitor its storage, and test a restore against a disposable database before using production data. Global roles and database objects restore in separate phases, so a failed restore can leave changes behind.
+
+**Supabase limitation:** Supabase-managed PostgreSQL generally does not grant the superuser privileges required by `pg_dumpall --globals-only` to read global roles or to restore managed roles. This service refuses to label a database-only dump as complete, so backup creation or restore may be unavailable on standard Supabase projects. The requested full roles-inclusive utility workflow requires a PostgreSQL host that grants the necessary global-role dump/restore privileges. Otherwise use the provider's supported backup and restore process, understanding that it is not this native roles-inclusive feature.
+
 ## Version
 The version (`2.8.0.x`) shows next to the Vriddhi name and under the sign-in box. GitHub Pages generates `x` from the workflow run number, starting after build 150; each push to `main` or manual deployment advances it. In **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions** once. The workflow then publishes the generated build metadata and matching script cache keys without needing a personal access token. If you still see an older number after deployment, hard-refresh (Ctrl+Shift+R) and confirm the latest **Deploy to GitHub Pages** workflow completed successfully.
 
@@ -163,7 +173,7 @@ The version (`2.8.0.x`) shows next to the Vriddhi name and under the sign-in box
 
 ## 5. Running it
 - **Backups:** Supabase free projects have limited backups and can pause when unused. For real client data
-  use a paid plan with daily backups (check Supabase's current terms), and use Settings, Export backup now and then.
+   use a paid plan with daily backups (check Supabase's current terms). Settings → Export backup is a per-login JSON copy; the full database backup service is described in step 3h.
 - **Another financial adviser:** create their account under Authentication, Users, then run this query
   with their email (or create them from Settings, Users if your assigned permissions allow it):
 

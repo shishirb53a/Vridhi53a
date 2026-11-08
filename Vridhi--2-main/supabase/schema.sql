@@ -97,6 +97,7 @@ insert into public.app_permissions (permission_key, description) values
   ('manage_users', 'Create, update and remove user accounts'),
   ('assign_roles', 'Assign roles to user accounts'),
   ('manage_roles', 'Create and manage custom user types'),
+  ('manage_database_backups', 'Create, restore and download full PostgreSQL backups'),
   ('manage_system_roles', 'Assign and manage Super Admin accounts'),
   ('access_goal_planner', 'Open the Goal Planner section'),
   ('access_retirement_planner', 'Open the Retirement Planner section'),
@@ -119,7 +120,7 @@ on conflict do nothing;
 
 insert into public.app_role_permissions (role_id, permission_key) values
   ('admin', 'read_data'), ('admin', 'write_data'), ('admin', 'manage_users'),
-  ('admin', 'assign_roles'), ('admin', 'manage_roles'),
+  ('admin', 'assign_roles'), ('admin', 'manage_roles'), ('admin', 'manage_database_backups'),
   ('admin', 'access_goal_planner'), ('admin', 'access_retirement_planner'),
   ('admin', 'access_policies'), ('admin', 'access_settings'),
   ('financial_adviser', 'read_data'), ('financial_adviser', 'write_data'),

@@ -7,7 +7,7 @@ ${reportColumns()}
 ${snapshots()}
 <div class="card"><h2>Appearance & backup</h2><div class="r"><div><label for="th">Display mode</label><select id="th">${['system','light','dark'].map(t=>`<option ${t===S.theme?'selected':''}>${t}</option>`).join('')}</select></div><div><label for="lsel">Language</label><select id="lsel">${LANGS.map(l=>`<option value="${l[0]}" ${l[0]===S.lang?'selected':''}>${l[1]}</option>`).join('')}</select></div></div>
 <div class="sub2">Colour theme</div>${colourTheme()}
-${appearance()}<div class="sub2">Backup</div><div class="acts"><button id="ex">Export backup</button><button id="im">Import backup</button></div>
+${appearance()}${window.VRDatabaseBackups?window.VRDatabaseBackups.render():''}<div class="sub2">Backup</div><div class="acts"><button id="ex">Export backup</button><button id="im">Import backup</button></div>
 <div class="sub2">Danger zone</div><div class="acts"><button class="d" id="rs">Reset to sample data</button><button class="d" id="clr">Clear all data</button></div><div id="se" class="er" role="alert"></div></div>`}
 window.VRSettings={render:settings};
 })();
