@@ -7,5 +7,6 @@ window.VR_CFG = {
   idleMinutes: 5,       // automatic sign-out after five idle minutes
   pollSeconds: 20,      // how often another device's changes are picked up
   usersFunction: "manage-users", // name of the Edge Function that creates client logins (see DEPLOY.md, step 3b)
+  aiFunction: "vriddhi-agent", // read-only plan assistant Edge Function (see DEPLOY.md)
   databaseBackupUrl: ""  // URL of the trusted native PostgreSQL backup service (see DEPLOY.md)
 };

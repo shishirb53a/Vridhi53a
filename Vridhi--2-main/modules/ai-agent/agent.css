@@ -1,0 +1,16 @@
+#vr-ai-launch{position:fixed;right:20px;bottom:20px;z-index:20;border:0;border-radius:999px;padding:12px 18px;background:var(--ac);color:var(--ac2);font-weight:700;box-shadow:0 6px 24px #0003}
+#vr-ai-panel{position:fixed;right:20px;bottom:78px;z-index:20;width:min(390px,calc(100vw - 24px));height:min(560px,calc(100dvh - 110px));display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:16px;background:var(--card);color:var(--tx);box-shadow:0 12px 42px #0003;overflow:hidden}
+#vr-ai-panel[hidden],#vr-ai-launch[hidden]{display:none}
+.vr-ai-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--bd)}
+.vr-ai-head h2{margin:0;font-size:15px}
+.vr-ai-head button{border:0;font-size:20px;padding:2px 8px}
+.vr-ai-intro{margin:0;padding:9px 14px;color:var(--mu);font-size:11px;border-bottom:1px solid var(--bd)}
+.vr-ai-messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.vr-ai-message{max-width:92%;padding:9px 11px;border-radius:12px;background:var(--bg);white-space:pre-wrap;overflow-wrap:anywhere}
+.vr-ai-message.user{align-self:flex-end;background:color-mix(in srgb,var(--ac) 16%,var(--card))}
+.vr-ai-message.error{color:var(--er)}
+.vr-ai-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--bd)}
+.vr-ai-form textarea{resize:none;min-height:44px;max-height:120px;flex:1}
+.vr-ai-form button{align-self:flex-end}
+.vr-ai-form button:disabled{opacity:.55;cursor:wait}
+@media(max-width:720px){#vr-ai-launch{right:12px;bottom:calc(68px + env(safe-area-inset-bottom,0px));font-size:14px}#vr-ai-panel{right:12px;bottom:calc(124px + env(safe-area-inset-bottom,0px));height:min(560px,calc(100dvh - 160px))}}

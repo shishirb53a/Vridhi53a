@@ -81,6 +81,25 @@ even by selecting its tab directly. These permissions control section access; `r
 - Assign another Super Admin only through an authorized account; test that ordinary admins cannot do so.
 - Check Edge Function logs if an administration request reports an error.
 
+## Ask Vriddhi AI (read-only plan assistant)
+The optional **Ask Vriddhi AI** button sends the open plan's holding names, balances, contributions,
+return assumptions, retirement age and target corpus, together with your question, to the
+`vriddhi-agent` Edge Function. The function verifies the signed-in user's `read_data` permission
+before forwarding that data to Anthropic Claude. Claude can call only four read-only calculation tools;
+the function does not write plan data. Projections use a simplified annual model and are estimates,
+not financial advice. The chat explains that plan data is sent to the configured AI provider.
+
+1. Create an Anthropic API key.
+2. Deploy `supabase/functions/vriddhi-agent/index.ts` as an Edge Function named `vriddhi-agent`
+   with JWT verification enabled.
+3. Set the Edge Function secret `ANTHROPIC_API_KEY` to your key. Optionally set `ANTHROPIC_MODEL`
+   (default: `claude-haiku-4-5-20251001`) and `ALLOWED_ORIGIN` to your site's origin.
+4. Ensure the `read_data` role permission has been installed by running the latest `supabase/schema.sql`.
+   No schema changes are required.
+
+The browser never receives the Anthropic key. Both the UI and function check for `read_data`; the
+function repeats the check on every request.
+
 ## 3c. Change password (every login, built in)
 Each signed-in person has a **Password** button at the top right, next to Sign out.
 They enter the current password, then the new one twice (8 to 72 characters; accounts with user-management permission require 14 or more). The current password is checked first.
