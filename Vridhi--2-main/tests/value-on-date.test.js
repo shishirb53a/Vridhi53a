@@ -15,7 +15,7 @@ const app = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'u
 const columns = fs.readFileSync(path.join(root, 'modules', 'report-columns', 'report-columns.js'), 'utf8');
 const coreStart = app.indexOf('//CALC-START');
 const coreEnd = app.indexOf('//CALC-END', coreStart);
-const moduleTag = '<script src="modules/value-on-date/value-on-date.js?v=1"></script>';
+const moduleTag = '<script src="modules/value-on-date/value-on-date.js?v=2"></script>';
 const styleTag = '<style>@import url("modules/value-on-date/value-on-date.css?v=1");</style>';
 const appTag = '<script src="modules/app-core/app.js?v=171"></script>';
 const columnTag = '<script src="modules/report-columns/report-columns.js?v=128"></script>';
@@ -30,6 +30,8 @@ assert.ok(monthly.includes('window.monthData=function(state)') && monthly.includ
   'Monthly projection exposes its engine rows for a selected plan and calendar month');
 assert.ok(app.includes("UI.rv==='vdate'&&window.repValueOnDate") && columns.includes("vdate:{fixed:['name','val']"),
   'The report is registered in Goal Planner and existing report-column preferences');
+assert.ok(source.includes('window.rsDrops()') && source.includes('<div id="rr">'),
+  'Value on Date uses the shared report filters and report-columns host');
 
 const listeners = {};
 const plan = {
@@ -39,6 +41,7 @@ const plan = {
   state: {
     start: 2026,
     end: 2027,
+    ret: 60,
     grat: { rem: 0 },
     members: [{ age: 40 }],
     assets: [
@@ -74,10 +77,11 @@ const context = {
   S,
   VRPolicy: policy,
   document: { addEventListener(name, callback) { listeners[name] = callback; } },
-  sessionStorage: { getItem() { return null; }, setItem() {} },
+  sessionStorage: { getItem() { return '2026-04-01'; }, setItem() {} },
   ymdLoc: value => String(value || '').slice(0, 10),
   fdd: value => String(value || '').slice(0, 10),
   rf: value => '₹ ' + String(value),
+  setTimeout() {},
   Date,
   Math,
   JSON,
@@ -85,6 +89,30 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(source, context);
+
+context.S.assets = plan.state.assets;
+context.S.gpp = { active: plan.id, profiles: { [plan.id]: { name: plan.name, d: plan.state } } };
+context.UI = { rsel: [] };
+context.window.repSel = () => {
+  const idx = context.S.assets.map((asset, index) => index)
+    .filter(index => context.UI.rsel === null || context.UI.rsel.includes(String(context.S.assets[index].id)));
+  return { all: context.UI.rsel === null || idx.length === context.S.assets.length,
+    none: context.UI.rsel !== null && idx.length === 0, idx };
+};
+context.window.repNone = () => '<div class="em">Please select at least one investment.</div>';
+context.window.rsDrops = () => '<div class="msds">shared filters</div>';
+context.window.rptInfo = () => '';
+context.window.rptCsv = () => '<button id="csv">Copy as CSV</button>';
+context.document.getElementById = () => null;
+const emptyReport = context.window.repValueOnDate();
+assert.ok(emptyReport.includes('shared filters') && emptyReport.includes('Please select at least one investment.'),
+  'The report renders shared filters and the existing empty state when no holding is selected');
+assert.ok(!emptyReport.includes('Total value on'), 'The empty state does not show unfiltered report totals');
+context.UI.rsel = ['3'];
+const selectedCsv = context.window.valueOnDateCSV();
+assert.ok(selectedCsv.includes('Snapshot holding,Debt,30,100.00%,Projected'),
+  'CSV exports only selected holdings and calculates their share of the selected total');
+assert.ok(selectedCsv.includes('Total,,30,100.00%,'), 'CSV total matches the selected holding value');
 
 const api = window.VRValueDate;
 assert.ok(api.parseDate('2024-02-29'), 'Leap-day calendar dates are valid');
@@ -106,6 +134,11 @@ assert.strictEqual(result.allHoldings, 3, 'The denominator includes all current 
 assert.strictEqual(result.excluded, 1, 'The excluded holding count is returned');
 assert.strictEqual(result.notDated, 1, 'Holdings without an entry date are reported');
 assert.strictEqual(result.total, 55, 'Only eligible holdings contribute to the total');
+
+const selected = api.compute('2026-04-01', [plan], false, undefined, ['3']);
+assert.strictEqual(selected.holdings, 1, 'Only the selected holding is counted');
+assert.strictEqual(selected.allHoldings, 1, 'The holding count denominator uses selected holdings');
+assert.strictEqual(selected.total, 30, 'The total uses only the selected holding value');
 
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 const enteredPlan = {

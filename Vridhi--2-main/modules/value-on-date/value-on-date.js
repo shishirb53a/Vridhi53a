@@ -92,10 +92,12 @@ function model(plan){
  var md=window.monthData(copy),next={signature:signature,rows:md.rows||[],assets:plan.state.assets||[],result:md};
  ST.models[plan.id]=next;return next
 }
-function planRows(plan,date,allowSnapshots,snapshotAsOf){
- var state=plan.state||{},assets=state.assets||[],b=bounds(state),rows=[],excluded=0,notDated=0,mod=model(plan);
- if(date<b.min||date>b.max)return{rows:rows,excluded:0,notDated:0,total:assets.length,outside:true,policy:0,policyOn:false};
+function planRows(plan,date,allowSnapshots,snapshotAsOf,selectedIds){
+ var state=plan.state||{},assets=state.assets||[],selectedAssets=selectedIds?assets.filter(function(asset){return selectedIds.indexOf(String(asset.id))>-1}):assets,
+ b=bounds(state),rows=[],excluded=0,notDated=0,mod=model(plan);
+ if(date<b.min||date>b.max)return{rows:rows,excluded:0,notDated:0,total:selectedAssets.length,outside:true,policy:0,policyOn:false};
  assets.forEach(function(asset,index){
+  if(selectedIds&&selectedIds.indexOf(String(asset.id))<0)return;
   var ca=asset.ca?((typeof ymdLoc==='function'?ymdLoc(asset.ca):String(asset.ca).slice(0,10))):'';
   if(ca&&ca>date){excluded++;return}
   if(!ca)notDated++;
@@ -107,17 +109,17 @@ function planRows(plan,date,allowSnapshots,snapshotAsOf){
   rows.push({client:plan.name,name:String(asset.name||'Holding'),cat:String(asset.cat||''),value:+val||0,basis:basis,id:String(asset.id),asset:asset})
  });
  var ps=policyState(plan),policyOn=!!(window.VRPolicy&&VRPolicy.hasPayouts('goal',ps)),policy=policyOn&&window.VRPolicy.receivedByDate?window.VRPolicy.receivedByDate(ps,date):0;
- return{rows:rows,excluded:excluded,notDated:notDated,total:assets.length,outside:false,policy:policy,policyOn:policyOn}
+ return{rows:rows,excluded:excluded,notDated:notDated,total:selectedAssets.length,outside:false,policy:policy,policyOn:policyOn}
 }
-function compute(date,plans,allowSnapshots,snapshotAsOf){
+function compute(date,plans,allowSnapshots,snapshotAsOf,selectedIds){
  var rows=[],excluded=0,notDated=0,total=0,outside=0,policy=0,policyOn=false;
  plans.forEach(function(plan){
-  var result=planRows(plan,date,allowSnapshots,snapshotAsOf);total+=result.total;
+  var result=planRows(plan,date,allowSnapshots,snapshotAsOf,selectedIds);total+=result.total;
   if(result.outside){outside++;return}
   rows=rows.concat(result.rows);excluded+=result.excluded;notDated+=result.notDated;policy+=result.policy;
   policyOn=policyOn||result.policyOn
  });
- if(policyOn)rows.push({client:'',name:'Policy payouts received',cat:'Policy payout',value:policy,basis:date>today()?'Projected':'Entered',id:'policy',policy:true});
+ if(policyOn&&!selectedIds)rows.push({client:'',name:'Policy payouts received',cat:'Policy payout',value:policy,basis:date>today()?'Projected':'Entered',id:'policy',policy:true});
  var sum=rows.reduce(function(n,r){return n+r.value},0),basisRows=rows.filter(function(r){return!r.policy}),actualCount=basisRows.filter(function(r){return r.basis!=='Projected'}).length,
  snapCount=basisRows.filter(function(r){return/^Snapshot /.test(r.basis)}).length,
  basis=actualCount===basisRows.length&&basisRows.length?'Actual':actualCount?'Mixed':'Projected';
@@ -133,6 +135,10 @@ function filtered(data){
  return rows
 }
 function formatMoney(value){return typeof rf==='function'?rf(value):'₹ '+Math.round(+value||0).toLocaleString('en-IN')}
+function selectedIds(){
+ var selection=window.repSel();
+ return selection.all?null:selection.idx.map(function(i){return String(S.assets[i].id)})
+}
 function snapshotMessage(plans,date){
  if(date>today()||!window.VRSB||!window.VRSB.snap||!window.VRSB.snap.values)return'';
  var selected=plans.filter(function(p){return ST.loading[snapshotKey(p,date)]}),failed=plans.map(function(p){return ST.errors[snapshotKey(p,date)]}).filter(Boolean);
@@ -140,8 +146,9 @@ function snapshotMessage(plans,date){
  return selected.length?'<p class="mu vod-alert" role="status">Loading saved holding snapshots…</p>':''
 }
 function bodyHTML(plans){
+ if(window.repSel().none)return window.repNone();
  var date=ST.date,actual=date<=today(),needsSnapshots=actual&&window.VRSB&&window.VRSB.snap&&window.VRSB.snap.values,
- selected=compute(date,plans,!!needsSnapshots,date),p=parseDate(date),fyStart=isoDate(p.year-(p.month<4?1:0),4,1),fy=compute(fyStart,plans,!!needsSnapshots,date),
+ ids=selectedIds(),selected=compute(date,plans,!!needsSnapshots,date,ids),p=parseDate(date),fyStart=isoDate(p.year-(p.month<4?1:0),4,1),fy=compute(fyStart,plans,!!needsSnapshots,date,ids),
  changes=selected.total-fy.total,rows=filtered(selected),tiles='<div class="rsum vod-summary" aria-label="Value on Date summary"><div><span class="mu">Total value on '+escape(displayDate(date))+'</span><b>'+formatMoney(selected.total)+'</b></div><div><span class="mu">Change since FY '+String(parseDate(fyStart).year)+' start</span><b>'+formatMoney(changes)+'</b></div><div><span class="mu">Holdings counted</span><b>'+selected.holdings+' of '+selected.allHoldings+'</b></div><div><span class="mu">Basis</span><b>'+escape(selected.basis)+'</b></div></div>',
  message=snapshotMessage(plans,date),note=(selected.excluded?'<p class="mu vod-note">'+selected.excluded+' holding'+(selected.excluded===1?' was':'s were')+' added after this date and not counted.</p>':'')+
  (selected.notDated?'<p class="mu vod-note">'+selected.notDated+' holding'+(selected.notDated===1?' has':'s have')+' no entry date and '+(selected.notDated===1?'is':'are')+' treated as present from the plan start.</p>':'')+
@@ -155,11 +162,12 @@ function bodyHTML(plans){
  th=header.map(function(h){return'<th data-vod-col="'+h[0]+'" aria-sort="'+(ST.sort===h[0]?(ST.direction>0?'ascending':'descending'):'none')+'"><button type="button" data-vod-sort="'+h[0]+'" data-rk="'+h[0]+'">'+h[1]+(ST.sort===h[0]?(ST.direction>0?' ▲':' ▼'):'')+'</button></th>'}).join(''),
  tableRows=rows.map(function(r){return'<tr><td>'+escape(r.name)+'</td><td>'+escape(r.cat)+'</td><td class="vod-n">'+formatMoney(r.value)+'</td><td class="vod-n">'+percent(r.value,selected.total).toFixed(2)+'%</td><td>'+escape(r.basis)+'</td></tr>'}).join(''),
  total='<tr class="vr-tot"><td><b>Total</b></td><td></td><td class="vod-n"><b>'+formatMoney(selected.total)+'</b></td><td class="vod-n"><b>'+(selected.total? '100.00':'0.00')+'%</b></td><td></td></tr>',
- cards=rows.map(function(r){return'<details class="vr-scd"><summary><b>'+escape(r.name)+'</b><span>'+escape(r.cat)+(r.client?' · '+escape(r.client):'')+'</span><em>'+formatMoney(r.value)+'</em></summary><dl><dt>Category</dt><dd>'+escape(r.cat)+'</dd><dt>Value on date</dt><dd>'+formatMoney(r.value)+'</dd><dt>Share of total</dt><dd>'+percent(r.value,selected.total).toFixed(2)+'%</dd><dt>Basis</dt><dd>'+escape(r.basis)+'</dd></dl></details>'}).join(''),
+ cards=rows.map(function(r){return'<details class="vr-scd"><summary><b>'+escape(r.name)+'</b><span>'+(columnVisible('cat')?escape(r.cat):'')+(r.client?' · '+escape(r.client):'')+'</span><em>'+formatMoney(r.value)+'</em></summary><dl>'+(columnVisible('cat')?'<dt>Category</dt><dd>'+escape(r.cat)+'</dd>':'')+'<dt>Value on date</dt><dd>'+formatMoney(r.value)+'</dd>'+(columnVisible('pct')?'<dt>Share of total</dt><dd>'+percent(r.value,selected.total).toFixed(2)+'%</dd>':'')+(columnVisible('basis')?'<dt>Basis</dt><dd>'+escape(r.basis)+'</dd>':'')+'</dl></details>'}).join(''),
  rowsInTable=tableRows+total;
  window.__vodFiltered=rows;
  return tiles+message+note+'<div class="mw vod-mw"><table class="rt vod-table" aria-label="Value on Date holdings"><thead><tr>'+th+'</tr></thead><tbody>'+rowsInTable+'</tbody></table><div class="vod-cards">'+cards+'<details class="vr-scd vod-total"><summary><b>Total</b><span>Portfolio value</span><em>'+formatMoney(selected.total)+'</em></summary><dl><dt>Holdings counted</dt><dd>'+selected.holdings+' of '+selected.allHoldings+'</dd><dt>Total value</dt><dd>'+formatMoney(selected.total)+'</dd></dl></details></div></div>'
 }
+function columnVisible(key){return !window.RCOLS||!window.RCOLS.vis||window.RCOLS.vis('vdate',key)}
 function calendarMarkup(plans){
  var plan=rangePlan(plans),range=bounds((plan||{state:{start:0,end:0}}).state),
  offset=(new Date(Date.UTC(ST.viewYear,ST.viewMonth-1,1)).getUTCDay()+6)%7,days=daysInMonth(ST.viewYear,ST.viewMonth),
@@ -173,18 +181,15 @@ function calendarMarkup(plans){
  var quickToday=today(),fyYear=parseDate(quickToday).year-(parseDate(quickToday).month<4?1:0),quick=[['today','Today',quickToday],['fy-start','FY start',isoDate(fyYear,4,1)],['fy-end','FY end',isoDate(fyYear+1,3,31)],['retirement','Retirement date',isoDate((+plan.state.start)+Math.max(0,(+plan.state.ret)-(+((plan.state.members||[])[0]||{}).age)),4,1)]];
  return'<div class="vod-popover" id="vod-calendar" role="dialog" aria-label="Choose report date"'+(ST.open?'':' hidden')+'><div class="vod-cal-top"><button type="button" data-vod="prev" aria-label="Previous month"'+(prev<range.min.slice(0,7)+'-01'?' disabled':'')+'>‹</button><label><span class="sr-only">Month</span><select id="vod-month" aria-label="Month">'+months+'</select></label><label><span class="sr-only">Year</span><select id="vod-year" aria-label="Year">'+years+'</select></label><button type="button" data-vod="next" aria-label="Next month"'+(next>range.max.slice(0,7)+'-01'?' disabled':'')+'>›</button></div><div class="vod-week" aria-hidden="true">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(x){return'<span>'+x+'</span>'}).join('')+'</div><div class="vod-days">'+cells.join('')+'</div><div class="vod-quick">'+quick.map(function(q){return'<button type="button" data-vod="quick" data-date="'+q[2]+'"'+(q[2]<range.min||q[2]>range.max?' disabled':'')+'>'+q[1]+'</button>'}).join('')+'</div></div>'
 }
-function columnDropdown(){
- return'<div class="msd vod-columns" data-msd="cols"><span class="msd-t">Columns</span><button type="button" class="msd-b" data-msdb="cols" aria-haspopup="true" aria-expanded="false"><b>Columns</b><span aria-hidden="true">⌄</span></button><div class="msd-p" hidden role="group" aria-label="Columns"><div class="msd-a"></div><div class="msd-l"></div><div class="msd-b"><b></b></div></div></div>'
-}
 function reportMarkup(plans){
  var selected=rangePlan(plans),
  clientOpts='<option value="all"'+(ST.client==='all'?' selected':'')+'>All clients</option>'+planList().map(function(p){return'<option value="'+escape(p.id)+'"'+(ST.client===p.id?' selected':'')+'>'+escape(p.name)+(p.active?' (current)':'')+'</option>'}).join('');
  setTimeout(function(){drawBody()},0);
- return'<div class="card vod-page"><div class="rph2" data-rpx><div class="rpt"><h2>Value on Date</h2>'+(window.rptInfo?window.rptInfo('Portfolio value on a selected date. Future dates use the Monthly Portfolio Projection engine. On or before today, the nearest saved holding snapshot on or before that date is used when available; otherwise the projection engine is used. A holding added after the date is excluded. Daily values between monthly projection rows are accrued from the engine values; the first of each month matches the Monthly Portfolio Projection report.','About this report'):'')+'</div>'+(window.rptCsv?window.rptCsv('csv'):'<button type="button" id="csv">Copy as CSV</button>')+'</div><div class="tb vod-toolbar"><label class="vod-select-label" for="vod-client">Client</label><select id="vod-client" aria-label="Client">'+clientOpts+'</select><div class="vod-date-wrap"><span class="vod-select-label">Date</span><button type="button" class="vod-date" data-vod="toggle" aria-haspopup="dialog" aria-label="Choose report date, '+escape(displayDate(ST.date))+'" aria-expanded="'+ST.open+'">'+escape(displayDate(ST.date))+' <span aria-hidden="true">▾</span></button>'+calendarMarkup(plans)+'</div></div><div class="tb vod-tools"><input id="vod-q" type="search" aria-label="Search holdings" placeholder="Search holding, category, basis…" value="'+escape(ST.query)+'">'+columnDropdown()+'</div><div id="vod-body">'+bodyHTML(plans)+'</div></div>'
+ return'<div class="card vod-page"><div class="rph2" data-rpx><div class="rpt"><h2>Value on Date</h2>'+(window.rptInfo?window.rptInfo('Portfolio value on a selected date. Future dates use the Monthly Portfolio Projection engine. On or before today, the nearest saved holding snapshot on or before that date is used when available; otherwise the projection engine is used. A holding added after the date is excluded. Daily values between monthly projection rows are accrued from the engine values; the first of each month matches the Monthly Portfolio Projection report.','About this report'):'')+'</div>'+(window.rptCsv?window.rptCsv('csv'):'<button type="button" id="csv">Copy as CSV</button>')+'</div><div class="tb vod-toolbar"><label class="vod-select-label" for="vod-client">Client</label><select id="vod-client" aria-label="Client">'+clientOpts+'</select><div class="vod-date-wrap"><span class="vod-select-label">Date</span><button type="button" class="vod-date" data-vod="toggle" aria-haspopup="dialog" aria-label="Choose report date, '+escape(displayDate(ST.date))+'" aria-expanded="'+ST.open+'">'+escape(displayDate(ST.date))+' <span aria-hidden="true">▾</span></button>'+calendarMarkup(plans)+'</div></div>'+window.rsDrops()+'<div class="tb vod-tools"><input id="vod-q" type="search" aria-label="Search holdings" placeholder="Search holding, category, basis…" value="'+escape(ST.query)+'"></div><div id="rr"><div id="vod-body">'+bodyHTML(plans)+'</div></div></div>'
 }
 function drawBody(){
  var p=document.getElementById('vod-body');if(!p)return;
- var plans=selectedPlans();ensureSnapshots(plans,ST.date);p.innerHTML=bodyHTML(plans);
+ var plans=selectedPlans();if(!window.repSel().none)ensureSnapshots(plans,ST.date);p.innerHTML=bodyHTML(plans);
  if(window.RCOLS&&document.getElementById('rr'))window.RCOLS.apply(document.getElementById('rr'),'vdate')
 }
 function setDate(date){
@@ -219,10 +224,10 @@ function csvForRows(rows,total){
  out.push(['Total','',Math.round(total),total?'100.00%':'0.00%',''].map(q).join(','));
  return out.join('\r\n')
 }
-function reportRowsCsv(){var data=compute(ST.date,selectedPlans(),ST.date<=today(),ST.date);return csvForRows(filtered(data),data.total)}
+function reportRowsCsv(){var data=compute(ST.date,selectedPlans(),ST.date<=today(),ST.date,selectedIds());return csvForRows(filtered(data),data.total)}
 window.valueOnDateCSV=reportRowsCsv;
 window.VRValueDate={parseDate:parseDate,daysInMonth:daysInMonth,addDays:addDays,dateValue:dateValue,nearestSnapshot:nearestSnapshot,snapshotBasis:snapshotBasis,csvForRows:csvForRows,compute:compute,csvCell:csvCell};
-window.repValueOnDate=function(){ensureState();var plans=selectedPlans();ensureSnapshots(plans,ST.date);return reportMarkup(plans)};
+window.repValueOnDate=function(){ensureState();var plans=selectedPlans();if(!window.repSel().none)ensureSnapshots(plans,ST.date);return reportMarkup(plans)};
 document.addEventListener('change',function(e){
  var t=e.target;if(!t||!t.id)return;
  if(t.id==='vod-client'){
@@ -235,7 +240,7 @@ document.addEventListener('change',function(e){
 document.addEventListener('input',function(e){if(e.target&&e.target.id==='vod-q'){ST.query=e.target.value;drawBody()}});
 document.addEventListener('click',function(e){
  var csv=e.target.closest&&e.target.closest('#csv');
- if(csv&&typeof UI!=='undefined'&&UI.rv==='vdate'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();text('Value on Date CSV',reportRowsCsv())}
+ if(csv&&typeof UI!=='undefined'&&UI.rv==='vdate'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(window.repSel().none){toast('Please select at least one investment.');return}text('Value on Date CSV',reportRowsCsv())}
 },true);
 document.addEventListener('click',function(e){
  var sort=e.target.closest&&e.target.closest('[data-vod-sort]');
