@@ -3,7 +3,7 @@
    Choosing a report is handled by the data-rv click handler in modules/reports/monthly-projection.js. */
 (function () {
   var FALLBACK = [['year', 'Annual Portfolio Projection'], ['month', 'Monthly Portfolio Projection'], ['int', 'Interest and income'],
-    ['sav', 'Savings schedule'], ['ent', 'Holdings register'], ['hold', 'Holdings']];
+    ['sav', 'Savings schedule'], ['ent', 'Holdings register'], ['vdate', 'Value on Date'], ['hold', 'Holdings']];
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function current() {
     if (typeof UI === 'undefined') return 'year';

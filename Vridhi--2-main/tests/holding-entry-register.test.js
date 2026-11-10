@@ -11,9 +11,9 @@ const source = fs.readFileSync(path.join(root, 'modules', 'holding-entry-registe
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
 const moduleScript = html.indexOf('<script src="modules/holding-entry-register/entry-register.js?v=134"></script>');
-const profileModule = html.indexOf('<script src="modules/goal-planner-clients/goal-planner-clients.js?v=143"></script>');
+const profileModule = html.indexOf('<script src="modules/goal-planner-clients/goal-planner-clients.js?v=144"></script>');
 const reportShell = appCore.indexOf('if(UI.rv===\'ent\'&&window.repEnt)');
-const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=169"></script>');
+const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
 const bodyEnd = html.indexOf('</body>');
 assert.ok(profileModule >= 0 && moduleScript > profileModule, 'Register module loads after the holding data provider');
 assert.ok(reportShell >= 0 && appCoreTag >= 0 && moduleScript > appCoreTag, 'Register module loads after the report shell');

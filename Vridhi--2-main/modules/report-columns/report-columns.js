@@ -3,12 +3,14 @@
 var CFG={
 year:{fixed:['year','v','tot'],defaultVisible:['age','int','mi','pay','ti','roi','add'],optional:['a','chg','hi','s']},
 month:{fixed:['year','v','tot'],defaultVisible:['age','roi','add','int','pay','ti'],optional:['a','chg','hi','fy','s']},
-int:{fixed:['year','open','close'],defaultVisible:['add','v','int','mi','roi'],optional:['a','age']}};
+int:{fixed:['year','open','close'],defaultVisible:['add','v','int','mi','roi'],optional:['a','age']},
+vdate:{fixed:['name','val'],defaultVisible:['cat','pct','basis'],optional:[]}};
 var LAB={
 year:{year:'Year (as on)',v:"Holding\u2019s value (\u20b9 L)",tot:'Year end balance',age:'Ages',int:'Yearly income',mi:'Monthly income',pay:'Policy payouts',ti:'Total income',roi:'Blended ROI',add:'Amount deposited',a:'S.No',chg:'Change (\u20b9 L)',hi:'Total (\u0939\u093f\u0928\u094d\u0926\u0940)',s:'Child stage columns'},
 month:{year:'Month',v:"Holding\u2019s value (\u20b9 L)",tot:'Month end balance',age:'Ages',roi:'Blended ROI',add:'Amount deposited',int:'Interest earned',pay:'Policy payout',ti:'Total income',a:'S.No',chg:'Change (\u20b9 L)',hi:'Total (\u0939\u093f\u0928\u094d\u0926\u0940)',fy:'Financial year',s:'Child stage columns'},
-int:{year:'Financial year',open:'Opening balance',close:'Closing balance',add:'Additions',v:"Holding\u2019s interest",int:'Interest earned',mi:'Monthly income',roi:'Yield on opening',a:'S.No',age:'Age'}};
-var NAME={year:'Annual Portfolio Projection',month:'Monthly Portfolio Projection',int:'Interest & Income Statement'};
+int:{year:'Financial year',open:'Opening balance',close:'Closing balance',add:'Additions',v:"Holding\u2019s interest",int:'Interest earned',mi:'Monthly income',roi:'Yield on opening',a:'S.No',age:'Age'},
+vdate:{name:'Holding',val:'Value on date',cat:'Category',pct:'% of total',basis:'Basis'}};
+var NAME={year:'Annual Portfolio Projection',month:'Monthly Portfolio Projection',int:'Interest & Income Statement',vdate:'Value on Date'};
 var CL={year:{'Blended ROI':'roi','Yearly income':'int','Monthly income':'mi','Policy payouts':'pay','Total income':'ti','Amount deposited':'add','Yearly change':'chg'},
 month:{'Blended ROI':'roi','Amount deposited':'add','Interest earned':'int','Policy payout':'pay','Total income':'ti','Monthly change':'chg'},
 int:{'Opening balance':'open','Additions':'add','Interest earned':'int','Monthly income':'mi','Yield on opening':'roi','Closing balance':'close'}};
@@ -16,7 +18,7 @@ var CK='fwt4-cols'+(window.__UK?'-'+window.__UK:''),P={};
 try{P=JSON.parse(localStorage.getItem(CK)||'{}')||{}}catch(e){P={}}
 /* Column ORDER, chosen in Settings > Report columns. DEFORD = the movable columns left to right as the report draws them;
    PIN = the leading identification columns that stay put (they are the frozen columns when you scroll). */
-var DEFORD={year:['v','int','mi','pay','ti','tot','roi','add','chg','hi'],month:['v','tot','roi','add','int','pay','ti','chg','hi'],int:['add','v','int','mi','roi','close']};
+var DEFORD={year:['v','int','mi','pay','ti','tot','roi','add','chg','hi'],month:['v','tot','roi','add','int','pay','ti','chg','hi'],int:['add','v','int','mi','roi','close'],vdate:['cat','pct','basis']};
 var HZPIN='When',CKO=CK+'-ord',O={};
 try{O=JSON.parse(localStorage.getItem(CKO)||'{}')||{}}catch(e){O={}}
 function persistO(){try{localStorage.setItem(CKO,JSON.stringify(O))}catch(e){}}

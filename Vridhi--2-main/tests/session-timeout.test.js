@@ -9,7 +9,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const workflow = fs.readFileSync(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
 const configScript = html.indexOf('<script src="config.js"></script>');
 const buildInfoScript = html.indexOf('<script src="modules/auth/build-info.js?v=151"></script>');
-const authScript = html.indexOf('<script id="vr-prod" src="modules/auth/auth.js?v=151"></script>');
+const authScript = html.indexOf('<script id="vr-prod" src="modules/auth/auth.js?v=153"></script>');
 const timeoutScript = html.indexOf('<script src="modules/auth/idle-timeout.js?v=148"></script>');
 const body = html.indexOf('<body>');
 assert.ok(configScript >= 0 && buildInfoScript > configScript && authScript > buildInfoScript &&

@@ -72,13 +72,16 @@ async function snapList(f){f=f||{};var s=await token(),p='vr_holding_snapshots?u
  if(q)p+='&or='+encodeURIComponent('(label.ilike.*'+q+'*,note.ilike.*'+q+'*,plan.ilike.*'+q+'*)');
  var r=await rest(p);return r.json()}
 async function snapGet(id){if(!SNID.test(String(id||'')))throw new Error('Bad snapshot id.');var s=await token(),r=await rest('vr_holding_snapshots?id=eq.'+id+'&user_id=eq.'+s.uid+'&select=id,label,plan,created_at,data&limit=1'),a=await r.json();if(!a[0])throw new Error('That snapshot no longer exists.');return a[0]}
+async function snapValues(plan,to){var s=await token(),p='vr_holding_snapshots?user_id=eq.'+s.uid+'&plan=eq.'+encodeURIComponent(String(plan||''))+'&select=id,plan,created_at,data&order=created_at.desc&limit=200';
+ if(to)p+='&created_at=lte.'+encodeURIComponent(to);
+ var r=await rest(p);return r.json()}
 async function snapCreate(o){var s=await token(),r=await rest('vr_holding_snapshots?select=id,created_at',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({user_id:s.uid,label:String(o.label||'').slice(0,120),note:String(o.note||'').slice(0,500),plan:String(o.plan||'').slice(0,120),holdings_count:Math.max(0,Math.round(+o.count||0)),total_value:+o.total||0,data:o.data})}),a=await r.json();return a[0]}
 async function snapRemove(id){if(!SNID.test(String(id||'')))throw new Error('Bad snapshot id.');var s=await token();await rest('vr_holding_snapshots?id=eq.'+id+'&user_id=eq.'+s.uid,{method:'DELETE',headers:{Prefer:'return=minimal'}})}
 /* The Pages workflow generates build-info.js from its monotonically increasing run number. */
 window.VR_VERSION='2.8.0.'+window.VR_BUILD_NO;
 window.VR_BUILD_TXT='Version '+window.VR_VERSION+' \u00b7 '+window.VR_BUILD_DATE;
 document.addEventListener('DOMContentLoaded',function(){var v=window.VR_VERSION,w=document.querySelector('.wm');if(w&&!w.querySelector('.vr-ver'))w.insertAdjacentHTML('beforeend',' <span class="vr-ver" title="'+window.VR_BUILD_TXT+'">v'+v+'</span>');var f=document.getElementById('lgf');if(f&&!document.querySelector('.vr-ver-lg')){var host=f.querySelector('.lform')||f;host.insertAdjacentHTML('beforeend','<p class="vr-ver-lg">'+window.VR_BUILD_TXT+'</p>')}});
-window.VRSB=cfgOk?{signIn:signIn,signOut:signOut,configured:true,access:access,isAdviser:isAdviser,users:usersCall,askAgent:agentCall,databaseBackups:databaseBackups,changePassword:changePassword,snap:{list:snapList,get:snapGet,create:snapCreate,remove:snapRemove},email:function(){var s=ses();return s&&s.email||''}}:null;
+window.VRSB=cfgOk?{signIn:signIn,signOut:signOut,configured:true,access:access,isAdviser:isAdviser,users:usersCall,askAgent:agentCall,databaseBackups:databaseBackups,changePassword:changePassword,snap:{list:snapList,get:snapGet,values:snapValues,create:snapCreate,remove:snapRemove},email:function(){var s=ses();return s&&s.email||''}}:null;
 /* Resolve permissions before the app enables account-specific actions. */
 if(cfgOk&&ses()&&ses().rt)access().catch(function(){});
 /* sign-in page wording */

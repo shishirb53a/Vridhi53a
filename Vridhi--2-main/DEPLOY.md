@@ -167,8 +167,11 @@ Each report has one name, used on its tab, its page title, the CSV window, Setti
 | **Interest & Income Statement** | each financial year's opening balance, additions, interest by holding, monthly income and yield |
 | **Annual Savings Schedule** | what you put in each financial year, by category |
 | **Holdings Entry Register** | when each holding was added, for every Goal Planner client |
+| **Value on Date** | engine-projected value by holding on a selected date; uses the nearest earlier saved holding snapshot for historical dates when one exists |
 
 The Annual Portfolio Projection no longer has a separate **Financial year** column: it repeated the **As on** date of the same row (the financial year is shown with the date on the phone cards and is still searchable). The Monthly Portfolio Projection keeps its Financial year column because a month is not the same thing as a year.
+
+**Value on Date** is read-only and follows the plan's start/end year range. It uses saved holding snapshots for dates on or before today when available; other values use the same Monthly Portfolio Projection engine. Snapshot access requires `read_data`; no schema changes or writes are needed.
 
 ## 3h. Full PostgreSQL backups and restore
 

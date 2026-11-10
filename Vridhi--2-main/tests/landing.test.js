@@ -11,7 +11,7 @@ const source = fs.readFileSync(path.join(root, 'modules', 'landing', 'landing.js
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const i18nScript = html.indexOf('<script src="modules/i18n/i18n.js?v=132"></script>');
 const landingScript = html.indexOf('<script src="modules/landing/landing.js?v=131"></script>');
-const mainRenderer = html.indexOf('<script src="modules/app-core/app.js?v=169"></script>');
+const mainRenderer = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
 assert.ok(i18nScript >= 0 && landingScript > i18nScript && mainRenderer > landingScript, 'Landing module loads after localization and before the app renderer');
 assert.ok(!html.includes('<script id="vw-landing">'), 'Landing component is no longer duplicated inline');
 

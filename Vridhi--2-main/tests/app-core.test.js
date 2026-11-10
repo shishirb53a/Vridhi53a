@@ -11,7 +11,7 @@ const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js')
 const i18n = html.indexOf('<script src="modules/i18n/i18n.js?v=132"></script>');
 const landing = html.indexOf('<script src="modules/landing/landing.js?v=131"></script>');
 const calculations = html.indexOf('<script src="modules/portfolio-calculations/engine.js?v=136"></script>');
-const coreTag = '<script src="modules/app-core/app.js?v=169"></script>';
+const coreTag = '<script src="modules/app-core/app.js?v=171"></script>';
 const core = html.indexOf(coreTag);
 const family = html.indexOf('<script src="modules/family-management/family-management.js?v=144"></script>');
 
@@ -82,7 +82,7 @@ assert.ok(!holdingsPage.includes('id="sf"') &&
 assert.ok(holdingsPage.includes('id="hsf"') && holdingsPage.includes('id="hsd"') &&
   holdingsPage.includes('id="htools"') && holdingsPage.includes('id="hp-more"') &&
   appCore.includes('class="hcard hp-total"') && appCore.includes('class="hp-kvd"') &&
-  appCore.includes("id==='hsf'") && appCore.includes("#rsd,#htools,#hsd')"),
+  appCore.includes("id==='hsf'") && appCore.includes("#rsd,#rp-max,#htools,#hsd')"),
 'Mobile Holdings adds a Sort control, a Tools menu, compact cards and a sticky Total, and read-only users can still use them');
 
 console.log('App core loads synchronously and preserves its initialization boundaries');

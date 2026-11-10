@@ -224,8 +224,8 @@
     persist();
   }
   /* true when the policies should show up in the Goal Planner (there is something to pay out and the module is switched on) */
-  function hasPayouts(who) {
-    return policiesFor(who || 'goal').some(function (p) { return p.amt > 0 || p.lump > 0 || (Array.isArray(p.maturities) && p.maturities.length > 0); });
+  function hasPayouts(who, s) {
+    return policiesFor(who || 'goal', s).some(function (p) { return p.amt > 0 || p.lump > 0 || (Array.isArray(p.maturities) && p.maturities.length > 0); });
   }
 
   /* ---------- API for the Goal Planner: payouts by plan row (row 1 = today carries none; a row is a financial year from 1 April) ---------- */
@@ -252,6 +252,12 @@
     var t = 0;
     listOf(s).forEach(function (p) { schedule(p).forEach(function (e) { var r = rowOf(e.ix, s); if (r >= 2 && r <= a) t += e.amt; }); });
     return t;
+  }
+  function receivedByDate(s, date) {
+    if (!usedBy('goal', s) || !/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return 0;
+    return listOf(s).reduce(function (total, p) {
+      return total + schedule(p).reduce(function (sum, e) { return sum + (e.date <= date ? e.amt : 0); }, 0);
+    }, 0);
   }
   /* the same payouts by calendar year of payment, plus the date of the first one still to come */
   function receivedByYear(s, a) {
@@ -520,6 +526,7 @@
     events: events, summary: summary, byFinancialYear: byFinancialYear, payoutMatrix: payoutMatrix,
     /* for other modules */
     usedBy: usedBy, setUsedBy: setUsedBy, hasPayouts: hasPayouts,
-    applyToRows: applyToRows, monthPayout: monthPayout, receivedBy: receivedBy, receivedByYear: receivedByYear, planStreams: planStreams
+    applyToRows: applyToRows, monthPayout: monthPayout, receivedBy: receivedBy, receivedByDate: receivedByDate,
+    receivedByYear: receivedByYear, planStreams: planStreams
   };
 })(window);

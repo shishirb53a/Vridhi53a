@@ -16,7 +16,7 @@ const files = [
   ['modules/reports/interest-income.js', 'interest-income.js']
 ];
 const positions = files.map(([file, tag]) => {
-  const versions = { 'monthly-projection.js': '140', 'report-selection.js': '139', 'roi-summary.js': '148', 'interest-income.js': '138' };
+  const versions = { 'monthly-projection.js': '141', 'report-selection.js': '139', 'roi-summary.js': '148', 'interest-income.js': '138' };
   const marker = `<script src="modules/reports/${tag}?v=${versions[tag]}"></script>`;
   const index = html.indexOf(marker);
   assert.ok(index >= 0, `${tag} is loaded synchronously from index.html`);
@@ -28,8 +28,10 @@ assert.ok(!html.includes('window.monthData=function()'), 'Monthly projection cod
 assert.ok(!html.includes('window.repSel=function()'), 'Report selection code is no longer inline');
 assert.ok(!html.includes('window.intData=function()'), 'Interest statement code is no longer inline');
 assert.ok(html.includes('modules/reports/report-redesign.css?v=149'), 'Report picker styles are loaded');
-assert.ok(appCore.includes("['frf','fsf','rsf','cf','sf','rv'].includes(id)"),
-  'Read-only users can still switch between reports');
+assert.ok(appCore.includes("['frf','fsf','rsf','cf','sf','rv','vod-client','vod-month','vod-year'].includes(id)") &&
+  appCore.includes('[data-vod]') && appCore.includes('[data-msdb],[data-msda],[data-rcmv]') &&
+  appCore.includes('#rp-max') && appCore.includes("target.hasAttribute('data-rck')"),
+  'Read-only users can use the Value on Date calendar, report columns, and maximize control');
 
 const assets = [
   { id: 1, name: 'PPF', cat: 'Retirement', type: 'fund', value: 1000, ret: 0.06, add: 120, madd: 10, amon: 4, cmp: 'ppf', icr: true, yrs: 4 },
