@@ -12,7 +12,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
 const renderer = appCore.indexOf('function render(){');
 const moduleScript = html.indexOf('<script src="modules/report-columns/report-columns.js?v=128"></script>');
-const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
+const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
 const bodyEnd = html.indexOf('</body>');
 assert.ok(renderer >= 0 && appCoreTag >= 0 && moduleScript > appCoreTag && bodyEnd > moduleScript, 'Report-column module loads after the main renderer');
 assert.ok(html.includes('<style>@import url("modules/report-columns/report-columns.css?v=126");</style>'), 'Report-column styles load at their original cascade position');

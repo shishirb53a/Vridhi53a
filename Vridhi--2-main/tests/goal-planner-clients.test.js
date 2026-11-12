@@ -11,10 +11,10 @@ const source = fs.readFileSync(path.join(root, 'modules', 'goal-planner-clients'
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
 const keysPosition = appCore.indexOf('const GPP_KEYS=');
-const retirementUI = html.indexOf('<script src="modules/retirement-planner/ui.js?v=152"></script>');
+const retirementUI = html.indexOf('<script src="modules/retirement-planner/ui.js?v=153"></script>');
 const moduleSourceTag = '<script src="modules/goal-planner-clients/goal-planner-clients.js?v=144"></script>';
 const moduleTag = html.indexOf(moduleSourceTag);
-const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
+const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
 assert.ok(keysPosition >= 0 && appCoreTag >= 0 && retirementUI > appCoreTag && moduleTag > retirementUI, 'Profile module loads after its state keys and planner dependencies');
 assert.strictEqual(html.indexOf(moduleSourceTag, moduleTag + moduleSourceTag.length), -1, 'Profile module is included only once');
 assert.ok(!html.includes('Goal Planner clients (build 84):'), 'Profile manager logic is no longer inline');

@@ -17,7 +17,7 @@ const coreStart = app.indexOf('//CALC-START');
 const coreEnd = app.indexOf('//CALC-END', coreStart);
 const moduleTag = '<script src="modules/value-on-date/value-on-date.js?v=2"></script>';
 const styleTag = '<style>@import url("modules/value-on-date/value-on-date.css?v=1");</style>';
-const appTag = '<script src="modules/app-core/app.js?v=171"></script>';
+const appTag = '<script src="modules/app-core/app.js?v=172"></script>';
 const columnTag = '<script src="modules/report-columns/report-columns.js?v=128"></script>';
 const profileTag = '<script src="modules/goal-planner-clients/goal-planner-clients.js?v=144"></script>';
 assert.ok(html.includes(moduleTag) && html.indexOf(moduleTag) > html.indexOf(appTag),

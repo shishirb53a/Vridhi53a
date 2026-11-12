@@ -10,7 +10,7 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appCoreSource = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
 const source = fs.readFileSync(path.join(root, 'modules', 'family-management', 'family-management.js'), 'utf8');
-const mainReady = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
+const mainReady = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
 const familyTag = '<script src="modules/family-management/family-management.js?v=144"></script>';
 const familyPosition = html.indexOf(familyTag);
 assert.ok(mainReady >= 0 && familyPosition > mainReady &&

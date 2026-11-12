@@ -1702,7 +1702,7 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
 <details class="hz-dt"><summary>Breakdown</summary>${rest.map(c => `<div class="hz-cr${c.bold ? " hz-b" : ""}"><span>${esc(c.label)}</span><span class="${c.get(r) < 0 ? "dz-b" : c.tone ? `hz-${c.tone}` : ""}">${val(c, r)}</span></div>`).join("")}</details></div>`;
     }).join("")
       + `<div class="hz-card hz-ctot"><div class="hz-chd"><div class="hz-ct">Total</div></div><div class="hz-km">${cSp ? km("Expenses", hzC(sum(cSp)), false, "expense") : ""}${cIn ? km("Income", hzC(sum(cIn)), false, "income") : ""}</div><details class="hz-dt"><summary>Breakdown</summary>${flat.filter(c => c.sum && c !== cSp && c !== cIn).map(c => `<div class="hz-cr"><span>${esc(c.label)}</span><span class="${c.tone ? `hz-${c.tone}` : ""}">${hzC(sum(c))}</span></div>`).join("")}</details></div>`;
-    return `<div class="hz-wrap"><table class="rt hz-t"><thead><tr>${h}</tr></thead><tbody>${body}</tbody><tfoot>${tot}</tfoot></table></div><div class="hz-cards">${cards}</div>`;
+    return `<div class="hz-wrap" tabindex="0" role="region" aria-label="Year-by-year plan table"><table class="rt hz-t"><thead><tr>${h}</tr></thead><tbody>${body}</tbody><tfoot>${tot}</tfoot></table></div><div class="hz-cards">${cards}</div>`;
   }
   window.hzReport = function () {
     const w = hzView();

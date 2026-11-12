@@ -12,7 +12,7 @@ const dashboardSource = fs.readFileSync(path.join(root, 'modules', 'dashboard-pr
 const wizardSource = fs.readFileSync(path.join(root, 'modules', 'holding-form-wizard', 'wizard.js'), 'utf8');
 const categorySource = fs.readFileSync(path.join(root, 'modules', 'categories', 'categories.js'), 'utf8');
 
-const mainReady = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
+const mainReady = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
 const mainCoreSource = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
 const dashboardTag = '<script src="modules/dashboard-preferences/dashboard-preferences.js?v=141"></script>';
 const wizardTag = '<script src="modules/holding-form-wizard/wizard.js?v=140"></script>';

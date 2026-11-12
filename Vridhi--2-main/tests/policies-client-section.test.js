@@ -23,6 +23,9 @@ const run = tab => {
 for (const tab of ['Dashboard', 'Holdings', 'Reports']) assert.strictEqual(run(tab).hidden, false, tab + ' still shows the Client section');
 assert.strictEqual(run('Policies').hidden, true, 'Policies does not show the Goal Planner Client section');
 const policyUI = fs.readFileSync(path.join(__dirname, '..', 'modules', 'policy', 'policy-ui.js'), 'utf8');
+assert.ok(policyUI.includes('class="vp-tw" tabindex="0" role="region"') &&
+  policyUI.includes('class="vp-tw vp-fit" tabindex="0" role="region"'),
+  'Policy report tables can receive keyboard focus');
 assert.ok(policyUI.includes('var L = V.clients()'), 'Policies builds its client list from Policy clients');
 assert.ok(policyUI.includes("V.selectClient(t.value)"), 'Policies switches between Policy clients');
 for (const tab of ['Retirement planner', 'RP Reports']) assert.strictEqual(run(tab).innerHTML, 'RETIREMENT-CLIENT-BAR', tab + ' keeps its own Client section');

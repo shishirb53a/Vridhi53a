@@ -11,7 +11,7 @@ const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js')
 const i18n = html.indexOf('<script src="modules/i18n/i18n.js?v=132"></script>');
 const landing = html.indexOf('<script src="modules/landing/landing.js?v=131"></script>');
 const calculations = html.indexOf('<script src="modules/portfolio-calculations/engine.js?v=136"></script>');
-const coreTag = '<script src="modules/app-core/app.js?v=171"></script>';
+const coreTag = '<script src="modules/app-core/app.js?v=172"></script>';
 const core = html.indexOf(coreTag);
 const family = html.indexOf('<script src="modules/family-management/family-management.js?v=144"></script>');
 
@@ -57,6 +57,10 @@ assert.ok(appCore.includes('o.x.add>0||!o.x.madd') &&
 assert.ok(appCore.includes("e.key==='ArrowRight'") && appCore.includes("e.key==='Home'") &&
   appCore.includes("e.key==='End'") && appCore.includes("tabs[next].click()"),
 'Holding detail tabs support arrow keys and Home/End navigation');
+assert.ok(appCore.includes("Arrow(Left|Right|Up|Down)") &&
+  appCore.includes(".gpb button,.rtabs button,.vp-pills button") &&
+  appCore.includes("#rr, #hz-rows .hz-wrap, #vpr .vp-tw"),
+'Planner and policy reports support arrow-key section navigation and table scrolling');
 assert.ok(appCore.includes('aria-label="Expand all categories"') &&
   appCore.includes('aria-label="Collapse all categories"') &&
   appCore.includes('class="hp-grp hp-grp-icon"'),

@@ -9,7 +9,7 @@ const assert = require('assert');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
-const mainReady = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
+const mainReady = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
 const helpTag = '<script src="modules/help/help.js?v=143"></script>';
 const settingsTag = '<script src="modules/settings/settings.js?v=144"></script>';
 const helpPosition = html.indexOf(helpTag);

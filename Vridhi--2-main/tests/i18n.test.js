@@ -10,7 +10,7 @@ const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'modules', 'i18n', 'i18n.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const moduleScript = html.indexOf('<script src="modules/i18n/i18n.js?v=132"></script>');
-const mainRenderer = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
+const mainRenderer = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
 assert.ok(moduleScript >= 0 && mainRenderer > moduleScript, 'Localization loads before the main app renderer');
 assert.ok(!html.includes('i18n: English text is the key'), 'Localization code is no longer duplicated inline');
 

@@ -12,7 +12,7 @@ const appCoreSource = fs.readFileSync(path.join(root, 'modules', 'app-core', 'ap
 const moduleSource = fs.readFileSync(path.join(root, 'modules', 'theme', 'theme.js'), 'utf8');
 const themeTag = '<script src="modules/theme/theme.js?v=144"></script>';
 const themePosition = html.indexOf(themeTag);
-const coreReady = html.indexOf('<script src="modules/app-core/app.js?v=171"></script>');
+const coreReady = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
 const dashboardPosition = html.indexOf('<script src="modules/dashboard-preferences/dashboard-preferences.js?v=141"></script>');
 assert.ok(coreReady >= 0 && themePosition > coreReady && dashboardPosition > themePosition,
   'Theme module loads after app callbacks exist and before appearance preferences');
