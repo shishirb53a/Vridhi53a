@@ -4,7 +4,6 @@ const DASH=[['hero','Summary header'],['status','Retirement readiness'],['plan',
 const T={Dashboard:{k:'fwt3-order',s:DASH,n:'dashboard'},
 Holdings:{k:'fwt3-order-holdings',n:'holdings',s:[['hdr','Page header'],['table','Holdings list']]},
 Reports:{k:'fwt3-order-reports',n:'reports',s:[['hdr','Header & report type'],['table','Report table']]},
-Settings:{k:'fwt3-order-settings',n:'settings',s:[['hdr','Page header'],['family','Family'],['general','General assumptions'],['appearance','Appearance & backup']]},
 Help:{k:'fwt3-order-help',n:'help',s:[['hdr','Page header'],['docs','Help & documentation'],['topics','Topics'],['tips','Tips']]}};
 const O={};const ids=t=>T[t].s.map(s=>s[0]);
 const get=t=>{if(O[t])return O[t];let o=ids(t).slice();try{const a=JSON.parse(localStorage.getItem(T[t].k));if(Array.isArray(a))o=a.filter(k=>ids(t).includes(k)).concat(ids(t).filter(k=>!a.includes(k)))}catch(e){}return O[t]=o};
