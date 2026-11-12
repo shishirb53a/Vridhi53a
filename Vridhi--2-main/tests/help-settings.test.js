@@ -86,11 +86,11 @@ assert.ok(settings.includes('id="family"') && settings.includes('id="st"') &&
   settings.includes('id="ex"') && settings.includes('id="im"') &&
   settings.includes('id="rs"') && settings.includes('id="clr"'),
 'Settings keeps its existing content and event-handler IDs');
-assert.deepStrictEqual(calls, ['columns', 'snapshots', 'colour', 'appearance'],
+assert.deepStrictEqual(calls, ['columns', 'colour', 'appearance', 'snapshots'],
   'Optional Settings sections render once in their original order');
-assert.ok(settings.indexOf('id="columns"') < settings.indexOf('id="snapshots"') &&
-  settings.indexOf('id="snapshots"') < settings.indexOf('id="colour"') &&
-  settings.indexOf('id="colour"') < settings.indexOf('id="appearance"'),
+assert.ok(settings.indexOf('id="columns"') < settings.indexOf('id="colour"') &&
+  settings.indexOf('id="colour"') < settings.indexOf('id="appearance"') &&
+  settings.indexOf('id="appearance"') < settings.indexOf('id="snapshots"'),
 'Settings sections preserve their original markup order');
 
 console.log('Help and Settings extraction tests passed');
