@@ -8,12 +8,11 @@ const tabs=`<div class="vrs-tabs" role="tablist" aria-label="Settings categories
 const plan=`${family}
 <div class="card"><h2>General assumptions</h2><div class="r">${n('st','Starting year',S.start)}${n('en','End year',S.end)}</div><p class="mu">Forecast covers ${S.end-S.start+1} years: ${S.start}–${S.end}, your age ${S.members[0].age} to ${S.members[0].age+S.end-S.start}. The end year can be at most 60 years after the start, and your age cannot pass 100.</p>
 </div>`;
-const reports=`${reportColumns()}
-${snapshots()}`;
+const reports=`${reportColumns()}`;
 const look=`<div class="card"><h2>Appearance</h2><div class="r"><div><label for="th">Display mode</label><select id="th">${['system','light','dark'].map(t=>`<option ${t===S.theme?'selected':''}>${t}</option>`).join('')}</select></div><div><label for="lsel">Language</label><select id="lsel">${LANGS.map(l=>`<option value="${l[0]}" ${l[0]===S.lang?'selected':''}>${l[1]}</option>`).join('')}</select></div></div>
 <div class="sub2">Colour theme</div>${colourTheme()}
 ${appearance()}</div>`;
-const data=`${window.VRDatabaseBackups?window.VRDatabaseBackups.render():''}<div class="card"><h2>Backup</h2><p class="mu">Export a copy of your data to a file, or import one you saved earlier.</p><div class="acts"><button id="ex">Export backup</button><button id="im">Import backup</button></div></div>
+const data=`${snapshots()}${window.VRDatabaseBackups?window.VRDatabaseBackups.render():''}<div class="card"><h2>Backup</h2><p class="mu">Export a copy of your data to a file, or import one you saved earlier.</p><div class="acts"><button id="ex">Export backup</button><button id="im">Import backup</button></div></div>
 <div class="card vrs-dz"><h2>Danger zone</h2><p class="mu">These actions replace or erase your data. Export a backup first.</p><div class="acts"><button class="d" id="rs">Reset to sample data</button><button class="d" id="clr">Clear all data</button></div><div id="se" class="er" role="alert"></div></div>`;
 return`<div class="rph"><div><h1>Settings</h1></div></div><div class="vrs-wrap">${tabs}${panel('plan',plan)}${panel('reports',reports)}${panel('appearance',look)}${panel('data',data)}</div>`}
 function show(k,focus){if(!TABS.some(t=>t[0]===k))return;cur=k;
