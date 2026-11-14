@@ -1,0 +1,97 @@
+/* Policies page: fits one screen (laptop and phone). Only the policy list may scroll inside its own box. */
+html:has(#vp-pg.vpf),html:has(#vp-pg.vpf) body{overflow:hidden}
+html body main#m:has(>#vp-pg.vpf){padding-bottom:0}
+html body #vp-pg.vpf{height:var(--vp-h);overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:auto auto auto auto minmax(0,1fr);gap:8px 12px;align-content:stretch;margin:0;padding:0}
+html body #vp-pg.vpf>*{margin:0;min-width:0}
+html body #vp-pg.vpf>.vp-top,html body #vp-pg.vpf>.rph,html body #vp-pg.vpf>.vp-stats{grid-column:1/-1}
+html body #vp-pg.vpf>.vp-tools{grid-column:1;grid-row:4}
+html body #vp-pg.vpf>#vp-list,html body #vp-pg.vpf>.vp-empty{grid-column:1;grid-row:5;min-height:0;overflow:auto}
+html body #vp-pg.vpf>.vp-empty{grid-row:4/6;align-self:start;padding:18px}
+html body #vp-pg.vpf>#vp-share{grid-column:2;grid-row:4/6;overflow:auto;min-height:0;padding:10px 12px}
+/* compact header strip */
+html body #vp-pg.vpf .vp-top{padding:6px 12px;gap:10px;min-height:0}
+html body #vp-pg.vpf .vp-av{width:32px;height:32px;font-size:12px}
+html body #vp-pg.vpf .vp-eb{display:none}
+html body #vp-pg.vpf .vp-top select{min-height:32px;height:32px;padding-top:0;padding-bottom:0}
+html body #vp-pg.vpf .vp-top button{min-height:32px;height:32px}
+html body #vp-pg.vpf .rph{margin:0;gap:8px;align-items:center;flex-wrap:nowrap}
+html body #vp-pg.vpf .rph h1{font-size:20px;line-height:1.2}
+html body #vp-pg.vpf .vp-sub{margin:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body #vp-pg.vpf .rph button{min-height:34px;height:34px;padding:0 14px}
+/* compact KPI strip */
+html body #vp-pg.vpf .vp-stats{gap:8px}
+html body #vp-pg.vpf .vp-st3{padding:8px 12px;gap:10px;min-height:0}
+html body #vp-pg.vpf .vp-si{width:30px;height:30px;flex:none}
+html body #vp-pg.vpf .vp-st3 b{font-size:17px;line-height:1.2}
+html body #vp-pg.vpf .vp-st3 small{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body #vp-pg.vpf .vp-st3>div{min-width:0}
+html body #vp-pg.vpf .vp-tools{gap:8px;flex-wrap:nowrap;align-items:center}
+html body #vp-pg.vpf .vp-tools input{min-height:34px;height:34px}
+html body #vp-pg.vpf .vp-chips{display:flex;gap:6px;overflow-x:auto;flex:none;max-width:100%}
+html body #vp-pg.vpf .vp-chipb{min-height:32px;height:32px;padding:0 12px;white-space:nowrap}
+/* each policy becomes one compact row */
+html body #vp-pg.vpf .vp-cards{display:grid;grid-template-columns:1fr;gap:6px}
+html body #vp-pg.vpf .vp-pc{display:grid;grid-template-columns:minmax(150px,1fr) minmax(0,3.6fr) auto auto;gap:6px 14px;align-items:center;padding:6px 12px;margin:0}
+html body #vp-pg.vpf .vp-pc-h,html body #vp-pg.vpf .vp-foot{display:contents}
+html body #vp-pg.vpf .vp-pn{order:1;min-width:0}
+html body #vp-pg.vpf .vp-fields{order:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border:0;margin:0;padding:0}
+html body #vp-pg.vpf .vp-pc .vv{order:3;text-align:right}
+html body #vp-pg.vpf .vp-fa{order:4;display:flex;align-items:center;gap:6px}
+html body #vp-pg.vpf .vp-pc h3{font-size:14px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body #vp-pg.vpf .vp-tl,html body #vp-pg.vpf .vp-tll,html body #vp-pg.vpf .vp-foot>.mu,html body #vp-pg.vpf .vp-fl small{display:none}
+html body #vp-pg.vpf .vp-fl{padding:0;border:0;min-width:0}
+html body #vp-pg.vpf .vp-fl b{font-size:12px;line-height:1.25;display:block;overflow-wrap:anywhere}
+html body #vp-pg.vpf .vp-fl span{font-size:10px}
+html body #vp-pg.vpf .vp-pc .vv b{font-size:15px}
+html body #vp-pg.vpf .vp-pc>div:not(.vp-pc-h):not(.vp-fields):not(.vp-foot){display:none}
+html body #vp-pg.vpf .vp-sub2{display:flex;gap:6px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+html body #vp-pg.vpf .vp-sub2 .mu{display:none}
+html body #vp-pg.vpf .vp-sttx{white-space:nowrap}
+/* data-sharing panel */
+html body #vp-pg.vpf .vp-shh p{display:none}
+html body #vp-pg.vpf .vp-shh h2{font-size:14px;margin:0 0 8px}
+html body #vp-pg.vpf .vp-shg{display:grid;grid-template-columns:1fr;gap:8px}
+html body #vp-pg.vpf .vp-pl{padding:8px 10px}
+html body #vp-pg.vpf .vp-tx small{display:none}
+html body #vp-pg.vpf .vp-pr{margin-top:6px;padding-top:6px}
+/* laptop with a short window */
+@media (max-height:700px) and (min-width:901px){html body #vp-pg.vpf .vp-st3 small{display:none}}
+/* tablets and phones: one column; the sharing panel becomes a compact strip under the list */
+@media (max-width:900px){
+ html body #vp-pg.vpf{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto minmax(0,1fr) auto;gap:6px}
+ html body #vp-pg.vpf>.vp-tools,html body #vp-pg.vpf>#vp-list,html body #vp-pg.vpf>.vp-empty,html body #vp-pg.vpf>#vp-share{grid-column:1}
+ html body #vp-pg.vpf>.vp-tools{grid-row:4;flex-wrap:nowrap}
+ html body #vp-pg.vpf>#vp-list,html body #vp-pg.vpf>.vp-empty{grid-row:5}
+ html body #vp-pg.vpf>#vp-share{grid-row:6;padding:6px 8px;overflow:hidden}
+ html body #vp-pg.vpf .vp-shg{grid-template-columns:1fr 1fr}
+ html body #vp-pg.vpf .vp-shh h2{font-size:12px;margin:0 0 4px}
+ html body #vp-pg.vpf .vp-stats{grid-template-columns:1fr 1fr}
+ html body #vp-pg.vpf .vp-st3{padding:6px 8px;gap:8px}
+ html body #vp-pg.vpf .vp-si,html body #vp-pg.vpf .vp-st3 small{display:none}
+ html body #vp-pg.vpf .vp-st3 b{font-size:15px}
+ html body #vp-pg.vpf .vp-sub{display:none}
+ html body #vp-pg.vpf .rph h1{font-size:17px}
+ html body #vp-pg.vpf .vp-tools input{flex:1 1 80px;min-width:70px}
+ html body #vp-pg.vpf .vp-chips{flex:0 1 auto}
+ html body #vp-pg.vpf .vp-top{padding:4px 8px}
+ html body #vp-pg.vpf .vp-av{width:28px;height:28px}
+ html body #vp-pg.vpf .vp-shg .vp-tx b{font-size:12px}
+ html body #vp-pg.vpf .vp-pr{flex-wrap:wrap;gap:4px;margin-top:4px;padding-top:4px}
+ html body #vp-pg.vpf .vp-pr .vp-cnt{display:none}
+ html body #vp-pg.vpf .vp-pr button{min-height:28px;height:28px;padding:0 8px;font-size:12px}
+ html body #vp-pg.vpf .rph button{min-height:32px;height:32px;padding:0 10px}
+ html body #vp-pg.vpf .vp-top .vp-meta{display:none}
+ html body #vp-pg.vpf .vp-pc{grid-template-columns:minmax(0,1fr) auto auto;padding:8px 10px}
+ html body #vp-pg.vpf .vp-fields{order:5;grid-column:1/-1;gap:6px}
+ html body #vp-pg.vpf .vp-pn{order:1}
+ html body #vp-pg.vpf .vp-pr .vp-cnt{font-size:11px}
+ html body #vp-pg.vpf .vp-shg .vp-pl{padding:6px 8px}
+ html body #vp-pg.vpf .vp-st3{padding:4px 8px}
+ html body #vp-pg.vpf .vp-k2{font-size:9.5px;letter-spacing:.04em}
+ html body #vp-pg.vpf .vp-st3 b{font-size:14px}
+ html body #vp-pg.vpf .vp-stats{gap:5px}
+ html body #vp-pg.vpf .vp-top{min-height:0}
+ html body #vp-pg.vpf .vp-pc .vv span{display:none}
+ html body #vp-pg.vpf .vp-fa .tbs{font-size:0;gap:0;padding:0 8px}
+ html body #vp-pg.vpf .vp-pc{gap:4px 8px}
+}

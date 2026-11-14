@@ -401,6 +401,20 @@
   });
 
   /* register with the app: it adds the Policies tab, and shows our bar, page and bottom navigation on it */
+  /* ---------- one-screen fit: the Policies list (and its empty state) is sized to the visible window, so the page itself never scrolls ---------- */
+  function fit() {
+    var pg = $$('vp-pg'); if (!pg) return;
+    var on = !!pg.querySelector(':scope > .vp-stats, :scope > .vp-empty'); pg.classList.toggle('vpf', on);
+    if (!on) { pg.style.removeProperty('--vp-h'); return; }
+    var nav = document.querySelector('.vp-nav'), top = pg.getBoundingClientRect().top + window.pageYOffset;
+    pg.style.setProperty('--vp-h', Math.max(300, window.innerHeight - top - (nav ? nav.offsetHeight : 0) - 10) + 'px');
+  }
+  (function () {
+    var t = 0, run = function () { cancelAnimationFrame(t); t = requestAnimationFrame(fit); };
+    var attach = function () { var m = document.getElementById('m'); if (m && window.MutationObserver) new MutationObserver(run).observe(m, { childList: true }); run(); };
+    window.addEventListener('resize', run); window.addEventListener('orientationchange', run);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attach); else attach();
+  })();
   window.VRMODULES = (window.VRMODULES || []).concat([{ tab: TAB, label: 'Policies', bar: bar, page: page, nav: nav }]);
   window.VRPolicyUI = { open: function (p) { if (p) ST.page = p; UI.tab = TAB; render(); window.scrollTo(0, 0); } };
 })();
