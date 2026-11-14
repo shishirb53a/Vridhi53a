@@ -10,6 +10,7 @@ const root = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'modules', 'report-maximize', 'report-maximize.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const landingStyles = fs.readFileSync(path.join(root, 'modules', 'landing', 'landing.css'), 'utf8');
+const yearByYearStyles = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'year-by-year.css'), 'utf8');
 const moduleScript = html.indexOf('<script src="modules/report-maximize/report-maximize.js?v=136"></script>');
 const reportMarkup = html.indexOf('<script id="vr-rep-max">');
 const bodyEnd = html.indexOf('</body>');
@@ -17,6 +18,9 @@ assert.ok(moduleScript >= 0 && bodyEnd > moduleScript, 'Report maximize module l
 assert.ok(reportMarkup < 0, 'Report maximize logic is no longer duplicated inline');
 assert.ok(landingStyles.includes('#rp-max') && landingStyles.includes('#fh-max') && landingStyles.includes('#hy-max'), 'Existing maximize controls remain styled');
 assert.ok(source.includes("m.querySelector('[data-rpx]')"), 'Report maximize control targets the report card header');
+assert.match(yearByYearStyles, /main#m\.vr-rmax \.hz-wrap\{[^}]*max-height:none!important;[^}]*overflow:visible!important/);
+assert.match(yearByYearStyles, /main#m\.vr-rmax \.hz-t\.rt\{width:100%!important;min-width:0!important;table-layout:fixed!important\}/);
+assert.match(yearByYearStyles, /main#m\.vr-rmax \.hz-cards\{max-height:none!important;min-height:0;overflow:visible!important\}/);
 
 const listeners = {};
 const stored = new Map([['vr-rep-max', '0']]);
