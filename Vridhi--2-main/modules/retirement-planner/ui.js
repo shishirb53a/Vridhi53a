@@ -113,8 +113,9 @@
     if (!m) return;
     const c = m[2], raw = FH.v[id], blank = isBlankV(raw) || !Number.isFinite(Number(raw));
     if (blank) return;
-    if (m[1] === "stage") {                 // College 1-4 = year of a 4-year course: class 12 is done, fee years left = 5 - year
+    if (m[1] === "stage") {                 // College 1-4 = year of a 4-year course; 5 means education is complete
       const st = Math.round(Number(raw)), cEl = $("classToday" + c);
+      if (st === 5) { setField("feeYears" + c, 0); if (cEl) { cEl.disabled = true; cEl.title = "Education is complete"; } return; }
       if (st >= 1 && st <= 4) { setField("classToday" + c, 12); setField("feeYears" + c, 5 - st); if (cEl) { cEl.disabled = true; cEl.title = "Not used while the child is in college"; } }
       else { if (cEl) { cEl.disabled = false; cEl.removeAttribute("title"); } autofillFromFamily("classToday" + c); }
       return;
@@ -167,9 +168,9 @@
       ctl = `<select id="${id}" data-fh="${f.id}" aria-describedby="${id}-e">` +
         ["No children", "One child", "Two children"].map((t, i) =>
           `<option value="${i}"${String(FH.v[f.id]) === String(i) ? " selected" : ""}>${t}</option>`).join("") + "</select>";
-    } else if (/^stage[12]$/.test(f.id)) {      // School, or the year (1-4) of a 4-year college course
+    } else if (/^stage[12]$/.test(f.id)) {      // School, college year (1-4), or completed education
       ctl = `<select id="${id}" data-fh="${f.id}" aria-label="${esc(f.label)}" aria-describedby="${id}-e">` +
-        ["School", "College 1", "College 2", "College 3", "College 4"].map((t, i) =>
+        ["School", "College 1", "College 2", "College 3", "College 4", "N/A"].map((t, i) =>
           `<option value="${i}"${String(FH.v[f.id]) === String(i) ? " selected" : ""}>${t}</option>`).join("") + "</select>";
     } else if (f.kind === "text") {
       ctl = `<input id="${id}" data-fh="${f.id}" type="text" maxlength="24" autocomplete="off" value="${esc(FH.v[f.id])}"` +
@@ -182,7 +183,8 @@
         `${fam && fam.ph ? `placeholder="${fam.ph}" ` : ""}${fam && (f.child || !f.required || f.panel === "household" || f.panel === "college" || f.panel === "weddings") ? `aria-label="${esc(f.label)}${f.required ? "" : " (optional)"}" ` : ""}` +
         `${hint ? `aria-description="${esc(f.help)}" ` : ""}aria-describedby="${id}-e">`;
     }
-    if (/^classToday[12]$/.test(f.id) && Number(FH.v["stage" + f.id.slice(-1)]) > 0) ctl = ctl.replace("<input ", '<input disabled title="Not used while the child is in college" ');
+    const childStage = /^classToday[12]$/.test(f.id) ? Number(FH.v["stage" + f.id.slice(-1)]) : 0;
+    if (childStage > 0) ctl = ctl.replace("<input ", `<input disabled title="${childStage === 5 ? "Education is complete" : "Not used while the child is in college"}" `);
     const amt = /₹/.test(f.label) ? `<small class="hh fh-amt" id="${id}-amt" aria-live="polite">${esc(amtText(FH.v[f.id]))}</small>` : "";   // "₹ 50,00,000 · ₹ 50.00 L" under every rupee box
     const bk = f.panel === "buckets" ? BK_UI[f.id.replace(/[12]$/, "")] : null;
     if (bk) {      // compact bucket field: amount input with its share of the corpus beside it
@@ -288,7 +290,7 @@
 <div class="wzt fh-wzt" id="fh-nav" role="tablist" aria-label="Planning steps"></div>
 <p class="fh-note" id="fh-note"><b>Returns and inflation rates are assumptions</b> you can edit, not predictions or guarantees. This pop-up uses its own simple model. It reads your Goal Planner holdings only when you tick them under Current Corpus, and never changes them.</p>
 ${panel("family", `<div class="fh-fam"><div class="hs">` + grid(f => f.panel === "family" && f.child === null).replace('class="hg"', 'class="hg fh-g2"') +
-  [1, 2].map(c => `<div class="fh-crow" data-fh-cond="${c}"><span class="fh-cn">Child ${c}</span>${FHE.FIELDS.filter(f => f.panel === "family" && f.child === c).map(fieldHTML).join("")}</div>`).join("") + `<p class="hh fh-stg-note" data-fh-cond-any>Stage: pick School and enter the Class (1–12), or College 1–4 for the year of a 4-year course. College years fill &ldquo;years of college fees left&rdquo; on the College step.</p></div></div>`)}
+  [1, 2].map(c => `<div class="fh-crow" data-fh-cond="${c}"><span class="fh-cn">Child ${c}</span>${FHE.FIELDS.filter(f => f.panel === "family" && f.child === c).map(fieldHTML).join("")}</div>`).join("") + `<p class="hh fh-stg-note" data-fh-cond-any>Stage: pick School and enter the Class (1–12), College 1–4 for the year of a 4-year course, or N/A if education is complete. College years fill &ldquo;years of college fees left&rdquo; on the College step.</p></div></div>`)}
 ${panel("planning", `<div class="fh-plan"><div class="fh-ph"><h3>Retirement Timeline</h3><span class="fh-badge" id="fh-horizon"></span></div><div id="fh-pt" class="fh-ptw"></div>` +
   pills("fh-ppills", "Retirement planning",
     `<button type="button" role="tab" id="fh-st-plan-ready" data-fh-plan="ready" aria-controls="fh-pp-ready">Retirement Readiness</button>` +
@@ -689,7 +691,9 @@ html body .sx .sx-key{margin:0 0 2px;font-size:11px;color:var(--mu)}
       const col = FHE.collegeCost(v, c), wed = FHE.weddingCost(v, c), ew = eduWhen(v, c, year), wy = FHE.weddingYear(v, c, year);
       const fy = Number(v["feeYears" + c]), todayEdu = Number(v["annualFee" + c]) * fy, edF = Number(v["educationFund" + c]), wdF = Number(v["weddingFund" + c]);
       const cls = (set, need) => set >= need - 0.5 ? "sx-hi" : "sx-lo";
-      const wAge = FHE.weddingAgeOf(v, c), sub = (FHE.isBlank(v["childAge" + c]) ? `${Number(v["stage" + c]) > 0 ? "College year " + v["stage" + c] : "Class " + v["classToday" + c]}` : `Age ${v["childAge" + c]} \u00b7 ${Number(v["stage" + c]) > 0 ? "College year " + v["stage" + c] : "Class " + v["classToday" + c]}`) + (wAge === null ? "" : ` \u00b7 Wedding at ${wAge}`);
+      const wAge = FHE.weddingAgeOf(v, c), stage = Number(v["stage" + c]);
+      const stageLabel = stage === 5 ? "Education completed" : stage >= 1 && stage <= 4 ? `College year ${stage}` : `Class ${v["classToday" + c]}`;
+      const sub = (FHE.isBlank(v["childAge" + c]) ? stageLabel : `Age ${v["childAge" + c]} \u00b7 ${stageLabel}`) + (wAge === null ? "" : ` \u00b7 Wedding at ${wAge}`);
       kidsH += `<h4>Child ${c}<small>${esc(sub)}</small></h4><div class="sx-tw"><table class="sx-t"><thead><tr><th scope="col">Goal</th><th scope="col">Inflated</th><th scope="col">Need now</th><th scope="col">Set aside</th></tr></thead><tbody>
 <tr><td>Education<small>${fy === 0 ? "No fee years left" : `${M(todayEdu)} today</small><small>${fy} yr${fy === 1 ? "" : "s"} \u00b7 till ${esc(ew.year)}`}</small></td><td title="${X(col.future)}">${M(col.future)}</td><td title="${X(col.present)}">${M(col.present)}</td><td class="${cls(edF, col.present)}" title="${X(edF)}">${M(edF)}</td></tr>
 <tr><td>Wedding<small>${M(Number(v["weddingCost" + c]))} today</small>${wy === null ? "" : `<small>in ${wy}${wAge === null ? "" : ` \u00b7 age ${wAge}`}</small>`}</td><td title="${X(wed.future)}">${M(wed.future)}</td><td title="${X(wed.present)}">${M(wed.present)}</td><td class="${cls(wdF, wed.present)}" title="${X(wdF)}">${M(wdF)}</td></tr></tbody></table></div>`;

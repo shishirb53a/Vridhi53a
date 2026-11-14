@@ -26,11 +26,11 @@
     F("age", "Your age", 48, 18, 110, "", true, { integer: true, panel: "family" }),
     F("children", "Number of children", 2, 0, 2, "", true, { integer: true, panel: "family" }),
     F("childAge1", "Child 1 age", "", 0, 60, "", false, { integer: true, panel: "family", child: 1 }),
-    F("stage1", "Child 1 · stage", 0, 0, 4, "", false, { integer: true, panel: "family", child: 1 }),
+    F("stage1", "Child 1 · stage", 0, 0, 5, "", false, { integer: true, panel: "family", child: 1 }),
     F("classToday1", "Child 1 · Class (1–12)", 12, 1, 12, "", true, { integer: true, panel: "family", child: 1 }),
     F("weddingAge1", "Child 1 · wedding age", "", 0, 80, "", false, { integer: true, panel: "family", child: 1 }),
     F("childAge2", "Child 2 age", "", 0, 60, "", false, { integer: true, panel: "family", child: 2 }),
-    F("stage2", "Child 2 · stage", 0, 0, 4, "", false, { integer: true, panel: "family", child: 2 }),
+    F("stage2", "Child 2 · stage", 0, 0, 5, "", false, { integer: true, panel: "family", child: 2 }),
     F("classToday2", "Child 2 · Class (1–12)", 9, 1, 12, "", true, { integer: true, panel: "family", child: 2 }),
     F("weddingAge2", "Child 2 · wedding age", "", 0, 80, "", false, { integer: true, panel: "family", child: 2 }),
 
