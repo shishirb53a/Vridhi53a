@@ -26,3 +26,8 @@ html body .fh-page .hz-tb select{flex:1 1 150px;min-width:0;max-width:100%;text-
 html body .fh-page .hz-tb #fzs{max-width:190px}
 html body .fh-page .card{min-width:0}
 @media (max-width:1040px){html body .hz-cards{display:block}html body .hz-wrap{display:none}}
+/* Maximised Year-by-year report: title, filters and summary stay in view; only the table (or the phone cards) scrolls */
+html body main#m.vr-rmax .hz-wrap{max-height:calc(100dvh - 360px)!important;min-height:220px;overflow:auto!important;scrollbar-width:thin!important;cursor:auto!important}
+html body main#m.vr-rmax .hz-cards{max-height:calc(100dvh - 330px)!important;min-height:200px;overflow:auto!important}
+html body main#m.vr-rmax .hz-wrap thead th{position:sticky;top:0;z-index:3}
+@media (max-width:720px){html body .rph2[data-rpx]{flex-wrap:nowrap}html body .rph2[data-rpx]>.rpt{flex:1 1 0;min-width:0}html body .rph2[data-rpx]>.rpt h2{font-size:16px}}
