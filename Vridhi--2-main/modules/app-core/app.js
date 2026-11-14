@@ -45,8 +45,15 @@ function calc(s){return PC.calculate(s,{stage:stg,policy:VRPolicy,yearsOf:yrsOf}
    The engine still books it in the financial year that starts that day, so balances, interest and income are unchanged. */
 function depShow(a,idx,N){if(a<2)return 0;const A=S.assets;let t=0;(idx||A.map((x,i)=>i)).forEach(i=>{const x=A[i];if(!x||x.type==='gratuity')return;const k=fyInfo(x,S,a),ap=(x.amon||4)===4;t+=k.act?(k.yp?x.add:0)+(x.madd||0)*k.n:0;if(a>=3&&ap&&k.act&&k.yp)t-=x.add;if(a<N&&ap){const k2=fyInfo(x,S,a+1);if(k2.act&&k2.yp)t+=x.add}});return t}
 function addInfo(D){const act=S.assets.filter(x=>!x.type&&(x.add>0||x.madd>0)&&x.yrs>=2),next=D.rows.length>1?D.rows[1].add:0,
-last=act.length?S.start+Math.max(...act.map(effYrs))-1:null,tot=D.rows.slice(1,D.ri+1).reduce((q,r)=>q+r.add,0);
-return{next,last,tot,sub:(next||tot)?(cr(next)+' next year · till '+last):'no additions planned'}}
+last=act.length?S.start+Math.max(...act.map(effYrs))-1:null,tot=D.rows.slice(1,D.ri+1).reduce((q,r)=>q+r.add,0),
+y1=D.rows.length>1?D.rows[1].year:null,fy=y1?'FY '+(y1-1)+'-'+String(y1).slice(-2):'',
+ml=ix=>MSN[ix%12]+' '+Math.floor(ix/12),
+retIx=D.rows[D.ri]?D.rows[D.ri].year*12+2:null,
+ends=act.map(x=>{const mt=matOf(x,S);let e=null;if(x.madd>0&&mIx(x.mto)!=null)e=mIx(x.mto);if(x.add>0&&mIx(x.yto)!=null)e=e==null?mIx(x.yto):Math.max(e,mIx(x.yto));if(mt&&e!=null)e=Math.min(e,mt.ix-1);return e}).filter(e=>e!=null),
+lastIx=ends.length?Math.max(...ends):null;
+/* The first figure is the first plan year (financial year from 1 April of the start year), not a rolling "next 12 months".
+   The total stops at retirement; the last line says when contributions really end if that is later. */
+return{next,last,tot,sub:(next||tot)?(fy+': '+cr(next)+(retIx!=null?' · counted to retirement ('+ml(retIx)+')':'')+(lastIx!=null&&retIx!=null&&lastIx>retIx?' · contributions continue to '+ml(lastIx):'')):'no additions planned'}}
 let MSG='';
 function fixEnd(){const a0=S.members[0].age,mx=S.start+Math.min(60,100-a0);let e=Math.round(S.end);
 if(!(e>S.start)){e=Math.min(S.start+23,mx);MSG='End year must be after the starting year. Reset to '+e+'.'}
