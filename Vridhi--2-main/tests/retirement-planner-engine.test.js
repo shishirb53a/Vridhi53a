@@ -12,7 +12,7 @@ const uiSource = fs.readFileSync(path.join(root, 'modules', 'retirement-planner'
 const reportCss = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'year-by-year.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=130"></script>');
-const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=153"></script>');
+const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=154"></script>');
 const bodyEnd = html.indexOf('</body>');
 assert.ok(moduleScript >= 0 && uiScript > moduleScript, 'Retirement Planner engine loads before its UI');
 assert.ok(!html.includes('<script id="fh-engine">'), 'Retirement Planner engine is no longer duplicated inline');

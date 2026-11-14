@@ -2,10 +2,34 @@
 /* Year by Year table: built like the Goal Planner Reports table (theme header, header sort, row highlight, shared Freeze) */
 html body .hz-sec{margin-top:6px}
 html body .hz-t.rt{font-size:12px}
-html body .hz-t.rt thead th{white-space:normal;vertical-align:bottom;line-height:1.25;min-width:92px;max-width:140px}html body .hz-t.rt thead th:nth-child(-n+3){max-width:none}html body .hz-t.rt th button{display:block;width:100%}
+html body .hz-wrap{position:relative;max-width:100%;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin!important;-ms-overflow-style:auto!important;cursor:grab}
+html body .hz-wrap::-webkit-scrollbar{display:block!important;width:auto!important;height:10px}
+html body .hz-t.rt{width:max-content!important;min-width:100%!important;table-layout:auto!important;font-variant-numeric:tabular-nums;word-break:normal;overflow-wrap:normal}
+html body .hz-t.rt :is(th,td){word-break:normal;overflow-wrap:normal}
+html body .hz-t.rt thead{position:sticky;top:0!important;z-index:20;background-color:var(--card)}
+html body .hz-t.rt thead th{position:sticky!important;top:0!important;z-index:20;vertical-align:bottom;line-height:1.25;white-space:nowrap;background-color:var(--card)!important}
+html body .hz-t.rt th button{display:block;width:max-content;max-width:none;white-space:nowrap!important}
 html body .hz-t.rt td:last-child,html body .hz-t.rt th:last-child{min-width:0;text-align:center}
-html body .hz-t.rt th.hz-w,html body .hz-t.rt td.hz-w{white-space:normal;min-width:240px;max-width:320px;text-align:left;line-height:1.35}
-html body .hz-t.rt th button{font:inherit;font-weight:inherit;background:none;border:0;padding:0;margin:0;color:inherit;text-align:inherit;cursor:pointer;white-space:normal;min-height:0}
+html body .hz-t.rt :is(th,td).hz-serial{width:92px!important;min-width:92px!important;max-width:92px!important}
+html body .hz-t.rt :is(th,td).hz-year{width:100px!important;min-width:100px!important;max-width:100px!important}
+html body .hz-t.rt :is(th,td).hz-age{min-width:132px}
+html body .hz-t.rt :is(th,td).hz-num{min-width:150px;padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+html body .hz-t.rt :is(th,td).hz-c,html body .hz-t.rt :is(th,td).hz-status{white-space:nowrap}
+html body .hz-t.rt :is(th,td).hz-w{min-width:240px;max-width:320px;text-align:left;line-height:1.4}
+html body .hz-t.rt td.hz-w{white-space:normal}
+html body .hz-t.rt th.hz-w{white-space:nowrap}
+html body .hz-t.rt :is(th,td).hz-serial,html body .hz-t.rt :is(th,td).hz-year{position:sticky!important;z-index:5;box-sizing:border-box;background-color:var(--card)!important;background-image:linear-gradient(var(--tn,transparent),var(--tn,transparent))!important}
+html body .hz-t.rt :is(th,td).hz-serial{left:0!important}
+html body .hz-t.rt :is(th,td).hz-year{left:92px!important;box-shadow:inset -1px 0 0 var(--bd),6px 0 8px -5px #0f172a59!important}
+html body .hz-t.rt thead :is(th.hz-serial,th.hz-year){z-index:30;background-color:var(--card)!important}
+html body .hz-t.rt th button{font:inherit;font-weight:inherit;background:none;border:0;padding:0;margin:0;color:inherit;text-align:inherit;cursor:pointer;white-space:nowrap!important;min-height:0}
+html body .hz-viewbar{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+html body .hz-viewbar button{min-height:34px;padding:5px 12px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--tx);font-size:12px;font-weight:600;cursor:pointer}
+html body .hz-viewbar button[aria-pressed="true"]{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,var(--card));color:var(--ac)}
+html body .hz-viewbar button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+html body .hz-t[data-hz-view="summary"] :is(th,td):not([data-hz-group="context"]):not([data-hz-summary="true"]),
+html body .hz-t[data-hz-view="income"] :is(th,td):not([data-hz-group="context"]):not([data-hz-group="income"]):not([data-hz-summary="true"]),
+html body .hz-t[data-hz-view="expenses"] :is(th,td):not([data-hz-group="context"]):not([data-hz-group="expenses"]):not([data-hz-summary="true"]){display:none}
 html body .hz-t.rt tbody tr[data-hzr]{cursor:pointer}
 html body .hz-t.rt tbody tr[data-hzr]:hover{--tn:color-mix(in srgb,var(--ac) 7%,transparent)}
 html body .hz-t.rt tbody tr.sel{--tn:color-mix(in srgb,var(--ac) 20%,transparent)}
@@ -26,13 +50,13 @@ html body .fh-page .hz-tb select{flex:1 1 150px;min-width:0;max-width:100%;text-
 html body .fh-page .hz-tb #fzs{max-width:190px}
 html body .fh-page .card{min-width:0}
 @media (max-width:1040px){html body .hz-cards{display:block}html body .hz-wrap{display:none}}
-/* Maximized reports use the page as the only scroll container and fit the table to the viewport. */
+/* Maximized reports keep the table horizontally scrollable and the page as the only vertical scroll container. */
 html body main#m.vr-rmax{overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none}
 html body main#m.vr-rmax::-webkit-scrollbar{display:none}
-html body main#m.vr-rmax .hz-wrap{max-height:none!important;min-height:0;overflow:visible!important;cursor:auto!important}
-html body main#m.vr-rmax .hz-t.rt{width:100%!important;min-width:0!important;table-layout:fixed!important}
-html body main#m.vr-rmax .hz-t.rt :is(th,td){min-width:0!important;max-width:none!important;white-space:normal!important;overflow-wrap:anywhere}
-html body main#m.vr-rmax .hz-t.rt :is(th.hz-w,td.hz-w){min-width:0!important;max-width:none!important}
-html body main#m.vr-rmax .hz-cards{max-height:none!important;min-height:0;overflow:visible!important}
-html body main#m.vr-rmax .hz-wrap thead th{position:sticky;top:0;z-index:3}
+html body main#m.vr-rmax .hz-wrap{max-height:none!important;min-height:0;overflow-x:auto!important;overflow-y:hidden!important;cursor:grab}
+html body main#m.vr-rmax .hz-t.rt{width:max-content!important;min-width:100%!important;table-layout:auto!important}
+html body main#m.vr-rmax .hz-t.rt thead th{position:sticky!important;top:0!important;z-index:20}
+html body main#m.vr-rmax .hz-t.rt :is(th.hz-serial,th.hz-year){z-index:30}
+html body main#m.vr-rmax .hz-cards{display:none!important;max-height:none!important;min-height:0;overflow:visible!important}
+html body main#m.vr-rmax .hz-wrap{display:block!important}
 @media (max-width:720px){html body .rph2[data-rpx]{flex-wrap:nowrap}html body .rph2[data-rpx]>.rpt{flex:1 1 0;min-width:0}html body .rph2[data-rpx]>.rpt h2{font-size:16px}}

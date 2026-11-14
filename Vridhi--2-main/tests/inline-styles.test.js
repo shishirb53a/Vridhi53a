@@ -32,7 +32,7 @@ const stylesheets = [
   ['modules/app-shell/ui-system.css', ':root{color-scheme:light dark}', '143'],
   ['modules/retirement-planner/ui.css', 'dialog.hf.fh{width:min(560px,96vw)}'],
   ['modules/retirement-planner/page-layout.css', '/* Retirement planner screen:', '147'],
-  ['modules/retirement-planner/year-by-year.css', '/* Year by Year table:', '148'],
+  ['modules/retirement-planner/year-by-year.css', '/* Year by Year table:', '149'],
   ['modules/app-shell/icons.css', '/* Icons (build 47):', '142'],
   ['modules/retirement-planner/planner-page.css', '.rp2-page{display:flex;', '142'],
   ['modules/holdings/notes-history.css', '/* Notes & History (per holding) */', '147'],

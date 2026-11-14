@@ -11,7 +11,7 @@ const source = fs.readFileSync(path.join(root, 'modules', 'goal-planner-clients'
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
 const keysPosition = appCore.indexOf('const GPP_KEYS=');
-const retirementUI = html.indexOf('<script src="modules/retirement-planner/ui.js?v=153"></script>');
+const retirementUI = html.indexOf('<script src="modules/retirement-planner/ui.js?v=154"></script>');
 const moduleSourceTag = '<script src="modules/goal-planner-clients/goal-planner-clients.js?v=144"></script>';
 const moduleTag = html.indexOf(moduleSourceTag);
 const appCoreTag = html.indexOf('<script src="modules/app-core/app.js?v=172"></script>');
