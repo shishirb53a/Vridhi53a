@@ -6,9 +6,10 @@
 try{if(sessionStorage.getItem('fs-auth')!=='1'&&localStorage.getItem('vr-rm')==='1'){var rmS=localStorage.getItem('vr-sb-remember'),rmO=rmS&&JSON.parse(rmS);if(rmO&&rmO.rt&&rmO.uid){sessionStorage.setItem('vr-sb',rmS);sessionStorage.setItem('fs-auth','1')}}}catch(e){}
 try{if(sessionStorage.getItem('fs-auth')!=='1')document.documentElement.classList.add('lk')}catch(e){document.documentElement.classList.add('lk')}</script>
 <link rel="stylesheet" href="modules/policy/policy.css?v=129">
+<link rel="stylesheet" href="modules/policy/policy-fit.css?v=1">
 <script src="config.js"></script>
 <script src="modules/policy/policy-core.js?v=128" charset="utf-8"></script>
-<script src="modules/policy/policy-ui.js?v=130" charset="utf-8"></script>
+<script src="modules/policy/policy-ui.js?v=131" charset="utf-8"></script>
 <script src="modules/auth/build-info.js?v=151"></script>
 <script id="vr-prod" src="modules/auth/auth.js?v=153"></script>
 <script src="modules/auth/idle-timeout.js?v=148"></script>
