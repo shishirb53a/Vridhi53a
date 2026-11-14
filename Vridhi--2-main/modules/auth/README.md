@@ -16,11 +16,7 @@ locking. The timeout is configured through `idleMinutes` in the root `config.js`
 
 Run `node tests/session-timeout.test.js` after changing the timeout behavior.
 
-`login.js` builds the responsive sign-in split panel and its optional, user-started 20-second
-story animation and generated soundscape. Sound starts only with the story, can be muted
-independently, and does not require an external audio asset. Optional spoken narration prefers an
-English feminine-sounding browser voice and can also be toggled separately. Voice availability
-depends on the browser and installed system voices. `login.css` contains the login-only layout and
-responsive styles, while `family-story.svg` is the original family illustration used by the story.
-Keep these separate from the authentication and session code. Run `node tests/login.test.js` after
-changing the login presentation.
+`login.css` contains the responsive, single-card sign-in presentation. The login page uses only the
+sign-in form and does not load promotional artwork, story audio, or narration. Keep the presentation
+separate from authentication and session code. Run `node tests/login.test.js` after changing the
+login presentation.

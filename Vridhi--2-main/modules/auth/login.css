@@ -1,278 +1,41 @@
 html body #lg {
   align-items: center;
+  justify-content: center;
   padding: 24px;
-  background:
-    radial-gradient(900px 520px at 10% 0%, #dff3e8 0, transparent 65%),
-    radial-gradient(780px 480px at 100% 100%, #fff0d6 0, transparent 68%),
-    var(--bg);
 }
+
 html body #lg .lc {
-  width: min(1040px, 100%);
-  grid-template-columns: minmax(0, 1.08fr) minmax(340px, .92fr);
-  border: 1px solid #dfe9e2;
-  border-radius: 22px;
-  box-shadow: 0 32px 80px -36px #183d2e70, 0 8px 26px -16px #17294a38;
-}
-html body #lg .lbrand {
-  gap: 18px;
-  min-width: 0;
-  padding: 34px;
-  color: #17372c;
-  background:
-    radial-gradient(circle at 8% 12%, #ffffffd9 0 2px, transparent 3px),
-    radial-gradient(circle at 90% 20%, #ffffffa6 0 3px, transparent 4px),
-    linear-gradient(145deg, #eff9f2 0%, #e8f5ee 55%, #f9f2e5 100%);
-}
-html body #lg .lbrand .lb {
-  gap: 12px;
-  margin: 0;
-}
-html body #lg .lbrand .lw {
-  color: #17372c;
-}
-html body #lg .lbrand .lgt {
-  max-width: 36ch;
-  color: #536b5f;
-  font-size: 15px;
-  line-height: 1.55;
-}
-html body #lg .lbrand .lgb {
-  display: none;
-}
-html body #lg .lbrand .lgc {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  margin: auto 0 0;
-  padding-top: 2px;
+  flex-direction: column;
+  width: min(420px, 100%);
+  box-sizing: border-box;
+  margin: auto;
+  padding: 40px 32px 32px;
+  border: 1px solid color-mix(in srgb, var(--bd) 60%, transparent);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px -16px #0f172a2e, 0 8px 24px -10px #0f172a1a;
 }
-html body #lg .lbrand .lgc li {
-  padding: 7px 10px;
-  border: 1px solid #cfe2d4;
-  border-radius: 999px;
-  background: #ffffffa8;
-  color: #315b45;
-  font-size: 12px;
-  font-weight: 600;
-}
-html body #lg .lform {
-  min-width: 0;
-  padding: 44px 40px;
-}
-html body #lg .lform .lgc {
-  display: none;
-}
-html body #lg .vr-story {
-  width: 100%;
-  margin: 0;
-}
-html body #lg .vr-story-visual {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #d6e8d9;
-  border-radius: 18px;
-  background: #fffdf8;
-  box-shadow: 0 16px 32px -24px #214f3a70;
-}
-html body #lg .vr-story-visual img {
-  display: block;
-  width: 100%;
-  height: auto;
-  transform-origin: 50% 70%;
-}
-html body #lg .vr-story-tag {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 9px;
-  border: 1px solid #ffffffb8;
-  border-radius: 999px;
-  background: #ffffffdc;
-  color: #315b45;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-html body #lg .vr-story-tag::before {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #368a5f;
-  content: "";
-}
-html body #lg .vr-story-caption {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  left: 12px;
-  width: fit-content;
-  max-width: calc(100% - 24px);
-  padding: 8px 11px;
-  border-radius: 10px;
-  background: #17372ce8;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.35;
-}
-html body #lg .vr-story-caption[aria-hidden="true"] {
-  opacity: 0;
-}
-html body #lg .vr-story-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin-top: 11px;
-}
-html body #lg .vr-story-toggle {
-  display: inline-flex;
-  align-items: center;
+
+html body #lg .lb {
   justify-content: center;
-  gap: 8px;
-  min-width: 150px;
-  min-height: 42px;
-  padding: 0 14px;
-  border: 1px solid #c8dfcf;
-  border-radius: 999px;
-  background: #fff;
-  color: #24553b;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
+  margin: 0 0 24px;
 }
-html body #lg .vr-story-toggle:hover {
-  border-color: #75ad86;
-  background: #f7fcf8;
+
+html body #lg .lw {
+  color: var(--tx);
+  font-size: 26px;
 }
-html body #lg .vr-story-toggle:focus-visible {
-  outline: 3px solid #35865b;
-  outline-offset: 3px;
+
+html body #lg h1 {
+  margin: 0 0 8px;
 }
-html body #lg .vr-story-toggle svg {
-  width: 16px;
-  height: 16px;
-  flex: none;
-  fill: currentColor;
-}
-html body #lg :is(.vr-story-sound, .vr-story-voice) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 42px;
-  padding: 0 11px;
-  border: 1px solid #c8dfcf;
-  border-radius: 999px;
-  background: #fff;
-  color: #24553b;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-html body #lg :is(.vr-story-sound, .vr-story-voice):hover {
-  border-color: #75ad86;
-  background: #f7fcf8;
-}
-html body #lg :is(.vr-story-sound, .vr-story-voice):focus-visible {
-  outline: 3px solid #35865b;
-  outline-offset: 3px;
-}
-html body #lg :is(.vr-story-sound, .vr-story-voice)[aria-pressed="false"] {
-  color: #687c70;
-}
-html body #lg :is(.vr-story-sound, .vr-story-voice) svg {
-  width: 17px;
-  height: 17px;
-  flex: none;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.7;
-}
-html body #lg .vr-story-duration {
-  color: #687c70;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-html body #lg .vr-story-progress {
-  height: 3px;
-  flex: 1;
-  flex-basis: 48px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #dcebe0;
-}
-html body #lg .vr-story-progress i {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  background: #368a5f;
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-html body #lg .vr-story-hint {
-  margin: 8px 0 0;
-  color: #687c70;
-  font-size: 12px;
-  line-height: 1.4;
-}
-@media (max-width: 760px) {
-  html body #lg {
-    align-items: stretch;
-    padding: 0;
-  }
-  html body #lg .lc {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    align-content: start;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  html body #lg .lbrand {
-    gap: 12px;
-    padding: 22px 22px 20px;
-  }
-  html body #lg .lbrand .vr-story {
-    max-width: 440px;
-  }
-  html body #lg .lbrand .lgt,
-  html body #lg .lbrand .lgc {
-    display: none;
-  }
-  html body #lg .lform {
-    justify-content: flex-start;
-    padding: 26px 22px 32px;
-  }
-}
+
 @media (max-width: 420px) {
-  html body #lg .lbrand {
-    padding: 18px 18px 16px;
+  html body #lg {
+    padding: 16px;
   }
-  html body #lg .lform {
-    padding: 22px 18px 28px;
-  }
-  html body #lg .vr-story-tag {
-    top: 8px;
-    left: 8px;
-    font-size: 9px;
-  }
-  html body #lg .vr-story-caption {
-    right: 8px;
-    bottom: 8px;
-    left: 8px;
-    padding: 6px 8px;
-    font-size: 11px;
+
+  html body #lg .lc {
+    padding: 34px 22px 28px;
   }
 }
