@@ -404,7 +404,7 @@
   /* ---------- one-screen fit: the Policies list (and its empty state) is sized to the visible window, so the page itself never scrolls ---------- */
   function fit() {
     var pg = $$('vp-pg'); if (!pg) return;
-    var on = !!pg.querySelector(':scope > .vp-stats, :scope > .vp-empty'); pg.classList.toggle('vpf', on);
+    var rp = !!pg.querySelector(':scope > .vp-pills'), on = rp || !!pg.querySelector(':scope > .vp-stats, :scope > .vp-empty'); pg.classList.toggle('vpf', on); pg.classList.toggle('vpr', rp);
     if (!on) { pg.style.removeProperty('--vp-h'); return; }
     var nav = document.querySelector('.vp-nav'), top = pg.getBoundingClientRect().top + window.pageYOffset;
     pg.style.setProperty('--vp-h', Math.max(300, window.innerHeight - top - (nav ? nav.offsetHeight : 0) - 10) + 'px');
