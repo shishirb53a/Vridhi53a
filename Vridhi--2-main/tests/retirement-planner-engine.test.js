@@ -93,6 +93,14 @@ assert.strictEqual(policyRow.policy, 32000, 'Per-policy reporting preserves the 
   assert.ok(!engine.validateAll(na).some(i => i.field === 'classToday1'), 'Class is not required while Stage is N/A');
   assert.ok(engine.validateAll(school).some(i => i.field === 'classToday1'), 'Class stays required for School');
   assert.strictEqual(JSON.stringify(engine.schedule(na)), JSON.stringify(engine.schedule(zero)), 'Year-by-year projection treats N/A like zero education cost');
+  /* Money Buckets: an N/A child has no education set-aside, even if an old amount is left behind */
+  const withFund = Object.assign({}, na, { corpus: '10000000', houseFund: '4000000', buffer: '1000000', educationFund1: '500000', weddingFund1: '1000000' });
+  const noFund = Object.assign({}, withFund, { educationFund1: '0' });
+  assert.strictEqual(engine.growthEngine(withFund), engine.growthEngine(noFund), 'N/A child: leftover education set-aside is ignored (money stays in the growth engine)');
+  assert.strictEqual(engine.growthEngine(withFund), 4000000, 'Growth engine = corpus minus household, reserve and wedding only');
+  assert.ok(!engine.validateAll(Object.assign({}, withFund, { educationFund1: '' })).some(i => i.field === 'educationFund1'), 'Education set-aside is not required while Stage is N/A');
+  assert.strictEqual(engine.defaultAllocation(10000000, 1, na).educationFund1, 0, 'Default allocation gives an N/A child no education share');
+  assert.strictEqual(engine.defaultAllocationPercents(1, na).growth, 100 - 40 - 10 - 10, 'Default percentages hand the unused education share to the growth engine');
 }
 
 console.log('  ok   Retirement Planner reports retain each policy payout separately');
