@@ -114,7 +114,10 @@
     ? ["family", "planning", "buckets", "household", "college", "weddings"]
     : ["family", "planning", "buckets", "household"];
   const defaults = () => Object.fromEntries(FIELDS.map(f => [f.id, f.initial]));
-  const applies = (f, inp) => (f.child === null || f.child <= childCount(inp)) && (!f.gate || String(inp[f.gate]) === "1") &&
+  /* Stage "N/A" (value 5): the child has no school or college spending. Class, fee years and annual fee then do not apply and every education cost is 0. */
+  const STAGE_NA = 5;
+  function isNA(inp, c) { return String(inp["stage" + c]) === String(STAGE_NA); }
+  const applies = (f, inp) => (f.child === null || f.child <= childCount(inp)) && !(f.child && isNA(inp, f.child) && /^(classToday|feeYears|annualFee)[12]$/.test(f.id)) && (!f.gate || String(inp[f.gate]) === "1") &&
     (!f.stream || (String(inp.incomeOn) === "1" && f.stream <= streamCount(inp)));
 
   /* ---------- per-field validation (mirrors the HTML min / max / step / required rules) ---------- */
@@ -192,7 +195,7 @@
     const years = num(inp, "until") - num(inp, "age");
     const out = [];
     for (let c = 1; c <= childCount(inp); c++) {
-      if (num(inp, "annualFee" + c) > 0 && num(inp, "feeYears" + c) > years)
+      if (!isNA(inp, c) && num(inp, "annualFee" + c) > 0 && num(inp, "feeYears" + c) > years)
         out.push({ panel: "college", child: c, field: "feeYears" + c, message:
           "Fee years extend beyond the selected planning period. Increase the target age or reduce fee years." });
       if (num(inp, "weddingCost" + c) > 0 && num(inp, "weddingYears" + c) > years)
@@ -244,7 +247,7 @@
 
   /* ---------- present-value helpers (same discounting as the original) ---------- */
   function collegeCost(inp, child) {
-    if (childCount(inp) < child) return { future: 0, present: 0 };
+    if (childCount(inp) < child || isNA(inp, child)) return { future: 0, present: 0 };
     const ids = ["feeYears" + child, "annualFee" + child, "educationInflation", "roi"];
     if (ids.some(id => isBlank(inp[id]))) return { future: NaN, present: NaN };
     let future = 0, present = 0;
@@ -295,7 +298,7 @@
 
   /* Calendar year in which the last college fee falls (fees are paid at the end of each remaining fee year). Display only. */
   function educationYear(inp, child, currentYear) {
-    if (childCount(inp) < child || isBlank(inp["feeYears" + child])) return null;
+    if (childCount(inp) < child || isNA(inp, child) || isBlank(inp["feeYears" + child])) return null;
     return currentYear + num(inp, "feeYears" + child);
   }
 
@@ -419,7 +422,7 @@
       const reserveYield = reserve * num(inp, "bufferRoi") / 100;
       const fee = new Array(kids + 1).fill(0), wed = new Array(kids + 1).fill(0);
       for (let c = 1; c <= kids; c++) {
-        if (year <= num(inp, "feeYears" + c))
+        if (!isNA(inp, c) && year <= num(inp, "feeYears" + c))
           fee[c] = num(inp, "annualFee" + c) * (1 + num(inp, "educationInflation") / 100) ** (year - 1 + FIRST_YEAR_INFLATION);
         if (year === num(inp, "weddingYears" + c))
           wed[c] = num(inp, "weddingCost" + c) * (1 + num(inp, "weddingInflation") / 100) ** year;
@@ -622,5 +625,5 @@
 
   root.FreedomHorizon = { defaultAllocation, defaultAllocationPercents, schedule, bucketsAt, horizonReport, FIELDS, BY_ID, STEP_LABELS, defaults, stepsFor, isBlank, currency,
     checkField, incomeField, growthEngine, moneyRule, planningRule, bucketsRule, incomeSummary, timingIssues, validateAll, validateStep,
-    collegeCost, weddingCost, weddingYear, weddingAgeOf, weddingYearsFromAge, educationYear, incomeStreams, incomeWindow, policyStreams, policyNow, withoutPolicy, setClock: fn => { clock = typeof fn === "function" ? fn : () => new Date(); }, horizonText, plan, calculate, earningYears, earningSummary, simulate };
+    isNA, STAGE_NA, collegeCost, weddingCost, weddingYear, weddingAgeOf, weddingYearsFromAge, educationYear, incomeStreams, incomeWindow, policyStreams, policyNow, withoutPolicy, setClock: fn => { clock = typeof fn === "function" ? fn : () => new Date(); }, horizonText, plan, calculate, earningYears, earningSummary, simulate };
 })(typeof window !== "undefined" ? window : globalThis);
