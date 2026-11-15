@@ -117,7 +117,7 @@
   /* Stage "N/A" (value 5): the child has no school or college spending. Class, fee years and annual fee then do not apply and every education cost is 0. */
   const STAGE_NA = 5;
   function isNA(inp, c) { return String(inp["stage" + c]) === String(STAGE_NA); }
-  const applies = (f, inp) => (f.child === null || f.child <= childCount(inp)) && !(f.child && isNA(inp, f.child) && /^(classToday|feeYears|annualFee)[12]$/.test(f.id)) && (!f.gate || String(inp[f.gate]) === "1") &&
+  const applies = (f, inp) => (f.child === null || f.child <= childCount(inp)) && !(f.child && isNA(inp, f.child) && /^(classToday|feeYears|annualFee|educationFund)[12]$/.test(f.id)) && (!f.gate || String(inp[f.gate]) === "1") &&
     (!f.stream || (String(inp.incomeOn) === "1" && f.stream <= streamCount(inp)));
 
   /* ---------- per-field validation (mirrors the HTML min / max / step / required rules) ---------- */
@@ -137,8 +137,8 @@
   function growthEngine(inp) {
     const kids = childCount(inp);
     const ids = ["houseFund", "buffer"]
-      .concat(kids >= 1 ? ["educationFund1", "weddingFund1"] : [])
-      .concat(kids >= 2 ? ["educationFund2", "weddingFund2"] : []);
+      .concat(kids >= 1 ? (isNA(inp, 1) ? [] : ["educationFund1"]).concat(["weddingFund1"]) : [])      // N/A child: no education set-aside
+      .concat(kids >= 2 ? (isNA(inp, 2) ? [] : ["educationFund2"]).concat(["weddingFund2"]) : []);
     if (isBlank(inp.corpus) || ids.some(id => isBlank(inp[id]))) return NaN;
     return num(inp, "corpus") - ids.reduce((s, id) => s + num(inp, id), 0);
   }
@@ -164,18 +164,19 @@
        household 40%  ·  emergency reserve 10%  ·  each child's education 10%  ·  each child's wedding 10%  ·  rest: growth engine
        Each child's wedding budget (Weddings tab) is set to the same wedding amount, so every child gets the 10% allocation. */
   const DEFAULT_SHARES = Object.freeze({ household: 40, reserve: 10, child: 10 });
-  function defaultAllocationPercents(kidCount) {
+  function defaultAllocationPercents(kidCount, inp) {
     const n = kidCount === 1 || kidCount === 2 ? kidCount : 0;
+    let na = 0; if (inp) for (let k = 1; k <= n; k++) if (isNA(inp, k)) na++;      // an N/A child gets no education share
     return { household: DEFAULT_SHARES.household, reserve: DEFAULT_SHARES.reserve, child: DEFAULT_SHARES.child,
-      growth: 100 - DEFAULT_SHARES.household - DEFAULT_SHARES.reserve - n * 2 * DEFAULT_SHARES.child };
+      growth: 100 - DEFAULT_SHARES.household - DEFAULT_SHARES.reserve - (n * 2 - na) * DEFAULT_SHARES.child };
   }
-  function defaultAllocation(corpus, kidCount) {
+  function defaultAllocation(corpus, kidCount, inp) {
     const c = Number(corpus);
     if (isBlank(corpus) || !Number.isFinite(c) || c <= 0) return null;
     const n = kidCount === 1 || kidCount === 2 ? kidCount : 0, part = pct => Math.floor(c * pct / 100 + 1e-6);
     const out = { houseFund: part(DEFAULT_SHARES.household), buffer: part(DEFAULT_SHARES.reserve) };
     for (let k = 1; k <= n; k++) {
-      out["educationFund" + k] = part(DEFAULT_SHARES.child); out["weddingFund" + k] = part(DEFAULT_SHARES.child);
+      out["educationFund" + k] = inp && isNA(inp, k) ? 0 : part(DEFAULT_SHARES.child); out["weddingFund" + k] = part(DEFAULT_SHARES.child);
       out["weddingCost" + k] = out["weddingFund" + k];     // the wedding budget on the Weddings tab starts at the same amount, for every child
     }
     return out;
@@ -501,7 +502,7 @@
     let house = num(inp, "houseFund"), grow = growthEngine(inp), sav = 0;
     const edu = [0], wed = [0];
     for (let c = 1; c <= kids; c++) {
-      edu[c] = num(inp, "educationFund" + c); wed[c] = num(inp, "weddingFund" + c);
+      edu[c] = isNA(inp, c) ? 0 : num(inp, "educationFund" + c); wed[c] = num(inp, "weddingFund" + c);
       if (toAge != null && num(inp, "weddingYears" + c) === 0) wed[c] -= num(inp, "weddingCost" + c);
     }
     const sim = simulate(inp);
@@ -596,7 +597,7 @@
     }
     for (let c = 1; c <= kids; c++) {
       rows.push(
-        { name: `Child ${c} · education`, setAside: num(inp, "educationFund" + c), needed: collegeCost(inp, c).present },
+        { name: `Child ${c} · education`, setAside: isNA(inp, c) ? 0 : num(inp, "educationFund" + c), needed: collegeCost(inp, c).present },
         { name: `Child ${c} · wedding (${currentYear + num(inp, "weddingYears" + c)})`,
           setAside: num(inp, "weddingFund" + c), needed: weddingCost(inp, c).present });
     }

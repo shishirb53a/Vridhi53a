@@ -72,7 +72,7 @@
   function applySaved(sv) {
     initValues();
     for (const k of Object.keys(FH.v)) if (k in sv.v) FH.v[k] = String(sv.v[k]);
-    for (const c of [1, 2]) if (String(FH.v["stage" + c]) === String(FHE.STAGE_NA)) { FH.v["feeYears" + c] = "0"; FH.v["annualFee" + c] = "0"; }     // Stage N/A: education costs are 0
+    for (const c of [1, 2]) if (String(FH.v["stage" + c]) === String(FHE.STAGE_NA)) { FH.v["feeYears" + c] = "0"; FH.v["annualFee" + c] = "0"; FH.v["educationFund" + c] = "0"; }     // Stage N/A: education costs are 0
     for (const c of [1, 2]) {                                    // plans saved before these boxes existed
       if (!("classToday" + c in sv.v)) FH.v["classToday" + c] = String(Math.min(12, Math.max(1, 12 - (Number(FH.v["feeYears" + c]) - COLLEGE_YEARS))));
     }
@@ -97,7 +97,7 @@
 
   /* ---------- markup (Add-holding vocabulary) ---------- */
   function allocHint() {
-    const n = kids(), p = FHE.defaultAllocationPercents(n);
+    const n = kids(), p = FHE.defaultAllocationPercents(n, FH.v);
     return `Auto-allocates: ${p.household}% Household, ${p.reserve}% Emergency${n ? `, ${p.child}% Kids (Edu & Wedding)` : ""}, ${p.growth}% Growth. Fully editable.`;
   }
   /* Family tab -> College / Weddings tabs. Typing a child's class or wedding years fills the matching field on the other tab
@@ -107,17 +107,20 @@
   const setField = (id, value) => {
     FH.v[id] = String(value);
     const el = $(id); if (el) el.value = FH.v[id];
+    const amtEl = $(id + "-amt"); if (amtEl) amtEl.textContent = amtText(FH.v[id]);      // the "₹ 40,000 · ₹ 40,000" line under a rupee box
     setErr(id, "");
   };
+  const NA_NOTE = "Not applicable (Stage N/A) · ₹ 0";
   /* College step: a child whose Stage is N/A has fee years and annual fee locked at 0. Returns true when the fields were locked before. */
   function lockFees(c, on) {
     let was = false;
-    for (const base of ["feeYears", "annualFee"]) {
+    for (const base of ["feeYears", "annualFee", "educationFund"]) {
       const el = $(base + c); if (!el) continue;
       if (el.disabled) was = true;
       el.disabled = on;
       if (on) el.title = "Not applicable: this child's Stage is N/A, so education costs are 0"; else el.removeAttribute("title");
     }
+    const note = $("annualFee" + c + "-amt"); if (note && on) note.textContent = NA_NOTE;
     return was;
   }
   function autofillFromFamily(id) {
@@ -130,12 +133,18 @@
       if (st === FHE.STAGE_NA) {
         FH.na = FH.na || {};
         const fee = FH.v["annualFee" + c]; if (!isBlankV(fee) && Number(fee) > 0) FH.na["annualFee" + c] = fee;
-        setField("feeYears" + c, 0); setField("annualFee" + c, 0); lockFees(c, true);
+        const edu = FH.v["educationFund" + c]; if (!isBlankV(edu) && Number(edu) > 0) FH.na["educationFund" + c] = edu;
+        setField("feeYears" + c, 0); setField("annualFee" + c, 0); setField("educationFund" + c, 0); lockFees(c, true);
+        const pc = $("educationFund" + c + "-pct"); if (pc) pc.textContent = "N/A";
         if (wrap) wrap.hidden = true;
         return;
       }
       if (wrap) wrap.hidden = false;
-      if (lockFees(c, false)) { const keep = FH.na && FH.na["annualFee" + c]; setField("annualFee" + c, keep != null ? keep : FHE.BY_ID["annualFee" + c].initial); }
+      if (lockFees(c, false)) {
+        const keep = FH.na && FH.na["annualFee" + c]; setField("annualFee" + c, keep != null ? keep : FHE.BY_ID["annualFee" + c].initial);
+        const ek = FH.na && FH.na["educationFund" + c], dflt = (FHE.defaultAllocation(FH.v.corpus, kids(), FH.v) || {})["educationFund" + c];
+        setField("educationFund" + c, FH.defAlloc && dflt != null ? dflt : ek != null ? ek : 0);     // back from N/A: the earlier amount (or the default share) returns
+      }
       if (st >= 1 && st <= 4) { setField("classToday" + c, 12); setField("feeYears" + c, 5 - st); if (cEl) { cEl.disabled = true; cEl.title = "Not used while the child is in college"; } }
       else { if (cEl) { cEl.disabled = false; cEl.removeAttribute("title"); } autofillFromFamily("classToday" + c); }
       return;
@@ -153,7 +162,7 @@
   const isBlankV = x => x === "" || x === null || x === undefined || (typeof x === "string" && x.trim() === "");
   /* Writes the suggested amounts into the Money Buckets inputs (the same inputs the user can edit by hand). Calculation is untouched. */
   function applyDefaultAllocation() {
-    const a = FHE.defaultAllocation(FH.v.corpus, kids());
+    const a = FHE.defaultAllocation(FH.v.corpus, kids(), FH.v);
     if (!a) return;
     for (const id of Object.keys(a)) {
       FH.v[id] = String(a[id]);
@@ -203,14 +212,14 @@
         `${fam && fam.ph ? `placeholder="${fam.ph}" ` : ""}${fam && (f.child || !f.required || f.panel === "household" || f.panel === "college" || f.panel === "weddings") ? `aria-label="${esc(f.label)}${f.required ? "" : " (optional)"}" ` : ""}` +
         `${hint ? `aria-description="${esc(f.help)}" ` : ""}aria-describedby="${id}-e">`;
     }
-    const stN = /^(classToday|feeYears|annualFee)([12])$/.test(f.id) ? Number(FH.v["stage" + f.id.slice(-1)]) : 0, na = stN === FHE.STAGE_NA;
+    const stN = /^(classToday|feeYears|annualFee|educationFund)([12])$/.test(f.id) ? Number(FH.v["stage" + f.id.slice(-1)]) : 0, na = stN === FHE.STAGE_NA;
     if (/^classToday[12]$/.test(f.id) && stN >= 1 && stN <= 4) ctl = ctl.replace("<input ", '<input disabled title="Not used while the child is in college" ');
-    if (/^(feeYears|annualFee)[12]$/.test(f.id) && na) ctl = ctl.replace("<input ", '<input disabled title="Not applicable: this child\'s Stage is N/A, so education costs are 0" ');
-    const amt = /₹/.test(f.label) ? `<small class="hh fh-amt" id="${id}-amt" aria-live="polite">${esc(amtText(FH.v[f.id]))}</small>` : "";   // "₹ 50,00,000 · ₹ 50.00 L" under every rupee box
+    if (/^(feeYears|annualFee|educationFund)[12]$/.test(f.id) && na) ctl = ctl.replace("<input ", '<input disabled title="Not applicable: this child\'s Stage is N/A, so education costs are 0" ');
+    const amt = /₹/.test(f.label) ? `<small class="hh fh-amt" id="${id}-amt" aria-live="polite">${esc(na && /^annualFee/.test(f.id) ? NA_NOTE : amtText(FH.v[f.id]))}</small>` : "";   // "₹ 50,00,000 · ₹ 50.00 L" under every rupee box
     const bk = f.panel === "buckets" ? BK_UI[f.id.replace(/[12]$/, "")] : null;
     if (bk) {      // compact bucket field: amount input with its share of the corpus beside it
       const mini = bk.mini ? `<label for="${id}">${esc(bk.mini)} <span aria-hidden="true">*</span>${f.assumption ? ' <span class="fh-as">assumption</span>' : ""}</label>` : "";
-      return `<div class="hf1 fh-bf"${f.child ? ` data-fh-cond="${f.child}"` : ""}>${mini}<div class="fh-bi">${ctl.replace("<input ", `<input aria-label="${esc(f.label)}" `)}${bk.pct ? `<span class="fh-pct" id="${id}-pct" aria-hidden="true">—</span>` : ""}</div>${amt}` +
+      return `<div class="hf1 fh-bf"${f.child ? ` data-fh-cond="${f.child}"` : ""}>${mini}<div class="fh-bi">${ctl.replace("<input ", `<input aria-label="${esc(f.label)}" `)}${bk.pct ? `<span class="fh-pct" id="${id}-pct" aria-hidden="true">${na && /^educationFund/.test(f.id) ? "N/A" : "—"}</span>` : ""}</div>${amt}` +
         `<small class="er fh-err" id="${id}-e" role="alert"></small></div>`;
     }
     const def = f.id === "roi" ? `<div class="hf1 fh-defrow"><label class="fh-def" for="fh-defalloc"><input type="checkbox" id="fh-defalloc"${FH.defAlloc ? " checked" : ""} aria-describedby="fh-defalloc-h"><span>Auto-allocate Corpus</span></label>` +
@@ -518,7 +527,7 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
       const cn = Number(FH.v.corpus), cp = FH.v.corpus !== "" && Number.isFinite(cn) && cn > 0 ? cn : null, n = kids();
       const ids = ["houseFund", "buffer"].concat(n >= 1 ? ["educationFund1", "weddingFund1"] : []).concat(n >= 2 ? ["educationFund2", "weddingFund2"] : []);
       const share = x => cp === null || x === "" || !Number.isFinite(Number(x)) ? "—" : (Math.round(Number(x) / cp * 1000) / 10) + "%";
-      ["houseFund", "buffer", "educationFund1", "weddingFund1", "educationFund2", "weddingFund2"].forEach(i => { const el = $(i + "-pct"); if (el) el.textContent = share(FH.v[i]); });
+      ["houseFund", "buffer", "educationFund1", "weddingFund1", "educationFund2", "weddingFund2"].forEach(i => { const el = $(i + "-pct"); if (el) el.textContent = /^educationFund[12]$/.test(i) && FHE.isNA(FH.v, i.slice(-1)) ? "N/A" : share(FH.v[i]); });
       const g = FHE.growthEngine(FH.v); $("growth-pct").textContent = Number.isFinite(g) ? share(g) : "—";
       const used = ids.reduce((t, i) => t + (Number(FH.v[i]) || 0), 0), M2 = typeof cr === "function" ? cr : FHE.currency, ab = $("alloc");
       ab.textContent = cp === null ? "— Allocated" : `${Math.round(Math.max(100, used / cp * 100) * 10) / 10}% Allocated • ${M2(cp)}`;
@@ -710,7 +719,7 @@ html body .sx .sx-key{margin:0 0 2px;font-size:11px;color:var(--mu)}
     if (!n) kidsH = `<p class="sx-empty">No children included, so no education or wedding goals are planned.</p>`;
     for (let c = 1; c <= n; c++) {
       const col = FHE.collegeCost(v, c), wed = FHE.weddingCost(v, c), ew = eduWhen(v, c, year), wy = FHE.weddingYear(v, c, year);
-      const fy = Number(v["feeYears" + c]), todayEdu = Number(v["annualFee" + c]) * fy, edF = Number(v["educationFund" + c]), wdF = Number(v["weddingFund" + c]);
+      const fy = Number(v["feeYears" + c]), todayEdu = Number(v["annualFee" + c]) * fy, edF = FHE.isNA(v, c) ? 0 : Number(v["educationFund" + c]), wdF = Number(v["weddingFund" + c]);
       const cls = (set, need) => set >= need - 0.5 ? "sx-hi" : "sx-lo";
       const stg = Number(v["stage" + c]) === FHE.STAGE_NA ? "Education N/A" : Number(v["stage" + c]) > 0 ? "College year " + v["stage" + c] : "Class " + v["classToday" + c];
       const wAge = FHE.weddingAgeOf(v, c), sub = (FHE.isBlank(v["childAge" + c]) ? stg : `Age ${v["childAge" + c]} \u00b7 ${stg}`) + (wAge === null ? "" : ` \u00b7 Wedding at ${wAge}`);
@@ -1959,7 +1968,7 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
       const v = {}; for (const f of FHE.FIELDS) v[f.id] = String(f.initial);
       Object.assign(v, Object.fromEntries(Object.entries(sm.o).filter(([k]) => k !== "inc").map(([k, x]) => [k, String(x)])));
       if (sm.o.inc) { const w = FHE.incomeWindow({ age: "0", until: String(sm.o.inc.years) }); Object.assign(v, { incomeOn: "1", incomeCount: "1", incName1: "Rent", incAmt1: String(sm.o.inc.amt), incGrowth1: String(sm.o.inc.growth), incFrom1: w.from, incTo1: w.to }); }
-      const a = FHE.defaultAllocation(Number(v.corpus), Number(v.children)) || {};
+      const a = FHE.defaultAllocation(Number(v.corpus), Number(v.children), v) || {};
       for (const k of Object.keys(a)) if (!(k in sm.o)) v[k] = String(a[k]);
       if (FHE.validateAll(v).length) continue;                    // never store an incomplete sample
       P.profiles[fhpUniqueId(sm.name, P)] = { name: sm.name, v, t: Date.now(), rep: 0, created: Date.now() };
