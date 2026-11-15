@@ -27,9 +27,9 @@ html body .hz-viewbar{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
 html body .hz-viewbar button{min-height:34px;padding:5px 12px;border:1px solid var(--bd);border-radius:999px;background:var(--card);color:var(--tx);font-size:12px;font-weight:600;cursor:pointer}
 html body .hz-viewbar button[aria-pressed="true"]{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 12%,var(--card));color:var(--ac)}
 html body .hz-viewbar button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-html body .hz-t[data-hz-view="summary"] :is(th,td):not([data-hz-group="context"]):not([data-hz-summary="true"]),
-html body .hz-t[data-hz-view="income"] :is(th,td):not([data-hz-group="context"]):not([data-hz-group="income"]):not([data-hz-summary="true"]),
-html body .hz-t[data-hz-view="expenses"] :is(th,td):not([data-hz-group="context"]):not([data-hz-group="expenses"]):not([data-hz-summary="true"]){display:none}
+html body .hz-t[data-hz-view="summary"] :is(th,td):not([data-hz-group="context"]):not([data-hz-presets~="summary"]),
+html body .hz-t[data-hz-view="income"] :is(th,td):not([data-hz-group="context"]):not([data-hz-presets~="income"]),
+html body .hz-t[data-hz-view="expenses"] :is(th,td):not([data-hz-group="context"]):not([data-hz-presets~="expenses"]){display:none}
 html body .hz-t.rt tbody tr[data-hzr]{cursor:pointer}
 html body .hz-t.rt tbody tr[data-hzr]:hover{--tn:color-mix(in srgb,var(--ac) 7%,transparent)}
 html body .hz-t.rt tbody tr.sel{--tn:color-mix(in srgb,var(--ac) 20%,transparent)}

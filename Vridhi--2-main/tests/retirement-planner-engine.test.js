@@ -11,8 +11,8 @@ const source = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 
 const uiSource = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
 const reportCss = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'year-by-year.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=130"></script>');
-const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=153"></script>');
+const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=131"></script>');
+const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=156"></script>');
 const bodyEnd = html.indexOf('</body>');
 assert.ok(moduleScript >= 0 && uiScript > moduleScript, 'Retirement Planner engine loads before its UI');
 assert.ok(!html.includes('<script id="fh-engine">'), 'Retirement Planner engine is no longer duplicated inline');
@@ -27,6 +27,22 @@ for (const label of ['Serial No', 'Age at Year-End', 'Key Events', 'Monthly Hous
     `Year-by-year report defines meaningful header or amount styling: ${label}`);
 assert.ok(uiSource.includes('function hzUniqueColumnLabels(groups)') && uiSource.includes('hzUniqueColumnLabels(g);'),
   'Year-by-year report disambiguates duplicate column labels across all groups');
+assert.ok(uiSource.includes('{ label: "Phase", get: r => r.phase, txt: 1 }'),
+  'Year-by-year report keeps Phase in its pinned context columns');
+assert.ok(uiSource.includes('data-hz-presets="${c.presets.join(" ")}"') &&
+  reportCss.includes(':not([data-hz-presets~="income"])') &&
+  reportCss.includes(':not([data-hz-presets~="expenses"])'),
+  'Year-by-year presets hide columns by their explicit preset membership');
+for (const marker of [
+  'presets: ["summary", "expenses"]',
+  'presets: ["summary"]',
+  'presets: ["summary", "income"]',
+  'presets: ["income"]',
+  'presets: ["expenses"]'
+])
+  assert.ok(uiSource.includes(marker), `Year-by-year columns define their preset membership: ${marker}`);
+assert.ok(!reportCss.includes('data-hz-summary="true"'),
+  'Preset membership does not leak unrelated summary columns into breakdown views');
 
 const context = {};
 vm.createContext(context);

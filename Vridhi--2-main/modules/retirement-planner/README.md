@@ -7,6 +7,9 @@ Income sources added on Planning Period > Income are not capped at a fixed count
 shows each source as its own column, using the source name entered in the plan. Policy payouts are also
 shown in separate columns named for each policy. The report uses concise, descriptive column headers,
 and colors expense amounts red and received income green in both table and mobile views.
+The year-by-year table includes All Columns, Summary View, Income Breakdown, and Expense Breakdown
+presets. Each preset keeps the serial number, year, age, phase, and key events visible; the summary
+row shows totals only for columns configured as additive amounts in the active view.
 
 Both classic scripts load synchronously in order: the engine first, then the UI. Keep this order
 so the UI can consume the existing engine API without changing the app's global interfaces.
