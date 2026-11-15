@@ -16,7 +16,7 @@ const files = [
   ['modules/reports/interest-income.js', 'interest-income.js']
 ];
 const positions = files.map(([file, tag]) => {
-  const versions = { 'monthly-projection.js': '141', 'report-selection.js': '139', 'roi-summary.js': '148', 'interest-income.js': '138' };
+  const versions = { 'monthly-projection.js': '142', 'report-selection.js': '140', 'roi-summary.js': '148', 'interest-income.js': '139' };
   const marker = `<script src="modules/reports/${tag}?v=${versions[tag]}"></script>`;
   const index = html.indexOf(marker);
   assert.ok(index >= 0, `${tag} is loaded synchronously from index.html`);
@@ -152,6 +152,8 @@ assert.strictEqual(monthly.rows[11].tot, 1820, 'Final month uses the annual fore
 assert.strictEqual(typeof window.repMRows, 'function', 'Monthly report renderer interface is preserved');
 assert.strictEqual(typeof window.monthCSV, 'function', 'Monthly CSV interface is preserved');
 assert.ok(window.repMRows().includes('Apr 2026'), 'Monthly report renders the calculated rows');
+assert.ok(window.repMRows().includes('Ages<br><span class="rt-sub">Self</span>'), 'Monthly report groups member names below the age header');
+assert.ok(window.repMRows().includes('<td class="rt-num">') && !window.repMRows().includes('₹ L'), 'Monthly report right-aligns numeric identifiers and omits repeated lakh units');
 assert.ok(!/<td\b[^>]*>[^<]*₹/.test(window.repMRows()), 'Monthly report row amounts omit currency symbols');
 assert.ok(window.monthCSV().includes('"S.No","Month","Year"'), 'Monthly CSV retains its column headers');
 
@@ -175,6 +177,9 @@ window.RCOLS.showPolicyPayouts = false;
 annualMin = window.repMin(annualRows, minOptions);
 assert.ok(annualMin.includes('<b>6.666666666666667</b>'),
   'Annual monthly income excludes payouts when the payout column is hidden');
+assert.ok(annualMin.includes('Ages<br><span class="rt-sub">Self</span>') &&
+  annualMin.includes('<td class="rt-num">') && !annualMin.includes('₹ L'),
+  'Annual report groups member ages, right-aligns numeric identifiers, and omits repeated lakh units');
 
 const interest = window.intData();
 assert.strictEqual(interest.rows[0].fy, 'FY 2026-27', 'Interest report uses the same financial-year range');
@@ -188,6 +193,9 @@ assert.deepStrictEqual(
 assert.strictEqual(typeof window.repIRows, 'function', 'Interest report renderer interface is preserved');
 assert.strictEqual(typeof window.intCSV, 'function', 'Interest report CSV interface is preserved');
 assert.ok(window.repIRows().includes('Interest<br>earned'), 'Interest report renders the statement columns');
+assert.ok(window.repIRows().includes('<span class="rt-sub">Interest</span>') &&
+  window.repIRows().includes('<td class="rt-num">') && !window.repIRows().includes('₹ L'),
+  'Interest report uses a muted sub-label, right-aligns numeric identifiers, and omits repeated lakh units');
 assert.ok(!/<td\b[^>]*>[^<]*₹/.test(window.repIRows()), 'Interest report row amounts omit currency symbols');
 assert.ok(window.intCSV().includes('"Interest earned"'), 'Interest statement CSV retains its column headers');
 

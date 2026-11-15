@@ -12,7 +12,7 @@ const stylesheets = [
   ['modules/app-shell/dialog-overrides.css', 'dialog{overflow-x:hidden}', '147'],
   ['modules/holding-form-wizard/form.css', '.hf .hs{border:1px solid var(--bd)', '147'],
   ['modules/retirement-planner/age-bar.css', '.agebar{position:sticky', '147'],
-  ['modules/reports/forecast-tint.css', '/* forecast: soft tint like Filter Asset Classes */', '147'],
+  ['modules/reports/forecast-tint.css', '/* Report tables use a neutral financial header independent of the selected accent. */', '148'],
   ['modules/dashboard-preferences/kpi-tints.css', '/* dashboard KPI tiles, summary strip, readiness meter: soft theme tint */', '147'],
   ['modules/theme/button-tint.css', '/* all buttons: soft theme tint */', '147'],
   ['modules/dashboard-fit/dashboard-fit.css', '/* ===== Fit-to-screen dashboard:', '146'],
@@ -75,6 +75,13 @@ assert.ok(iconsCss.includes('.hp-card .hp-act-icon::before{content:none!importan
 'Holdings icon duplicates are suppressed and mobile content clears the fixed navigation');
 assert.deepStrictEqual(positions.slice().sort((a, b) => a - b), positions,
   'Extracted stylesheets preserve their cascade order');
+const reportTableStyles = fs.readFileSync(path.join(root, 'modules', 'reports', 'forecast-tint.css'), 'utf8');
+assert.ok(reportTableStyles.includes('background:#F8FAFC!important') &&
+  reportTableStyles.includes('color:#1E293B!important') &&
+  reportTableStyles.includes('border-bottom:1px solid #E2E8F0!important') &&
+  reportTableStyles.includes('font-size:12px;font-weight:600') &&
+  reportTableStyles.includes('.rt :is(th,td).rt-num{text-align:right}'),
+  'Report table headers use neutral slate styling and numeric cells align right');
 assert.ok(!html.includes('<style id="ui-system">') && !html.includes('<style id="fh-css">') &&
   !html.includes('<style id="fh-css2">') && !html.includes('<style id="ds-ent">') &&
   !html.includes('<style id="vfit">') && !html.includes('<style id="hp-style">') &&

@@ -15,9 +15,9 @@ const app = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'u
 const columns = fs.readFileSync(path.join(root, 'modules', 'report-columns', 'report-columns.js'), 'utf8');
 const coreStart = app.indexOf('//CALC-START');
 const coreEnd = app.indexOf('//CALC-END', coreStart);
-const moduleTag = '<script src="modules/value-on-date/value-on-date.js?v=2"></script>';
+const moduleTag = '<script src="modules/value-on-date/value-on-date.js?v=3"></script>';
 const styleTag = '<style>@import url("modules/value-on-date/value-on-date.css?v=1");</style>';
-const appTag = '<script src="modules/app-core/app.js?v=172"></script>';
+const appTag = '<script src="modules/app-core/app.js?v=173"></script>';
 const columnTag = '<script src="modules/report-columns/report-columns.js?v=128"></script>';
 const profileTag = '<script src="modules/goal-planner-clients/goal-planner-clients.js?v=144"></script>';
 assert.ok(html.includes(moduleTag) && html.indexOf(moduleTag) > html.indexOf(appTag),
@@ -109,6 +109,10 @@ assert.ok(emptyReport.includes('shared filters') && emptyReport.includes('Please
   'The report renders shared filters and the existing empty state when no holding is selected');
 assert.ok(!emptyReport.includes('Total value on'), 'The empty state does not show unfiltered report totals');
 context.UI.rsel = ['3'];
+const selectedReport = context.window.repValueOnDate();
+assert.ok(selectedReport.includes('<th class="vod-n" data-vod-col="val"') &&
+  selectedReport.includes('<th class="vod-n" data-vod-col="pct"'),
+  'Value on Date right-aligns numeric column headers with their data');
 const selectedCsv = context.window.valueOnDateCSV();
 assert.ok(selectedCsv.includes('Snapshot holding,Debt,30,100.00%,Projected'),
   'CSV exports only selected holdings and calculates their share of the selected total');
