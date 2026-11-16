@@ -72,7 +72,6 @@
   function applySaved(sv) {
     initValues();
     for (const k of Object.keys(FH.v)) if (k in sv.v) FH.v[k] = String(sv.v[k]);
-    for (const c of [1, 2]) if (String(FH.v["stage" + c]) === String(FHE.STAGE_NA)) { FH.v["feeYears" + c] = "0"; FH.v["annualFee" + c] = "0"; FH.v["educationFund" + c] = "0"; }     // Stage N/A: education costs are 0
     for (const c of [1, 2]) {                                    // plans saved before these boxes existed
       if (!("classToday" + c in sv.v)) FH.v["classToday" + c] = String(Math.min(12, Math.max(1, 12 - (Number(FH.v["feeYears" + c]) - COLLEGE_YEARS))));
     }
@@ -97,7 +96,7 @@
 
   /* ---------- markup (Add-holding vocabulary) ---------- */
   function allocHint() {
-    const n = kids(), p = FHE.defaultAllocationPercents(n, FH.v);
+    const n = kids(), p = FHE.defaultAllocationPercents(n);
     return `Auto-allocates: ${p.household}% Household, ${p.reserve}% Emergency${n ? `, ${p.child}% Kids (Edu & Wedding)` : ""}, ${p.growth}% Growth. Fully editable.`;
   }
   /* Family tab -> College / Weddings tabs. Typing a child's class or wedding years fills the matching field on the other tab
@@ -107,44 +106,15 @@
   const setField = (id, value) => {
     FH.v[id] = String(value);
     const el = $(id); if (el) el.value = FH.v[id];
-    const amtEl = $(id + "-amt"); if (amtEl) amtEl.textContent = amtText(FH.v[id]);      // the "₹ 40,000 · ₹ 40,000" line under a rupee box
     setErr(id, "");
   };
-  const NA_NOTE = "Not applicable (Stage N/A) · ₹ 0";
-  /* College step: a child whose Stage is N/A has fee years and annual fee locked at 0. Returns true when the fields were locked before. */
-  function lockFees(c, on) {
-    let was = false;
-    for (const base of ["feeYears", "annualFee", "educationFund"]) {
-      const el = $(base + c); if (!el) continue;
-      if (el.disabled) was = true;
-      el.disabled = on;
-      if (on) el.title = "Not applicable: this child's Stage is N/A, so education costs are 0"; else el.removeAttribute("title");
-    }
-    const note = $("annualFee" + c + "-amt"); if (note && on) note.textContent = NA_NOTE;
-    return was;
-  }
   function autofillFromFamily(id) {
     const m = /^(classToday|weddingAge|childAge|weddingYears|stage)([12])$/.exec(id);
     if (!m) return;
     const c = m[2], raw = FH.v[id], blank = isBlankV(raw) || !Number.isFinite(Number(raw));
     if (blank) return;
-    if (m[1] === "stage") {                 // College 1-4 = year of a 4-year course: class 12 is done, fee years left = 5 - year. N/A = no education: Class hidden, fees locked at 0
-      const st = Math.round(Number(raw)), cEl = $("classToday" + c), wrap = cEl && cEl.closest(".hf1");
-      if (st === FHE.STAGE_NA) {
-        FH.na = FH.na || {};
-        const fee = FH.v["annualFee" + c]; if (!isBlankV(fee) && Number(fee) > 0) FH.na["annualFee" + c] = fee;
-        const edu = FH.v["educationFund" + c]; if (!isBlankV(edu) && Number(edu) > 0) FH.na["educationFund" + c] = edu;
-        setField("feeYears" + c, 0); setField("annualFee" + c, 0); setField("educationFund" + c, 0); lockFees(c, true);
-        const pc = $("educationFund" + c + "-pct"); if (pc) pc.textContent = "N/A";
-        if (wrap) wrap.hidden = true;
-        return;
-      }
-      if (wrap) wrap.hidden = false;
-      if (lockFees(c, false)) {
-        const keep = FH.na && FH.na["annualFee" + c]; setField("annualFee" + c, keep != null ? keep : FHE.BY_ID["annualFee" + c].initial);
-        const ek = FH.na && FH.na["educationFund" + c], dflt = (FHE.defaultAllocation(FH.v.corpus, kids(), FH.v) || {})["educationFund" + c];
-        setField("educationFund" + c, FH.defAlloc && dflt != null ? dflt : ek != null ? ek : 0);     // back from N/A: the earlier amount (or the default share) returns
-      }
+    if (m[1] === "stage") {                 // College 1-4 = year of a 4-year course: class 12 is done, fee years left = 5 - year
+      const st = Math.round(Number(raw)), cEl = $("classToday" + c);
       if (st >= 1 && st <= 4) { setField("classToday" + c, 12); setField("feeYears" + c, 5 - st); if (cEl) { cEl.disabled = true; cEl.title = "Not used while the child is in college"; } }
       else { if (cEl) { cEl.disabled = false; cEl.removeAttribute("title"); } autofillFromFamily("classToday" + c); }
       return;
@@ -162,7 +132,7 @@
   const isBlankV = x => x === "" || x === null || x === undefined || (typeof x === "string" && x.trim() === "");
   /* Writes the suggested amounts into the Money Buckets inputs (the same inputs the user can edit by hand). Calculation is untouched. */
   function applyDefaultAllocation() {
-    const a = FHE.defaultAllocation(FH.v.corpus, kids(), FH.v);
+    const a = FHE.defaultAllocation(FH.v.corpus, kids());
     if (!a) return;
     for (const id of Object.keys(a)) {
       FH.v[id] = String(a[id]);
@@ -199,7 +169,7 @@
           `<option value="${i}"${String(FH.v[f.id]) === String(i) ? " selected" : ""}>${t}</option>`).join("") + "</select>";
     } else if (/^stage[12]$/.test(f.id)) {      // School, or the year (1-4) of a 4-year college course
       ctl = `<select id="${id}" data-fh="${f.id}" aria-label="${esc(f.label)}" aria-describedby="${id}-e">` +
-        ["School", "College 1", "College 2", "College 3", "College 4", "N/A"].map((t, i) =>
+        ["School", "College 1", "College 2", "College 3", "College 4"].map((t, i) =>
           `<option value="${i}"${String(FH.v[f.id]) === String(i) ? " selected" : ""}>${t}</option>`).join("") + "</select>";
     } else if (f.kind === "text") {
       ctl = `<input id="${id}" data-fh="${f.id}" type="text" maxlength="24" autocomplete="off" value="${esc(FH.v[f.id])}"` +
@@ -212,19 +182,17 @@
         `${fam && fam.ph ? `placeholder="${fam.ph}" ` : ""}${fam && (f.child || !f.required || f.panel === "household" || f.panel === "college" || f.panel === "weddings") ? `aria-label="${esc(f.label)}${f.required ? "" : " (optional)"}" ` : ""}` +
         `${hint ? `aria-description="${esc(f.help)}" ` : ""}aria-describedby="${id}-e">`;
     }
-    const stN = /^(classToday|feeYears|annualFee|educationFund)([12])$/.test(f.id) ? Number(FH.v["stage" + f.id.slice(-1)]) : 0, na = stN === FHE.STAGE_NA;
-    if (/^classToday[12]$/.test(f.id) && stN >= 1 && stN <= 4) ctl = ctl.replace("<input ", '<input disabled title="Not used while the child is in college" ');
-    if (/^(feeYears|annualFee|educationFund)[12]$/.test(f.id) && na) ctl = ctl.replace("<input ", '<input disabled title="Not applicable: this child\'s Stage is N/A, so education costs are 0" ');
-    const amt = /₹/.test(f.label) ? `<small class="hh fh-amt" id="${id}-amt" aria-live="polite">${esc(na && /^annualFee/.test(f.id) ? NA_NOTE : amtText(FH.v[f.id]))}</small>` : "";   // "₹ 50,00,000 · ₹ 50.00 L" under every rupee box
+    if (/^classToday[12]$/.test(f.id) && Number(FH.v["stage" + f.id.slice(-1)]) > 0) ctl = ctl.replace("<input ", '<input disabled title="Not used while the child is in college" ');
+    const amt = /₹/.test(f.label) ? `<small class="hh fh-amt" id="${id}-amt" aria-live="polite">${esc(amtText(FH.v[f.id]))}</small>` : "";   // "₹ 50,00,000 · ₹ 50.00 L" under every rupee box
     const bk = f.panel === "buckets" ? BK_UI[f.id.replace(/[12]$/, "")] : null;
     if (bk) {      // compact bucket field: amount input with its share of the corpus beside it
       const mini = bk.mini ? `<label for="${id}">${esc(bk.mini)} <span aria-hidden="true">*</span>${f.assumption ? ' <span class="fh-as">assumption</span>' : ""}</label>` : "";
-      return `<div class="hf1 fh-bf"${f.child ? ` data-fh-cond="${f.child}"` : ""}>${mini}<div class="fh-bi">${ctl.replace("<input ", `<input aria-label="${esc(f.label)}" `)}${bk.pct ? `<span class="fh-pct" id="${id}-pct" aria-hidden="true">${na && /^educationFund/.test(f.id) ? "N/A" : "—"}</span>` : ""}</div>${amt}` +
+      return `<div class="hf1 fh-bf"${f.child ? ` data-fh-cond="${f.child}"` : ""}>${mini}<div class="fh-bi">${ctl.replace("<input ", `<input aria-label="${esc(f.label)}" `)}${bk.pct ? `<span class="fh-pct" id="${id}-pct" aria-hidden="true">—</span>` : ""}</div>${amt}` +
         `<small class="er fh-err" id="${id}-e" role="alert"></small></div>`;
     }
     const def = f.id === "roi" ? `<div class="hf1 fh-defrow"><label class="fh-def" for="fh-defalloc"><input type="checkbox" id="fh-defalloc"${FH.defAlloc ? " checked" : ""} aria-describedby="fh-defalloc-h"><span>Auto-allocate Corpus</span></label>` +
       `<small id="fh-defalloc-h">${esc(allocHint())}</small></div>` : "";
-    return `<div class="hf1"${f.child && f.panel !== "college" && f.panel !== "weddings" ? ` data-fh-cond="${f.child}"` : ""}${/^classToday[12]$/.test(f.id) && na ? " hidden" : ""}>` +
+    return `<div class="hf1"${f.child && f.panel !== "college" && f.panel !== "weddings" ? ` data-fh-cond="${f.child}"` : ""}>` +
       `${f.id === "corpus" ? hpHead(id, label) : `<label for="${id}">${label}</label>`}${ctl}${amt}${hint ? `<small class="hh">${esc(f.help)}</small>` : ""}` +
       `<small class="er fh-err" id="${id}-e" role="alert"></small>${f.id === "corpus" ? '<div id="fh-hold" class="fh-hold" hidden></div>' : ""}</div>${def}`;
   }
@@ -320,7 +288,7 @@
 <div class="wzt fh-wzt" id="fh-nav" role="tablist" aria-label="Planning steps"></div>
 <p class="fh-note" id="fh-note"><b>Returns and inflation rates are assumptions</b> you can edit, not predictions or guarantees. This pop-up uses its own simple model. It reads your Goal Planner holdings only when you tick them under Current Corpus, and never changes them.</p>
 ${panel("family", `<div class="fh-fam"><div class="hs">` + grid(f => f.panel === "family" && f.child === null).replace('class="hg"', 'class="hg fh-g2"') +
-  [1, 2].map(c => `<div class="fh-crow" data-fh-cond="${c}"><span class="fh-cn">Child ${c}</span>${FHE.FIELDS.filter(f => f.panel === "family" && f.child === c).map(fieldHTML).join("")}</div>`).join("") + `<p class="hh fh-stg-note" data-fh-cond-any>Stage: pick School and enter the Class (1–12), or College 1–4 for the year of a 4-year course. College years fill &ldquo;years of college fees left&rdquo; on the College step. Pick N/A if there is no education spending: Class is hidden and college costs are 0.</p></div></div>`)}
+  [1, 2].map(c => `<div class="fh-crow" data-fh-cond="${c}"><span class="fh-cn">Child ${c}</span>${FHE.FIELDS.filter(f => f.panel === "family" && f.child === c).map(fieldHTML).join("")}</div>`).join("") + `<p class="hh fh-stg-note" data-fh-cond-any>Stage: pick School and enter the Class (1–12), or College 1–4 for the year of a 4-year course. College years fill &ldquo;years of college fees left&rdquo; on the College step.</p></div></div>`)}
 ${panel("planning", `<div class="fh-plan"><div class="fh-ph"><h3>Retirement Timeline</h3><span class="fh-badge" id="fh-horizon"></span></div><div id="fh-pt" class="fh-ptw"></div>` +
   pills("fh-ppills", "Retirement planning",
     `<button type="button" role="tab" id="fh-st-plan-ready" data-fh-plan="ready" aria-controls="fh-pp-ready">Retirement Readiness</button>` +
@@ -527,7 +495,7 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
       const cn = Number(FH.v.corpus), cp = FH.v.corpus !== "" && Number.isFinite(cn) && cn > 0 ? cn : null, n = kids();
       const ids = ["houseFund", "buffer"].concat(n >= 1 ? ["educationFund1", "weddingFund1"] : []).concat(n >= 2 ? ["educationFund2", "weddingFund2"] : []);
       const share = x => cp === null || x === "" || !Number.isFinite(Number(x)) ? "—" : (Math.round(Number(x) / cp * 1000) / 10) + "%";
-      ["houseFund", "buffer", "educationFund1", "weddingFund1", "educationFund2", "weddingFund2"].forEach(i => { const el = $(i + "-pct"); if (el) el.textContent = /^educationFund[12]$/.test(i) && FHE.isNA(FH.v, i.slice(-1)) ? "N/A" : share(FH.v[i]); });
+      ["houseFund", "buffer", "educationFund1", "weddingFund1", "educationFund2", "weddingFund2"].forEach(i => { const el = $(i + "-pct"); if (el) el.textContent = share(FH.v[i]); });
       const g = FHE.growthEngine(FH.v); $("growth-pct").textContent = Number.isFinite(g) ? share(g) : "—";
       const used = ids.reduce((t, i) => t + (Number(FH.v[i]) || 0), 0), M2 = typeof cr === "function" ? cr : FHE.currency, ab = $("alloc");
       ab.textContent = cp === null ? "— Allocated" : `${Math.round(Math.max(100, used / cp * 100) * 10) / 10}% Allocated • ${M2(cp)}`;
@@ -719,10 +687,9 @@ html body .sx .sx-key{margin:0 0 2px;font-size:11px;color:var(--mu)}
     if (!n) kidsH = `<p class="sx-empty">No children included, so no education or wedding goals are planned.</p>`;
     for (let c = 1; c <= n; c++) {
       const col = FHE.collegeCost(v, c), wed = FHE.weddingCost(v, c), ew = eduWhen(v, c, year), wy = FHE.weddingYear(v, c, year);
-      const fy = Number(v["feeYears" + c]), todayEdu = Number(v["annualFee" + c]) * fy, edF = FHE.isNA(v, c) ? 0 : Number(v["educationFund" + c]), wdF = Number(v["weddingFund" + c]);
+      const fy = Number(v["feeYears" + c]), todayEdu = Number(v["annualFee" + c]) * fy, edF = Number(v["educationFund" + c]), wdF = Number(v["weddingFund" + c]);
       const cls = (set, need) => set >= need - 0.5 ? "sx-hi" : "sx-lo";
-      const stg = Number(v["stage" + c]) === FHE.STAGE_NA ? "Education N/A" : Number(v["stage" + c]) > 0 ? "College year " + v["stage" + c] : "Class " + v["classToday" + c];
-      const wAge = FHE.weddingAgeOf(v, c), sub = (FHE.isBlank(v["childAge" + c]) ? stg : `Age ${v["childAge" + c]} \u00b7 ${stg}`) + (wAge === null ? "" : ` \u00b7 Wedding at ${wAge}`);
+      const wAge = FHE.weddingAgeOf(v, c), sub = (FHE.isBlank(v["childAge" + c]) ? `${Number(v["stage" + c]) > 0 ? "College year " + v["stage" + c] : "Class " + v["classToday" + c]}` : `Age ${v["childAge" + c]} \u00b7 ${Number(v["stage" + c]) > 0 ? "College year " + v["stage" + c] : "Class " + v["classToday" + c]}`) + (wAge === null ? "" : ` \u00b7 Wedding at ${wAge}`);
       kidsH += `<h4>Child ${c}<small>${esc(sub)}</small></h4><div class="sx-tw"><table class="sx-t"><thead><tr><th scope="col">Goal</th><th scope="col">Inflated</th><th scope="col">Need now</th><th scope="col">Set aside</th></tr></thead><tbody>
 <tr><td>Education<small>${fy === 0 ? "No fee years left" : `${M(todayEdu)} today</small><small>${fy} yr${fy === 1 ? "" : "s"} \u00b7 till ${esc(ew.year)}`}</small></td><td title="${X(col.future)}">${M(col.future)}</td><td title="${X(col.present)}">${M(col.present)}</td><td class="${cls(edF, col.present)}" title="${X(edF)}">${M(edF)}</td></tr>
 <tr><td>Wedding<small>${M(Number(v["weddingCost" + c]))} today</small>${wy === null ? "" : `<small>in ${wy}${wAge === null ? "" : ` \u00b7 age ${wAge}`}</small>`}</td><td title="${X(wed.future)}">${M(wed.future)}</td><td title="${X(wed.present)}">${M(wed.present)}</td><td class="${cls(wdF, wed.present)}" title="${X(wdF)}">${M(wdF)}</td></tr></tbody></table></div>`;
@@ -1645,33 +1612,33 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
     const sources = hzIncomeSources(v);
     const incomeTotals = new Map();
     sources.forEach(s => incomeTotals.set(s.label, (incomeTotals.get(s.label) || 0) + 1));
-    const kid = (label, key, tone) => { const o = []; for (let c = 1; c <= kids; c++) o.push({ label: `Child ${c} ${label}`, get: r => r[key][c], zero: true, sum: tone === "expense", tone, presets: ["expenses"] }); return o; };
+    const kid = (label, key, tone) => { const o = []; for (let c = 1; c <= kids; c++) o.push({ label: `Child ${c} ${label}`, get: r => r[key][c], zero: true, sum: tone === "expense", tone }); return o; };
     const g = [
-      { title: "When", kind: "context", cols: [{ label: "Serial No", get: r => String(r.__i + 1), txt: 1, sno: 1 }, { label: "Year", get: r => String(r.year), txt: 1 }, { label: "Age at Year-End", get: r => String(r.age), txt: 1 },
-        { label: "Phase", get: r => r.phase, txt: 1 },
+      { title: "When", cols: [{ label: "Serial No", get: r => String(r.__i + 1), txt: 1, sno: 1 }, { label: "Year", get: r => String(r.year), txt: 1 }, { label: "Age at Year-End", get: r => String(r.age), txt: 1 },
+        ...(earn ? [{ label: "Phase", get: r => r.phase, txt: 1 }] : []),
         { label: "Key Events", get: r => r.what, txt: 1, wide: 1 }] },
-      { title: "Household living", kind: "expenses", cols: [{ label: "Monthly Household Expense", get: r => r.monthly, zero: true, tone: "expense", presets: ["expenses"] },
-        { label: "Annual Household Expense", get: r => r.house, zero: true, sum: 1, tone: "expense", presets: ["expenses"] }] }
+      { title: "Household living", cols: [{ label: "Monthly Household Expense", get: r => r.monthly, zero: true, tone: "expense" },
+        { label: "Annual Household Expense", get: r => r.house, zero: true, sum: 1, tone: "expense" }] }
     ];
-    if (kids) g.push({ title: "Kids — college & weddings", kind: "expenses", cols: kid("College Fees", "fee", "expense").concat(kid("Wedding Cost", "wed", "expense")) });
-    g.push({ title: "Money out", kind: "expenses", cols: [{ label: "Total Expenses", get: r => r.spent, bold: 1, sum: 1, tone: "expense", presets: ["summary", "expenses"] }] });
-    if (earn) g.push({ title: "Earning phase", kind: "income", cols: [
-      { label: "Earnings Received", get: r => r.earn, zero: true, sum: 1, tone: "income", presets: ["income"] },
+    if (kids) g.push({ title: "Kids — college & weddings", cols: kid("College Fees", "fee", "expense").concat(kid("Wedding Cost", "wed", "expense")) });
+    g.push({ title: "Money out", cols: [{ label: "Total Expenses", get: r => r.spent, bold: 1, sum: 1, tone: "expense" }] });
+    if (earn) g.push({ title: "Earning phase", cols: [
+      { label: "Earnings Received", get: r => r.earn, zero: true, sum: 1, tone: "income" },
       { label: "Expenses Paid by Earnings & Savings", get: r => r.paidByEarn, zero: true, sum: 1, tone: "expense" },
       { label: "Expenses Paid from Corpus", get: r => r.fromCorpus, zero: true, sum: 1, tone: "expense" },
       { label: "Net Savings", get: r => r.netSaved, zero: true, sum: 1 },
       { label: "Savings fund at START", get: r => r.startS, zero: true },
-      { label: "Savings Fund Interest", get: r => r.interestS, zero: true, sum: 1, tone: "income", presets: ["income"] },
+      { label: "Savings Fund Interest", get: r => r.interestS, zero: true, sum: 1, tone: "income" },
       { label: "Savings fund at END", get: r => r.endS, zero: true },
       { label: "Savings Fund Added to Corpus", get: r => r.merged, zero: true, sum: 1, tone: "income" }] });
     g.push(
-      { title: "Start", kind: "summary", cols: [{ label: "Opening Corpus", get: r => r.start, presets: ["summary"] }] },
-      { title: "Money coming in", kind: "income", cols: [{ label: "Investment Interest", get: r => r.interest, sum: 1, tone: "income", presets: ["income"] }, { label: "Emergency Fund Interest", get: r => r.reserveInterest, zero: true, sum: 1, tone: "income", presets: ["income"] },
-        ...(sources.length ? sources.map(s => ({ label: `${s.label}${incomeTotals.get(s.label) > 1 ? ` ${s.occurrence}` : ""}`, get: r => r.incomeBySource && r.incomeBySource[s.k] || 0, zero: true, sum: 1, tone: "income", presets: ["income"] })) :
-          [{ label: "Other Income", get: r => r.income - r.policy, zero: true, sum: 1, tone: "income", presets: ["income"] }]),
-        ...policies.map(p => ({ label: p.label, get: r => r.policyBySource && r.policyBySource[p.k] || 0, zero: true, sum: 1, tone: "income", presets: ["income"] })),
-        { label: "Total Income", get: r => r.moneyIn, bold: 1, sum: 1, tone: "income", presets: ["summary", "income"] }] },
-      { title: "End", kind: "summary", cols: [{ label: "Closing Corpus", get: r => r.end, bold: 1, presets: ["summary"] }, { label: "Funding Status", get: r => r.status, txt: 1, status: 1, presets: ["summary"] }] });
+      { title: "Start", cols: [{ label: "Opening Corpus", get: r => r.start }] },
+      { title: "Money coming in", cols: [{ label: "Investment Interest", get: r => r.interest, sum: 1, tone: "income" }, { label: "Emergency Fund Interest", get: r => r.reserveInterest, zero: true, sum: 1, tone: "income" },
+        ...(sources.length ? sources.map(s => ({ label: `${s.label}${incomeTotals.get(s.label) > 1 ? ` ${s.occurrence}` : ""}`, get: r => r.incomeBySource && r.incomeBySource[s.k] || 0, zero: true, sum: 1, tone: "income" })) :
+          [{ label: "Other Income", get: r => r.income - r.policy, zero: true, sum: 1, tone: "income" }]),
+        ...policies.map(p => ({ label: p.label, get: r => r.policyBySource && r.policyBySource[p.k] || 0, zero: true, sum: 1, tone: "income" })),
+        { label: "Total Income", get: r => r.moneyIn, bold: 1, sum: 1, tone: "income" }] },
+      { title: "End", cols: [{ label: "Closing Corpus", get: r => r.end, bold: 1 }, { label: "Funding Status", get: r => r.status, txt: 1, status: 1 }] });
     hzUniqueColumnLabels(g);
     return window.RCOLS && RCOLS.hzOrder ? RCOLS.hzOrder(g) : g;
   }
@@ -1679,11 +1646,29 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
   const hzMoney = (x, zero) => x === 0 && zero ? "—" : x < 0 ? `(${FHE.currency(-x)})` : FHE.currency(x);
   const hzEarn = v => FHE.earningYears(v) > 0;
   const hzKids = v => Number(v.children) === 1 || Number(v.children) === 2 ? Number(v.children) : 0;
+  /* Column groups hidden on the Year-by-year report. Remembered per user in this browser, so they survive logout and login.
+     The "When" group (S.No, Year, Age) always stays. */
+  const HZ_PIN = "When";
+  const hzVisible = (groups, hide) => groups.filter(g => g.title === HZ_PIN || !(hide || []).includes(g.title));
+  const hzKey = () => "vr-hz-hide" + (typeof UK !== "undefined" && UK ? "-" + UK : "");
+  const hzHide = () => {
+    if (!Array.isArray(RP.hide)) { try { const a = JSON.parse(localStorage.getItem(hzKey()) || "[]"); RP.hide = Array.isArray(a) ? a.filter(x => typeof x === "string") : []; } catch (e) { RP.hide = []; } }
+    return RP.hide;
+  };
+  const hzGroupNames = () => { try { const sv = savedState(); if (!sv || FHE.validateAll(sv.v).length) return []; return hzColumns(hzKids(sv.v), hzEarn(sv.v), sv.v).map(g => g.title).filter(t => t !== HZ_PIN); } catch (e) { return []; } };
+  function hzColsDropdown(v, earn) {
+    const all = hzColumns(hzKids(v), earn, v).filter(g => g.title !== HZ_PIN), hide = hzHide(), open = !!RP.cm;
+    const shown = all.filter(g => !hide.includes(g.title)).length;
+    const label = shown === all.length ? "All columns" : shown === 0 ? "Only year and age" : `${shown} of ${all.length} groups`;
+    const chev = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    const items = all.map(g => `<label class="msd-i"><input type="checkbox" data-hzg="${esc(g.title)}"${hide.includes(g.title) ? "" : " checked"}><span>${esc(g.title)}</span><em>${g.cols.length}</em></label>`).join("");
+    return `<div class="msd" data-hzcols><span class="msd-t">Columns</span><button type="button" class="msd-b" data-hzcb aria-haspopup="true" aria-expanded="${open}"><b>${label}</b>${chev}</button><div class="msd-p"${open ? "" : " hidden"} role="group" aria-label="Columns"><div class="msd-a"><button type="button" data-hzca="all">Select all</button><button type="button" data-hzca="none">Clear</button></div><div class="msd-l">${items}</div></div></div>`;
+  }
   window.hzGroupTitles = () => { try { const sv = savedState(); if (!sv || FHE.validateAll(sv.v).length) return null; return hzColumns(hzKids(sv.v), hzEarn(sv.v), sv.v).map(x => x.title); } catch (e) { return null; } };
   function hzView() {
     const sv = savedState();
     if (!sv || FHE.validateAll(sv.v).length) return null;
-    const v = sv.v, earn = hzEarn(v), flat = [].concat(...hzColumns(hzKids(v), earn, v).map(g => g.cols));
+    const v = sv.v, earn = hzEarn(v), vis = hzVisible(hzColumns(hzKids(v), earn, v), hzHide()), flat = [].concat(...vis.map(g => g.cols));
     let rows = FHE.horizonReport(v).map((r, i) => (r.__i = i, r));
     if (earn && (RP.ph === "Earning" || RP.ph === "Retired")) rows = rows.filter(r => r.phase === RP.ph);
     const q = String(RP.q || "").trim().toLowerCase().replace(/[₹,\s]/g, "");
@@ -1693,7 +1678,7 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
       const g = flat[k].get, n = x => (isFinite(Number(x)) && String(x).trim() !== "" ? Number(x) : null);
       rows = rows.slice().sort((a, b) => { const x = g(a), y = g(b), nx = n(x), ny = n(y); return (nx !== null && ny !== null ? nx - ny : String(x).localeCompare(String(y))) * RP.d || a.__i - b.__i; });
     } else if (RP.d < 0) rows = rows.slice().reverse();
-    return { v, flat, rows, cols: hzColumns(hzKids(v), earn, v) };
+    return { v, flat, rows, cols: vis };
   }
   const hzC = x => { const a = Math.abs(x), n = a >= 1e7 ? (a / 1e7).toFixed(2) + " Cr" : a >= 1e5 ? (a / 1e5).toFixed(2) + " L" : null; return n ? (x < 0 ? "(₹" + n + ")" : "₹" + n) : hzMoney(x); };
   function hzPhaseBar(v, shown) {
@@ -1706,40 +1691,22 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
   function hzTable() {
     const w = hzView();
     if (!w) return "";
-    const { flat, rows } = w, sel = Number(RP.sel), groups = new Map();
+    const { flat, rows } = w, sel = Number(RP.sel);
     if (!rows.length) return `<div class="mu" style="padding:14px">No rows match your search.</div>`;
-    w.cols.forEach(group => group.cols.forEach(c => groups.set(c, group.kind)));
-    const colGroup = c => groups.get(c) || "summary";
-    const colClass = c => [
-      c.sno ? "hz-serial" : "",
-      c.label === "Year" ? "hz-year" : "",
-      /^Age/.test(c.label) ? "hz-age" : "",
-      c.wide ? "hz-w" : "",
-      c.status ? "hz-status" : "",
-      c.txt && !c.wide ? "hz-c" : "",
-      !c.txt && !c.status ? "hz-num" : "",
-      c.tone ? `hz-${c.tone}` : ""
-    ].filter(Boolean).join(" ");
-    const colAttrs = c => `data-hz-group="${colGroup(c)}"${c.presets ? ` data-hz-presets="${c.presets.join(" ")}"` : ""}`;
-    const view = ["summary", "income", "expenses"].includes(RP.cv) ? RP.cv : "all";
-    const h = flat.map(c => { const i = flat.indexOf(c), on = Number(RP.k) === i; return `<th scope="col" class="${colClass(c)}" ${colAttrs(c)} aria-sort="${on ? (RP.d > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-hzk="${i}">${esc(c.label)}${on ? (RP.d > 0 ? " ▲" : " ▼") : ""}</button></th>`; }).join("");
+    const h = flat.map(c => { const i = flat.indexOf(c), on = Number(RP.k) === i; return `<th scope="col"${c.wide ? ' class="hz-w"' : ""} aria-sort="${on ? (RP.d > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-hzk="${i}">${esc(c.label)}${on ? (RP.d > 0 ? " ▲" : " ▼") : ""}</button></th>`; }).join("");
     const val = (c, r) => { const v = c.get(r); return c.txt || c.status ? esc(v) : c.zero && v === 0 ? "—" : hzC(v); };
     const cell = (c, r) => {
       const v = c.get(r);
       const tone = c.tone ? ` hz-${c.tone}` : "";
-      if (c.status) return `<td class="${colClass(c)} ${v === "Funded" ? "dz-o" : v === "Runs out" ? "dz-w" : "dz-b"}" ${colAttrs(c)}>${esc(v)}</td>`;
-      if (c.txt) return `<td class="${colClass(c)}" ${colAttrs(c)}>${c.wide ? hzWhat(v) : esc(v)}</td>`;
-      return `<td class="${colClass(c)} ${v < 0 ? "dz-b" : ""}" ${colAttrs(c)} title="${esc(hzMoney(v, false))}">${val(c, r)}</td>`;
+      if (c.status) return `<td class="hz-s ${v === "Funded" ? "dz-o" : v === "Runs out" ? "dz-w" : "dz-b"}">${esc(v)}</td>`;
+      if (c.txt) return `<td class="${c.wide ? "hz-w" : "hz-c"}${tone}">${c.wide ? hzWhat(v) : esc(v) + (c.label === "Age at Year-End" && isRet(r) ? '<span class="rtg">Retired</span>' : "")}</td>`;
+      return `<td class="${v < 0 ? "dz-b" : ""}${tone}" title="${esc(hzMoney(v, false))}">${val(c, r)}</td>`;
     };
     const on = r => r.__i === sel ? " sel" : "";
     const isRet = r => !r.today && !FHE.isBlank(w.v.retire) && Number(r.age) === Number(w.v.retire) ? " ret" : "";   // the year you retire: highlighted yellow
     const body = rows.map(r => `<tr data-hzr="${r.__i}" tabindex="0" class="${(on(r) + isRet(r)).trim()}">${flat.map(c => cell(c, r)).join("")}</tr>`).join("");
     const sum = c => rows.reduce((t, r) => t + c.get(r), 0);
-    const tot = `<tr class="hz-tot">${flat.map((c, i) => {
-      const content = i === 0 ? "" : i === 1 ? "Total" : c.sum ? hzC(sum(c)) : "";
-      const title = c.sum ? ` title="${esc(hzMoney(sum(c), false))}"` : "";
-      return `<td class="${colClass(c)}" ${colAttrs(c)}${title}>${content}</td>`;
-    }).join("")}</tr>`;
+    const tot = `<tr class="hz-tot">${flat.map((c, i) => i === 0 ? '<td class="hz-c"></td>' : i === 1 ? '<td class="hz-c">Total</td>' : c.sum ? `<td class="${c.tone ? `hz-${c.tone}` : ""}" title="${esc(hzMoney(sum(c), false))}">${hzC(sum(c))}</td>` : "<td></td>").join("")}</tr>`;
     const skip = c => c.sno || c.wide || /^(Year|Age)/.test(c.label);
     const [cs, cy, ca] = [flat[0], flat[1], flat[2]], wide = flat.find(c => c.wide);
     // Phone cards: year, age and status up top, three key amounts, everything else under a tap-to-open "Breakdown".
@@ -1748,21 +1715,26 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
     const km = (l, x, neg, tone) => `<div><small>${l}</small><b class="${neg ? "dz-b" : tone ? `hz-${tone}` : ""}">${x}</b></div>`;
     const cards = rows.map(r => {
       const rest = flat.filter(c => !skip(c) && c !== cSp && c !== cIn && c !== cEn && c !== cSt && !(c.zero && c.get(r) === 0));
-      return `<div class="hz-card${on(r)}${isRet(r)}" data-hzr="${r.__i}"><div class="hz-chd"><div class="hz-ct">${esc(cy.get(r))} \u00b7 Age ${esc(ca.get(r))}</div>${cSt ? `<span class="hz-chip ${stCls(cSt.get(r))}">${esc(cSt.get(r))}</span>` : ""}</div>${wide ? `<div class="hz-cn">${hzWhat(wide.get(r))}</div>` : ""}
+      return `<div class="hz-card${on(r)}${isRet(r)}" data-hzr="${r.__i}"><div class="hz-chd"><div class="hz-ct">${esc(cy.get(r))} \u00b7 Age ${esc(ca.get(r))}${isRet(r) ? ' <span class="rtg">Retired</span>' : ""}</div>${cSt ? `<span class="hz-chip ${stCls(cSt.get(r))}">${esc(cSt.get(r))}</span>` : ""}</div>${wide ? `<div class="hz-cn">${hzWhat(wide.get(r))}</div>` : ""}
 <div class="hz-km">${cSp ? km("Expenses", hzC(cSp.get(r)), false, "expense") : ""}${cIn ? km("Income", hzC(cIn.get(r)), false, "income") : ""}${cEn ? km("Closing Corpus", hzC(cEn.get(r)), cEn.get(r) < 0) : ""}</div>
 <details class="hz-dt"><summary>Breakdown</summary>${rest.map(c => `<div class="hz-cr${c.bold ? " hz-b" : ""}"><span>${esc(c.label)}</span><span class="${c.get(r) < 0 ? "dz-b" : c.tone ? `hz-${c.tone}` : ""}">${val(c, r)}</span></div>`).join("")}</details></div>`;
     }).join("")
       + `<div class="hz-card hz-ctot"><div class="hz-chd"><div class="hz-ct">Total</div></div><div class="hz-km">${cSp ? km("Expenses", hzC(sum(cSp)), false, "expense") : ""}${cIn ? km("Income", hzC(sum(cIn)), false, "income") : ""}</div><details class="hz-dt"><summary>Breakdown</summary>${flat.filter(c => c.sum && c !== cSp && c !== cIn).map(c => `<div class="hz-cr"><span>${esc(c.label)}</span><span class="${c.tone ? `hz-${c.tone}` : ""}">${hzC(sum(c))}</span></div>`).join("")}</details></div>`;
-    return `<div class="hz-wrap" tabindex="0" role="region" aria-label="Year-by-year plan table"><table class="rt hz-t" data-hz-view="${view}"><thead><tr>${h}</tr></thead><tbody>${body}</tbody><tfoot>${tot}</tfoot></table></div><div class="hz-cards">${cards}</div>`;
+    return `<div class="hz-wrap"><table class="rt hz-t"><thead><tr>${h}</tr></thead><tbody>${body}</tbody><tfoot>${tot}</tfoot></table></div><div class="hz-cards">${cards}</div>`;
+  }
+  function hzFilters(v) {
+    const earn = hzEarn(v), ph = [["all", "All years"], ["Earning", "Earning phase only"], ["Retired", "Retirement only"]];
+    const phase = earn ? `<div class="msd"><span class="msd-t">Phase</span><select id="hzp" class="hz-ph" aria-label="Show phase">${ph.map(o => `<option value="${o[0]}"${(RP.ph || "all") === o[0] ? " selected" : ""}>${o[1]}</option>`).join("")}</select></div>` : "";
+    return `<div class="msds hz-fr">${phase}${hzColsDropdown(v, earn)}</div>`;
   }
   window.hzReport = function () {
     const w = hzView();
     if (!w) return "";
     const rows = FHE.horizonReport(w.v);
     const opt = (val, cur, t) => `<option value="${val}"${String(cur) === String(val) ? " selected" : ""}>${t}</option>`;
-    return `<div class="card"><div class="rph2" data-rpx><div class="rpt"><h2>Year-by-year plan</h2>${window.rptInfo("Click or tap a row to highlight it · click a column heading to sort · Freeze keeps the first columns in view while you scroll · amounts in ₹ Lakh / Crore (hover for the exact amount)", "About this table")}</div>${window.rptCsv("hzcsv")}</div>
-<div class="tb hz-tb"><input id="hzq" type="search" placeholder="Search year, age, amount…" aria-label="Search year by year plan" value="${esc(RP.q || "")}"><select id="hzs" aria-label="Sort by">${opt(-1, RP.k, "Sort: S.No")}${w.flat.map((c, i) => opt(i, RP.k, "Sort: " + esc(c.label))).join("")}</select><select id="fzs" aria-label="Freeze columns">${[["0", "Freeze: none"], ["2", "Freeze: Year"], ["3", "Freeze: Year + Ages"]].map(o => `<option value="${o[0]}"${(document.body.dataset.fz || "2") === o[0] ? " selected" : ""}>${o[1]}</option>`).join("")}</select>${hzEarn(w.v) ? `<select id="hzp" aria-label="Show phase">${[["all", "All years"], ["Earning", "Earning phase only"], ["Retired", "Retirement only"]].map(o => `<option value="${o[0]}"${(RP.ph || "all") === o[0] ? " selected" : ""}>${o[1]}</option>`).join("")}</select>` : ""}<button type="button" id="hzd" aria-label="Toggle sort direction">${RP.d > 0 ? "▲" : "▼"}</button></div>
-<div class="hz-viewbar" role="group" aria-label="Column visibility">${[["all", "All Columns"], ["summary", "Summary View"], ["income", "Income Breakdown"], ["expenses", "Expense Breakdown"]].map(([key, label]) => `<button type="button" data-hz-preset="${key}" aria-pressed="${(RP.cv || "all") === key}">${label}</button>`).join("")}</div>
+    return `<div class="card"><div class="rph2" data-rpx><div class="rpt"><h2>Year-by-year plan</h2>${window.rptInfo("Click or tap a row to highlight it · click a column heading to sort · Freeze keeps the first columns in view while you scroll · amounts in ₹ Lakh / Crore (hover for the exact amount)", "About this table")}</div><button type="button" id="hzcsv">Copy as CSV</button></div>
+${hzFilters(w.v)}
+<div class="tb hz-tb"><input id="hzq" type="search" placeholder="Search year, age, amount…" aria-label="Search year by year plan" value="${esc(RP.q || "")}"><select id="hzs" aria-label="Sort by">${opt(-1, RP.k, "Sort: S.No")}${w.flat.map((c, i) => opt(i, RP.k, "Sort: " + esc(c.label))).join("")}</select><select id="fzs" aria-label="Freeze columns">${[["0", "Freeze: none"], ["2", "Freeze: Year"], ["3", "Freeze: Year + Ages"]].map(o => `<option value="${o[0]}"${(document.body.dataset.fz || "2") === o[0] ? " selected" : ""}>${o[1]}</option>`).join("")}</select><button type="button" id="hzd" aria-label="Toggle sort direction">${RP.d > 0 ? "▲" : "▼"}</button></div>
 ${hzPhaseBar(w.v, rows)}
 
 <div id="hz-rows">${hzTable()}</div>
@@ -1787,14 +1759,6 @@ ${hzPhaseBar(w.v, rows)}
     const t = e.target;
     if (!t.closest) return;
     if (t.closest("#hzd")) { RP.d = -RP.d; hzRefresh(); return; }
-    const preset = t.closest("[data-hz-preset]");
-    if (preset) {
-      RP.cv = preset.dataset.hzPreset;
-      const table = document.querySelector("#hz-rows .hz-t");
-      if (table) table.dataset.hzView = RP.cv;
-      document.querySelectorAll(".hz-viewbar [data-hz-preset]").forEach(button => button.setAttribute("aria-pressed", String(button === preset)));
-      return;
-    }
     const h = t.closest("[data-hzk]");
     if (h) { const i = Number(h.dataset.hzk); if (Number(RP.k) === i) RP.d = -RP.d; else { RP.k = i; RP.d = 1; } hzRefresh(); return; }
     const row = t.closest("#hz-rows [data-hzr]");
@@ -1806,6 +1770,38 @@ ${hzPhaseBar(w.v, rows)}
     }
   });
   document.addEventListener("keydown", e => { const x = e.target; if ((e.key === "Enter" || e.key === " ") && x && x.matches && x.matches("#hz-rows tr[data-hzr]")) { e.preventDefault(); x.click(); } });
+  function hzRepaint() { const sec = document.querySelector(".hz-sec"); if (sec) sec.innerHTML = window.hzReport(); }
+  function hzSetHide(list) {
+    RP.hide = list; RP.k = -1; RP.d = 1;
+    try { localStorage.setItem(hzKey(), JSON.stringify(list)); } catch (e) { /* storage unavailable: the choice lasts until reload */ }
+    hzRepaint();
+  }
+  function hzMenu(open) {
+    RP.cm = !!open;
+    const b = document.querySelector("[data-hzcb]"); if (!b) return;
+    b.setAttribute("aria-expanded", String(RP.cm));
+    const p = b.parentNode.querySelector(".msd-p"); if (p) p.hidden = !RP.cm;
+  }
+  document.addEventListener("click", e => {
+    const t = e.target; if (!t || !t.closest) return;
+    if (t.closest("[data-hzcb]")) { hzMenu(!RP.cm); return; }
+    const a = t.closest("[data-hzca]");
+    if (a) { hzSetHide(a.dataset.hzca === "all" ? [] : hzGroupNames()); return; }
+    if (RP.cm && !t.closest("[data-hzcols]")) hzMenu(false);
+  });
+  document.addEventListener("change", e => {
+    const t = e.target; if (!t || !t.matches || !t.matches("[data-hzg]")) return;
+    const g = t.dataset.hzg, off = new Set(hzHide());
+    if (t.checked) off.delete(g); else off.add(g);
+    hzSetHide(Array.from(off));
+    const again = Array.from(document.querySelectorAll("[data-hzg]")).find(x => x.dataset.hzg === g);
+    if (again) again.focus();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape" || !RP.cm) return;
+    hzMenu(false); e.stopPropagation();
+    const b = document.querySelector("[data-hzcb]"); if (b) b.focus();
+  }, true);
   function hzCSV() {
     const w = hzView(), q = x => '"' + String(x).replace(/"/g, '""') + '"';
     return [w.flat.map(c => q(c.label)).join(",")].concat(w.rows.map(r => w.flat.map(c => c.txt ? q(c.get(r)) : Math.round(c.get(r))).join(","))).join("\n");
@@ -1821,7 +1817,7 @@ ${hzPhaseBar(w.v, rows)}
   });
 
   /* Retirement planner sub-tabs, like Goal Planner's: Plan | Report (> Year by Year) */
-  const RP = window.RPUI = window.RPUI || { tab: "status", rv: "clients", q: "", k: -1, d: 1, z: 0, sel: -1, cv: "all" };
+  const RP = window.RPUI = window.RPUI || { tab: "status", rv: "clients", q: "", k: -1, d: 1, z: 0, sel: -1 };
   const rpBar = (id, label, items, cur) => `<div class="seg gpb rpb" role="group" aria-label="${label}">` + items.map(i => `<button type="button" data-rp="${id}:${i[0]}" aria-pressed="${i[0] === cur}">${i[1]}</button>`).join("") + `</div>`;
   document.addEventListener("click", e => {
     const x = e.target.closest && e.target.closest("[data-rp]");
@@ -1917,7 +1913,6 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
     if (P && S.fh) P.profiles[P.active] = Object.assign({}, P.profiles[P.active], { v: Object.assign({}, S.fh.v), t: S.fh.t, rep: S.fh.rep });
   }
   const fhpList = () => { const P = fhpEnsure(); return P ? Object.keys(P.profiles).map(id => Object.assign({ id, active: id === P.active }, P.profiles[id])) : []; };
-  window.fhpClientList = () => fhpList().map(p => ({ id: p.id, name: p.name }));
   const fhpUniqueId = (name, P) => { let base = fhpSlug(name), id = base, i = 2; while (id in Object.prototype || Object.prototype.hasOwnProperty.call(P.profiles, id)) id = base.slice(0, 20) + "-" + i++; return id; };
   const fhpTaken = (name, P, exceptId) => Object.keys(P.profiles).some(id => id !== exceptId && P.profiles[id].name.toLowerCase() === name.toLowerCase());
 
@@ -1995,7 +1990,7 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
       const v = {}; for (const f of FHE.FIELDS) v[f.id] = String(f.initial);
       Object.assign(v, Object.fromEntries(Object.entries(sm.o).filter(([k]) => k !== "inc").map(([k, x]) => [k, String(x)])));
       if (sm.o.inc) { const w = FHE.incomeWindow({ age: "0", until: String(sm.o.inc.years) }); Object.assign(v, { incomeOn: "1", incomeCount: "1", incName1: "Rent", incAmt1: String(sm.o.inc.amt), incGrowth1: String(sm.o.inc.growth), incFrom1: w.from, incTo1: w.to }); }
-      const a = FHE.defaultAllocation(Number(v.corpus), Number(v.children), v) || {};
+      const a = FHE.defaultAllocation(Number(v.corpus), Number(v.children)) || {};
       for (const k of Object.keys(a)) if (!(k in sm.o)) v[k] = String(a[k]);
       if (FHE.validateAll(v).length) continue;                    // never store an incomplete sample
       P.profiles[fhpUniqueId(sm.name, P)] = { name: sm.name, v, t: Date.now(), rep: 0, created: Date.now() };
