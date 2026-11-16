@@ -11,8 +11,8 @@ const source = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 
 const uiSource = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
 const reportCss = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'year-by-year.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=131"></script>');
-const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=156"></script>');
+const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=130"></script>');
+const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=153"></script>');
 const bodyEnd = html.indexOf('</body>');
 assert.ok(moduleScript >= 0 && uiScript > moduleScript, 'Retirement Planner engine loads before its UI');
 assert.ok(!html.includes('<script id="fh-engine">'), 'Retirement Planner engine is no longer duplicated inline');
@@ -27,22 +27,6 @@ for (const label of ['Serial No', 'Age at Year-End', 'Key Events', 'Monthly Hous
     `Year-by-year report defines meaningful header or amount styling: ${label}`);
 assert.ok(uiSource.includes('function hzUniqueColumnLabels(groups)') && uiSource.includes('hzUniqueColumnLabels(g);'),
   'Year-by-year report disambiguates duplicate column labels across all groups');
-assert.ok(uiSource.includes('{ label: "Phase", get: r => r.phase, txt: 1 }'),
-  'Year-by-year report keeps Phase in its pinned context columns');
-assert.ok(uiSource.includes('data-hz-presets="${c.presets.join(" ")}"') &&
-  reportCss.includes(':not([data-hz-presets~="income"])') &&
-  reportCss.includes(':not([data-hz-presets~="expenses"])'),
-  'Year-by-year presets hide columns by their explicit preset membership');
-for (const marker of [
-  'presets: ["summary", "expenses"]',
-  'presets: ["summary"]',
-  'presets: ["summary", "income"]',
-  'presets: ["income"]',
-  'presets: ["expenses"]'
-])
-  assert.ok(uiSource.includes(marker), `Year-by-year columns define their preset membership: ${marker}`);
-assert.ok(!reportCss.includes('data-hz-summary="true"'),
-  'Preset membership does not leak unrelated summary columns into breakdown views');
 
 const context = {};
 vm.createContext(context);
@@ -97,26 +81,4 @@ const policyRow = engine.horizonReport(engine.defaults())[0];
 assert.strictEqual(policyRow.policyBySource[101], 11000, 'Year-by-year rows retain Tata AIA payouts by policy');
 assert.strictEqual(policyRow.policyBySource[102], 21000, 'Year-by-year rows retain LIC payouts by policy');
 assert.strictEqual(policyRow.policy, 32000, 'Per-policy reporting preserves the total payout amount');
-/* Stage N/A (value 5): no class needed, and every education cost is 0 even if old fee values are left behind */
-{
-  const na = Object.assign({}, inputs, { age: '48', until: '74', children: '1', childAge1: '17', weddingAge1: '28', stage1: '5', classToday1: '', feeYears1: '4', annualFee1: '40000',
-    educationFund1: '0', weddingFund1: '0' });
-  const zero = Object.assign({}, na, { stage1: '0', classToday1: '12', feeYears1: '0', annualFee1: '0' });
-  const school = Object.assign({}, na, { stage1: '0', classToday1: '', feeYears1: '4', annualFee1: '40000' });
-  assert.ok(engine.isNA(na, 1) && !engine.isNA(zero, 1) && engine.STAGE_NA === 5, 'Stage 5 means N/A');
-  assert.strictEqual(engine.collegeCost(na, 1).present, 0, 'N/A child has no college cost');
-  assert.strictEqual(engine.educationYear(na, 1, 2026), null, 'N/A child has no education completion year');
-  assert.ok(!engine.validateAll(na).some(i => i.field === 'classToday1'), 'Class is not required while Stage is N/A');
-  assert.ok(engine.validateAll(school).some(i => i.field === 'classToday1'), 'Class stays required for School');
-  assert.strictEqual(JSON.stringify(engine.schedule(na)), JSON.stringify(engine.schedule(zero)), 'Year-by-year projection treats N/A like zero education cost');
-  /* Money Buckets: an N/A child has no education set-aside, even if an old amount is left behind */
-  const withFund = Object.assign({}, na, { corpus: '10000000', houseFund: '4000000', buffer: '1000000', educationFund1: '500000', weddingFund1: '1000000' });
-  const noFund = Object.assign({}, withFund, { educationFund1: '0' });
-  assert.strictEqual(engine.growthEngine(withFund), engine.growthEngine(noFund), 'N/A child: leftover education set-aside is ignored (money stays in the growth engine)');
-  assert.strictEqual(engine.growthEngine(withFund), 4000000, 'Growth engine = corpus minus household, reserve and wedding only');
-  assert.ok(!engine.validateAll(Object.assign({}, withFund, { educationFund1: '' })).some(i => i.field === 'educationFund1'), 'Education set-aside is not required while Stage is N/A');
-  assert.strictEqual(engine.defaultAllocation(10000000, 1, na).educationFund1, 0, 'Default allocation gives an N/A child no education share');
-  assert.strictEqual(engine.defaultAllocationPercents(1, na).growth, 100 - 40 - 10 - 10, 'Default percentages hand the unused education share to the growth engine');
-}
-
 console.log('  ok   Retirement Planner reports retain each policy payout separately');
