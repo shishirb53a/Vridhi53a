@@ -1,0 +1,29 @@
+/* Annual Portfolio Projection helpers (see annual-helpers.js). Colour only marks the column groups; every label also says it in words. */
+html body #m .vr-aph{--vr-y:var(--mu,#5b687c);--vr-h:var(--ac,#0b5cab);--vr-i:#12804f;--vr-b:#b86e00;margin:0 0 8px}
+html body #m .vr-aph [hidden]{display:none!important}
+html body #m .vr-aph .vr-sum{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:8px 12px;margin:0 0 8px;border-radius:10px;background:var(--soft,#edf1f7);font-size:13px}
+html body #m .vr-aph .vr-sum b{font-size:15px}
+html body #m .vr-aph .vr-sn{color:var(--mu,#5b687c);font-size:12px}
+html body #m .vr-aph .vr-ctl{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
+html body #m .vr-aph .vr-seg{display:inline-flex;gap:2px;padding:3px;border-radius:10px;background:var(--soft,#edf1f7)}
+html body #m .vr-aph .vr-seg button{border:0;background:none;color:var(--mu,#5b687c);font:inherit;font-size:13px;font-weight:600;padding:0 12px;min-height:32px;border-radius:8px;cursor:pointer;box-shadow:none}
+html body #m .vr-aph .vr-seg button.on{background:var(--card,#fff);color:var(--tx,#17212f);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+html body #m .vr-aph .vr-jump{min-height:32px;padding:0 12px;font-size:13px;font-weight:600;border-radius:9px;cursor:pointer}
+html body #m .vr-aph .vr-leg{margin-left:auto;font-size:12px;color:var(--mu,#5b687c)}
+html body #m .vr-aph .vr-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 4px 0 10px;vertical-align:-1px}
+html body #m .vr-aph .g-y{background:var(--vr-y)}html body #m .vr-aph .g-h{background:var(--vr-h)}html body #m .vr-aph .g-i{background:var(--vr-i)}html body #m .vr-aph .g-b{background:var(--vr-b)}
+/* colour bar over each column group and a clear line where a group starts */
+html body #rr table.rt[data-aph] th.vr-g-y{border-top:3px solid var(--mu,#5b687c)!important}
+html body #rr table.rt[data-aph] th.vr-g-h{border-top:3px solid var(--ac,#0b5cab)!important}
+html body #rr table.rt[data-aph] th.vr-g-i{border-top:3px solid #12804f!important}
+html body #rr table.rt[data-aph] th.vr-g-b{border-top:3px solid #b86e00!important}
+html body #rr table.rt[data-aph] .vr-gs{border-left:2px solid var(--bd,#d9e0ea)!important}
+html body #rr table.rt[data-aph] td.vr-k-tot{font-weight:700}
+html body #rr table.rt[data-aph] .vr-i{display:inline-block;margin-left:3px;font-size:10px;color:var(--mu,#5b687c);cursor:help}
+html body #rr table.rt[data-aph] .vr-tdy{display:block;width:max-content;margin:2px 0 0;padding:0 7px;border-radius:99px;border:1px solid var(--bd,#d9e0ea);background:var(--card,#fff);color:var(--mu,#5b687c);font-size:10px;font-weight:700}
+html body #rr table.rt[data-aph] .vr-col{background-image:linear-gradient(color-mix(in srgb,var(--ac,#0b5cab) 12%,transparent),color-mix(in srgb,var(--ac,#0b5cab) 12%,transparent))}
+/* quick views and Every 5 years (only hide; nothing is removed or recalculated) */
+html body #rr table.rt.vr-view-hold .vr-g-i,html body #rr table.rt.vr-view-hold .vr-k-roi,html body #rr table.rt.vr-view-hold .vr-k-add,html body #rr table.rt.vr-view-hold .vr-k-chg{display:none}
+html body #rr table.rt.vr-view-inc .vr-g-h,html body #rr table.rt.vr-view-inc .vr-k-tot,html body #rr table.rt.vr-view-inc .vr-k-roi,html body #rr table.rt.vr-view-inc .vr-k-add,html body #rr table.rt.vr-view-inc .vr-k-chg{display:none}
+html body #rr table.rt tr.vr-skip{display:none}
+@media (max-width:700px){html body #m .vr-aph .vr-leg,html body #m .vr-aph .vr-sn{display:none}html body #m .vr-aph .vr-seg button{padding:0 9px}}
