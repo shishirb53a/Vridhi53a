@@ -5,13 +5,12 @@
 <script>/* Remember me: a ticked sign-in keeps its session in localStorage; a new tab or a restarted browser picks it up here, before the lock screen decides */
 try{if(sessionStorage.getItem('fs-auth')!=='1'&&localStorage.getItem('vr-rm')==='1'){var rmS=localStorage.getItem('vr-sb-remember'),rmO=rmS&&JSON.parse(rmS);if(rmO&&rmO.rt&&rmO.uid){sessionStorage.setItem('vr-sb',rmS);sessionStorage.setItem('fs-auth','1')}}}catch(e){}
 try{if(sessionStorage.getItem('fs-auth')!=='1')document.documentElement.classList.add('lk')}catch(e){document.documentElement.classList.add('lk')}</script>
-<link rel="stylesheet" href="modules/policy/policy.css?v=129">
-<link rel="stylesheet" href="modules/policy/policy-fit.css?v=1">
+<link rel="stylesheet" href="modules/policy/policy.css?v=123">
 <script src="config.js"></script>
-<script src="modules/policy/policy-core.js?v=128" charset="utf-8"></script>
-<script src="modules/policy/policy-ui.js?v=131" charset="utf-8"></script>
+<script src="modules/policy/policy-core.js?v=123" charset="utf-8"></script>
+<script src="modules/policy/policy-ui.js?v=123" charset="utf-8"></script>
 <script src="modules/auth/build-info.js?v=151"></script>
-<script id="vr-prod" src="modules/auth/auth.js?v=153"></script>
+<script id="vr-prod" src="modules/auth/auth.js?v=151"></script>
 <script src="modules/auth/idle-timeout.js?v=148"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -60,7 +59,6 @@ html body #lg .lw{font-size:28px;font-weight:800;letter-spacing:-.03em;color:var
 <link rel="stylesheet" href="modules/app-shell/goal-timeline.css?v=143">
 <link rel="stylesheet" href="modules/goal-planner-clients/client-compare.css?v=8">
 <link rel="stylesheet" href="modules/landing/landing.css?v=141">
-<link rel="stylesheet" href="modules/ai-agent/agent.css?v=1">
 </head>
 <body><div id="lg" role="dialog" aria-modal="true" aria-labelledby="lgt"><form class="lc" id="lgf" autocomplete="on" novalidate><div class="lb"><div class="ll"><svg width="30" height="30" viewBox="3.5 2 27 27" fill="none" aria-hidden="true"><rect x="5.5" y="20" width="4.6" height="7" rx="2.3" style="fill:var(--on,#fff)" opacity=".55"/><rect x="13.7" y="15" width="4.6" height="12" rx="2.3" style="fill:var(--on,#fff)" opacity=".78"/><rect x="21.9" y="11" width="4.6" height="16" rx="2.3" style="fill:var(--on,#fff)" opacity="1"/><path d="M24.2 9.6C23.6 6 25.6 3.6 29 3.2c.4 3.5-1.5 6-4.8 6.4z" style="fill:var(--on,#fff)" opacity="1"/><path d="M24.2 9.6C24.4 7 22.7 5.1 20 4.6c-.3 2.8 1.4 4.8 4.2 5z" style="fill:var(--on,#fff)" opacity=".8"/></svg></div><div class="lw">Vriddhi</div></div><svg class="lgb" viewBox="0 0 320 96" role="img" aria-label="Asha beside growing savings bars under a rising sun"><rect width="320" height="96" rx="12" fill="#E1F5EE"/><circle cx="270" cy="30" r="22" fill="#F5B83D" opacity=".45"/><circle cx="270" cy="30" r="13" fill="#F5B83D" opacity=".8"/><path d="M0 80C60 66 120 70 190 78C240 84 285 74 320 70L320 84Q320 96 308 96L12 96Q0 96 0 84Z" fill="#5DCAA5" opacity=".5"/><rect x="130" y="64" width="22" height="26" rx="6" fill="#0F6E56" opacity=".5"/><rect x="160" y="52" width="22" height="38" rx="6" fill="#0F6E56" opacity=".7"/><rect x="190" y="38" width="22" height="52" rx="6" fill="#0F6E56" opacity=".88"/><rect x="220" y="22" width="22" height="68" rx="6" fill="#0F6E56"/><path d="M134 52Q190 30 232 12" fill="none" stroke="#5F5E5A" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 6"/><g transform="translate(58,56) scale(.95)"><rect x="-16" y="0" width="32" height="38" rx="10" fill="#1D9E75"/><circle cx="0" cy="-14" r="16" fill="#F2C9A0"/><path d="M-17 -14Q-17 -34 0 -34Q17 -34 17 -14Q10 -24 0 -24Q-10 -24 -17 -14Z" fill="#3B2A20"/><circle cx="-6" cy="-13" r="2" fill="#2C2C2A"/><circle cx="6" cy="-13" r="2" fill="#2C2C2A"/><path d="M-7 -7Q0 1 7 -7" stroke="#2C2C2A" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M14 8L34 -8" stroke="#F2C9A0" stroke-width="6" stroke-linecap="round" fill="none"/></g><circle cx="104" cy="30" r="11" fill="#F5B83D"/><circle cx="104" cy="30" r="7.5" fill="none" stroke="#fff" stroke-width="1.5" opacity=".7"/><text x="104" y="30.5" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="800" fill="#fff" font-family="Arial,sans-serif">&#8377;</text></svg><p class="lgt">Know if your money will last. Track your holdings, watch them grow and plan your retirement.</p><h1 id="lgt">Sign in</h1><div class="fl"><input id="lu" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder=" " required><label for="lu">Email</label></div><div class="fl pw"><input id="lp" name="password" type="password" autocomplete="current-password" placeholder=" " required><label for="lp">Password</label><button type="button" id="lt" aria-label="Show password">Show</button></div><label class="lgsv" title="Stay signed in on this device. Use only on your own device."><input type="checkbox" id="lsv"> <span>Remember me</span></label><div id="le" class="er" role="alert"></div><button class="p go" type="submit">Sign in</button><ul class="lgc"><li>📈 Forecast growth</li><li>🏖️ Retirement roadmap</li><li>🔒 Private</li></ul></form></div>
 <header class="hd"><div class="hdi"><div class="brand"><div class="logo"><svg width="30" height="30" viewBox="3.5 2 27 27" fill="none" aria-hidden="true"><rect x="5.5" y="20" width="4.6" height="7" rx="2.3" style="fill:var(--on);opacity:.55"/><rect x="13.7" y="15" width="4.6" height="12" rx="2.3" style="fill:var(--on);opacity:.78"/><rect x="21.9" y="11" width="4.6" height="16" rx="2.3" style="fill:var(--on);opacity:1"/><path d="M24.2 9.6C23.6 6 25.6 3.6 29 3.2c.4 3.5-1.5 6-4.8 6.4z" style="fill:var(--on);opacity:1"/><path d="M24.2 9.6C24.4 7 22.7 5.1 20 4.6c-.3 2.8 1.4 4.8 4.2 5z" style="fill:var(--on);opacity:.8"/></svg></div><div><div class="wm">Vriddhi</div><div class="tg">Plan · Track · Retire</div></div></div><nav id="nav" aria-label="Sections"></nav><div id="fhp" class="fhp" hidden></div><span id="who" class="who" title="Signed in as" hidden></span><div id="settings-menu-wrap" class="settings-menu-wrap" hidden><button type="button" aria-label="Settings" title="Settings" aria-expanded="false" aria-controls="settings-menu" data-settings-toggle><span aria-hidden="true">&#8942;</span></button><div class="settings-menu" id="settings-menu" role="group" aria-label="Settings" hidden><button type="button" data-settings-tab="Settings">Settings</button></div></div><button type="button" id="so" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div></header>
@@ -74,12 +72,11 @@ html[lang=hi] body,html[lang=hi] button,html[lang=hi] input,html[lang=hi] select
 <script src="modules/landing/landing.js?v=131"></script>
 <script src="modules/portfolio-calculations/engine.js?v=136"></script>
 
-<script src="modules/app-core/app.js?v=172"></script>
+<script src="modules/app-core/app.js?v=165"></script>
 <script src="modules/app-shell/reports-menu.js?v=1"></script>
 <script src="modules/family-management/family-management.js?v=144"></script>
 <script src="modules/help/help.js?v=143"></script>
-<script src="modules/database-backups/backups.js?v=1"></script>
-<script src="modules/settings/settings.js?v=146"></script>
+<script src="modules/settings/settings.js?v=143"></script>
 <script src="modules/theme/theme.js?v=144"></script>
 <script>window.VRTheme.configure({getState:()=>S,save:save,render:render,toast:toast});</script>
 <script src="modules/dashboard-preferences/dashboard-preferences.js?v=141"></script>
@@ -109,12 +106,11 @@ const end=()=>{if(w)w.classList.remove('drag');w=null};document.addEventListener
 document.addEventListener('click',e=>{if(mv){e.stopPropagation();e.preventDefault();mv=false}},true);})();</script>
 
 <link rel="stylesheet" href="modules/app-shell/control-panel.css?v=147">
-<link rel="stylesheet" href="modules/settings/settings.css?v=2">
 
 <style>[data-sec="ready"] .rdy{margin-top:0;padding-top:0;border-top:0}</style><link rel="stylesheet" href="modules/app-shell/header-theme.css?v=147">
 
 
-<script src="modules/reports/monthly-projection.js?v=141"></script>
+<script src="modules/reports/monthly-projection.js?v=140"></script>
 <script src="modules/annual-savings/annual-savings.js?v=129"></script>
 
 <script src="modules/report-maximize/report-maximize.js?v=136"></script>
@@ -203,8 +199,7 @@ html body .yc.a:not(.sel){background:transparent}</style>
 <link rel="stylesheet" href="modules/holdings/holdings.css?v=157">
 <script src="modules/report-filters/report-filters.js?v=134"></script>
 <style>@import url("modules/report-filters/report-filters.css?v=134");</style>
-<script src="modules/report-columns/report-columns.js?v=128"></script>
-<script src="modules/reports/annual-helpers.js?v=1"></script>
+<script src="modules/report-columns/report-columns.js?v=127"></script>
 <style>@import url("modules/report-columns/report-columns.css?v=126");</style>
 <script src="modules/dashboard-preferences/mobile-tabs.js?v=147"></script>
 <script src="modules/ui-pagination/ui-pagination.js?v=135"></script>
@@ -229,7 +224,7 @@ html body dialog.hf .wzt button{min-width:0}
 <link rel="stylesheet" href="modules/retirement-planner/ui.css?v=141">
 <script src="modules/retirement-planner/engine.js?v=130"></script>
 <script src="modules/retirement-planner/ui.js?v=153"></script>
-<script src="modules/goal-planner-clients/goal-planner-clients.js?v=144"></script>
+<script src="modules/goal-planner-clients/goal-planner-clients.js?v=143"></script>
 <link rel="stylesheet" href="modules/retirement-planner/page-layout.css?v=147">
 <style>
 html body .rp-head>div:first-child{flex:1 1 320px;min-width:0}
@@ -243,7 +238,7 @@ html body .rp-top .rpb{align-self:auto}
 html body .rp-top .rp-check{min-height:42px;padding:0 20px;margin-left:auto}
 @media (max-width:720px){html body .rp-top .rpb,html body .rp-top .rp-check{width:100%;margin-left:0}}
 </style>
-<link rel="stylesheet" href="modules/retirement-planner/year-by-year.css?v=147">
+<link rel="stylesheet" href="modules/retirement-planner/year-by-year.css?v=148">
 <link rel="stylesheet" href="modules/app-shell/icons.css?v=142">
 <script>(function(){var M={'family':'users','general assumptions':'sliders','appearance & backup':'palette','users':'users','year-by-year plan':'table','year by year status':'cal'};
 function tag(){document.querySelectorAll('h1,h2').forEach(function(h){if(h.closest('dialog'))return;var k=M[h.textContent.trim().toLowerCase()];if(k){if(h.dataset.hic!==k)h.dataset.hic=k}else if(h.dataset.hic)delete h.dataset.hic})}
@@ -284,10 +279,6 @@ new MutationObserver(q).observe(document.body,{childList:true,subtree:true});tag
 </script>
 <style>@import url("modules/holding-entry-register/entry-register.css?v=132");</style>
 <script src="modules/holding-entry-register/entry-register.js?v=134"></script>
-<style>@import url("modules/value-on-date/value-on-date.css?v=1");</style>
-<script src="modules/value-on-date/value-on-date.js?v=2"></script>
-<script src="modules/ai-agent/agent.js?v=1"></script>
 <link rel="stylesheet" href="modules/reports/retirement-row.css?v=147">
-<link rel="stylesheet" href="modules/reports/annual-helpers.css?v=1">
 <link rel="stylesheet" href="modules/app-shell/reports-menu.css?v=1">
 </body></html>
