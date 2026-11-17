@@ -244,17 +244,17 @@
       `<tbody id="fh-inctbody"></tbody><tfoot><tr><th scope="row" colspan="1" title="Annual income of all sources, in today\u2019s money">Total a year</th><td id="fh-inctot" colspan="5"></td></tr></tfoot></table></div>` +
       `<button type="button" id="fh-incadd" class="fh-addstream">+ Add income source</button><div id="fh-inc-editors"></div></div></div>`;
   };
-  /* Lump Sum tab: same pattern as the Income tab. A read-only grid (Edit / Duplicate / Delete on each row, + Add lump sum below) and one editor that opens for the row being added or edited. */
+  /* Lump Sum tab: same pattern as the Income tab. A read-only grid (Edit / Delete on each row, + Add lump sum below) and one editor that opens for the row being added or edited. */
   const lumpSumCard = () => `<div class="hs fh-lump" id="fh-lump">` +
     `<p class="fh-lump-warning" id="fh-lump-warning" role="status" hidden></p>` +
     `<div id="fh-lump-undo" class="fh-incundo" role="status" hidden></div>` +
     `<div class="fh-lump-empty" id="fh-lump-empty"><b>No lump sums yet</b><span>Add a one-time receipt such as a maturity payout, bonus or property sale.</span></div>` +
     `<div id="fh-lump-body" hidden><div class="fh-lumptw"><table class="fh-lumptbl" id="fh-lumptbl"><caption class="fh-sr">Lump sums</caption>` +
     `<colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"><col class="c6"><col class="c7"></colgroup>` +
-    `<thead><tr><th scope="col" title="Label (optional)">Label</th><th scope="col" title="Lump sum amount (\u20b9)">Amount (\u20b9)</th>` +
-    `<th scope="col" title="Year in which lump sum is received">Year received</th><th scope="col" title="Yearly income earned on the lump sum (%)">Income %</th>` +
-    `<th scope="col" title="Yearly income from the lump sum (\u20b9). Calculated automatically: amount \u00d7 income %">Yearly income (\u20b9) <span class="fh-auto-chip">Auto</span></th>` +
-    `<th scope="col" title="Principal treatment">Principal</th><th scope="col"><span class="fh-sr">Actions</span></th></tr></thead>` +
+    `<thead><tr><th scope="col" title="Source">Source</th><th scope="col" title="Amount">Amount</th>` +
+    `<th scope="col" title="Year">Year</th><th scope="col" title="ROI %">ROI %</th>` +
+    `<th scope="col" title="Annual Income (\u20b9)">Annual Income (\u20b9)</th>` +
+    `<th scope="col" title="Principal">Principal</th><th scope="col"><span class="fh-sr">Actions</span></th></tr></thead>` +
     `<tbody id="fh-lumptbody"></tbody><tfoot><tr><th scope="row">Totals</th><td id="fh-lumptotal-amount"></td><td class="fh-lump-skip">\u2014</td><td class="fh-lump-skip">\u2014</td><td id="fh-lumptotal-income"></td><td class="fh-lump-skip" colspan="2"></td></tr></tfoot></table></div></div>` +
     `<button type="button" id="fh-lumpadd" class="fh-addstream">+ Add lump sum</button><div id="fh-lump-editors"></div></div>`;
   const grid = pred => `<div class="hg">${FHE.FIELDS.filter(pred).map(fieldHTML).join("")}</div>`;
@@ -542,17 +542,17 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
   }
   function lumpEditorHTML(k) {
     const id = part => "fh-" + part + k, err = part => `<small class="er fh-err" id="${id(part)}-e" role="alert"></small>`;
-    const field = (part, label, required, control) => `<div class="hf1"><label for="${id(part)}">${label}${required ? ' <span aria-hidden="true">*</span>' : " (optional)"}</label>${control}${err(part)}</div>`;
+    const field = (part, label, required, control) => `<div class="hf1"><label for="${id(part)}">${label}${required ? ' <span aria-hidden="true">*</span>' : ""}</label>${control}${err(part)}</div>`;
     const d = part => `data-fh-lump="${part}${k}" aria-describedby="${id(part)}-e"`;
     return `<div class="fh-stream fh-lump-stream" data-fh-lump-stream="${k}" hidden><div class="fh-sh"><b data-fh-lump-edtitle="${k}">Edit lump sum ${k}</b>` +
       `<span class="fh-edbtns"><button type="button" class="fh-sdone" data-fh-lump-done="${k}">Done</button><button type="button" class="fh-scancel" data-fh-lump-cancel="${k}" hidden>Cancel</button></span></div>` +
       `<div class="hg">` +
-      field("lumpLabel", "Label", false, `<input id="${id("lumpLabel")}" ${d("lumpLabel")} type="text" maxlength="24" autocomplete="off" value="${esc(FH.v["lumpLabel" + k] || "")}">`) +
-      field("lumpAmount", "Lump sum amount (\u20b9)", true, `<input id="${id("lumpAmount")}" ${d("lumpAmount")} type="text" inputmode="decimal" autocomplete="off" value="${esc(indianAmount(FH.v["lumpAmount" + k]))}">`) +
-      field("lumpYear", "Year in which lump sum is received", true, `<select id="${id("lumpYear")}" ${d("lumpYear")}>${lumpYearOptions(FH.v["lumpYear" + k])}</select>`) +
-      field("lumpRate", "Yearly income earned on the lump sum (%)", true, `<input id="${id("lumpRate")}" ${d("lumpRate")} type="number" min="0" max="100" step="0.01" inputmode="decimal" value="${esc(FH.v["lumpRate" + k] || "")}">`) +
-      field("lumpTreatment", "Principal treatment", true, `<select id="${id("lumpTreatment")}" ${d("lumpTreatment")}><option value="keep"${lumpSpent(k) ? "" : " selected"}>Keep invested</option><option value="spent"${lumpSpent(k) ? " selected" : ""}>Spent</option></select>`) +
-      `</div><p class="fh-lump-calc"><span>Yearly income from the lump sum (\u20b9)</span><b data-fh-lump-calc="${k}">\u2014</b><span class="fh-auto-chip" title="Calculated automatically: amount \u00d7 yearly income %">Auto</span></p>` +
+      field("lumpLabel", "Source", false, `<input id="${id("lumpLabel")}" ${d("lumpLabel")} type="text" maxlength="24" autocomplete="off" value="${esc(FH.v["lumpLabel" + k] || "")}">`) +
+      field("lumpAmount", "Amount", true, `<input id="${id("lumpAmount")}" ${d("lumpAmount")} type="text" inputmode="decimal" autocomplete="off" value="${esc(indianAmount(FH.v["lumpAmount" + k]))}">`) +
+      field("lumpYear", "Year", true, `<select id="${id("lumpYear")}" ${d("lumpYear")}>${lumpYearOptions(FH.v["lumpYear" + k])}</select>`) +
+      field("lumpRate", "ROI %", true, `<input id="${id("lumpRate")}" ${d("lumpRate")} type="number" min="0" max="100" step="0.01" inputmode="decimal" value="${esc(FH.v["lumpRate" + k] || "")}">`) +
+      field("lumpTreatment", "Principal", true, `<select id="${id("lumpTreatment")}" ${d("lumpTreatment")}><option value="keep"${lumpSpent(k) ? "" : " selected"}>Keep</option><option value="spent"${lumpSpent(k) ? " selected" : ""}>Withdraw</option></select>`) +
+      `</div><p class="fh-lump-calc"><span>Annual Income (\u20b9)</span><b data-fh-lump-calc="${k}">\u2014</b></p>` +
       `<small class="fh-lump-hint" data-fh-lump-hint="${k}"></small></div>`;
   }
   /* Keeps one editor in step with its values: Spent forces and locks the rate at 0, the auto income updates, field messages show. */
@@ -575,12 +575,12 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
     const cell = (label, v) => `<td data-label="${label}">${v === "" || v == null ? "\u2014" : esc(String(v))}</td>`;
     const pill = errs ? ' <span class="fh-chk">Check</span>' : !row.complete ? ' <span class="fh-chk fh-chk-warn">Incomplete</span>' : "";
     const cls = ((k === FH.lumpEdit ? "is-edit" : "") + (errs ? " is-bad" : !row.complete ? " is-incomplete" : "")).trim();
-    return `<tr class="${cls}" data-fh-lump-row="${k}"><th scope="row" data-label="Label">${esc(nm)}${pill}</th>` +
-      cell("Amount (\u20b9)", Number.isFinite(row.amount) ? lumpMoney(row.amount) : "") + cell("Year received", FH.v["lumpYear" + k]) +
-      cell("Income %", FHE.isBlank(FH.v["lumpRate" + k]) ? "" : FH.v["lumpRate" + k] + "%") +
-      `<td data-label="Yearly income (\u20b9) \u00b7 auto" class="fh-lump-auto"${spent ? ` title="${LUMP_SPENT_TIP}"` : ""}>${lumpIncomeText(k, row)}</td>` +
-      cell("Principal", spent ? "Spent" : "Keep invested") +
-      `<td class="fh-act"><button type="button" data-fh-lump-edit="${k}" aria-label="Edit ${esc(nm)}">Edit</button><button type="button" data-fh-lump-duplicate="${k}" aria-label="Duplicate ${esc(nm)}">Duplicate</button>` +
+    return `<tr class="${cls}" data-fh-lump-row="${k}"><th scope="row" data-label="Source">${esc(nm)}${pill}</th>` +
+      cell("Amount", Number.isFinite(row.amount) ? lumpMoney(row.amount) : "") + cell("Year", FH.v["lumpYear" + k]) +
+      cell("ROI %", FHE.isBlank(FH.v["lumpRate" + k]) ? "" : FH.v["lumpRate" + k] + "%") +
+      `<td data-label="Annual Income (\u20b9)" class="fh-lump-auto"${spent ? ` title="${LUMP_SPENT_TIP}"` : ""}>${lumpIncomeText(k, row)}</td>` +
+      cell("Principal", spent ? "Withdraw" : "Keep") +
+      `<td class="fh-act"><button type="button" data-fh-lump-edit="${k}" aria-label="Edit ${esc(nm)}">Edit</button>` +
       `<button type="button" class="d" data-fh-lump-delete="${k}" aria-label="Delete ${esc(nm)}">Delete</button></td></tr>`;
   }
   function renderLumpGrid() {
@@ -629,10 +629,10 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
     if (FH.lumpRange !== `${range.from}:${range.to}`) renderLumpSumTable();
   }
   function updateLumpRow(k) { updateLumpEditor(k); renderLumpGrid(); }   // an editor field changed
-  function addLumpSum(values) {                                           // + Add lump sum / Duplicate: the new row opens in the editor
+  function addLumpSum() {                                                 // + Add lump sum: the new row opens in the editor
     const k = lumpCount() + 1, range = lumpYearRange();
     FH.v.lumpCount = String(k);
-    setLumpValues(k, values || ["", "", String(range.from), "", "keep"]);
+    setLumpValues(k, ["", "", String(range.from), "", "keep"]);
     FH.lumpEdit = k; FH.lumpNew = k; FH.lumpUndo = null;
     dirty(); renderLumpSumTable(); updateLive();
     focusLump(`#fh-lumpLabel${k}`);
@@ -1607,7 +1607,6 @@ ${msMarkup(v, r)}</main></body></html>`;
       else if (b.id === "fh-incundo") undoDelete();
       else if (b.id === "fh-lumpadd") addLumpSum();
       else if (b.dataset.fhLumpEdit) editLump(Number(b.dataset.fhLumpEdit));
-      else if (b.dataset.fhLumpDuplicate) addLumpSum(lumpValues(Number(b.dataset.fhLumpDuplicate)));
       else if (b.dataset.fhLumpDelete) deleteLumpSum(Number(b.dataset.fhLumpDelete));
       else if (b.dataset.fhLumpDone) finishLump(Number(b.dataset.fhLumpDone));
       else if (b.dataset.fhLumpCancel) cancelLump(Number(b.dataset.fhLumpCancel));

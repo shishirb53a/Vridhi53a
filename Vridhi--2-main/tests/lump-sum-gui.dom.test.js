@@ -28,7 +28,7 @@ for (let n = $("lump"); n && n !== d.body; n = n.parentElement) n.removeAttribut
 ok(!$("lump-empty").hidden && $("lump-body").hidden, "empty state shown, grid hidden with zero rows");
 const yr = new w.Date().getFullYear();
 ok(!d.body.textContent.includes("Years available") && !d.body.textContent.includes("added to the general corpus"), "information lines are gone from the tab");
-ok([...d.querySelectorAll("#fh-lumptbl thead th")].map(h => h.textContent.trim().replace(/\s+/g, " ")).slice(0, 6).join("|") === "Label|Amount (\u20b9)|Year received|Income %|Yearly income (\u20b9) Auto|Principal", "short column headers");
+ok([...d.querySelectorAll("#fh-lumptbl thead th")].map(h => h.textContent.trim().replace(/\s+/g, " ")).slice(0, 6).join("|") === "Source|Amount|Year|ROI %|Annual Income (\u20b9)|Principal", "requested column headers");
 
 click("#fh-lumpadd");
 ok(rows() === 1 && $("lump-empty").hidden && !$("lump-body").hidden, "add: one row, empty state hidden");
@@ -56,10 +56,11 @@ ok(/Maturity/.test(rowText) && /10,00,000/.test(rowText) && /70,000/.test(rowTex
 ok(/10,00,000/.test($("lumptotal-amount").textContent) && /70,000/.test($("lumptotal-income").textContent), "totals row: " + $("lumptotal-amount").textContent + " / " + $("lumptotal-income").textContent);
 ok($("lump-warning").hidden, "no incomplete-row warning when complete");
 
-click('[data-fh-lump-duplicate="1"]');
-ok(rows() === 2 && !d.querySelector('[data-fh-lump-stream="2"]').hidden, "duplicate: row 2 added and its editor opens");
+click("#fh-lumpadd");
+ok(rows() === 2 && !d.querySelector('[data-fh-lump-stream="2"]').hidden, "add another: row 2 opens in its editor");
+ok([...$("lumpTreatment2").options].map(option => option.textContent).join("|") === "Keep|Withdraw", "principal options use Keep and Withdraw");
 click('[data-fh-lump-cancel="2"]');
-ok(rows() === 1, "cancel on a new/duplicated row drops it");
+ok(rows() === 1, "cancel on a new row drops it");
 
 click('[data-fh-lump-delete="1"]');
 ok(rows() === 0 && !$("lump-empty").hidden, "delete: row gone, empty state back");

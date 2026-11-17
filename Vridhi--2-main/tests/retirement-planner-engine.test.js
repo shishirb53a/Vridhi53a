@@ -12,7 +12,7 @@ const uiSource = fs.readFileSync(path.join(root, 'modules', 'retirement-planner'
 const reportCss = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'year-by-year.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=131"></script>');
-const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=155"></script>');
+const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=156"></script>');
 const bodyEnd = html.indexOf('</body>');
 assert.ok(moduleScript >= 0 && uiScript > moduleScript, 'Retirement Planner engine loads before its UI');
 assert.ok(!html.includes('<script id="fh-engine">'), 'Retirement Planner engine is no longer duplicated inline');
@@ -24,6 +24,13 @@ assert.ok(uiSource.includes('document.addEventListener("focusout"') && !uiSource
   'Amount formatting uses delegated focusout because the planner root is created on demand');
 assert.ok(uiSource.indexOf('data-fh-plan="lump"') > uiSource.indexOf('data-fh-plan="income"'), 'Lump Sum follows Income in Planning Period tabs');
 assert.ok(uiSource.includes('Principal is spent in the year received. No ongoing income.'), 'Spent principal explains that there is no ongoing income');
+assert.ok(!uiSource.includes('Lump sums are added to the general corpus'), 'Lump-sum explanatory text is removed');
+for (const label of ['title="Source">Source', 'title="Amount">Amount', 'title="Year">Year',
+  'title="ROI %">ROI %', 'title="Annual Income (\\u20b9)">Annual Income (\\u20b9)', 'title="Principal">Principal',
+  '>Keep</option>', '>Withdraw</option>'])
+  assert.ok(uiSource.includes(label), `Lump-sum table includes the requested label: ${label}`);
+assert.ok(!uiSource.includes('data-fh-lump-duplicate') && !uiSource.includes('fhLumpDuplicate'),
+  'Lump-sum rows no longer offer duplicate actions');
 for (const label of ['Serial No', 'Age at Year-End', 'Key Events', 'Monthly Household Expense', 'Annual Household Expense',
   'Total Expenses', 'Opening Corpus', 'Investment Interest', 'Emergency Fund Interest', 'Total Income', 'Closing Corpus', 'Funding Status',
   'Rental Income', 'Agriculture Income', ' Payout', 'Lump Sums Received', 'Lump Sums Spent', 'hz-expense', 'hz-income'])

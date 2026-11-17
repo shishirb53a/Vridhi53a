@@ -84,11 +84,11 @@
   const LUMP_PARTS = ["lumpLabel", "lumpAmount", "lumpYear", "lumpRate", "lumpTreatment"];
   FIELDS.push(
     F("lumpCount", "Lump sums", "0", 0, null, "", false, { integer: true, panel: "planning", sub: "lump" }),
-    F("lumpLabel1", "Lump sum label", "", 0, null, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "text" }),
-    F("lumpAmount1", "Lump sum amount (₹)", "", 0, null, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "rupees" }),
-    F("lumpYear1", "Year in which lump sum is received", "", 1900, 2200, "", false, { integer: true, panel: "planning", sub: "lump", lumpRow: 1, kind: "year" }),
-    F("lumpRate1", "Yearly income earned on the lump sum (%)", "", 0, 100, "", false, { panel: "planning", sub: "lump", lumpRow: 1, decimals: 2 }),
-    F("lumpTreatment1", "Principal treatment", "keep", 0, 1, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "choice", choices: ["keep", "spent"] }));
+    F("lumpLabel1", "Source", "", 0, null, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "text" }),
+    F("lumpAmount1", "Amount", "", 0, null, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "rupees" }),
+    F("lumpYear1", "Year", "", 1900, 2200, "", false, { integer: true, panel: "planning", sub: "lump", lumpRow: 1, kind: "year" }),
+    F("lumpRate1", "ROI %", "", 0, 100, "", false, { panel: "planning", sub: "lump", lumpRow: 1, decimals: 2 }),
+    F("lumpTreatment1", "Principal", "keep", 0, 1, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "choice", choices: ["keep", "spent"] }));
   const BY_ID = Object.fromEntries(FIELDS.map(f => [f.id, f]));
 
   const STEP_LABELS = { family: "Family", planning: "Planning Period", buckets: "Money Buckets", household: "Household",
