@@ -27,6 +27,22 @@ html body .fh-inctbl tbody th{font-weight:700;overflow-wrap:anywhere}
 html body .fh-inctbl tr.is-edit{background:color-mix(in srgb,var(--rpc,var(--ac,#2563eb)) 8%,transparent)}
 html body .fh-inctbl tr.is-bad td,html body .fh-inctbl tr.is-bad th{color:#be123c}
 html body .fh-inctbl tfoot th,html body .fh-inctbl tfoot td{font-weight:800;border-bottom:0}
+html body .fh-lumptw{overflow-x:auto;margin:8px 0}
+html body .fh-lumptbl{width:100%;min-width:920px;border-collapse:collapse;font-size:12px}
+html body .fh-lumptbl th,html body .fh-lumptbl td{padding:7px 5px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:middle}
+html body .fh-lumptbl thead th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--mu);line-height:1.2;vertical-align:bottom;white-space:normal}
+html body .fh-lumptbl input,html body .fh-lumptbl select{box-sizing:border-box;width:100%;min-width:88px;min-height:36px;padding:4px 7px;border:1px solid var(--bd);border-radius:8px;background:color-mix(in srgb,#facc15 12%,var(--card));color:var(--ac);font:inherit}
+html body .fh-lumptbl input:disabled{opacity:.7;cursor:not-allowed}
+html body .fh-lumptbl td.fh-lump-auto{min-width:112px;background:color-mix(in srgb,var(--mu) 12%,var(--card));color:var(--mu);font-weight:700;white-space:nowrap}
+html body .fh-lumptbl tfoot th,html body .fh-lumptbl tfoot td{font-weight:800;border-bottom:0}
+html body .fh-lumptbl tr.is-bad td{background:color-mix(in srgb,#be123c 7%,var(--card))}
+html body .fh-lumptbl tr.is-incomplete td{background:color-mix(in srgb,#f59e0b 7%,var(--card))}
+html body .fh-lumptbl .fh-err{display:block}
+html body .fh-lump-hint{display:block;min-height:0;margin-top:3px;color:var(--mu);font-size:11px}
+html body .fh-lump-warning{margin:6px 0;padding:8px 10px;border:1px solid color-mix(in srgb,#f59e0b 45%,var(--bd));border-radius:8px;color:#92400e;background:color-mix(in srgb,#f59e0b 10%,var(--card));font-size:12px}
+html body .fh-lumpsummary{margin:6px 0;padding-left:18px}
+html body .fh-lumpsummary li{margin:4px 0}
+html body .fh-lumpsummary small{display:block;color:var(--mu)}
 html body .fh-chk{font-size:11px;font-weight:800;text-transform:uppercase;border:1px solid #be123c;border-radius:99px;padding:1px 6px;margin-left:4px}
 html body .fh-act{white-space:nowrap;text-align:right}
 html body .fh-act button{min-height:36px;padding:3px 6px;margin-left:2px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font:inherit;font-weight:700;cursor:pointer}
@@ -45,6 +61,13 @@ html body .fh-edbtns .fh-sdone{background:var(--rpc,var(--ac,#2563eb));color:#ff
   html body .fh-inctbl tbody td[data-label]::before{content:attr(data-label);color:var(--mu);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
   html body .fh-inctbl tbody td.fh-act{justify-content:flex-end}
   html body .fh-inctbl tfoot tr{display:flex;justify-content:space-between;gap:10px}
+  html body .fh-lumptbl,html body .fh-lumptbl tbody,html body .fh-lumptbl tfoot{display:block;width:100%;min-width:0}
+  html body .fh-lumptbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  html body .fh-lumptbl tbody tr{display:block;border:1px solid var(--bd);border-radius:12px;margin-bottom:8px;padding:6px 8px}
+  html body .fh-lumptbl tbody td{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(0,1.2fr);gap:8px;border-bottom:0;padding:4px 0}
+  html body .fh-lumptbl tbody td[data-label]::before{content:attr(data-label);align-self:center;color:var(--mu);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  html body .fh-lumptbl tbody td.fh-act{display:flex;justify-content:flex-end}
+  html body .fh-lumptbl tfoot tr{display:flex;justify-content:space-between;gap:10px}
 }
 html body .fh-stream{border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:10px 0;background:var(--card)}
 html body .fh-sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}

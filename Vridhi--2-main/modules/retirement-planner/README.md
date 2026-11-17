@@ -7,6 +7,10 @@ Income sources added on Planning Period > Income are not capped at a fixed count
 shows each source as its own column, using the source name entered in the plan. Policy payouts are also
 shown in separate columns named for each policy. The report uses concise, descriptive column headers,
 and colors expense amounts red and received income green in both table and mobile views.
+Planning Period > Lump Sum records one-time general-corpus receipts. Kept principal earns its entered
+annual income starting the year after receipt, while principal grows at the plan portfolio return.
+Spent principal is shown as a same-year receipt and outflow, with no ongoing income. Incomplete rows
+are preserved and excluded from calculations; valid complete rows are included in the projection and report.
 The year-by-year table includes All Columns, Summary View, Income Breakdown, and Expense Breakdown
 presets. Each preset keeps the serial number, year, age, phase, and key events visible; the summary
 row shows totals only for columns configured as additive amounts in the active view.

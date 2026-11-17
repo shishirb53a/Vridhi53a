@@ -81,6 +81,14 @@
     F("incGrowth" + k, "Annual growth of this income (%)", "2", 0, 100, "Editable assumption.", true, { panel: "planning", sub: "income", stream: k, assumption: "growth" }),
     F("incFrom" + k, "Income from (year)", "", 1900, 2200, "", true, { integer: true, panel: "planning", sub: "income", stream: k, kind: "year" }),
     F("incTo" + k, "Income to (year)", "", 1900, 2200, "", true, { integer: true, panel: "planning", sub: "income", stream: k, kind: "year" }));
+  const LUMP_PARTS = ["lumpLabel", "lumpAmount", "lumpYear", "lumpRate", "lumpTreatment"];
+  FIELDS.push(
+    F("lumpCount", "Lump sums", "0", 0, null, "", false, { integer: true, panel: "planning", sub: "lump" }),
+    F("lumpLabel1", "Lump sum label", "", 0, null, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "text" }),
+    F("lumpAmount1", "Lump sum amount (₹)", "", 0, null, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "rupees" }),
+    F("lumpYear1", "Year in which lump sum is received", "", 1900, 2200, "", false, { integer: true, panel: "planning", sub: "lump", lumpRow: 1, kind: "year" }),
+    F("lumpRate1", "Yearly income earned on the lump sum (%)", "", 0, 100, "", false, { panel: "planning", sub: "lump", lumpRow: 1, decimals: 2 }),
+    F("lumpTreatment1", "Principal treatment", "keep", 0, 1, "", false, { panel: "planning", sub: "lump", lumpRow: 1, kind: "choice", choices: ["keep", "spent"] }));
   const BY_ID = Object.fromEntries(FIELDS.map(f => [f.id, f]));
 
   const STEP_LABELS = { family: "Family", planning: "Planning Period", buckets: "Money Buckets", household: "Household",
@@ -92,6 +100,10 @@
   const num = (inp, id) => Number(inp[id]);            // blank -> 0, as in the original
   const childCount = inp => num(inp, "children");
   const INCOME_PARTS = ["incName", "incAmt", "incGrowth", "incFrom", "incTo"];
+  const lumpSumCount = inp => {
+    const count = Number(inp.lumpCount);
+    return Number.isSafeInteger(count) && count >= 0 ? count : 0;
+  };
   const streamCount = inp => {
     const count = Number(inp.incomeCount);
     return Number.isSafeInteger(count) && count > 0 ? count : 1;
@@ -102,10 +114,18 @@
     const template = BY_ID[part + "1"];
     return Object.assign({}, template, { id: part + k, stream: k });
   };
+  const lumpSumField = (part, k) => {
+    const existing = BY_ID[part + k];
+    if (existing) return existing;
+    const template = BY_ID[part + "1"];
+    return Object.assign({}, template, { id: part + k, lumpRow: k });
+  };
   const fieldsFor = inp => {
     const fields = FIELDS.slice();
     for (let k = 6; k <= streamCount(inp); k++)
       for (const part of INCOME_PARTS) fields.push(incomeField(part, k));
+    for (let k = 2; k <= lumpSumCount(inp); k++)
+      for (const part of LUMP_PARTS) fields.push(lumpSumField(part, k));
     return fields;
   };
   const currency = x => Number.isFinite(x)
@@ -118,18 +138,22 @@
   const STAGE_NA = 5;
   function isNA(inp, c) { return String(inp["stage" + c]) === String(STAGE_NA); }
   const applies = (f, inp) => (f.child === null || f.child <= childCount(inp)) && !(f.child && isNA(inp, f.child) && /^(classToday|feeYears|annualFee|educationFund)[12]$/.test(f.id)) && (!f.gate || String(inp[f.gate]) === "1") &&
-    (!f.stream || (String(inp.incomeOn) === "1" && f.stream <= streamCount(inp)));
+    (!f.stream || (String(inp.incomeOn) === "1" && f.stream <= streamCount(inp))) && (!f.lumpRow || f.lumpRow <= lumpSumCount(inp));
 
   /* ---------- per-field validation (mirrors the HTML min / max / step / required rules) ---------- */
   function checkField(f, raw) {
-    if (f.kind === "year") return /^\d{4}$/.test(String(raw).trim()) && Number(raw) >= f.min && Number(raw) <= f.max ? null : "Enter a 4-digit year, for example 2030.";
+    if (f.kind === "year") return isBlank(raw) && !f.required ? null :
+      /^\d{4}$/.test(String(raw).trim()) && Number(raw) >= f.min && Number(raw) <= f.max ? null : "Enter a 4-digit year, for example 2030.";
     if (f.kind === "text") return String(raw == null ? "" : raw).length > 24 ? "Use up to 24 characters." : null;
+    if (f.kind === "choice") return isBlank(raw) || f.choices.includes(String(raw)) ? null : "Choose a listed option.";
     if (isBlank(raw)) return f.required ? "Please fill in this field." : null;
-    const n = Number(raw);
+    const n = f.kind === "rupees" ? Number(String(raw).replace(/,/g, "")) : Number(raw);
     if (!Number.isFinite(n)) return "Enter a number.";
     if (f.integer && !Number.isInteger(n)) return "Enter a whole number.";
     if (n < f.min) return "Value must be " + f.min + " or more.";
     if (f.max !== null && n > f.max) return "Value must be " + f.max + " or less.";
+    if (f.decimals && String(raw).includes(".") && String(raw).split(".")[1].length > f.decimals)
+      return `Use up to ${f.decimals} decimal places.`;
     return null;
   }
 
@@ -242,6 +266,7 @@
           issues.push({ field: t.field, step, kind: "timing", message: t.message, sub: null, child: t.child });
       }
     }
+    issues.push(...lumpSumTimingIssues(inp));
     return issues;
   }
   const validateStep = (inp, step) => validateAll(inp).filter(i => i.step === step);
@@ -311,6 +336,61 @@
   let clock = () => new Date();
   const nowYear = () => clock().getFullYear();
   const yearOf = x => { const t = String(x == null ? "" : x).trim(); if (!/^\d{4}$/.test(t)) return null; const n = Number(t); return n >= 1900 && n <= 2200 ? n : null; };
+  function lumpSumWindow(inp, currentYear) {
+    const cy = currentYear || nowYear(), span = !isBlank(inp.age) && !isBlank(inp.until) ? Math.max(0, num(inp, "until") - num(inp, "age")) : 0;
+    return { from: cy + 1, to: cy + span };
+  }
+  function lumpSumRows(inp) {
+    const { from, to } = lumpSumWindow(inp), rows = [];
+    for (let k = 1; k <= lumpSumCount(inp); k++) {
+      const amountRaw = inp["lumpAmount" + k], yearRaw = inp["lumpYear" + k], rateRaw = inp["lumpRate" + k];
+      const amount = isBlank(amountRaw) ? NaN : Number(String(amountRaw).replace(/,/g, ""));
+      const year = yearOf(yearRaw), rate = isBlank(rateRaw) ? NaN : Number(rateRaw);
+      const treatment = String(inp["lumpTreatment" + k] || "keep");
+      const complete = !isBlank(amountRaw) && !isBlank(yearRaw) && !isBlank(rateRaw);
+      const fieldIssues = LUMP_PARTS.map(part => {
+        const f = lumpSumField(part, k), raw = inp[f.id];
+        return isBlank(raw) ? null : checkField(f, raw);
+      });
+      rows.push({ k, label: String(inp["lumpLabel" + k] || "").trim(), amount, year, rate, treatment, complete,
+        valid: complete && fieldIssues.every(x => !x) && year !== null && year >= from && year <= to && (treatment !== "spent" || rate === 0),
+        outsidePlan: year !== null && (year < from || year > to),
+        income: treatment === "keep" && Number.isFinite(amount) && Number.isFinite(rate) ? amount * rate / 100 : 0 });
+    }
+    return rows;
+  }
+  function lumpSumTimingIssues(inp) {
+    const { from, to } = lumpSumWindow(inp), out = [];
+    for (const row of lumpSumRows(inp)) {
+      if (row.complete && row.outsidePlan) out.push({ field: "lumpYear" + row.k, step: "planning", kind: "timing",
+        message: `Choose a year from ${from} to ${to}, within the planning period.`, sub: "lump", child: null });
+      if (row.treatment === "spent" && Number.isFinite(row.rate) && row.rate !== 0)
+        out.push({ field: "lumpRate" + row.k, step: "planning", kind: "rule",
+          message: "Spent principal must have a 0% income rate.", sub: "lump", child: null });
+    }
+    return out;
+  }
+  const lumpSumStreams = inp => lumpSumRows(inp).filter(row => row.valid);
+  const lumpSumSummary = inp => {
+    const rows = lumpSumRows(inp), included = rows.filter(row => row.valid);
+    return { rows, count: included.length, principal: included.reduce((sum, row) => sum + row.amount, 0),
+      annualIncome: included.reduce((sum, row) => sum + row.income, 0) };
+  };
+  function lumpSumCashFlow(rows, year, cy) {
+    let received = 0, spent = 0, income = 0;
+    const incomeBySource = {};
+    for (const row of rows) {
+      if (row.year === cy + year) {
+        received += row.amount;
+        if (row.treatment === "spent") spent += row.amount;
+      }
+      if (row.treatment === "keep" && cy + year > row.year) {
+        income += row.income;
+        incomeBySource[row.k] = row.income;
+      }
+    }
+    return { received, spent, income, incomeBySource };
+  }
   /* the default window for a new stream: the first plan year to the last one */
   function incomeWindow(inp) {
     const cy = nowYear(), span = !isBlank(inp.age) && !isBlank(inp.until) ? Math.max(1, num(inp, "until") - num(inp, "age")) : 1;
@@ -405,10 +485,11 @@
   }
 
   /* One simulation behind plan(), schedule(), horizonReport() and the earning credit, so they cannot disagree.
-     Row y (1..years): spending parts, other income, reserve interest, the pool (P) and the savings fund (S). */
+     Row y (1..years): spending parts, income, lump-sum receipts/outflows, reserve interest, the pool (P) and savings fund (S). */
   function simulate(inp, noEarn) {
     const years = num(inp, "until") - num(inp, "age"), rate = num(inp, "roi") / 100, reserve = num(inp, "buffer"), kids = childCount(inp);
     const cy = nowYear(), extra = extraStreams(cy), sources = incomeStreams(inp), streams = sources.concat(extra);
+    const lumpSums = lumpSumStreams(inp);
     const R = noEarn ? 0 : earningYears(inp), E = R ? num(inp, "preEarn") : 0, g = R ? num(inp, "preRoi") / 100 : 0, age = num(inp, "age");
     let P = num(inp, "corpus") - reserve, S = 0;
     const today = []; let todayTotal = 0;
@@ -417,7 +498,8 @@
     for (let year = 1; year <= years; year++) {
       const reduction = age + year > num(inp, "reduceAge") ? 1 - num(inp, "reducePercent") / 100 : 1;
       const house = 12 * num(inp, "monthly") * (1 + num(inp, "houseInflation") / 100) ** (year - 1 + FIRST_YEAR_INFLATION) * reduction;
-      const income = incomeIn(streams, year, cy), policy = incomeIn(extra, year, cy);   // policy = the part of income that is policy payouts
+      const lump = lumpSumCashFlow(lumpSums, year, cy);
+      const income = incomeIn(streams, year, cy) + lump.income, policy = incomeIn(extra, year, cy);   // policy = the part of income that is policy payouts
       const incomeBySource = Object.fromEntries(sources.map(s => [s.k, incomeIn([s], year, cy)]));
       const policyBySource = Object.fromEntries(extra.map(s => [s.k, incomeIn([s], year, cy)]));
       const reserveYield = reserve * num(inp, "bufferRoi") / 100;
@@ -434,11 +516,12 @@
       const cash = S + interestS + earn, used = earning ? Math.min(cash, O) : 0;   // spending paid by earnings + savings fund
       let endS = earning ? cash - used : 0;
       const draw = O - used;                                                       // spending paid by the corpus
-      P = P * (1 + rate) + income + reserveYield - draw;
+      P = P * (1 + rate) + income + lump.received - lump.spent + reserveYield - draw;
       let merged = 0;
       if (R > 0 && year === R) { merged = endS; P += endS; endS = 0; }
       S = endS;
-      rows.push({ y: year, age: age + year, earning, house, fee, wed, O, income, incomeBySource, policyBySource, policy, reserveYield, earn, used, draw, startP, interestP, endP: P,
+      rows.push({ y: year, age: age + year, earning, house, fee, wed, O, income, incomeBySource, lumpIncomeBySource: lump.incomeBySource,
+        lumpReceived: lump.received, lumpSpent: lump.spent, policyBySource, policy, reserveYield, earn, used, draw, startP, interestP, endP: P,
         startS, interestS, endS: earning && merged ? merged : endS, merged, total: P + S, reduction });
     }
     return { rows, startPool, today, todayTotal, R, reserve };
@@ -448,7 +531,7 @@
      • Spendable pool starts at corpus − emergency reserve.
      • Weddings due today (0 years) are paid immediately.
      • Household, college fees and other income are inflated from year 1 (see FIRST_YEAR_INFLATION).
-     • Each year: pool × (1 + return) + other income + reserve interest
+     • Each year: pool × (1 + return) + other income + reserve interest + lump-sum receipt − amount spent
                   − household − college fees − weddings due that year   (earnings pay these first while the earning phase runs).
      • The reserve principal is never spent; it is added back after the final year. */
   function plan(inp, noEarn) {
@@ -458,7 +541,7 @@
     let housePV = 0, interestPV = 0, runout = null;
     if (sim.startPool < 0) runout = num(inp, "age");
     for (const r of sim.rows) {
-      housePV += (r.house - r.income) / (1 + rate) ** r.y;
+      housePV += (r.house - r.income - (r.lumpReceived - r.lumpSpent)) / (1 + rate) ** r.y;
       interestPV += r.reserveYield / (1 + rate) ** r.y;
       if (runout === null && r.total < 0) runout = r.age;
     }
@@ -469,8 +552,8 @@
 
   /* ---------- year-by-year schedule (same arithmetic as plan(); used by the Plan Simulation table) ----------
      Row 0 is today (weddings due today are paid). Each later row is one year-end:
-       money in  = portfolio growth + other income + reserve interest (+ earnings and savings-fund interest while earning)
-       money out = household + college fees + weddings due that year   (a negative growth is shown under money out)
+       money in  = portfolio growth + other income + reserve interest + lump-sum receipts (+ earnings and savings-fund interest while earning)
+       money out = household + college fees + weddings due that year + lump-sum principal spent (negative growth is also shown under money out)
      bal is the spendable money after the year (pool + savings fund), exactly as in plan(). */
   function schedule(inp, toAge, opts) {
     const currentYear = (opts && opts.currentYear) || new Date().getFullYear();
@@ -483,8 +566,8 @@
     };
     const rows = [mk(age, currentYear, 0, sim.todayTotal, sim.startPool, 0, sim.R > 0 ? "earning" : "retired")];
     for (const r of sim.rows.slice(0, years)) {
-      rows.push(mk(r.age, currentYear + r.y, Math.max(r.interestP, 0) + r.interestS + r.earn + r.income + r.reserveYield,
-        r.O + Math.max(-r.interestP, 0), r.total, r.house, r.earning ? "earning" : "retired"));
+      rows.push(mk(r.age, currentYear + r.y, Math.max(r.interestP, 0) + r.interestS + r.earn + r.income + r.reserveYield + r.lumpReceived,
+        r.O + Math.max(-r.interestP, 0) + r.lumpSpent, r.total, r.house, r.earning ? "earning" : "retired"));
     }
     return rows;
   }
@@ -493,7 +576,7 @@
      toAge == null -> the amounts set aside today. Otherwise each purpose is carried forward with its own flows:
        household bucket: grows, pays household spending, receives other income and reserve interest
        college / wedding buckets: grow, pay their own fees / weddings   (weddings due today are paid at once)
-       reserve: principal stays;  growth engine: grows only.
+       reserve: principal stays; growth engine: grows and receives general, unearmarked lump-sum principal.
      The values add up to schedule(inp, toAge) closing balance + reserve, so the chart agrees with the table. A negative
      value means that purpose is underfunded at that age. */
   function bucketsAt(inp, toAge, opts) {
@@ -511,7 +594,7 @@
       let cover = r.used; const take = need => { const t = Math.min(cover, need); cover -= t; return t; };
       const hPaid = take(r.house);
       house = house * (1 + rate) + r.income + r.reserveYield - (r.house - hPaid);
-      grow = grow * (1 + rate);
+      grow = grow * (1 + rate) + r.lumpReceived - r.lumpSpent;
       for (let c = 1; c <= kids; c++) {
         const fPaid = take(r.fee[c]), wPaid = take(r.wed[c]);
         edu[c] = edu[c] * (1 + rate) - (r.fee[c] - fPaid); wed[c] = wed[c] * (1 + rate) - (r.wed[c] - wPaid);
@@ -528,12 +611,12 @@
 
   /* ---------- Horizon Report: every plan year in full (same arithmetic as plan() and schedule()) ----------
      Money here is the spendable pool (corpus minus the emergency reserve, whose principal is never spent).
-     end = start + money in - money out, where money in = interest on the pool + interest on the reserve + other income.
+     end = start + money in - money out, where money in also includes lump-sum principal receipts and the existing other-income flow.
      A "Today" row is added only when a wedding falls due today. Child columns are arrays indexed by child (1..kids). */
   function horizonReport(inp, opts) {
     const currentYear = (opts && opts.currentYear) || new Date().getFullYear();
     const age = num(inp, "age"), years = num(inp, "until") - age, kids = childCount(inp), cutP = num(inp, "reducePercent");
-    const streams = incomeStreams(inp).concat(extraStreams(nowYear())), sim = simulate(inp), R = sim.R, retireAge = R > 0 ? num(inp, "retire") : null;
+    const streams = incomeStreams(inp).concat(extraStreams(nowYear())), lumpSums = lumpSumStreams(inp), sim = simulate(inp), R = sim.R, retireAge = R > 0 ? num(inp, "retire") : null;
     let pool = sim.startPool, seenNeg = false;
     const status = bal => { if (bal >= 0) return "Funded"; const s = seenNeg ? "Shortfall" : "Runs out"; seenNeg = true; return s; };
     const rows = [], zero = () => new Array(kids + 1).fill(0);
@@ -557,7 +640,12 @@
       if (R > 0 && r.y === R) { ev.push(`Retires at ${retireAge}`); if (r.merged > 0) ev.push("Savings fund moves into the corpus"); }
       if (cutP > 0 && r.age === num(inp, "reduceAge") + 1) ev.push(`Household spending drops ${cutP}%`);
       for (const e of incomeEvents(streams, r.y, years, nowYear())) ev.push(e);
-      const interest = r.startP * (num(inp, "roi") / 100), moneyIn = interest + r.reserveYield + r.income;
+      for (const lump of lumpSums) {
+        const label = lump.label || `Lump sum ${lump.k}`;
+        if (lump.year === nowYear() + r.y) ev.push(`${label} received${lump.treatment === "spent" ? " and spent" : ""}`);
+        if (lump.treatment === "keep" && lump.year + 1 === nowYear() + r.y) ev.push(`${label} income starts`);
+      }
+      const interest = r.startP * (num(inp, "roi") / 100), moneyIn = interest + r.reserveYield + r.income + r.lumpReceived;
       pool = r.endP;
       const st = status(r.total);
       if (st === "Runs out") ev.push("Money runs out");
@@ -565,7 +653,8 @@
       const plain = ev.length === 1 && r.earning ? ev[0] : ev.length ? ev.join(" · ") : "Regular year";
       rows.push({ today: false, year: currentYear + r.y, age: r.age, phase: r.earning ? "Earning" : "Retired", what: plain, monthly: r.house / 12, house: r.house,
         fee: r.fee, wed: r.wed, spent: r.O, start: r.startP, interest, reserveInterest: r.reserveYield, income: r.income,
-        incomeBySource: r.incomeBySource, policyBySource: r.policyBySource, policy: r.policy, moneyIn, end: r.endP, status: st,
+        incomeBySource: r.incomeBySource, lumpIncomeBySource: r.lumpIncomeBySource, lumpReceived: r.lumpReceived,
+        lumpSpent: r.lumpSpent, policyBySource: r.policyBySource, policy: r.policy, moneyIn, end: r.endP, status: st,
         earn: r.earn, netSaved: r.earning ? r.earn - r.O : 0, startS: r.startS, interestS: r.interestS, endS: r.merged ? r.merged : r.endS, merged: r.merged,
         paidByEarn: r.used, fromCorpus: r.draw });
     }
@@ -625,6 +714,7 @@
   }
 
   root.FreedomHorizon = { defaultAllocation, defaultAllocationPercents, schedule, bucketsAt, horizonReport, FIELDS, BY_ID, STEP_LABELS, defaults, stepsFor, isBlank, currency,
-    checkField, incomeField, growthEngine, moneyRule, planningRule, bucketsRule, incomeSummary, timingIssues, validateAll, validateStep,
+    checkField, incomeField, lumpSumField, lumpSumCount, lumpSumWindow, lumpSumRows, lumpSumStreams, lumpSumSummary,
+    growthEngine, moneyRule, planningRule, bucketsRule, incomeSummary, timingIssues, validateAll, validateStep,
     isNA, STAGE_NA, collegeCost, weddingCost, weddingYear, weddingAgeOf, weddingYearsFromAge, educationYear, incomeStreams, incomeWindow, policyStreams, policyNow, withoutPolicy, setClock: fn => { clock = typeof fn === "function" ? fn : () => new Date(); }, horizonText, plan, calculate, earningYears, earningSummary, simulate };
 })(typeof window !== "undefined" ? window : globalThis);
