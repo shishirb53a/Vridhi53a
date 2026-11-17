@@ -12,7 +12,7 @@
 
   /* Working copy of the inputs lives in FH.v. It is persisted only by Finish, inside Vriddhi's own state
      object (S.fh) via the app's save(), so it follows the same per-user storage and cloud sync as holdings. */
-  const FH = { v: null, step: "family", house: "expenses", plan: "ready", incEdit: 0, incNew: 0, incUndo: null, sel: { college: 1, weddings: 1 }, sig: "",
+  const FH = { v: null, step: "family", house: "expenses", plan: "ready", incEdit: 0, incNew: 0, incUndo: null, lumpEdit: 0, lumpNew: 0, lumpUndo: null, sel: { college: 1, weddings: 1 }, sig: "",
     sec: "status", mode: "wizard", doneAt: 0, defAlloc: false, smTab: "buckets", lumpRange: "" };
   const initValues = () => { FH.v = {}; for (const f of FHE.FIELDS) FH.v[f.id] = String(f.initial); FH.defAlloc = false; };
   function ensureIncomeValues() {
@@ -244,12 +244,17 @@
       `<tbody id="fh-inctbody"></tbody><tfoot><tr><th scope="row" colspan="1" title="Annual income of all sources, in today\u2019s money">Total a year</th><td id="fh-inctot" colspan="5"></td></tr></tfoot></table></div>` +
       `<button type="button" id="fh-incadd" class="fh-addstream">+ Add income source</button><div id="fh-inc-editors"></div></div></div>`;
   };
-  const lumpSumCard = () => `<div class="hs fh-lump" id="fh-lump"><p class="hh">Lump sums are added to the general corpus in the year received. Keep invested amounts earn the entered income from the following year; principal grows at the plan\u2019s portfolio return.</p>` +
+  /* Lump Sum tab: same pattern as the Income tab. A read-only grid (Edit / Duplicate / Delete on each row, + Add lump sum below) and one editor that opens for the row being added or edited. */
+  const lumpSumCard = () => `<div class="hs fh-lump" id="fh-lump"><p class="hh">Lump sums are added to the general corpus in the year received. Keep invested amounts earn the entered income from the following year; principal grows at the plan\u2019s portfolio return. Spent amounts leave the corpus in the year received and earn nothing.</p>` +
+    `<p class="hh fh-lump-range" id="fh-lump-range"></p>` +
     `<p class="fh-lump-warning" id="fh-lump-warning" role="status" hidden></p>` +
-    `<div class="fh-lumptw"><table class="fh-lumptbl" id="fh-lumptbl"><caption class="fh-sr">Lump sums</caption>` +
-    `<thead><tr><th scope="col">Label (optional)</th><th scope="col">Lump sum amount (\u20b9)</th><th scope="col">Year in which lump sum is received</th><th scope="col">Yearly income earned on the lump sum (%)</th><th scope="col">Yearly income from the lump sum (\u20b9)</th><th scope="col">Principal treatment</th><th scope="col"><span class="fh-sr">Actions</span></th></tr></thead>` +
-    `<tbody id="fh-lumptbody"></tbody><tfoot><tr><th scope="row">Totals</th><td id="fh-lumptotal-amount"></td><td>\u2014</td><td>\u2014</td><td id="fh-lumptotal-income"></td><td colspan="2"></td></tr></tfoot></table></div>` +
-    `<button type="button" id="fh-lumpadd" class="fh-addstream">+ Add lump sum</button></div>`;
+    `<div id="fh-lump-undo" class="fh-incundo" role="status" hidden></div>` +
+    `<div class="fh-lump-empty" id="fh-lump-empty"><b>No lump sums yet</b><span>Add a one-time receipt such as a maturity payout, bonus or property sale.</span></div>` +
+    `<div id="fh-lump-body" hidden><div class="fh-lumptw"><table class="fh-lumptbl" id="fh-lumptbl"><caption class="fh-sr">Lump sums</caption>` +
+    `<colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"><col class="c6"><col class="c7"></colgroup>` +
+    `<thead><tr><th scope="col">Label (optional)</th><th scope="col">Lump sum amount (\u20b9)</th><th scope="col">Year in which lump sum is received</th><th scope="col">Yearly income earned on the lump sum (%)</th><th scope="col">Yearly income from the lump sum (\u20b9) <span class="fh-auto-chip" title="Calculated automatically: amount \u00d7 yearly income %">Auto</span></th><th scope="col">Principal treatment</th><th scope="col"><span class="fh-sr">Actions</span></th></tr></thead>` +
+    `<tbody id="fh-lumptbody"></tbody><tfoot><tr><th scope="row">Totals</th><td id="fh-lumptotal-amount"></td><td class="fh-lump-skip">\u2014</td><td class="fh-lump-skip">\u2014</td><td id="fh-lumptotal-income"></td><td class="fh-lump-skip" colspan="2"></td></tr></tfoot></table></div></div>` +
+    `<button type="button" id="fh-lumpadd" class="fh-addstream">+ Add lump sum</button><div id="fh-lump-editors"></div></div>`;
   const grid = pred => `<div class="hg">${FHE.FIELDS.filter(pred).map(fieldHTML).join("")}</div>`;
   const section = (title, ic, inner) => `<section class="hs" data-ic="${ic}"><h3>${title}</h3>${inner}</section>`;
   // The expand/collapse component first used on the Family tab; reused wherever an explanation is needed.
@@ -275,7 +280,7 @@
     stat("Money available today", `<b id="fh-${p}available">—</b>`) + stat("Surplus / (shortfall)", `<b id="fh-${p}diff">—</b>`) +
     stat("When does the money run out?", `<b id="fh-${p}runout">—</b>`) + "</div>";
 
-  const HOW = "Run-out is estimated at the end of the first plan year in which the spendable balance becomes negative; an expense due today is checked first. The spendable corpus earns the assumed portfolio return, then receives regular income and reserve interest and pays that year's household, education and wedding bills. The emergency reserve is not spendable during the plan; its principal is unavailable for spending and returns only at the end of the final plan year. This is a year-end approximation, not a precise day or month. Retirement age is informational. The pre-retirement earning phase inputs are saved with the plan but are not yet part of the projection. Taxes, SIPs, lump sums and market volatility are not modeled. All returns and inflation rates are assumptions and are not guaranteed.";
+  const HOW = "Run-out is estimated at the end of the first plan year in which the spendable balance becomes negative; an expense due today is checked first. The spendable corpus earns the assumed portfolio return, then receives regular income and reserve interest and pays that year's household, education and wedding bills. The emergency reserve is not spendable during the plan; its principal is unavailable for spending and returns only at the end of the final plan year. This is a year-end approximation, not a precise day or month. Retirement age is informational. The pre-retirement earning phase inputs are saved with the plan but are not yet part of the projection. Taxes, SIPs and market volatility are not modeled. One-time lump sums entered on Planning Period > Lump Sum are included: kept principal stays in the corpus and earns the entered income from the following year, and spent principal leaves the corpus in the year received. All returns and inflation rates are assumptions and are not guaranteed.";
 
   // The detailed results. `p` is an id prefix so the wizard's Result tab ("") and the Financial Freedom Summary ("sm-") can coexist.
   const detailHTML = p => `<div id="fh-${p}detail">` +
@@ -492,8 +497,12 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
   }
 
   const LUMP_PARTS = ["lumpLabel", "lumpAmount", "lumpYear", "lumpRate", "lumpTreatment"];
+  const LUMP_SPENT_TIP = "Principal is spent in the year received. No ongoing income.";
   const lumpCount = () => FHE.lumpSumCount(FH.v);
   const lumpFieldError = (part, k) => FHE.checkField(FHE.lumpSumField(part, k), FH.v[part + k]);
+  const lumpName = k => String(FH.v["lumpLabel" + k] || "").trim() || "Lump sum " + k;
+  const lumpMoney = x => String(typeof cr === "function" ? cr(x) : FHE.currency(x)).replace("\u20b9 ", "\u20b9");
+  const lumpSpent = k => String(FH.v["lumpTreatment" + k]) === "spent";
   const indianAmount = raw => {
     if (FHE.isBlank(raw)) return "";
     const n = Number(String(raw == null ? "" : raw).replace(/,/g, ""));
@@ -509,119 +518,164 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
   }
   function lumpValues(k) { return LUMP_PARTS.map(part => FH.v[part + k]); }
   function setLumpValues(k, values) { LUMP_PARTS.forEach((part, i) => { FH.v[part + k] = String(values[i] == null ? "" : values[i]); }); }
-  function lumpRowStatus(k, row) {
-    const errors = [];
+  const focusLump = sel => { const el = root.querySelector(sel); if (el) el.focus(); };
+
+  /* Field problems for one row: { part: message }. Used by the editor (shown under each field) and by the grid (Check pill). */
+  function lumpIssues(k, row) {
+    const out = {};
     for (const part of LUMP_PARTS) {
-      const id = part + k;
       let message = lumpFieldError(part, k);
       if (part === "lumpYear" && row.outsidePlan) {
         const range = lumpYearRange();
         message = `Choose a year from ${range.from} to ${range.to}, within the planning period.`;
       }
-      setErr(id, message || "");
-      if (message) errors.push(message);
+      if (message) out[part] = message;
     }
-    const tr = root.querySelector(`[data-fh-lump-row="${k}"]`);
-    const hint = root.querySelector(`[data-fh-lump-hint="${k}"]`);
-    if (tr) {
-      tr.classList.toggle("is-bad", errors.length > 0);
-      tr.classList.toggle("is-incomplete", !row.complete && errors.length === 0);
-    }
-    if (hint) hint.textContent = errors.length ? "Check this row." : !row.complete ? "Incomplete row \u2014 ignored in calculations." : "";
+    return out;
   }
-  function updateLumpTotals() {
-    const summary = FHE.lumpSumSummary(FH.v);
-    const annualIncome = summary.rows.reduce((total, row) => {
-      const amountOK = !FHE.isBlank(FH.v["lumpAmount" + row.k]) && !lumpFieldError("lumpAmount", row.k);
-      const rateOK = !FHE.isBlank(FH.v["lumpRate" + row.k]) && !lumpFieldError("lumpRate", row.k);
-      return total + (amountOK && rateOK && Number.isFinite(row.income) ? row.income : 0);
-    }, 0);
-    const principal = $("lumptotal-amount"), income = $("lumptotal-income");
-    if (principal) principal.textContent = FHE.currency(summary.rows.reduce((total, row) => total + (Number.isFinite(row.amount) && row.amount >= 0 ? row.amount : 0), 0));
-    if (income) income.textContent = FHE.currency(annualIncome);
+  function lumpIncomeText(k, row) {
+    if (lumpSpent(k)) return lumpMoney(0);
+    const has = !FHE.isBlank(FH.v["lumpAmount" + k]) && !FHE.isBlank(FH.v["lumpRate" + k]);
+    return has && Number.isFinite(row.income) ? lumpMoney(row.income) : "\u2014";
   }
-  function updateLumpRow(k) {
-    const tr = root.querySelector(`[data-fh-lump-row="${k}"]`), output = tr && tr.querySelector("[data-fh-lump-income]"), rate = $("lumpRate" + k);
-    const treatment = $("lumpTreatment" + k), spent = String(FH.v["lumpTreatment" + k]) === "spent";
-    if (spent && String(FH.v["lumpRate" + k]) !== "0") {
-      FH.v["lumpRate" + k] = "0";
-      if (rate) rate.value = "0";
-    }
+  function lumpEditorHTML(k) {
+    const id = part => "fh-" + part + k, err = part => `<small class="er fh-err" id="${id(part)}-e" role="alert"></small>`;
+    const field = (part, label, required, control) => `<div class="hf1"><label for="${id(part)}">${label}${required ? ' <span aria-hidden="true">*</span>' : " (optional)"}</label>${control}${err(part)}</div>`;
+    const d = part => `data-fh-lump="${part}${k}" aria-describedby="${id(part)}-e"`;
+    return `<div class="fh-stream fh-lump-stream" data-fh-lump-stream="${k}" hidden><div class="fh-sh"><b data-fh-lump-edtitle="${k}">Edit lump sum ${k}</b>` +
+      `<span class="fh-edbtns"><button type="button" class="fh-sdone" data-fh-lump-done="${k}">Done</button><button type="button" class="fh-scancel" data-fh-lump-cancel="${k}" hidden>Cancel</button></span></div>` +
+      `<div class="hg">` +
+      field("lumpLabel", "Label", false, `<input id="${id("lumpLabel")}" ${d("lumpLabel")} type="text" maxlength="24" autocomplete="off" value="${esc(FH.v["lumpLabel" + k] || "")}">`) +
+      field("lumpAmount", "Lump sum amount (\u20b9)", true, `<input id="${id("lumpAmount")}" ${d("lumpAmount")} type="text" inputmode="decimal" autocomplete="off" value="${esc(indianAmount(FH.v["lumpAmount" + k]))}">`) +
+      field("lumpYear", "Year in which lump sum is received", true, `<select id="${id("lumpYear")}" ${d("lumpYear")}>${lumpYearOptions(FH.v["lumpYear" + k])}</select>`) +
+      field("lumpRate", "Yearly income earned on the lump sum (%)", true, `<input id="${id("lumpRate")}" ${d("lumpRate")} type="number" min="0" max="100" step="0.01" inputmode="decimal" value="${esc(FH.v["lumpRate" + k] || "")}">`) +
+      field("lumpTreatment", "Principal treatment", true, `<select id="${id("lumpTreatment")}" ${d("lumpTreatment")}><option value="keep"${lumpSpent(k) ? "" : " selected"}>Keep invested</option><option value="spent"${lumpSpent(k) ? " selected" : ""}>Spent</option></select>`) +
+      `</div><p class="fh-lump-calc"><span>Yearly income from the lump sum (\u20b9)</span><b data-fh-lump-calc="${k}">\u2014</b><span class="fh-auto-chip" title="Calculated automatically: amount \u00d7 yearly income %">Auto</span></p>` +
+      `<small class="fh-lump-hint" data-fh-lump-hint="${k}"></small></div>`;
+  }
+  /* Keeps one editor in step with its values: Spent forces and locks the rate at 0, the auto income updates, field messages show. */
+  function updateLumpEditor(k) {
+    const spent = lumpSpent(k), rate = $("lumpRate" + k), treatment = $("lumpTreatment" + k);
+    if (spent && String(FH.v["lumpRate" + k]) !== "0") { FH.v["lumpRate" + k] = "0"; if (rate) rate.value = "0"; }
+    if (rate) { rate.disabled = spent; rate.title = spent ? LUMP_SPENT_TIP : ""; }
+    if (treatment) treatment.title = spent ? LUMP_SPENT_TIP : "";
     const row = FHE.lumpSumRows(FH.v).find(item => item.k === k);
     if (!row) return;
-    if (rate) {
-      rate.disabled = spent;
-      rate.title = spent ? "Principal is spent in the year received. No ongoing income." : "";
-    }
-    if (treatment) treatment.title = spent ? "Principal is spent in the year received. No ongoing income." : "";
-    if (output) {
-      const hasIncomeInputs = !FHE.isBlank(FH.v["lumpAmount" + k]) && !FHE.isBlank(FH.v["lumpRate" + k]);
-      output.textContent = spent ? FHE.currency(0) : hasIncomeInputs && Number.isFinite(row.income) ? FHE.currency(row.income) : "\u2014";
-      output.title = spent ? "Principal is spent in the year received. No ongoing income." : "";
-    }
-    lumpRowStatus(k, row);
-    const warning = $("lump-warning"), incomplete = FHE.lumpSumRows(FH.v).filter(item => !item.complete).length;
-    if (warning) {
-      warning.hidden = incomplete === 0;
-      warning.textContent = incomplete ? `${incomplete} incomplete row${incomplete === 1 ? "" : "s"} will be ignored in calculations.` : "";
-    }
-    updateLumpTotals();
+    const calc = root.querySelector(`[data-fh-lump-calc="${k}"]`);
+    if (calc) { calc.textContent = lumpIncomeText(k, row); calc.title = spent ? LUMP_SPENT_TIP : ""; }
+    const issues = lumpIssues(k, row);
+    for (const part of LUMP_PARTS) setErr(part + k, issues[part] || "");
+    const hint = root.querySelector(`[data-fh-lump-hint="${k}"]`);
+    if (hint) hint.textContent = Object.keys(issues).length ? "Check this row." : !row.complete ? "Incomplete row \u2014 ignored in calculations until all required fields are filled." : "";
   }
-  function renderLumpSumTable() {
-    const tbody = $("lumptbody");
-    if (!tbody) return;
-    const range = lumpYearRange(), signature = `${range.from}:${range.to}`;
-    FH.lumpRange = signature;
+  function lumpRowHTML(k, row) {
+    const errs = Object.keys(lumpIssues(k, row)).length, spent = lumpSpent(k), nm = lumpName(k);
+    const cell = (label, v) => `<td data-label="${label}">${v === "" || v == null ? "\u2014" : esc(String(v))}</td>`;
+    const pill = errs ? ' <span class="fh-chk">Check</span>' : !row.complete ? ' <span class="fh-chk fh-chk-warn">Incomplete</span>' : "";
+    const cls = ((k === FH.lumpEdit ? "is-edit" : "") + (errs ? " is-bad" : !row.complete ? " is-incomplete" : "")).trim();
+    return `<tr class="${cls}" data-fh-lump-row="${k}"><th scope="row" data-label="Label">${esc(nm)}${pill}</th>` +
+      cell("Lump sum amount", Number.isFinite(row.amount) ? lumpMoney(row.amount) : "") + cell("Year received", FH.v["lumpYear" + k]) +
+      cell("Yearly income rate", FHE.isBlank(FH.v["lumpRate" + k]) ? "" : FH.v["lumpRate" + k] + "%") +
+      `<td data-label="Yearly income (auto)" class="fh-lump-auto"${spent ? ` title="${LUMP_SPENT_TIP}"` : ""}>${lumpIncomeText(k, row)}</td>` +
+      cell("Principal treatment", spent ? "Spent" : "Keep invested") +
+      `<td class="fh-act"><button type="button" data-fh-lump-edit="${k}" aria-label="Edit ${esc(nm)}">Edit</button><button type="button" data-fh-lump-duplicate="${k}" aria-label="Duplicate ${esc(nm)}">Duplicate</button>` +
+      `<button type="button" class="d" data-fh-lump-delete="${k}" aria-label="Delete ${esc(nm)}">Delete</button></td></tr>`;
+  }
+  function renderLumpGrid() {
+    const tb = $("lumptbody"); if (!tb) return;
     const count = lumpCount(), rows = FHE.lumpSumRows(FH.v);
-    tbody.innerHTML = Array.from({ length: count }, (_, index) => {
-      const k = index + 1, row = rows[index], label = FH.v["lumpLabel" + k] || "";
-      const id = part => "fh-" + part + k;
-      const input = (part, aria, type = "text", attrs = "") => `<input id="${id(part)}" data-fh-lump="${part}${k}" type="${type}" value="${esc(FH.v[part + k] || "")}" aria-label="${aria}"${attrs} aria-describedby="${id(part)}-e">`;
-      const error = part => `<small class="er fh-err" id="${id(part)}-e" role="alert"></small>`;
-      const year = `<select id="${id("lumpYear")}" data-fh-lump="lumpYear${k}" aria-label="Year received" aria-describedby="${id("lumpYear")}-e">${lumpYearOptions(FH.v["lumpYear" + k])}</select>`;
-      const amount = input("lumpAmount", "Lump sum amount in rupees", "text", ' inputmode="decimal" autocomplete="off"');
-      const rate = input("lumpRate", "Yearly income earned on the lump sum in percent", "number", ' min="0" max="100" step="0.01" inputmode="decimal"');
-      const treatment = `<select id="${id("lumpTreatment")}" data-fh-lump="lumpTreatment${k}" aria-label="Principal treatment" aria-describedby="${id("lumpTreatment")}-e">` +
-        `<option value="keep"${String(FH.v["lumpTreatment" + k] || "keep") === "keep" ? " selected" : ""}>Keep invested</option>` +
-        `<option value="spent"${String(FH.v["lumpTreatment" + k]) === "spent" ? " selected" : ""}>Spent</option></select>`;
-      return `<tr data-fh-lump-row="${k}"><td data-label="Label">${input("lumpLabel", "Optional label", "text", ' maxlength="24" autocomplete="off"')}${error("lumpLabel")}</td>` +
-        `<td data-label="Lump sum amount">${amount}${error("lumpAmount")}</td><td data-label="Year received">${year}${error("lumpYear")}</td>` +
-        `<td data-label="Yearly income rate">${rate}${error("lumpRate")}</td>` +
-        `<td data-label="Yearly income" class="fh-lump-auto" data-fh-lump-income>${Number.isFinite(row.income) ? FHE.currency(row.income) : "\u2014"}</td>` +
-        `<td data-label="Principal treatment">${treatment}${error("lumpTreatment")}<small class="fh-lump-hint" data-fh-lump-hint="${k}"></small></td>` +
-        `<td class="fh-act" data-label="Actions"><button type="button" data-fh-lump-duplicate="${k}" aria-label="Duplicate ${esc(label || `lump sum ${k}`)}">Duplicate</button>` +
-        `<button type="button" class="d" data-fh-lump-delete="${k}" aria-label="Delete ${esc(label || `lump sum ${k}`)}">Delete</button></td></tr>`;
-    }).join("");
-    const warning = $("lump-warning");
+    tb.innerHTML = rows.map(row => lumpRowHTML(row.k, row)).join("");
+    const empty = $("lump-empty"), body = $("lump-body");
+    if (empty) empty.hidden = count > 0;
+    if (body) body.hidden = count === 0;
+    const principal = $("lumptotal-amount"), income = $("lumptotal-income");
+    if (principal) principal.textContent = lumpMoney(rows.reduce((t, row) => t + (Number.isFinite(row.amount) && row.amount >= 0 ? row.amount : 0), 0));
+    if (income) income.textContent = lumpMoney(rows.reduce((t, row) => {
+      const ok = !FHE.isBlank(FH.v["lumpAmount" + row.k]) && !lumpFieldError("lumpAmount", row.k) && !FHE.isBlank(FH.v["lumpRate" + row.k]) && !lumpFieldError("lumpRate", row.k);
+      return t + (ok && Number.isFinite(row.income) ? row.income : 0);
+    }, 0));
+    const warning = $("lump-warning"), incomplete = rows.filter(row => !row.complete && row.k !== FH.lumpEdit).length;   // the row being typed in is not nagged about
     if (warning) {
-      const incomplete = rows.filter(row => !row.complete).length;
       warning.hidden = incomplete === 0;
-      warning.textContent = incomplete ? `${incomplete} incomplete row${incomplete === 1 ? "" : "s"} will be ignored in calculations.` : "";
+      warning.textContent = incomplete ? `${incomplete} incomplete row${incomplete === 1 ? "" : "s"} will be ignored in calculations. Edit the row and fill the required fields.` : "";
     }
-    for (let k = 1; k <= count; k++) {
-      const amount = $("lumpAmount" + k);
-      if (amount) amount.value = indianAmount(FH.v["lumpAmount" + k]);
-      updateLumpRow(k);
+  }
+  /* Entry point (kept by name for updateVisibility / refreshLumpPeriod): editors, undo banner, year hint and grid. */
+  function renderLumpSumTable() {
+    if (!$("lumptbody")) return;
+    const range = lumpYearRange(), count = lumpCount();
+    FH.lumpRange = `${range.from}:${range.to}`;
+    if (FH.lumpEdit > count) { FH.lumpEdit = 0; FH.lumpNew = 0; }
+    const host = $("lump-editors"), sig = `${count}|${FH.lumpRange}`;
+    if (host && host.dataset.sig !== sig) {
+      host.innerHTML = Array.from({ length: count }, (_, index) => lumpEditorHTML(index + 1)).join("");
+      host.dataset.sig = sig;
+      for (let k = 1; k <= count; k++) updateLumpEditor(k);
     }
-    updateLumpTotals();
+    $$("[data-fh-lump-stream]").forEach(el => { el.hidden = Number(el.dataset.fhLumpStream) !== FH.lumpEdit; });
+    $$("[data-fh-lump-cancel]").forEach(el => { el.hidden = Number(el.dataset.fhLumpCancel) !== FH.lumpNew; });
+    $$("[data-fh-lump-edtitle]").forEach(el => { const k = Number(el.dataset.fhLumpEdtitle); el.textContent = (k === FH.lumpNew ? "New" : "Edit") + " lump sum " + k; });
+    const hint = $("lump-range");
+    if (hint) hint.textContent = range.to >= range.from ? `Years available: ${range.from}\u2013${range.to} (your planning period). * marks a required field.` : "Years become available once your age and plan-end age are entered. * marks a required field.";
+    const un = $("lump-undo");
+    if (un) {
+      un.hidden = !FH.lumpUndo;
+      if (FH.lumpUndo) un.innerHTML = `Deleted \u201c${esc(FH.lumpUndo.name)}\u201d. <button type="button" id="fh-lumpundo">Undo</button>`;
+    }
+    renderLumpGrid();
   }
   function refreshLumpPeriod() {
-    const range = lumpYearRange(), signature = `${range.from}:${range.to}`;
-    if (FH.lumpRange !== signature) renderLumpSumTable();
+    const range = lumpYearRange();
+    if (FH.lumpRange !== `${range.from}:${range.to}`) renderLumpSumTable();
   }
-  function addLumpSum(values) {
+  function updateLumpRow(k) { updateLumpEditor(k); renderLumpGrid(); }   // an editor field changed
+  function addLumpSum(values) {                                           // + Add lump sum / Duplicate: the new row opens in the editor
     const k = lumpCount() + 1, range = lumpYearRange();
     FH.v.lumpCount = String(k);
     setLumpValues(k, values || ["", "", String(range.from), "", "keep"]);
-    dirty(); renderLumpSumTable();
-    const el = $("lumpLabel" + k); if (el) el.focus();
+    FH.lumpEdit = k; FH.lumpNew = k; FH.lumpUndo = null;
+    dirty(); renderLumpSumTable(); updateLive();
+    focusLump(`#fh-lumpLabel${k}`);
   }
-  function deleteLumpSum(k) {
+  function editLump(k) {
+    FH.lumpEdit = k; FH.lumpNew = 0; FH.lumpUndo = null;
+    renderLumpSumTable();
+    const el = $("lumpLabel" + k); if (el) { if (el.scrollIntoView) el.scrollIntoView({ block: "nearest" }); el.focus(); }
+  }
+  function dropLump(k) {                                                  // remove row k; the ones below move up
     const count = lumpCount();
     for (let index = k; index < count; index++) setLumpValues(index, lumpValues(index + 1));
     setLumpValues(count, ["", "", "", "", "keep"]);
     FH.v.lumpCount = String(count - 1);
-    dirty(); renderLumpSumTable();
+  }
+  function finishLump(k) {                                                // Done: check this row, then close the editor
+    const row = FHE.lumpSumRows(FH.v).find(item => item.k === k), issues = row ? lumpIssues(k, row) : {};
+    const need = [["lumpAmount", "Enter the lump sum amount."], ["lumpYear", "Choose the year the lump sum is received."]];
+    if (!lumpSpent(k)) need.push(["lumpRate", "Enter the yearly income earned on the lump sum (0 if none)."]);
+    for (const [part, message] of need) if (FHE.isBlank(FH.v[part + k]) && !issues[part]) issues[part] = message;
+    let first = null;
+    for (const part of LUMP_PARTS) { setErr(part + k, issues[part] || ""); if (issues[part] && !first) first = part + k; }
+    if (first) { const el = $(first); if (el) el.focus(); return; }
+    FH.lumpEdit = 0; FH.lumpNew = 0;
+    dirty(); renderLumpSumTable(); updateLive();
+    focusLump(`[data-fh-lump-edit="${k}"]`);
+  }
+  function cancelLump(k) { dropLump(k); FH.lumpEdit = 0; FH.lumpNew = 0; dirty(); renderLumpSumTable(); updateLive(); focusLump("#fh-lumpadd"); }
+  function deleteLumpSum(k) {
+    FH.lumpUndo = { k, vals: lumpValues(k), name: lumpName(k) };
+    dropLump(k); FH.lumpEdit = 0; FH.lumpNew = 0;
+    dirty(); renderLumpSumTable(); updateLive();
+    focusLump("#fh-lumpundo");
+  }
+  function undoLumpDelete() {
+    const u = FH.lumpUndo; if (!u) return;
+    FH.lumpUndo = null;
+    const count = lumpCount();
+    for (let index = count; index >= u.k; index--) setLumpValues(index + 1, lumpValues(index));
+    setLumpValues(u.k, u.vals);
+    FH.v.lumpCount = String(count + 1);
+    dirty(); renderLumpSumTable(); updateLive();
+    focusLump(`[data-fh-lump-edit="${u.k}"]`);
   }
 
   function updateLive() {
@@ -1401,6 +1455,7 @@ ${msMarkup(v, r)}</main></body></html>`;
     if (issue.step === "household" && issue.sub) FH.house = issue.sub;
     if (issue.step === "planning") FH.plan = issue.sub || "ready";
     { const m = /^inc[A-Za-z]+(\d+)$/.exec(issue.field || ""); if (m) { FH.incEdit = Number(m[1]); FH.incNew = 0; } }
+    { const m = /^lump[A-Za-z]+(\d+)$/.exec(issue.field || ""); if (m) { FH.lumpEdit = Number(m[1]); FH.lumpNew = 0; } }   // open the row's editor so the field can take focus
     if ((issue.step === "college" || issue.step === "weddings") && issue.child) FH.sel[issue.step] = issue.child;
     updateVisibility();
     clearErrs(); clearInvalid();
@@ -1551,8 +1606,12 @@ ${msMarkup(v, r)}</main></body></html>`;
       else if (b.dataset.fhInccancel) cancelStream(Number(b.dataset.fhInccancel));
       else if (b.id === "fh-incundo") undoDelete();
       else if (b.id === "fh-lumpadd") addLumpSum();
+      else if (b.dataset.fhLumpEdit) editLump(Number(b.dataset.fhLumpEdit));
       else if (b.dataset.fhLumpDuplicate) addLumpSum(lumpValues(Number(b.dataset.fhLumpDuplicate)));
       else if (b.dataset.fhLumpDelete) deleteLumpSum(Number(b.dataset.fhLumpDelete));
+      else if (b.dataset.fhLumpDone) finishLump(Number(b.dataset.fhLumpDone));
+      else if (b.dataset.fhLumpCancel) cancelLump(Number(b.dataset.fhLumpCancel));
+      else if (b.id === "fh-lumpundo") undoLumpDelete();
       else if (b.dataset.fhCt) { FH.sel[b.dataset.fhSec] = Number(b.dataset.fhCt); updateVisibility(); }
       else if (b.dataset.fhSx) { FH.smTab = b.dataset.fhSx; renderSummaryX(); const t = root.querySelector('[data-fh-sx="' + FH.smTab + '"]'); if (t) t.focus({ preventScroll: true }); }
       else if (b.id === "fh-hx") root.closest("dialog").close();
@@ -2163,7 +2222,7 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
     const q = P.profiles[id];
     S.fh = q.v ? { v: Object.assign({}, q.v), t: q.t || 0, rep: q.rep ? 1 : 0 } : null;
     if (typeof save === "function") save();
-    FH.v = null; FH.step = "family"; FH.house = "expenses"; FH.plan = "ready"; FH.incEdit = 0; FH.incNew = 0; FH.incUndo = null; FH.sel = { college: 1, weddings: 1 }; FH.sig = ""; FH.mode = "wizard"; FH.doneAt = 0; FH.lumpRange = "";
+    FH.v = null; FH.step = "family"; FH.house = "expenses"; FH.plan = "ready"; FH.incEdit = 0; FH.incNew = 0; FH.incUndo = null; FH.lumpEdit = 0; FH.lumpNew = 0; FH.lumpUndo = null; FH.sel = { college: 1, weddings: 1 }; FH.sig = ""; FH.mode = "wizard"; FH.doneAt = 0; FH.lumpRange = "";
     memo = { key: "", r: null }; simAge = null; RPT.tab = null;
     hpReset();
     syncFromState();
