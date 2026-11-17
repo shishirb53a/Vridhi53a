@@ -35,19 +35,16 @@ html body .fh-lumptbl thead th{font-size:11px;letter-spacing:.02em;color:var(--m
 html body .fh-lumptbl tbody th{font-weight:700}
 html body .fh-lumptbl tr.is-edit{background:color-mix(in srgb,var(--rpc,var(--ac,#2563eb)) 8%,transparent)}
 html body .fh-lumptbl tr.is-bad td,html body .fh-lumptbl tr.is-bad th{color:#be123c}
-html body .fh-lumptbl tr.is-incomplete td,html body .fh-lumptbl tr.is-incomplete th{background:color-mix(in srgb,#f59e0b 7%,var(--card))}
 html body .fh-lumptbl td.fh-lump-auto{background:color-mix(in srgb,var(--mu) 12%,var(--card));color:var(--mu);font-weight:700}
 html body .fh-lumptbl tfoot th,html body .fh-lumptbl tfoot td{font-weight:800;border-bottom:0}
 html body .fh-lumptbl .fh-act{white-space:normal}
-html body .fh-chk-warn{border-color:#b45309;color:#92400e}
 html body .fh-auto-chip{display:inline-block;margin-left:4px;padding:0 6px;border:1px solid var(--bd);border-radius:99px;color:var(--mu);font-size:10px;font-weight:800;text-transform:uppercase;vertical-align:middle}
 html body .fh-lump-empty{display:flex;flex-direction:column;gap:2px;margin:8px 0;padding:12px;border:1px dashed var(--bd);border-radius:12px;color:var(--mu);font-size:12px}
 html body .fh-lump-empty b{color:var(--tx);font-size:13px}
-html body .fh-lump-empty[hidden],html body .fh-lump-warning[hidden],html body #fh-lump-body[hidden],html body #fh-lump-undo[hidden],html body .fh-lump-stream[hidden]{display:none}
+html body .fh-lump-empty[hidden],html body #fh-lump-body[hidden],html body #fh-lump-undo[hidden],html body .fh-lump-stream[hidden]{display:none}
 html body .fh-lump-calc{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:12px}
 html body .fh-lump-calc b{padding:4px 10px;border-radius:8px;background:color-mix(in srgb,var(--mu) 12%,var(--card));color:var(--mu)}
 html body .fh-lump-hint{display:block;min-height:0;margin-top:3px;color:var(--mu);font-size:11px}
-html body .fh-lump-warning{margin:6px 0;padding:8px 10px;border:1px solid color-mix(in srgb,#f59e0b 45%,var(--bd));border-radius:8px;color:#92400e;background:color-mix(in srgb,#f59e0b 10%,var(--card));font-size:12px}
 html body .fh-lumpsummary{margin:6px 0;padding-left:18px}
 html body .fh-lumpsummary li{margin:4px 0}
 html body .fh-lumpsummary small{display:block;color:var(--mu)}

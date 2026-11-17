@@ -246,7 +246,6 @@
   };
   /* Lump Sum tab: same pattern as the Income tab. A read-only grid (Edit / Delete on each row, + Add lump sum below) and one editor that opens for the row being added or edited. */
   const lumpSumCard = () => `<div class="hs fh-lump" id="fh-lump">` +
-    `<p class="fh-lump-warning" id="fh-lump-warning" role="status" hidden></p>` +
     `<div id="fh-lump-undo" class="fh-incundo" role="status" hidden></div>` +
     `<div class="fh-lump-empty" id="fh-lump-empty"><b>No lump sums yet</b><span>Add a one-time receipt such as a maturity payout, bonus or property sale.</span></div>` +
     `<div id="fh-lump-body" hidden><div class="fh-lumptw"><table class="fh-lumptbl" id="fh-lumptbl"><caption class="fh-sr">Lump sums</caption>` +
@@ -573,8 +572,8 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
   function lumpRowHTML(k, row) {
     const errs = Object.keys(lumpIssues(k, row)).length, spent = lumpSpent(k), nm = lumpName(k);
     const cell = (label, v) => `<td data-label="${label}">${v === "" || v == null ? "\u2014" : esc(String(v))}</td>`;
-    const pill = errs ? ' <span class="fh-chk">Check</span>' : !row.complete ? ' <span class="fh-chk fh-chk-warn">Incomplete</span>' : "";
-    const cls = ((k === FH.lumpEdit ? "is-edit" : "") + (errs ? " is-bad" : !row.complete ? " is-incomplete" : "")).trim();
+    const pill = errs ? ' <span class="fh-chk">Check</span>' : "";
+    const cls = ((k === FH.lumpEdit ? "is-edit" : "") + (errs ? " is-bad" : "")).trim();
     return `<tr class="${cls}" data-fh-lump-row="${k}"><th scope="row" data-label="Source">${esc(nm)}${pill}</th>` +
       cell("Amount", Number.isFinite(row.amount) ? lumpMoney(row.amount) : "") + cell("Year", FH.v["lumpYear" + k]) +
       cell("ROI %", FHE.isBlank(FH.v["lumpRate" + k]) ? "" : FH.v["lumpRate" + k] + "%") +
@@ -596,11 +595,6 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
       const ok = !FHE.isBlank(FH.v["lumpAmount" + row.k]) && !lumpFieldError("lumpAmount", row.k) && !FHE.isBlank(FH.v["lumpRate" + row.k]) && !lumpFieldError("lumpRate", row.k);
       return t + (ok && Number.isFinite(row.income) ? row.income : 0);
     }, 0));
-    const warning = $("lump-warning"), incomplete = rows.filter(row => !row.complete && row.k !== FH.lumpEdit).length;   // the row being typed in is not nagged about
-    if (warning) {
-      warning.hidden = incomplete === 0;
-      warning.textContent = incomplete ? `${incomplete} incomplete row${incomplete === 1 ? "" : "s"} will be ignored in calculations. Edit the row and fill the required fields.` : "";
-    }
   }
   /* Entry point (kept by name for updateVisibility / refreshLumpPeriod): editors, undo banner, year hint and grid. */
   function renderLumpSumTable() {

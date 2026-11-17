@@ -36,7 +36,7 @@ const ed1 = d.querySelector('[data-fh-lump-stream="1"]');
 ok(!ed1.hidden, "add: editor panel opens for the new row");
 ok(d.querySelector('[data-fh-lump-cancel="1"]').hidden === false, "add: Cancel visible for a new row");
 ok(/New lump sum 1/.test(d.querySelector('[data-fh-lump-edtitle="1"]').textContent), "add: title says New lump sum 1");
-ok(/Incomplete/.test(d.querySelector("#fh-lumptbody tr").textContent), "incomplete row carries a text pill, not just colour");
+ok(!/Incomplete|Check/.test(d.querySelector("#fh-lumptbody tr").textContent), "incomplete row has no status text on the grid");
 ok(d.activeElement === $("lumpLabel1"), "add: focus moves to the label field");
 
 type("lumpLabel1", "Maturity");
@@ -54,7 +54,7 @@ ok(ed1.hidden, "Done closes the editor");
 const rowText = d.querySelector("#fh-lumptbody tr").textContent;
 ok(/Maturity/.test(rowText) && /10,00,000/.test(rowText) && /70,000/.test(rowText) && !/Check|Incomplete/.test(rowText), "grid row shows label, amount, income, no status pill");
 ok(/10,00,000/.test($("lumptotal-amount").textContent) && /70,000/.test($("lumptotal-income").textContent), "totals row: " + $("lumptotal-amount").textContent + " / " + $("lumptotal-income").textContent);
-ok($("lump-warning").hidden, "no incomplete-row warning when complete");
+ok(!$("lump-warning"), "incomplete-row warning is removed from the Lump Sum tab");
 
 click("#fh-lumpadd");
 ok(rows() === 2 && !d.querySelector('[data-fh-lump-stream="2"]').hidden, "add another: row 2 opens in its editor");

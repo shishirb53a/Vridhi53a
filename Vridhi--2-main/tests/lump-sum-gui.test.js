@@ -26,7 +26,10 @@ for (const hook of ['data-fh-lump-edit', 'data-fh-lump-delete', 'data-fh-lump-do
   assert.ok(ui.includes(hook), 'ui.js has ' + hook);
 assert.ok(!ui.includes('data-fh-lump-duplicate') && !ui.includes('fhLumpDuplicate'), 'duplicate action is removed');
 assert.ok(/function undoLumpDelete\(/.test(ui) && /function finishLump\(/.test(ui) && /function cancelLump\(/.test(ui), 'undo, Done and Cancel handlers exist');
-assert.ok(ui.includes('fh-chk fh-chk-warn">Incomplete') && ui.includes('fh-chk">Check'), 'row status is stated in words, not colour alone');
+assert.ok(!ui.includes('fh-chk-warn') && !ui.includes('is-incomplete') &&
+  !ui.includes('will be ignored in calculations. Edit the row and fill the required fields.') &&
+  ui.includes('fh-chk">Check'), 'grid omits incomplete status but preserves validation errors');
+assert.ok(!ui.includes('fh-lump-warning'), 'lump-sum incomplete warning is removed');
 assert.ok(!ui.includes('Years available:') && !ui.includes('Lump sums are added to the general corpus in the year received. Keep invested'), 'the two information lines were removed from the tab');
 assert.ok(/lumpEdit = Number\(m\[1\]\)/.test(ui), 'a validation issue on a lump row opens that row\'s editor');
 assert.ok(ui.includes('lumpUndo = null') && /FH\.lumpEdit = 0; FH\.lumpNew = 0; FH\.lumpUndo = null;/.test(ui), 'lump editor state resets with the plan');
@@ -34,7 +37,7 @@ assert.ok(ui.includes('lumpUndo = null') && /FH\.lumpEdit = 0; FH\.lumpNew = 0; 
 /* layout: no sideways scrolling table and the calculated annual-income cell is marked */
 assert.ok(!/min-width:920px/.test(css), 'lump table no longer forces a 920px width');
 assert.ok(/\.fh-lumptbl\{[^}]*table-layout:fixed/.test(css), 'lump table uses a fixed layout like Income');
-assert.ok(/fh-chk-warn/.test(css) && /fh-auto-chip/.test(css) && /fh-lump-empty/.test(css), 'styles for the Incomplete pill, Auto chip and empty state');
+assert.ok(/fh-auto-chip/.test(css) && /fh-lump-empty/.test(css), 'styles for the Auto chip and empty state');
 assert.ok(ui.includes('class="fh-lump-auto"') && !ui.includes('class="fh-auto-chip"'), 'annual income uses the requested label without an Auto chip');
 
 /* text: lump sums are modeled, so the disclaimer and the Help must not say otherwise */
