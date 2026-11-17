@@ -1001,7 +1001,7 @@ html body .sx .sx-key{margin:0 0 2px;font-size:11px;color:var(--mu)}
       try { if (sv) { sv.rep = 1; if (typeof save === "function") save(); } if (typeof render === "function") render(); say("Added to the Retirement Planner"); } catch (x) { /* cosmetic */ }
     }
   });
-  root.addEventListener("focusout", e => {
+  document.addEventListener("focusout", e => {
     const lumpId = e.target.dataset && e.target.dataset.fhLump;
     if (lumpId && lumpId.startsWith("lumpAmount")) {
       const k = lumpId.slice("lumpAmount".length), input = $("lumpAmount" + k);

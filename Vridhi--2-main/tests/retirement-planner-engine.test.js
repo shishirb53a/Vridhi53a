@@ -20,6 +20,8 @@ assert.ok(!html.includes('<script id="fh-ui">'), 'Retirement Planner UI is no lo
 assert.ok(bodyEnd > uiScript, 'Retirement Planner UI loads before the document ends');
 assert.ok(!/\bdocument\s*\.|\blocalStorage\b|\bfetch\s*\(/.test(source), 'Engine stays independent of DOM, storage, and network APIs');
 assert.ok(uiSource.includes('window.FreedomHorizon'), 'Extracted UI consumes the existing calculation engine API');
+assert.ok(uiSource.includes('document.addEventListener("focusout"') && !uiSource.includes('root.addEventListener("focusout"'),
+  'Amount formatting uses delegated focusout because the planner root is created on demand');
 assert.ok(uiSource.indexOf('data-fh-plan="lump"') > uiSource.indexOf('data-fh-plan="income"'), 'Lump Sum follows Income in Planning Period tabs');
 assert.ok(uiSource.includes('Principal is spent in the year received. No ongoing income.'), 'Spent principal explains that there is no ongoing income');
 for (const label of ['Serial No', 'Age at Year-End', 'Key Events', 'Monthly Household Expense', 'Annual Household Expense',
