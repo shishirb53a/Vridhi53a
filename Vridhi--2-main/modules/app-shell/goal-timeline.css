@@ -47,7 +47,6 @@ html body .fh-lump-empty[hidden],html body .fh-lump-warning[hidden],html body #f
 html body .fh-lump-calc{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:12px}
 html body .fh-lump-calc b{padding:4px 10px;border-radius:8px;background:color-mix(in srgb,var(--mu) 12%,var(--card));color:var(--mu)}
 html body .fh-lump-hint{display:block;min-height:0;margin-top:3px;color:var(--mu);font-size:11px}
-html body .fh-lump-range{margin:4px 0}
 html body .fh-lump-warning{margin:6px 0;padding:8px 10px;border:1px solid color-mix(in srgb,#f59e0b 45%,var(--bd));border-radius:8px;color:#92400e;background:color-mix(in srgb,#f59e0b 10%,var(--card));font-size:12px}
 html body .fh-lumpsummary{margin:6px 0;padding-left:18px}
 html body .fh-lumpsummary li{margin:4px 0}
