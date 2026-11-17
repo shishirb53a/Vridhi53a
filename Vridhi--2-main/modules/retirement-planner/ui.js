@@ -245,14 +245,16 @@
       `<button type="button" id="fh-incadd" class="fh-addstream">+ Add income source</button><div id="fh-inc-editors"></div></div></div>`;
   };
   /* Lump Sum tab: same pattern as the Income tab. A read-only grid (Edit / Duplicate / Delete on each row, + Add lump sum below) and one editor that opens for the row being added or edited. */
-  const lumpSumCard = () => `<div class="hs fh-lump" id="fh-lump"><p class="hh">Lump sums are added to the general corpus in the year received. Keep invested amounts earn the entered income from the following year; principal grows at the plan\u2019s portfolio return. Spent amounts leave the corpus in the year received and earn nothing.</p>` +
-    `<p class="hh fh-lump-range" id="fh-lump-range"></p>` +
+  const lumpSumCard = () => `<div class="hs fh-lump" id="fh-lump">` +
     `<p class="fh-lump-warning" id="fh-lump-warning" role="status" hidden></p>` +
     `<div id="fh-lump-undo" class="fh-incundo" role="status" hidden></div>` +
     `<div class="fh-lump-empty" id="fh-lump-empty"><b>No lump sums yet</b><span>Add a one-time receipt such as a maturity payout, bonus or property sale.</span></div>` +
     `<div id="fh-lump-body" hidden><div class="fh-lumptw"><table class="fh-lumptbl" id="fh-lumptbl"><caption class="fh-sr">Lump sums</caption>` +
     `<colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"><col class="c6"><col class="c7"></colgroup>` +
-    `<thead><tr><th scope="col">Label (optional)</th><th scope="col">Lump sum amount (\u20b9)</th><th scope="col">Year in which lump sum is received</th><th scope="col">Yearly income earned on the lump sum (%)</th><th scope="col">Yearly income from the lump sum (\u20b9) <span class="fh-auto-chip" title="Calculated automatically: amount \u00d7 yearly income %">Auto</span></th><th scope="col">Principal treatment</th><th scope="col"><span class="fh-sr">Actions</span></th></tr></thead>` +
+    `<thead><tr><th scope="col" title="Label (optional)">Label</th><th scope="col" title="Lump sum amount (\u20b9)">Amount (\u20b9)</th>` +
+    `<th scope="col" title="Year in which lump sum is received">Year received</th><th scope="col" title="Yearly income earned on the lump sum (%)">Income %</th>` +
+    `<th scope="col" title="Yearly income from the lump sum (\u20b9). Calculated automatically: amount \u00d7 income %">Yearly income (\u20b9) <span class="fh-auto-chip">Auto</span></th>` +
+    `<th scope="col" title="Principal treatment">Principal</th><th scope="col"><span class="fh-sr">Actions</span></th></tr></thead>` +
     `<tbody id="fh-lumptbody"></tbody><tfoot><tr><th scope="row">Totals</th><td id="fh-lumptotal-amount"></td><td class="fh-lump-skip">\u2014</td><td class="fh-lump-skip">\u2014</td><td id="fh-lumptotal-income"></td><td class="fh-lump-skip" colspan="2"></td></tr></tfoot></table></div></div>` +
     `<button type="button" id="fh-lumpadd" class="fh-addstream">+ Add lump sum</button><div id="fh-lump-editors"></div></div>`;
   const grid = pred => `<div class="hg">${FHE.FIELDS.filter(pred).map(fieldHTML).join("")}</div>`;
@@ -574,10 +576,10 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
     const pill = errs ? ' <span class="fh-chk">Check</span>' : !row.complete ? ' <span class="fh-chk fh-chk-warn">Incomplete</span>' : "";
     const cls = ((k === FH.lumpEdit ? "is-edit" : "") + (errs ? " is-bad" : !row.complete ? " is-incomplete" : "")).trim();
     return `<tr class="${cls}" data-fh-lump-row="${k}"><th scope="row" data-label="Label">${esc(nm)}${pill}</th>` +
-      cell("Lump sum amount", Number.isFinite(row.amount) ? lumpMoney(row.amount) : "") + cell("Year received", FH.v["lumpYear" + k]) +
-      cell("Yearly income rate", FHE.isBlank(FH.v["lumpRate" + k]) ? "" : FH.v["lumpRate" + k] + "%") +
-      `<td data-label="Yearly income (auto)" class="fh-lump-auto"${spent ? ` title="${LUMP_SPENT_TIP}"` : ""}>${lumpIncomeText(k, row)}</td>` +
-      cell("Principal treatment", spent ? "Spent" : "Keep invested") +
+      cell("Amount (\u20b9)", Number.isFinite(row.amount) ? lumpMoney(row.amount) : "") + cell("Year received", FH.v["lumpYear" + k]) +
+      cell("Income %", FHE.isBlank(FH.v["lumpRate" + k]) ? "" : FH.v["lumpRate" + k] + "%") +
+      `<td data-label="Yearly income (\u20b9) \u00b7 auto" class="fh-lump-auto"${spent ? ` title="${LUMP_SPENT_TIP}"` : ""}>${lumpIncomeText(k, row)}</td>` +
+      cell("Principal", spent ? "Spent" : "Keep invested") +
       `<td class="fh-act"><button type="button" data-fh-lump-edit="${k}" aria-label="Edit ${esc(nm)}">Edit</button><button type="button" data-fh-lump-duplicate="${k}" aria-label="Duplicate ${esc(nm)}">Duplicate</button>` +
       `<button type="button" class="d" data-fh-lump-delete="${k}" aria-label="Delete ${esc(nm)}">Delete</button></td></tr>`;
   }
@@ -615,8 +617,6 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
     $$("[data-fh-lump-stream]").forEach(el => { el.hidden = Number(el.dataset.fhLumpStream) !== FH.lumpEdit; });
     $$("[data-fh-lump-cancel]").forEach(el => { el.hidden = Number(el.dataset.fhLumpCancel) !== FH.lumpNew; });
     $$("[data-fh-lump-edtitle]").forEach(el => { const k = Number(el.dataset.fhLumpEdtitle); el.textContent = (k === FH.lumpNew ? "New" : "Edit") + " lump sum " + k; });
-    const hint = $("lump-range");
-    if (hint) hint.textContent = range.to >= range.from ? `Years available: ${range.from}\u2013${range.to} (your planning period). * marks a required field.` : "Years become available once your age and plan-end age are entered. * marks a required field.";
     const un = $("lump-undo");
     if (un) {
       un.hidden = !FH.lumpUndo;

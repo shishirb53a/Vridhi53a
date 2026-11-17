@@ -10,7 +10,8 @@ and colors expense amounts red and received income green in both table and mobil
 Planning Period > Lump Sum uses the same pattern as Planning Period > Income: a read-only grid with Edit, Duplicate and
 Delete on each row, one editor that opens for the row being added or edited (Done validates, Cancel drops a new row),
 an Undo banner after Delete, an empty-state message, and "Check" / "Incomplete" pills so status never relies on colour.
-The requested column headers are unchanged; the yearly-income column is marked Auto and read-only.
+Column headers are short (Label, Amount, Year received, Income %, Yearly income, Principal); the full names are the header tooltips and the editor labels.
+The yearly-income column is marked Auto and read-only.
 Planning Period > Lump Sum records one-time general-corpus receipts. Kept principal earns its entered
 annual income starting the year after receipt, while principal grows at the plan portfolio return.
 Spent principal is shown as a same-year receipt and outflow, with no ongoing income. Incomplete rows
