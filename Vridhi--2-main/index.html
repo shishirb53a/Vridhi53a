@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>try{document.documentElement.setAttribute("data-skin",localStorage.getItem("vr-skin")||"enterprise")}catch(e){document.documentElement.setAttribute("data-skin","enterprise")}</script>
+<script>document.documentElement.setAttribute("data-skin","enterprise")</script>
 <script>/* Remember me: a ticked sign-in keeps its session in localStorage; a new tab or a restarted browser picks it up here, before the lock screen decides */
 try{if(sessionStorage.getItem('fs-auth')!=='1'&&localStorage.getItem('vr-rm')==='1'){var rmS=localStorage.getItem('vr-sb-remember'),rmO=rmS&&JSON.parse(rmS);if(rmO&&rmO.rt&&rmO.uid){sessionStorage.setItem('vr-sb',rmS);sessionStorage.setItem('fs-auth','1')}}}catch(e){}
 try{if(sessionStorage.getItem('fs-auth')!=='1')document.documentElement.classList.add('lk')}catch(e){document.documentElement.classList.add('lk')}</script>
@@ -79,10 +79,10 @@ html[lang=hi] body,html[lang=hi] button,html[lang=hi] input,html[lang=hi] select
 <script src="modules/family-management/family-management.js?v=144"></script>
 <script src="modules/help/help.js?v=143"></script>
 <script src="modules/database-backups/backups.js?v=1"></script>
-<script src="modules/settings/settings.js?v=146"></script>
-<script src="modules/theme/theme.js?v=144"></script>
+<script src="modules/settings/settings.js?v=147"></script>
+<script src="modules/theme/theme.js?v=145"></script>
 <script>window.VRTheme.configure({getState:()=>S,save:save,render:render,toast:toast});</script>
-<script src="modules/dashboard-preferences/dashboard-preferences.js?v=141"></script>
+<script src="modules/dashboard-preferences/dashboard-preferences.js?v=142"></script>
 <script src="modules/holding-form-wizard/wizard.js?v=140"></script>
 
 
@@ -266,10 +266,11 @@ new MutationObserver(q).observe(document.body,{childList:true,subtree:true});tag
 <script src="modules/reports/holding-report.js?v=147"></script>
 <script id="fh-nb" src="modules/app-shell/dialog-number-format.js?v=147"></script>
 <script id="fh-logo" src="modules/app-shell/dialog-logo.js?v=147"></script>
-<script src="modules/theme/professional-themes.js?v=147"></script>
+<script src="modules/theme/professional-themes.js?v=148"></script>
 <script src="modules/auth/login.js?v=151"></script>
-<div id="lk-sw"><div class="pp" id="lk-pp" role="radiogroup" aria-label="Look" hidden></div><button type="button" id="lk-bt" aria-haspopup="true" aria-expanded="false">&#127912; <span id="lk-nm">Look</span></button></div>
-<script src="modules/theme/skin-selector.js?v=147"></script>
+
+<link rel="stylesheet" href="modules/theme/appearance-pro.css?v=1">
+<script src="modules/theme/appearance-pro.js?v=1"></script>
 <link rel="stylesheet" href="modules/user-management/user-management.css?v=150">
 <script src="modules/user-management/client-admin.js?v=150"></script>
 <link rel="stylesheet" href="modules/app-shell/account-controls.css?v=148">
