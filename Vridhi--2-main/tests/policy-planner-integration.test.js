@@ -49,4 +49,15 @@ assert.deepStrictEqual(Array.from(win.__vrExtraStreams(2030)), [], 'switching th
 win.__setS(Object.assign(state(), { polClients: { active: 'pc', profiles: { pc: { name: 'Asha', policies: policy, enabled: { goal: false, retirement: true }, share: { goal: [], retirement: ['someone-else'] }, created: 1 } } } }));
 assert.deepStrictEqual(Array.from(win.__vrExtraStreams(2030)), [], 'a policy shared only with another client is not counted');
 delete win.fhpClientList;
+
+/* 3. regression: planner cache must change when linked policies change; linked premium-only policies are listed */
+assert.ok(/function result\(\)\s*\{[\s\S]{0,600}policyStreams\(\)[\s\S]{0,300}const key = JSON\.stringify\(FH\.v\) \+ "\|" \+ pk;/.test(ui), 'planner result() cache key includes policy payouts');
+const termOnly = V.clean([{ id: 't', name: 'taaaa', amt: 0, freq: 'yearly', start: '2026-11-07', yrs: 10, lump: 0, prem: { amt: 3250000, freq: 'yearly', start: '2026-11-07', yrs: 10 } }]);
+win.fhpClientList = function () { const s = win.__getS(); if (!s.fhp) s.fhp = { active: 'live', profiles: { live: { name: 'Live Plan Validation' } } }; return [{ id: 'live', name: 'Live Plan Validation' }]; };
+win.__setS({ start: 2026, polFh: true, polGp: true, policies: [], fhp: { active: 'live', profiles: { live: { name: 'Live Plan Validation' } } },
+  polClients: { active: 'pc', profiles: { pc: { name: 'abc', policies: termOnly, enabled: { goal: false, retirement: true }, share: { goal: [], retirement: ['live'] }, created: 1 } } } });
+assert.strictEqual(V.linkedPolicies('retirement').length, 1, 'a premium-only policy shared with the planner client is reported as linked');
+assert.strictEqual(win.__vrExtraStreams(2026).length, 0, 'a premium-only policy has no payout stream');
+assert.ok(/linkedPolicies/.test(ui), 'planner lists linked policies');
+delete win.fhpClientList;
 console.log('Policies and the Retirement Planner hand over clients and payouts correctly');

@@ -11,8 +11,8 @@ const source = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 
 const uiSource = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
 const reportCss = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'year-by-year.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=131"></script>');
-const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=157"></script>');
+const moduleScript = html.indexOf('<script src="modules/retirement-planner/engine.js?v=132"></script>');
+const uiScript = html.indexOf('<script src="modules/retirement-planner/ui.js?v=159"></script>');
 const bodyEnd = html.indexOf('</body>');
 assert.ok(moduleScript >= 0 && uiScript > moduleScript, 'Retirement Planner engine loads before its UI');
 assert.ok(!html.includes('<script id="fh-engine">'), 'Retirement Planner engine is no longer duplicated inline');
@@ -122,21 +122,30 @@ const keep = Object.assign({}, lumpBase, {
 assert.deepStrictEqual(Array.from(engine.validateAll(keep)), [], 'A valid lump sum in the planning period passes validation');
 const keepRows = engine.horizonReport(keep, { currentYear: 2029 });
 assert.strictEqual(keepRows[0].year, 2030, 'Lump sum year uses the report calendar year');
-assert.strictEqual(keepRows[0].lumpReceived, 1000000, 'Principal enters the general corpus in the received year');
+assert.strictEqual(keepRows[0].lumpReceived, 1000000, 'Principal is shown as a receipt in the received year');
 assert.strictEqual(keepRows[0].income, 0, 'A kept lump sum earns no income in its received year');
 assert.strictEqual(keepRows[1].income, 70000, 'A kept lump sum starts its stated annual income the next year');
 assert.strictEqual(keepRows[1].lumpIncomeBySource[1], 70000, 'Lump income remains attributable to its source in reports');
 assert.strictEqual(keepRows[4].income, 70000, 'Lump income continues through the end of the planning period');
 const baseRows = engine.horizonReport(lumpBase, { currentYear: 2029 });
-assert.strictEqual(keepRows[0].end - baseRows[0].end, 1000000, 'Year-end contribution adds exactly the principal in year received');
-assert.strictEqual(keepRows[1].end - baseRows[1].end, 1170000, 'Principal compounds at plan return and includes the year-two income inflow');
+assert.strictEqual(keepRows[0].lumpHeld, 1000000, 'Kept principal is held outside the corpus in the received year');
+assert.strictEqual(keepRows[0].end - baseRows[0].end, 0, 'Kept principal does not enter the corpus in the received year');
+assert.strictEqual(keepRows[1].end - baseRows[1].end, 70000, 'Held principal does not compound in the corpus; only its stated income is added');
+const keepLast = keepRows[keepRows.length - 1], baseLast = baseRows[baseRows.length - 1];
+assert.strictEqual(keepLast.lumpAdded, 1000000, 'Remaining kept principal is added in the final plan year');
+assert.ok(keepRows.slice(0, -1).every(row => row.lumpAdded === 0), 'Kept principal is added only in the final year');
+assert.ok(keepLast.what.includes('Lump sum principal added to the closing corpus'), 'Final-year event notes the principal added');
+assert.ok(keepLast.end - baseLast.end >= 1000000, 'Closing corpus in the final year includes the full kept principal');
+keepRows.forEach((row, n) => assert.ok(Math.abs(row.start + row.moneyIn - row.spent - row.lumpSpent - row.lumpHeld - row.end) < 0.01,
+  'Year ' + (n + 1) + ': closing corpus = opening + money in - money out, with kept principal added only at the end'));
+
 assert.strictEqual(engine.schedule(keep, 53, { currentYear: 2029 })[1].in - engine.schedule(lumpBase, 53, { currentYear: 2029 })[1].in, 1000000,
   'Cash-flow projection includes the year-end principal inflow');
 assert.ok(engine.calculate(keep).needed < engine.calculate(lumpBase).needed, 'Lump sums reduce present-day funding need and affect FI metrics');
 const allocationTotal = engine.bucketsAt(keep, 53).reduce((total, bucket) => total + bucket.value, 0);
 assert.ok(Math.abs(allocationTotal - engine.schedule(keep, 53, { currentYear: 2029 }).at(-1).bal) < 0.01,
   'Un earmarked lump-sum principal flows into the general growth bucket without changing total-corpus parity');
-console.log('  ok   Kept lump sums enter at year end, compound at portfolio return, and pay income from the following year');
+console.log('  ok   Kept lump sums are held outside the corpus, pay income from the following year, and join the final closing corpus');
 
 const spent = Object.assign({}, keep, { lumpTreatment1: 'spent', lumpRate1: '0' });
 assert.deepStrictEqual(Array.from(engine.validateAll(spent)), [], 'Spent principal with a zero rate passes validation');
@@ -145,6 +154,7 @@ assert.strictEqual(spentRows[0].lumpReceived, 1000000, 'Spent principal remains 
 assert.strictEqual(spentRows[0].lumpSpent, 1000000, 'Spent principal is shown as a same-year outflow');
 assert.strictEqual(spentRows[0].end, baseRows[0].end, 'Receipt and spending have zero net corpus effect in the received year');
 assert.ok(spentRows.every(row => row.income === 0), 'Spent principal produces no ongoing income');
+assert.ok(spentRows.every(row => row.lumpAdded === 0 && row.lumpHeld === 0), 'Spent principal is never added to the closing corpus');
 console.log('  ok   Spent lump sums are net-zero same-year cash flows and produce no income');
 
 const twoLumps = Object.assign({}, keep, {
