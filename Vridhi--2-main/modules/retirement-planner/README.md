@@ -12,8 +12,9 @@ Delete on each row, one editor that opens for the row being added or edited (Don
 an Undo banner after Delete, an empty-state message, and "Check" / "Incomplete" pills so status never relies on colour.
 Column headers are short (Label, Amount, Year received, Income %, Yearly income, Principal); the full names are the header tooltips and the editor labels.
 The yearly-income column is marked Auto and read-only.
-Planning Period > Lump Sum records one-time general-corpus receipts. Kept principal earns its entered
-annual income starting the year after receipt, while principal grows at the plan portfolio return.
+Planning Period > Lump Sum records one-time receipts. Kept principal is held outside the corpus: it earns its entered
+annual income starting the year after receipt (the income flows into the corpus) and the principal itself is added to the
+closing corpus of the final plan year (Year by Year: "Lump Sum Principal Added to Closing Corpus").
 Spent principal is shown as a same-year receipt and outflow, with no ongoing income. Incomplete rows
 are preserved and excluded from calculations; valid complete rows are included in the projection and report.
 The year-by-year table includes All Columns, Summary View, Income Breakdown, and Expense Breakdown

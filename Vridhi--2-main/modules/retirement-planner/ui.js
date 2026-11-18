@@ -1927,7 +1927,8 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
     ];
     if (kids) g.push({ title: "Kids — college & weddings", cols: kid("College Fees", "fee", "expense").concat(kid("Wedding Cost", "wed", "expense")) });
     g.push({ title: "Money out", cols: [{ label: "Total Expenses", get: r => r.spent, bold: 1, sum: 1, tone: "expense" },
-      ...(lumps.length ? [{ label: "Lump Sums Spent", get: r => r.lumpSpent || 0, zero: true, sum: 1, tone: "expense" }] : [])] });
+      ...(lumps.length ? [{ label: "Lump Sums Spent", get: r => r.lumpSpent || 0, zero: true, sum: 1, tone: "expense" },
+        { label: "Lump Sums Held Outside Corpus", get: r => r.lumpHeld || 0, zero: true, sum: 1, tone: "expense" }] : [])] });
     if (earn) g.push({ title: "Earning phase", cols: [
       { label: "Earnings Received", get: r => r.earn, zero: true, sum: 1, tone: "income" },
       { label: "Expenses Paid by Earnings & Savings", get: r => r.paidByEarn, zero: true, sum: 1, tone: "expense" },
@@ -1943,7 +1944,8 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
         ...(sources.length ? sources.map(s => ({ label: `${s.label}${incomeTotals.get(s.label) > 1 ? ` ${s.occurrence}` : ""}`, get: r => r.incomeBySource && r.incomeBySource[s.k] || 0, zero: true, sum: 1, tone: "income" })) :
           [{ label: "Other Income", get: r => r.income - r.policy - lumpIncomeTotal(r), zero: true, sum: 1, tone: "income" }]),
         ...lumps.map(s => ({ label: `${s.label}${s.occurrence > 1 ? ` ${s.occurrence}` : ""}`, get: r => r.lumpIncomeBySource && r.lumpIncomeBySource[s.k] || 0, zero: true, sum: 1, tone: "income" })),
-        ...(lumps.length ? [{ label: "Lump Sums Received", get: r => r.lumpReceived || 0, zero: true, sum: 1, tone: "income" }] : []),
+        ...(lumps.length ? [{ label: "Lump Sums Received", get: r => r.lumpReceived || 0, zero: true, sum: 1, tone: "income" },
+          { label: "Lump Sum Principal Added to Closing Corpus", get: r => r.lumpAdded || 0, zero: true, sum: 1, tone: "income" }] : []),
         ...policies.map(p => ({ label: p.label, get: r => r.policyBySource && r.policyBySource[p.k] || 0, zero: true, sum: 1, tone: "income" })),
         { label: "Total Income", get: r => r.moneyIn, bold: 1, sum: 1, tone: "income" }] },
       { title: "End", cols: [{ label: "Closing Corpus", get: r => r.end, bold: 1 }, { label: "Funding Status", get: r => r.status, txt: 1, status: 1 }] });

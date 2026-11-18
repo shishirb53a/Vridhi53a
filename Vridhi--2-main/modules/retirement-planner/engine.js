@@ -376,20 +376,24 @@
     return { rows, count: included.length, principal: included.reduce((sum, row) => sum + row.amount, 0),
       annualIncome: included.reduce((sum, row) => sum + row.income, 0) };
   };
+  /* received = every principal that arrives this year; spent = the part spent at once;
+     held = kept principal that arrives this year and stays OUTSIDE the corpus (it only earns its stated income);
+     heldTotal = all kept principal received so far, which joins the closing corpus in the final plan year. */
   function lumpSumCashFlow(rows, year, cy) {
-    let received = 0, spent = 0, income = 0;
+    let received = 0, spent = 0, income = 0, held = 0, heldTotal = 0;
     const incomeBySource = {};
     for (const row of rows) {
       if (row.year === cy + year) {
         received += row.amount;
-        if (row.treatment === "spent") spent += row.amount;
+        if (row.treatment === "spent") spent += row.amount; else held += row.amount;
       }
+      if (row.treatment === "keep" && row.year <= cy + year) heldTotal += row.amount;
       if (row.treatment === "keep" && cy + year > row.year) {
         income += row.income;
         incomeBySource[row.k] = row.income;
       }
     }
-    return { received, spent, income, incomeBySource };
+    return { received, spent, income, incomeBySource, held, heldTotal };
   }
   /* the default window for a new stream: the first plan year to the last one */
   function incomeWindow(inp) {
@@ -516,12 +520,13 @@
       const cash = S + interestS + earn, used = earning ? Math.min(cash, O) : 0;   // spending paid by earnings + savings fund
       let endS = earning ? cash - used : 0;
       const draw = O - used;                                                       // spending paid by the corpus
-      P = P * (1 + rate) + income + lump.received - lump.spent + reserveYield - draw;
+      const lumpAdded = year === years ? lump.heldTotal : 0;   // kept principal still held is added to the final-year closing corpus
+      P = P * (1 + rate) + income + lump.received - lump.spent - lump.held + lumpAdded + reserveYield - draw;
       let merged = 0;
       if (R > 0 && year === R) { merged = endS; P += endS; endS = 0; }
       S = endS;
       rows.push({ y: year, age: age + year, earning, house, fee, wed, O, income, incomeBySource, lumpIncomeBySource: lump.incomeBySource,
-        lumpReceived: lump.received, lumpSpent: lump.spent, policyBySource, policy, reserveYield, earn, used, draw, startP, interestP, endP: P,
+        lumpReceived: lump.received, lumpSpent: lump.spent, lumpHeld: lump.held, lumpAdded, policyBySource, policy, reserveYield, earn, used, draw, startP, interestP, endP: P,
         startS, interestS, endS: earning && merged ? merged : endS, merged, total: P + S, reduction });
     }
     return { rows, startPool, today, todayTotal, R, reserve };
@@ -531,7 +536,8 @@
      • Spendable pool starts at corpus − emergency reserve.
      • Weddings due today (0 years) are paid immediately.
      • Household, college fees and other income are inflated from year 1 (see FIRST_YEAR_INFLATION).
-     • Each year: pool × (1 + return) + other income + reserve interest + lump-sum receipt − amount spent
+     • Each year: pool × (1 + return) + other income + reserve interest + lump-sum receipt − amount spent − kept principal held outside
+                  (+ all kept principal added back in the final year)
                   − household − college fees − weddings due that year   (earnings pay these first while the earning phase runs).
      • The reserve principal is never spent; it is added back after the final year. */
   function plan(inp, noEarn) {
@@ -541,7 +547,7 @@
     let housePV = 0, interestPV = 0, runout = null;
     if (sim.startPool < 0) runout = num(inp, "age");
     for (const r of sim.rows) {
-      housePV += (r.house - r.income - (r.lumpReceived - r.lumpSpent)) / (1 + rate) ** r.y;
+      housePV += (r.house - r.income - (r.lumpReceived - r.lumpSpent - r.lumpHeld + r.lumpAdded)) / (1 + rate) ** r.y;
       interestPV += r.reserveYield / (1 + rate) ** r.y;
       if (runout === null && r.total < 0) runout = r.age;
     }
@@ -566,8 +572,8 @@
     };
     const rows = [mk(age, currentYear, 0, sim.todayTotal, sim.startPool, 0, sim.R > 0 ? "earning" : "retired")];
     for (const r of sim.rows.slice(0, years)) {
-      rows.push(mk(r.age, currentYear + r.y, Math.max(r.interestP, 0) + r.interestS + r.earn + r.income + r.reserveYield + r.lumpReceived,
-        r.O + Math.max(-r.interestP, 0) + r.lumpSpent, r.total, r.house, r.earning ? "earning" : "retired"));
+      rows.push(mk(r.age, currentYear + r.y, Math.max(r.interestP, 0) + r.interestS + r.earn + r.income + r.reserveYield + r.lumpReceived + r.lumpAdded,
+        r.O + Math.max(-r.interestP, 0) + r.lumpSpent + r.lumpHeld, r.total, r.house, r.earning ? "earning" : "retired"));
     }
     return rows;
   }
@@ -594,7 +600,7 @@
       let cover = r.used; const take = need => { const t = Math.min(cover, need); cover -= t; return t; };
       const hPaid = take(r.house);
       house = house * (1 + rate) + r.income + r.reserveYield - (r.house - hPaid);
-      grow = grow * (1 + rate) + r.lumpReceived - r.lumpSpent;
+      grow = grow * (1 + rate) + r.lumpReceived - r.lumpSpent - r.lumpHeld + r.lumpAdded;
       for (let c = 1; c <= kids; c++) {
         const fPaid = take(r.fee[c]), wPaid = take(r.wed[c]);
         edu[c] = edu[c] * (1 + rate) - (r.fee[c] - fPaid); wed[c] = wed[c] * (1 + rate) - (r.wed[c] - wPaid);
@@ -611,7 +617,8 @@
 
   /* ---------- Horizon Report: every plan year in full (same arithmetic as plan() and schedule()) ----------
      Money here is the spendable pool (corpus minus the emergency reserve, whose principal is never spent).
-     end = start + money in - money out, where money in also includes lump-sum principal receipts and the existing other-income flow.
+     end = start + money in - money out, where money in also includes lump-sum receipts and the existing other-income flow.
+     Kept lump-sum principal is held outside the corpus (earning only its stated income) and added to the final year's closing corpus.
      A "Today" row is added only when a wedding falls due today. Child columns are arrays indexed by child (1..kids). */
   function horizonReport(inp, opts) {
     const currentYear = (opts && opts.currentYear) || new Date().getFullYear();
@@ -642,10 +649,11 @@
       for (const e of incomeEvents(streams, r.y, years, nowYear())) ev.push(e);
       for (const lump of lumpSums) {
         const label = lump.label || `Lump sum ${lump.k}`;
-        if (lump.year === nowYear() + r.y) ev.push(`${label} received${lump.treatment === "spent" ? " and spent" : ""}`);
+        if (lump.year === nowYear() + r.y) ev.push(`${label} received${lump.treatment === "spent" ? " and spent" : " and held outside the corpus"}`);
         if (lump.treatment === "keep" && lump.year + 1 === nowYear() + r.y) ev.push(`${label} income starts`);
       }
-      const interest = r.startP * (num(inp, "roi") / 100), moneyIn = interest + r.reserveYield + r.income + r.lumpReceived;
+      if (r.lumpAdded > 0) ev.push("Lump sum principal added to the closing corpus");
+      const interest = r.startP * (num(inp, "roi") / 100), moneyIn = interest + r.reserveYield + r.income + r.lumpReceived + r.lumpAdded;
       pool = r.endP;
       const st = status(r.total);
       if (st === "Runs out") ev.push("Money runs out");
@@ -654,7 +662,7 @@
       rows.push({ today: false, year: currentYear + r.y, age: r.age, phase: r.earning ? "Earning" : "Retired", what: plain, monthly: r.house / 12, house: r.house,
         fee: r.fee, wed: r.wed, spent: r.O, start: r.startP, interest, reserveInterest: r.reserveYield, income: r.income,
         incomeBySource: r.incomeBySource, lumpIncomeBySource: r.lumpIncomeBySource, lumpReceived: r.lumpReceived,
-        lumpSpent: r.lumpSpent, policyBySource: r.policyBySource, policy: r.policy, moneyIn, end: r.endP, status: st,
+        lumpSpent: r.lumpSpent, lumpHeld: r.lumpHeld, lumpAdded: r.lumpAdded, policyBySource: r.policyBySource, policy: r.policy, moneyIn, end: r.endP, status: st,
         earn: r.earn, netSaved: r.earning ? r.earn - r.O : 0, startS: r.startS, interestS: r.interestS, endS: r.merged ? r.merged : r.endS, merged: r.merged,
         paidByEarn: r.used, fromCorpus: r.draw });
     }
