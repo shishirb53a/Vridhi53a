@@ -59,7 +59,11 @@
   // One calculation per input state, shared by every view (wizard Result, status summary, detailed summary).
   let memo = { key: "", r: null };
   function result() {
-    const key = JSON.stringify(FH.v);
+    /* Policy payouts come from the Policies module, not from FH.v: include them in the key, otherwise linking or editing a policy
+       after the first calculation keeps returning the old (policy-less) result. */
+    let pk = "";
+    try { pk = JSON.stringify(FHE.policyStreams().map(q => [q.k, q.name, q.byYear])); } catch (e) { pk = ""; }
+    const key = JSON.stringify(FH.v) + "|" + pk;
     if (memo.key !== key) memo = { key, r: FHE.calculate(FH.v) };
     return memo.r;
   }
@@ -977,6 +981,18 @@ html body .sx .sx-key{margin:0 0 2px;font-size:11px;color:var(--mu)}
         const w = FHE.withoutPolicy(() => FHE.calculate(v)), save = w.ok && r.ok !== false ? w.needed - r.needed : 0, tot = ps.reduce((t, q) => t + sum(q), 0), y0 = Math.min(...ps.map(q => q.fromY)), y1 = Math.max(...ps.map(q => q.toY)), span = y0 === y1 ? y0 : y0 + "\u2013" + y1;
         const note = save > 0.5 ? `Not part of your corpus until you receive it. Each payout is counted as income in the year it arrives, which cuts the money needed today by ${sp(save)} (${sp(w.needed)} \u2192 ${sp(r.needed)}). Fixed rupees, not inflated.` : "No effect yet: these payouts fall outside the plan years.";
         oi += `<section class="oi" aria-label="Policy payouts"><div class="oi-h"><span>Policy payouts</span><span>${sp(tot)} still to receive \u00b7 ${span}${ps.length > 1 ? " \u00b7 " + ps.length + " policies" : ""}</span></div><ul>${li}</ul><p class="oi-n"><b>Impact:</b> ${note}</p></section>`;
+      }
+    } catch (e) { }
+    // Policies linked to this client that have nothing to pay out yet (e.g. premium-only term plans): still show them, so the link is visible
+    try {
+      const VP = window.VRPolicy;
+      if (VP && typeof VP.linkedPolicies === "function" && !FHE.policyStreams().length) {
+        const linked = VP.linkedPolicies("retirement");
+        if (linked.length) {
+          const li = linked.map(p => { const m = VP.maturity(p), pr = VP.premTotals(p);
+            return `<li><span>${esc(p.name || "Policy")}</span><small>${pr.count ? esc(String(M(pr.total))) + " premiums" : "No premium plan"}${m && m.date ? " \u00b7 matures " + esc(VP.fmtDate(m.date)) : ""} \u00b7 no payouts to receive</small></li>`; }).join("");
+          oi += `<section class="oi" aria-label="Policies"><div class="oi-h"><span>Policies</span><span>${linked.length} linked</span></div><ul>${li}</ul><p class="oi-n"><b>Impact:</b> No payout or maturity amount is entered for these policies, so they do not change the money needed today. Premiums stay in the Policies section.</p></section>`;
+        }
       }
     } catch (e) { }
     return { hero, actions, pills, pt: ptHTML(v, true), oi, buckets, kids: kidsH, cash, foot, vd };
