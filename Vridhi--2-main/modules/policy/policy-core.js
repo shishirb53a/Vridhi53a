@@ -532,6 +532,8 @@
     /* for other modules */
     usedBy: usedBy, setUsedBy: setUsedBy, hasPayouts: hasPayouts,
     applyToRows: applyToRows, monthPayout: monthPayout, receivedBy: receivedBy, receivedByDate: receivedByDate,
-    receivedByYear: receivedByYear, planStreams: planStreams
+    receivedByYear: receivedByYear, planStreams: planStreams,
+    /* policies shared with the open Goal / Retirement Planner client (whether or not they have payouts yet) */
+    linkedPolicies: function (who) { return policiesFor(who).slice(); }
   };
 })(window);
