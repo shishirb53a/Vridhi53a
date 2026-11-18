@@ -42,32 +42,29 @@ const FF={inter:'Inter',poppins:'Poppins',nunito:'Nunito Sans',plex:'IBM Plex Sa
 const PR=[['Emerald Classic','green','light','inter','#052e2b','#0f766e'],['Midnight Blue','blue','dark','inter','#0b1b4a','#2563eb'],['Royal Purple','purple','light','poppins','#2e1065','#9333ea'],['Executive Navy','indigo','light','plex','#1e1b4b','#4f46e5'],['Sunset Orange','orange','light','nunito','#431407','#ea580c'],['Rosewood','rose','light','lora','#4c0519','#e11d48'],['Graphite Dark','grey','dark','plex','#111827','#64748b'],['Golden Paper','yellow','light','lora','#3b2f05','#ca8a04']];
 [['blue','Blue','#0b1b4a','#1d4ed8'],['indigo','Indigo','#1e1b4b','#4338ca'],['purple','Purple','#2e1065','#7e22ce'],['rose','Rose','#4c0519','#be123c']].forEach(p=>{if(!PALS.some(x=>x[0]===p[0]))PALS.push(p)});
 const K='fwt2-look',D={font:'inter',size:'m',dens:'cosy',rad:'std'};let L=Object.assign({},D);try{Object.assign(L,JSON.parse(localStorage.getItem(K))||{})}catch(e){}
-const ap=()=>{const r=document.documentElement.dataset;r.font=L.font;r.size=L.size;r.dens=L.dens==='cosy'?'':L.dens;r.rad=L.rad==='std'?'':L.rad;try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}};ap();
+const ap=()=>{const r=document.documentElement.dataset;r.font=L.font;r.size=L.size;r.dens=L.dens==='cosy'?'':L.dens;r.rad=L.rad==='std'?'':L.rad;try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}};ap();window.vrLookSet=(k,v)=>{L[k]=v;ap()};window.vrLookReset=()=>{L=Object.assign({},D);ap()};
 const sg=(k,t,o)=>'<div><div class="mu" style="margin-bottom:6px">'+t+'</div><div class="seg" role="group" aria-label="'+t+'">'+o.map(([v,n])=>'<button type="button" data-lk="'+k+':'+v+'" aria-pressed="'+(L[k]===v)+'">'+n+'</button>').join('')+'</div></div>';
 window.lookUI=()=>''+'<div class="sub2">Font</div><div class="fonts" role="group" aria-label="Font">'+FN.map(f=>'<button type="button" class="fb" data-lk="font:'+f[0]+'" aria-pressed="'+(L.font===f[0])+'"><span style="font-family:'+FF[f[0]]+',sans-serif">Aa 123</span>'+f[1]+'<br><small>'+f[2]+'</small></button>').join('')+'</div>'
-+'<div class="sub2">Comfort</div><div class="sgs">'+sg('size','Text size',[['s','A−'],['m','A'],['l','A+'],['xl','A++']])+sg('dens','Table spacing',[['compact','Compact'],['cosy','Normal'],['roomy','Roomy']])+sg('rad','Corners',[['sharp','Sharp'],['std','Default'],['round','Round']])+'</div>'
-+'<div style="margin-top:12px"><button type="button" data-lk="reset:1">Reset look</button></div>';
++'<div class="sgs">'+sg('rad','Corners',[['sharp','Sharp'],['std','Default'],['round','Round']])+'</div>';
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-look],[data-lk]');if(!a)return;
 if(a.dataset.look!=null){const p=PR[+a.dataset.look];S.palette=p[1];S.cc=null;S.theme=p[2];L.font=p[3];save();theme();ap();render();toast(p[0]+' look applied');return}
 const[k,v]=a.dataset.lk.split(':');if(k==='reset'){L=Object.assign({},D)}else L[k]=v;ap();render()});
 })();
 (function(){var K='vr-ui',D={uth:'mono',ubt:'filled',ush:'round',uin:'outlined',utd:'normal',uhd:'plain',utz:'off',utl:'on',utc:'on',ufn:'system',utx:'default',uic:'on'},U=Object.assign({},D);
 try{Object.assign(U,JSON.parse(localStorage.getItem(K))||{})}catch(e){}
-var O={uth:['Colour theme',[['mono','Mono'],['ocean','Ocean'],['emerald','Emerald'],['indigo','Indigo'],['amber','Amber']]],
-ufn:['Font',[['system','System'],['inter','Inter'],['serif','Serif'],['humanist','Humanist'],['mono','Monospace']]],
+var O={ufn:['Font',[['system','System'],['inter','Inter'],['serif','Serif'],['humanist','Humanist'],['mono','Monospace']]],
 utx:['Text colour',[['default','Default'],['charcoal','Charcoal'],['navy','Navy'],['forest','Forest']]],
 ubt:['Button style',[['filled','Filled'],['soft','Soft'],['outline','Outline']]],
 ush:['Corner shape',[['sharp','Sharp'],['round','Rounded'],['pill','Pill']]],
 uin:['Input style',[['outlined','Outlined'],['filled','Filled'],['underline','Underline']]],
-utd:['Table density',[['compact','Compact'],['normal','Normal'],['comfy','Comfortable']]],
 uhd:['Table header',[['plain','Plain'],['tint','Tinted'],['line','Underlined']]],
 utz:['Striped rows',[['off','Off'],['on','On']]],
 utl:['Row lines',[['on','On'],['off','Off']]],
 utc:['Column lines',[['on','On'],['off','Off']]],
 uic:['Icons',[['on','On'],['off','Off']]]};
 function ap(){var r=document.documentElement.dataset;Object.keys(U).forEach(function(k){r[k]=U[k]});try{localStorage.setItem(K,JSON.stringify(U))}catch(e){}}
-ap();var L0=window.lookUI;
-window.lookUI=function(){return'<div class="uip">'+Object.keys(O).map(function(k){return'<div><label for="u_'+k+'">'+O[k][0]+'</label><select id="u_'+k+'" data-ui="'+k+'">'+O[k][1].map(function(o){return'<option value="'+o[0]+'"'+(U[k]===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'}).join('')+'</div><div style="margin:8px 0 12px"><button type="button" data-uireset="1">Reset appearance</button></div>'+(L0?L0():'')};
+ap();window.vrUISet=function(k,v){U[k]=v;ap()};window.vrUIReset=function(){U=Object.assign({},D);ap()};var L0=window.lookUI;
+window.lookUI=function(){return'<div class="uip">'+Object.keys(O).map(function(k){return'<div><label for="u_'+k+'">'+O[k][0]+'</label><select id="u_'+k+'" data-ui="'+k+'">'+O[k][1].map(function(o){return'<option value="'+o[0]+'"'+(U[k]===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'}).join('')+'</div>'+(L0?L0():'')};
 document.addEventListener('change',function(e){var t=e.target;if(t&&t.dataset&&t.dataset.ui){e.stopPropagation();U[t.dataset.ui]=t.value;ap()}},true);
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-uireset]');if(!b)return;e.stopPropagation();U=Object.assign({},D);ap();if(window.render)window.render()},true);
 })();
