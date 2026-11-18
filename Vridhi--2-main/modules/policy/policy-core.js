@@ -75,6 +75,10 @@
     var store = policyStore(s);
     if (!store) return Array.isArray(s.policies) ? s.policies : [];
     var planner = who === 'goal' ? s.gpp : s.fhp, targetId = planner && planner.active;
+    if (!targetId && s === cur()) {   /* the planner creates its client profiles lazily: ask it for them once, so shared policies count before it was first opened */
+      var init = who === 'goal' ? window.gppClientList : window.fhpClientList;
+      if (typeof init === 'function') { try { init(); } catch (e) {} planner = who === 'goal' ? s.gpp : s.fhp; targetId = planner && planner.active; }
+    }
     if (!targetId) return [];
     return Object.keys(store.profiles).reduce(function (out, id) {
       var p = store.profiles[id], share = p.share && p.share[who];
