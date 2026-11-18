@@ -1,0 +1,38 @@
+html[data-minimal-theme=true]{
+  --bg:#fff!important;--card:#fff!important;--tx:#111!important;--mu:#444!important;--bd:#888!important;
+  --ac:#111!important;--acb:#111!important;--brand:#111!important;--on:#fff!important;--rpc:#111!important;--rpt:#111!important;
+  --hl:#eee!important;--hl2:#f5f5f5!important;--hv:#f5f5f5!important;--hd:#fff!important;--thc:#eee!important;
+  --ok:#111!important;--er:#111!important;--cmp-ok:#111!important;--cmp-bad:#111!important;--r:0;--sh:none
+}
+@media(prefers-color-scheme:dark){
+  html[data-minimal-theme=true]:not([data-theme=light]){
+    --bg:#000!important;--card:#000!important;--tx:#fff!important;--mu:#ccc!important;--bd:#888!important;
+    --ac:#fff!important;--acb:#fff!important;--brand:#fff!important;--on:#000!important;--rpc:#fff!important;--rpt:#fff!important;
+    --hl:#222!important;--hl2:#181818!important;--hv:#181818!important;--hd:#000!important;--thc:#222!important;
+    --ok:#fff!important;--er:#fff!important;--cmp-ok:#fff!important;--cmp-bad:#fff!important
+  }
+}
+html[data-minimal-theme=true][data-theme=dark]{
+  --bg:#000!important;--card:#000!important;--tx:#fff!important;--mu:#ccc!important;--bd:#888!important;
+  --ac:#fff!important;--acb:#fff!important;--brand:#fff!important;--on:#000!important;--rpc:#fff!important;--rpt:#fff!important;
+  --hl:#222!important;--hl2:#181818!important;--hv:#181818!important;--hd:#000!important;--thc:#222!important;
+  --ok:#fff!important;--er:#fff!important;--cmp-ok:#fff!important;--cmp-bad:#fff!important
+}
+html[data-minimal-theme=true] body{background:var(--bg)!important;color:var(--tx)!important}
+html[data-minimal-theme=true] body *,
+html[data-minimal-theme=true] body *::before,
+html[data-minimal-theme=true] body *::after{
+  color:var(--tx)!important;border-color:var(--bd)!important;border-radius:0!important;
+  box-shadow:none!important;text-shadow:none!important;background-image:none!important
+}
+html[data-minimal-theme=true] body :is(button,input,select,textarea){
+  color:var(--tx)!important;background:var(--card)!important;border:1px solid var(--bd)!important;
+  box-shadow:none!important
+}
+html[data-minimal-theme=true] body :is(.card,.hero,.bn,.hd,nav,dialog,[role=dialog],.gpp-drawer,.gpp-best-banner,th,td){
+  color:var(--tx)!important;background-color:var(--card)!important;border-color:var(--bd)!important
+}
+html[data-minimal-theme=true] body :focus-visible{outline:2px solid var(--ac)!important;outline-offset:2px}
+html[data-minimal-theme=true] body :is(svg,canvas,img){filter:grayscale(1)!important}
+html[data-minimal-theme=true] body .hero svg.hbg,
+html[data-minimal-theme=true] body .hero .hsh{display:none!important}

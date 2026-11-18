@@ -80,12 +80,12 @@ html body .gpp-foot{margin:0;color:var(--mu);font-size:12px;line-height:1.5}
   html body .gpp-table-wrap.gpp-plans,html body .gpp-table-wrap:has(.gpp-table){border:0;background:transparent;overflow:visible}
   html body .gpp-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   html body .gpp-table,html body .gpp-table tbody{display:block}
-  html body .gpp-table tr.gpp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;position:relative;margin:0 0 10px;padding:12px 12px 12px 48px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
+  html body .gpp-table tr.gpp-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 12px;position:relative;margin:0 0 10px;padding:12px 12px 12px 48px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
   html body .gpp-table tr.gpp-row.is-active{border:2px solid var(--ac);padding:11px 11px 11px 47px}
   html body .gpp-table tr.gpp-row.is-selected{background:color-mix(in srgb,var(--ac) 8%,var(--card))}
   html body .gpp-table tr.gpp-row td{display:block;padding:0;border:0;background:transparent!important;box-shadow:none!important;text-align:left}
   html body .gpp-table td[data-label]:not([data-label=""])::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--mu);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
-  html body .gpp-table td.num{text-align:left}
+  html body .gpp-table td.num{text-align:left;white-space:normal;overflow-wrap:anywhere}
   html body .gpp-table td.gpp-c-sel{position:absolute;left:12px;top:12px;width:auto}
   html body .gpp-table td.gpp-c-name{grid-column:1/-1;min-width:0}
   html body .gpp-table td.gpp-c-prog,html body .gpp-table td.gpp-c-act{grid-column:1/-1;min-width:0}
@@ -121,13 +121,13 @@ html body .gpp-drawer .gpp-compare-btn:disabled{background:transparent!important
 /* Clients opens as a complete page (not a side drawer) */
 html body .gpp-overlay{display:block;background:var(--bg)}
 html body .gpp-overlay[hidden]{display:none}
-html body .gpp-drawer.gpp-drawer-wide{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;border:0;border-radius:0;box-shadow:none;animation:none;background:var(--bg)}
-html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-header{padding:16px max(16px,calc((100% - 1200px)/2));background:var(--card)}
+html body .gpp-drawer.gpp-drawer-wide{position:fixed;inset:0;display:flex;flex-direction:column;box-sizing:border-box;width:100%;max-width:none;height:100%;height:100dvh;min-height:0;max-height:none;overflow:hidden;border:0;border-radius:0;box-shadow:none;animation:none;background:var(--bg)}
+html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-header{padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,calc((100% - 1200px)/2)) 16px;background:var(--card)}
 html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-header h2{font-size:24px}
-html body .gpp-drawer.gpp-drawer-wide .gpp-client-list{padding:16px max(16px,calc((100% - 1200px)/2));max-height:none}
-html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-footer{padding-left:max(16px,calc((100% - 1200px)/2));padding-right:max(16px,calc((100% - 1200px)/2))}
+html body .gpp-drawer.gpp-drawer-wide .gpp-client-list{flex:1 1 auto;min-height:0;width:100%;box-sizing:border-box;overflow-x:hidden;padding:16px max(16px,calc((100% - 1200px)/2));max-height:none}
+html body .gpp-drawer.gpp-drawer-wide .gpp-drawer-footer{box-sizing:border-box;padding-left:max(16px,calc((100% - 1200px)/2));padding-right:max(16px,calc((100% - 1200px)/2))}
 html body .gpp-drawer.gpp-drawer-wide .gpp-add-client{max-width:320px;margin-left:auto}
-@media (max-width:639px){html body .gpp-drawer.gpp-drawer-wide{height:100%;max-height:none;border-radius:0}html body .gpp-drawer.gpp-drawer-wide .gpp-client-list{max-height:none}}
+@media (max-width:639px){html body .gpp-drawer.gpp-drawer-wide{height:100%;height:100dvh;max-height:none;border-radius:0}html body .gpp-drawer.gpp-drawer-wide .gpp-client-list{max-height:none}}
 
 /* Row action menu: opened menus are fixed-position (set from JS) so the scrolling table wrapper can never clip them */
 html body .gpp-kebab[open]>.gpp-menu{position:fixed;z-index:60;max-width:calc(100vw - 16px)}

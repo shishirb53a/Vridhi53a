@@ -10,10 +10,10 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const appCoreSource = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
 const moduleSource = fs.readFileSync(path.join(root, 'modules', 'theme', 'theme.js'), 'utf8');
-const themeTag = '<script src="modules/theme/theme.js?v=144"></script>';
+const themeTag = '<script src="modules/theme/theme.js?v=145"></script>';
 const themePosition = html.indexOf(themeTag);
 const coreReady = html.indexOf('<script src="modules/app-core/app.js?v=173"></script>');
-const dashboardPosition = html.indexOf('<script src="modules/dashboard-preferences/dashboard-preferences.js?v=141"></script>');
+const dashboardPosition = html.indexOf('<script src="modules/dashboard-preferences/dashboard-preferences.js?v=142"></script>');
 assert.ok(coreReady >= 0 && themePosition > coreReady && dashboardPosition > themePosition,
   'Theme module loads after app callbacks exist and before appearance preferences');
 assert.strictEqual(html.indexOf(themeTag, themePosition + themeTag.length), -1,
@@ -60,19 +60,19 @@ context.VRTheme.configure({
   toast(message) { toasts.push(message); }
 });
 context.VRTheme.apply();
-assert.strictEqual(context.brandOf(), '#1e3a8a', 'Unset brand uses Ocean Navy');
+assert.strictEqual(context.brandOf(), '#0b2545', 'Unset brand uses Ledger navy');
 assert.ok(context.ccUI().includes('role="radiogroup"') &&
   context.ccUI().includes('Text contrast') && context.ccUI().includes('aria-checked="true"'),
 'Colour picker retains its accessible selected-state and contrast details');
 assert.strictEqual(typeof mediaChange, 'function', 'System color-scheme changes refresh theme colors');
 assert.strictEqual(rootElement.dataset.pal, 'yellow', 'Page theme applies the selected palette attribute');
-assert.strictEqual(styles['--brand'], '#1e3a8a', 'Page theme applies the selected brand color');
+assert.strictEqual(styles['--brand'], '#0b2545', 'Page theme applies the selected brand color');
 
 state.cc = '#00ff00';
-assert.strictEqual(context.brandOf(), '#065f46', 'Custom colors map to the nearest supported theme');
+assert.strictEqual(context.brandOf(), '#14392b', 'Custom colors map to the nearest supported theme');
 state.cc = '#777777';
-assert.strictEqual(context.brandOf(), '#334155', 'Low-chroma custom colors map to Graphite');
-state.cc = '#1e3a8a';
+assert.strictEqual(context.brandOf(), '#3b4252', 'Low-chroma custom colors map to Graphite');
+state.cc = '#0b2545';
 state.theme = 'system';
 context.VRTheme.apply();
 assert.ok(!Object.prototype.hasOwnProperty.call(rootElement.dataset, 'theme'),
@@ -80,7 +80,7 @@ assert.ok(!Object.prototype.hasOwnProperty.call(rootElement.dataset, 'theme'),
 state.theme = 'dark';
 context.VRTheme.apply();
 assert.strictEqual(rootElement.dataset.theme, 'dark', 'Dark appearance sets the dark theme attribute');
-assert.notStrictEqual(styles['--brand'], '#1e3a8a', 'Dark appearance adjusts the selected brand');
+assert.notStrictEqual(styles['--brand'], '#0b2545', 'Dark appearance adjusts the selected brand');
 
 function click(dataset, disabled) {
   listeners.click({
@@ -95,12 +95,12 @@ assert.strictEqual(state.cc, null, 'High contrast clears an insufficient custom 
 assert.strictEqual(saves, 1, 'High-contrast change persists app state');
 assert.strictEqual(renders, 1, 'High-contrast change rerenders the app');
 
-click({ cc: '#065f46' });
-assert.strictEqual(state.cc, '#065f46', 'Theme selection stores the selected color');
+click({ cc: '#14392b' });
+assert.strictEqual(state.cc, '#14392b', 'Theme selection stores the selected color');
 assert.strictEqual(saves, 2, 'Theme selection persists app state');
 assert.strictEqual(renders, 2, 'Theme selection rerenders the app');
-assert.deepStrictEqual(toasts, ['Emerald theme applied'], 'Named theme selection shows confirmation');
-assert.strictEqual(context.brandOf(), '#065f46', 'Selected theme is reflected by brand lookup');
+assert.deepStrictEqual(toasts, ['Private bank theme applied'], 'Named theme selection shows confirmation');
+assert.strictEqual(context.brandOf(), '#14392b', 'Selected theme is reflected by brand lookup');
 
 const previous = { cc: state.cc, saves, renders, toastCount: toasts.length };
 click({ cc: '#881337' }, true);

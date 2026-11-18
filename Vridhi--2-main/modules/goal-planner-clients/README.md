@@ -12,4 +12,4 @@ the app's state, save/render functions, dialog, calculation helpers, and `GPP_KE
 The drawer reuses the existing profile handlers and dialogs; drawer state is transient and
 does not add storage keys. Goal Planner report navigation stays in the reports view.
 
-Run `node tests/goal-planner-clients.test.js` after changing this module.
+Run `node tests/goal-planner-clients.test.js` and `node tests/mobile-client-switcher.test.js` after changing this module.

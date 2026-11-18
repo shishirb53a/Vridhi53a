@@ -31,7 +31,7 @@ const positions = scripts.map(([file, marker]) => {
     : file === 'modules/app-shell/dialog-logo.js' ? 'fh-logo' : null;
   const tag = scriptId
     ? `<script id="${scriptId}" src="${file}?v=147"></script>`
-    : `<script src="${file}?v=${{ 'modules/reports/roi-summary.js': '148', 'modules/theme/professional-themes.js': '148', 'modules/theme/appearance-pro.js': '1' }[file] || '147'}"></script>`;
+    : `<script src="${file}?v=${{ 'modules/reports/roi-summary.js': '148', 'modules/theme/professional-themes.js': '149', 'modules/theme/appearance-pro.js': '2' }[file] || '147'}"></script>`;
   const index = html.indexOf(tag);
   assert.ok(index >= 0, `${file} is loaded synchronously from index.html`);
   assert.strictEqual(html.indexOf(tag, index + tag.length), -1, `${file} is included only once`);
