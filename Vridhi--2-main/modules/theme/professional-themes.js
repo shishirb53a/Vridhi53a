@@ -1,13 +1,10 @@
 (function(){
 var T=[
-["default","Default","Original colours",null,null],
-["boardroom","Boardroom","Cool steel and navy",{bg:"#eef1f6",card:"#ffffff",tx:"#0f1b2d",mu:"#46556b",bd:"#d5dbe5"},{bg:"#0c1220",card:"#141c2e",tx:"#e6ebf5",mu:"#aab6cc",bd:"#26324a"}],
-["bank","Private Bank","Warm ivory, calm",{bg:"#f7f4ee",card:"#fffdf9",tx:"#2a241b",mu:"#5e5446",bd:"#e4dccd",hl:"#fbefc7",hl2:"#e0efdc"},{bg:"#16130f",card:"#201c16",tx:"#efe8dc",mu:"#bfb5a3",bd:"#352f25"}],
-["evergreen","Evergreen","Soft green wealth tone",{bg:"#f1f6f3",card:"#ffffff",tx:"#11261c",mu:"#42584c",bd:"#d6e3db"},{bg:"#0d1612",card:"#15211b",tx:"#e5f0ea",mu:"#a9c0b3",bd:"#243529"}],
-["mono","Slate Mono","Neutral greyscale",{bg:"#f3f4f6",card:"#ffffff",tx:"#111827",mu:"#4b5563",bd:"#e5e7eb"},{bg:"#0f1115",card:"#181b21",tx:"#eceef2",mu:"#b0b6c2",bd:"#2a2e37"}],
-["contrast","High Contrast","Maximum legibility",{bg:"#ffffff",card:"#ffffff",tx:"#000000",mu:"#2b3340",bd:"#7a8494",hl:"#ffe680",hl2:"#bfe8c9"},{bg:"#000000",card:"#0b0b0b",tx:"#ffffff",mu:"#dde3ee",bd:"#7b8494"}]
-],K="vr-pro",r=document.documentElement,used={},LG={boardroom:["#0b1220","#13233f"],bank:["#241c14","#4a3a26"],evergreen:["#0a2218","#14402f"],mono:["#0f1216","#2b303a"],contrast:["#000000","#1c1c1c"]};
-function get(){try{return localStorage.getItem(K)||"default"}catch(e){return"default"}}
+["ledger","Ledger navy","Clean and trusted",{bg:"#f4f6f9",card:"#ffffff",tx:"#0f1b2d",mu:"#4a586c",bd:"#dfe4ec"},{bg:"#0c1220",card:"#141c2e",tx:"#e6ebf5",mu:"#aab6cc",bd:"#26324a"}],
+["bank","Private bank","Warm ivory and green",{bg:"#f6f3ec",card:"#fffefb",tx:"#2a241b",mu:"#5e5446",bd:"#e6dfd0",hl:"#fbefc7",hl2:"#e0efdc"},{bg:"#16130f",card:"#201c16",tx:"#efe8dc",mu:"#bfb5a3",bd:"#352f25"}],
+["graphite","Graphite","Charcoal with gold",{bg:"#eef0f4",card:"#ffffff",tx:"#141922",mu:"#4b5565",bd:"#dde1e8"},{bg:"#0f1319",card:"#171c24",tx:"#eef1f6",mu:"#9aa5b8",bd:"#2a313d"}]
+],K="vr-pro",r=document.documentElement,used={},LG={ledger:["#0b1220","#13233f"],bank:["#241c14","#4a3a26"],graphite:["#0f1216","#2b303a"]},AL={"default":"ledger",boardroom:"ledger",contrast:"ledger",evergreen:"bank",mono:"graphite"};
+function get(){var v="ledger";try{v=localStorage.getItem(K)||"ledger"}catch(e){}return AL[v]||v}
 function dark(){var a=r.getAttribute("data-theme");return a==="dark"||(!a&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)}
 function sp(n,v){r.style.setProperty(n,v);if(document.body)document.body.style.setProperty(n,v)}function rp(n){r.style.removeProperty(n);if(document.body)document.body.style.removeProperty(n)}
 function apply(){Object.keys(used).forEach(function(k){rp("--"+k)});used={};var k=get(),x=T.filter(function(z){return z[0]===k})[0];if(!x||!x[3])return;var v=dark()?x[4]:x[3];Object.keys(v).forEach(function(n){sp("--"+n,v[n]);used[n]=1});var g=LG[k];if(g){sp("--lg1",g[0]);sp("--lg2",g[1]);used.lg1=1;used.lg2=1}}
@@ -18,7 +15,6 @@ function pick(el){var k=el.getAttribute("data-pro");try{localStorage.setItem(K,k
 window.vrPro={T:T,get:get,set:function(k){try{localStorage.setItem(K,k)}catch(e){}apply();document.querySelectorAll(".pro-i").forEach(function(n){n.setAttribute("aria-checked",String(n.getAttribute("data-pro")===k))})}};
 document.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest(".pro-i");if(el)pick(el)});
 document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("pro-i")){e.preventDefault();pick(e.target)}});
-var o=window.lookUI;window.lookUI=function(){return(o?o.apply(this,arguments):"")+ui()};
 try{new MutationObserver(apply).observe(r,{attributes:true,attributeFilter:["data-theme"]})}catch(e){}
 try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",apply)}catch(e){}
 apply()})();

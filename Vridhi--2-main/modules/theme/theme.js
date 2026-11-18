@@ -3,10 +3,9 @@
   var WHITE = '#ffffff';
   var BLACK = '#000000';
   var THEMES = [
-    { k: 'navy', n: 'Ocean Navy', c: '#1e3a8a', d: 'Trusted and calm. The classic finance look.' },
-    { k: 'emerald', n: 'Emerald', c: '#065f46', d: 'Growth and stability. Easy on the eyes.' },
-    { k: 'graphite', n: 'Graphite', c: '#334155', d: 'Neutral and focused. Lets the numbers lead.' },
-    { k: 'burgundy', n: 'Burgundy', c: '#881337', d: 'Premium and confident. A warm, heritage feel.' }
+    { k: 'ledger', n: 'Ledger navy', c: '#0b2545', d: 'Clean and trusted. The classic finance look.' },
+    { k: 'bank', n: 'Private bank', c: '#14392b', d: 'Warm ivory and deep green. Calm and premium.' },
+    { k: 'graphite', n: 'Graphite', c: '#3b4252', d: 'Charcoal with a gold accent. Lets the numbers lead.' }
   ];
 
   function channels(color) {
@@ -38,8 +37,7 @@
       : max === rgb[1] ? (rgb[2] - rgb[0]) / delta + 2
         : (rgb[0] - rgb[1]) / delta + 4;
     hue = (hue * 60 + 360) % 360;
-    return hue >= 75 && hue < 190 ? THEMES[1].c
-      : hue >= 190 && hue < 265 ? THEMES[0].c : THEMES[3].c;
+    return hue >= 75 && hue < 190 ? THEMES[1].c : THEMES[0].c;
   }
   function state() { return app ? app.getState() : null; }
   function brand() {

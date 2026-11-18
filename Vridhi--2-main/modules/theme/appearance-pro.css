@@ -1,0 +1,35 @@
+/* Simplified Appearance screen */
+.ap{display:grid;gap:4px}
+.ap-l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:16px 0 6px}
+.ap-n{margin:6px 0 0;font-size:12px}
+.ap-th{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.ap-c{display:grid;gap:4px;text-align:left;padding:10px;border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx);cursor:pointer;min-height:0}
+.ap-c:hover{border-color:var(--ac)}
+.ap-c[aria-checked=true]{border:2px solid var(--ac);padding:9px}
+.ap-pv{display:flex;gap:6px;height:54px;padding:8px;border-radius:8px}
+.ap-pv i{flex:1;border-radius:4px;display:block}
+.ap-pv b{width:26px;border-radius:4px;display:block}
+.ap-nm{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.ap-nm em{font-style:normal;font-weight:500;font-size:11px;padding:1px 8px;border-radius:99px;background:color-mix(in srgb,var(--ac) 12%,var(--card));color:var(--ac)}
+.ap-ds{font-size:12px;color:var(--mu)}
+.ap-adv{margin-top:18px;border:1px dashed var(--bd);border-radius:10px;padding:10px 12px}
+.ap-adv>summary{cursor:pointer;color:var(--mu);font-size:13px}
+.ap-adv[open]>summary{margin-bottom:12px}
+.ap-ft{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
+
+/* Header light/dark toggle (replaces the floating "Look" menu) */
+html body header.hd .ap-mode{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;min-height:40px;padding:0;margin-right:6px;border-radius:10px;background:transparent;color:inherit;border:1px solid color-mix(in srgb,currentColor 28%,transparent);cursor:pointer}
+html body header.hd .ap-mode:hover{background:color-mix(in srgb,currentColor 10%,transparent)}
+html body header.hd .ap-mode svg{display:block;flex:none}
+
+/* Retirement Planner summary: clean white cards, hairline borders, slim navy bars (no grey tinted fills, no black blocks) */
+html body .sx .sx-hero,html body .sx .sx-r,html body .sx .sx-pill,html body .sx .sx-as,html body .sx .sx-seg{background:var(--card)!important;border:1px solid var(--bd)!important;color:var(--tx)}
+html body .sx .sx-bar{height:6px;background:color-mix(in srgb,var(--mu) 16%,var(--card))!important}
+html body .sx .sx-bar i{background:var(--ac)!important}
+html body .sx .sx-tr{background:color-mix(in srgb,var(--mu) 16%,var(--card))!important}
+html body .sx .sx-tr i{background:var(--sxg,var(--ac))}
+html body .sx :is(.sx-hero,.sx-r,.sx-pill,.sx-as){box-shadow:var(--sh)}
+html body .sx .sx-ok{background:#0f7b5f}
+html body .sx .sx-mid{background:#b7791f}
+html body .sx .sx-bad{background:#b42318}
+html body :is(.card,.sx,.rp2) :is(td,th,.n,.num,.v,.amt){font-variant-numeric:tabular-nums}
