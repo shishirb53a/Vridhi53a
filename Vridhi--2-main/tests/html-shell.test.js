@@ -19,8 +19,8 @@ const scripts = [
   ['modules/reports/holding-report.js', 'var TT={year:'],
   ['modules/app-shell/dialog-number-format.js', 'build 112: wrap every amount'],
   ['modules/app-shell/dialog-logo.js', 'build 126: put the Vriddhi logo'],
-  ['modules/theme/professional-themes.js', 'Original colours'],
-  ['modules/theme/skin-selector.js', '"enterprise","Enterprise"'],
+  ['modules/theme/professional-themes.js', 'Charcoal with gold'],
+  ['modules/theme/appearance-pro.js', 'Simplified Appearance'],
   ['modules/holdings/snapshot-ui.js', 'window.snapUI=function()']
 ];
 
@@ -31,7 +31,7 @@ const positions = scripts.map(([file, marker]) => {
     : file === 'modules/app-shell/dialog-logo.js' ? 'fh-logo' : null;
   const tag = scriptId
     ? `<script id="${scriptId}" src="${file}?v=147"></script>`
-    : `<script src="${file}?v=${file === 'modules/reports/roi-summary.js' ? '148' : '147'}"></script>`;
+    : `<script src="${file}?v=${{ 'modules/reports/roi-summary.js': '148', 'modules/theme/professional-themes.js': '148', 'modules/theme/appearance-pro.js': '1' }[file] || '147'}"></script>`;
   const index = html.indexOf(tag);
   assert.ok(index >= 0, `${file} is loaded synchronously from index.html`);
   assert.strictEqual(html.indexOf(tag, index + tag.length), -1, `${file} is included only once`);
