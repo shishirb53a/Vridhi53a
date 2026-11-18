@@ -30,6 +30,13 @@ win.fhpClientList = function () {            // what the planner does: build the
   const s = win.__getS(); if (!s.fhp) s.fhp = { active: 'asha', profiles: { asha: { name: 'Asha' } } };
   return [{ id: 'asha', name: 'Asha' }];
 };
+const unloaded = state();
+V.cleanClients(unloaded.polClients, { polFh: true, polGp: true }, unloaded);
+win.__setS(unloaded);
+const afterLoad = win.__vrExtraStreams(2030);
+assert.strictEqual(afterLoad.length, 1, 'cleaning a plan before lazy Retirement Planner initialization preserves its policy share');
+assert.strictEqual(afterLoad[0].name, 'Policy: Tata');
+
 win.__setS(state());
 const streams = win.__vrExtraStreams(2030);
 assert.strictEqual(streams.length, 1, 'a policy shared with a not-yet-created retirement profile reaches the planner once the profile is created');

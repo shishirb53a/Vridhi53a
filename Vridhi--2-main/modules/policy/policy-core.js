@@ -409,8 +409,11 @@
     var out = {}, goalIds = {}, retirementIds = {}, names = {};
     plannerClients('goal', s).forEach(function (c) { goalIds[c.id] = true; });
     plannerClients('retirement', s).forEach(function (c) { retirementIds[c.id] = true; });
-    function cleanIds(ids, valid) {
-      return Array.from(new Set((Array.isArray(ids) ? ids : []).map(String))).filter(function (id) { return valid[id]; });
+    function cleanIds(ids, valid, preserveUninitialized) {
+      var hasProfiles = Object.keys(valid).length > 0;
+      return Array.from(new Set((Array.isArray(ids) ? ids : []).map(String))).filter(function (id) {
+        return valid[id] || (preserveUninitialized && !hasProfiles && /^[a-z0-9][a-z0-9-]{0,23}$/.test(id));
+      });
     }
     function addProfile(id, q, fallbackEnabled) {
       if (!/^[a-z0-9][a-z0-9-]{0,23}$/.test(id) || id in Object.prototype || Object.keys(out).length >= 30 || !q || typeof q !== 'object') return;
@@ -424,7 +427,7 @@
       out[id] = {
         name: name,
         policies: clean(q.policies),
-        share: { goal: cleanIds(share.goal, goalIds), retirement: cleanIds(share.retirement, retirementIds) },
+        share: { goal: cleanIds(share.goal, goalIds), retirement: cleanIds(share.retirement, retirementIds, true) },
         enabled: {
           goal: typeof enabled.goal === 'boolean' ? enabled.goal : fallbackEnabled.goal,
           retirement: typeof enabled.retirement === 'boolean' ? enabled.retirement : fallbackEnabled.retirement

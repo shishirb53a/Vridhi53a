@@ -48,7 +48,7 @@ Plans saved before this module existed contain only the first four rows and load
 | `receivedBy(s, row)`, `receivedByYear(s, row)` | Goal Planner dashboard: payouts received so far, year by year |
 | `hasPayouts('goal')` | report columns: show policy columns only when there is something to show |
 | `planStreams(calendarYear)` (also `window.__vrExtraStreams`) | Retirement Planner engine: fixed-rupee income by calendar year |
-| `cleanState(doc, s)`, `cleanClients(doc, source, s)` | the plan's `clean()`: migrates legacy policies and validates Policy clients on load |
+| `cleanState(doc, s)`, `cleanClients(doc, source, s)` | the plan's `clean()`: migrates legacy policies and validates Policy clients on load; preserves valid Retirement Planner share IDs until its lazy profile is initialized |
 
 Inside the module: `clients() addClient() renameClient() selectClient() setClients()`, `list() get() put() remove() setPaid() markPaidUpTo()`, `schedule() premSchedule() totals() premTotals()
 maturity() status()`, `events() summary() byFinancialYear() payoutMatrix()`.
