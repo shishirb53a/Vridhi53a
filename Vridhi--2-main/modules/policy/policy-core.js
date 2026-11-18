@@ -70,10 +70,8 @@
   function policiesFor(who, s) {
     s = s || cur();
     if (!s) return [];
-    var moduleOn = usedBy(who, s);
-    if (!moduleOn) return [];
     var store = policyStore(s);
-    if (!store) return Array.isArray(s.policies) ? s.policies : [];
+    if (!store) return usedBy(who, s) && Array.isArray(s.policies) ? s.policies : [];
     var planner = who === 'goal' ? s.gpp : s.fhp, targetId = planner && planner.active;
     if (!targetId && s === cur()) {   /* the planner creates its client profiles lazily: ask it for them once, so shared policies count before it was first opened */
       var init = who === 'goal' ? window.gppClientList : window.fhpClientList;

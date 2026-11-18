@@ -165,6 +165,19 @@ t('Policy clients keep policies separate and share only with selected planner cl
   V.applyToRows(state, unshared);
   assert.ok(unshared.every(r => !r.pay));
 });
+t('Retirement Planner sharing does not depend on the selected Policy client', () => {
+  const state = {
+    policies: [], polGp: true, polFh: true, start: 2026,
+    gpp: { active: 'goal-a', profiles: { 'goal-a': { name: 'Alice' } } },
+    fhp: { active: 'ret-a', profiles: { 'ret-a': { name: 'Alice' } } }
+  };
+  V.cleanClients({ active: 'policy-b', profiles: {
+    'policy-a': { name: 'Alice policies', policies: [mk()], share: { goal: [], retirement: ['ret-a'] }, enabled: { goal: false, retirement: true } },
+    'policy-b': { name: 'Bob policies', policies: [mk({ id: 'b', name: 'Bob policy', amt: 2000 })], share: { goal: [], retirement: [] }, enabled: { goal: false, retirement: false } }
+  } }, { polGp: true, polFh: true }, state);
+  win.__setS(state);
+  assert.strictEqual(win.__vrExtraStreams(2030)[0].name, 'Policy: Tata');
+});
 t('legacy Goal Planner policy records migrate to independent Policy clients', () => {
   const state = {
     policies: [], polGp: true, polFh: true,
