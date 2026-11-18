@@ -11,7 +11,7 @@ html body #lg label.lgsv span{line-height:1.2}
  html body #lg .er{min-height:0;margin:8px 0 0}
 }
 @media (max-width:720px){
- html:not(#vrx) body header.hd .hdi{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto auto;grid-template-areas:"brand who settings so" "nav nav nav nav";align-items:center;column-gap:8px;row-gap:6px;padding:8px 12px 0!important;max-width:none!important;min-height:0!important;flex-wrap:nowrap!important}
+ html:not(#vrx) body header.hd .hdi{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto auto;grid-template-areas:"brand who settings so" "nav nav nav nav" "client client client client";align-items:center;column-gap:8px;row-gap:6px;padding:8px 12px 0!important;max-width:none!important;min-height:0!important;flex-wrap:nowrap!important}
  html:not(#vrx) body header.hd .hdi>*{margin:0!important}
  html:not(#vrx) body header.hd .brand{grid-area:brand;min-width:0;display:flex!important;align-items:center;gap:10px;flex:none}
  html:not(#vrx) body header.hd .brand>div:last-child{min-width:0}
@@ -85,7 +85,7 @@ html:not(#vrx) body header.hd #settings-menu-wrap .settings-menu button:hover{ba
    Phones: the Goal Planner client switcher opens its drawer; the Retirement Planner switcher and add action stay at the top,
    so the copy squeezed into the header is hidden. The module menu gets the full row, so "Goal Planner" is never cut. */
 @media (max-width:720px){
- html:not(#vrx) body header.hd #fhp,
+ html:not(#vrx) body header.hd #fhp:not(:has(.gpp-client-trigger)),
  html:not(#vrx) body header.hd #fhp[hidden]{display:none!important}
  html:not(#vrx) body header.hd nav{padding:0!important;min-width:0}
  html:not(#vrx) body header.hd #nav .nav-modules{flex:1 1 100%;width:100%;min-width:0}
@@ -96,6 +96,9 @@ html:not(#vrx) body header.hd #settings-menu-wrap .settings-menu button:hover{ba
  html:not(#vrx) body header.hd #nav .module-menu{left:0;right:0;min-width:0;width:auto;padding:6px;gap:2px}
  html:not(#vrx) body header.hd #nav .module-menu button{flex-direction:row!important;justify-content:flex-start!important;align-items:center;gap:12px!important;min-height:48px!important;padding:8px 14px!important;font-size:15px!important;text-align:left;border-bottom:0!important;border-radius:8px!important;text-decoration:none!important;color:var(--tx)!important;background:transparent!important}
  html:not(#vrx) body header.hd #nav .module-menu button[aria-current]{background:color-mix(in srgb,var(--ac) 12%,var(--card))!important;font-weight:700;box-shadow:inset 3px 0 0 var(--ac)}
+ html:not(#vrx) body header.hd #fhp:has(.gpp-client-trigger){grid-area:client;display:flex!important;flex-direction:column;align-items:stretch;gap:6px;width:100%;min-width:0;padding:8px 0 0;overflow:visible}
+ html:not(#vrx) body header.hd #fhp:has(.gpp-client-trigger) .fhp-l{display:block!important;margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+ html:not(#vrx) body header.hd #fhp .gpp-client-trigger{flex:1 1 auto;width:100%;min-width:0;max-width:none;height:44px;min-height:44px;padding:0 12px!important;font-size:14px!important}
  /* the page-level client bar: a clean card with the label above the controls */
  html:not(#vrx) body .fhp.fhp-m{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"lab lab" "sel add";column-gap:8px;row-gap:6px;align-items:center;width:100%;margin:0 0 14px;padding:10px 12px 12px;box-sizing:border-box;background:var(--card);border:1px solid var(--bd);border-radius:12px;box-shadow:0 1px 2px rgba(15,23,42,.06)}
  html:not(#vrx) body .fhp.fhp-m .fhp-l{grid-area:lab;display:block!important;margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
