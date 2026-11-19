@@ -13,7 +13,7 @@ html body .hp-card{padding:0;overflow:hidden}
 .hp-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--bd)}
 .hp-search{position:relative;flex:1 1 260px;min-width:200px;margin:0}
 .hp-search svg{position:absolute;left:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);color:var(--mu);pointer-events:none}
-html body .hp-search input{box-sizing:border-box;width:100%;min-width:0;padding-left:36px;min-height:44px;border-radius:99px}
+html body .hp-search input{box-sizing:border-box;width:100%;min-width:0;padding:10px 14px 10px 42px !important;text-indent:0;min-height:44px;border-radius:99px;-webkit-appearance:none;appearance:none}
 .hp-sort{display:flex;gap:8px;align-items:center}
 html body .hp-sort button{min-width:44px;min-height:44px;padding:0;border-radius:12px}
 .hp-portfolio-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
