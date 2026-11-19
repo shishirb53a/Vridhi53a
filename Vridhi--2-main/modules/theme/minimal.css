@@ -21,9 +21,9 @@ html[data-minimal-theme=true][data-theme=dark] body{
   --ok:#fff!important;--er:#fff!important;--cmp-ok:#fff!important;--cmp-bad:#fff!important
 }
 html[data-minimal-theme=true] body{background:var(--bg)!important;color:var(--tx)!important}
-html[data-minimal-theme=true] body *,
-html[data-minimal-theme=true] body *::before,
-html[data-minimal-theme=true] body *::after{
+html[data-minimal-theme=true]:not(#vrx) body *,
+html[data-minimal-theme=true]:not(#vrx) body *::before,
+html[data-minimal-theme=true]:not(#vrx) body *::after{
   color:var(--tx)!important;border-color:var(--bd)!important;border-radius:0!important;
   box-shadow:none!important;text-shadow:none!important;background-image:none!important
 }
@@ -34,7 +34,10 @@ html[data-minimal-theme=true] body :is(button,input,select,textarea){
 html[data-minimal-theme=true] body :is(.card,.hero,.bn,.hd,nav,dialog,[role=dialog],.gpp-drawer,.gpp-best-banner,th,td){
   color:var(--tx)!important;background-color:var(--card)!important;border-color:var(--bd)!important
 }
-html[data-minimal-theme=true] body .pill{color:var(--tx)!important;background-color:var(--hl)!important}
+html[data-minimal-theme=true]:not(#vrx) body table :is(th,td){
+  color:var(--tx)!important;background-color:var(--card)!important;border-color:var(--bd)!important
+}
+html[data-minimal-theme=true]:not(#vrx) body .pill{color:var(--tx)!important;background-color:var(--hl)!important}
 html[data-minimal-theme=true] body :focus-visible{outline:2px solid var(--ac)!important;outline-offset:2px}
 html[data-minimal-theme=true] body :is(svg,canvas,img){filter:grayscale(1)!important}
 html[data-minimal-theme=true] body .hero svg.hbg,

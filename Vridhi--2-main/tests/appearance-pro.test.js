@@ -29,12 +29,13 @@ assert.strictEqual(theme.window.brandOf(), '#14392b', 'A legacy emerald accent m
 /* one Appearance screen, no floating Look menu */
 assert.ok(!html.includes('id="lk-sw"') && !html.includes('skin-selector.js'), 'The floating Look menu is gone');
 assert.ok(html.includes('data-skin","enterprise"'), 'One layout skin is always applied');
-assert.ok(html.includes('modules/theme/minimal.css?v=2') && /k: 'minimal', n: 'Minimal'/.test(ap),
+assert.ok(html.includes('modules/theme/minimal.css?v=3') && /k: 'minimal', n: 'Minimal'/.test(ap),
   'Minimal theme is available from Appearance and its styles load after the app stylesheets');
 assert.ok(minimal.includes('html[data-minimal-theme=true] body{') &&
   minimal.includes('html[data-minimal-theme=true][data-theme=dark] body{') &&
+  minimal.includes('html[data-minimal-theme=true]:not(#vrx) body table :is(th,td){') &&
   minimal.includes('body .pill{color:var(--tx)!important;background-color:var(--hl)!important}'),
-  'Minimal theme overrides body-level palette variables and keeps category badges monochrome');
+  'Minimal theme overrides body-level palette variables, table colors, and category badges');
 assert.ok(minimal.includes('background-image:none!important') && minimal.includes('box-shadow:none!important') &&
   minimal.includes(':focus-visible{outline:2px solid var(--ac)!important'),
   'Minimal theme removes decoration without removing visible keyboard focus');
