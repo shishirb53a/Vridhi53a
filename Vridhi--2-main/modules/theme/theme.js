@@ -3,8 +3,8 @@
   var WHITE = '#ffffff';
   var BLACK = '#000000';
   var THEMES = [
-    { k: 'ledger', n: 'Ledger navy', c: '#0b2545', d: 'Clean and trusted. The classic finance look.' },
-    { k: 'bank', n: 'Private bank', c: '#14392b', d: 'Warm ivory and deep green. Calm and premium.' },
+    { k: 'forest', n: 'Forest green', c: '#14392b', d: 'Calm forest green with a clean, premium finish.' },
+    { k: 'sage', n: 'Sage green', c: '#2f6b52', d: 'A softer green accent with a quiet, balanced feel.' },
     { k: 'graphite', n: 'Graphite', c: '#3b4252', d: 'Charcoal with a gold accent. Lets the numbers lead.' }
   ];
 
