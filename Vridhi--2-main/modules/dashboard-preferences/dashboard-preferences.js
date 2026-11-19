@@ -39,8 +39,8 @@ document.addEventListener('change',e=>{if(e.target.id==='fzs')set(e.target.value
 (function(){
 const FN=[['inter','Inter','Clean & modern'],['poppins','Poppins','Friendly & round'],['nunito','Nunito Sans','Soft & readable'],['plex','IBM Plex Sans','Corporate'],['lora','Lora','Elegant serif'],['system','System','Your device font']];
 const FF={inter:'Inter',poppins:'Poppins',nunito:'Nunito Sans',plex:'IBM Plex Sans',lora:'Lora',system:'-apple-system,Segoe UI'};
-const PR=[['Emerald Classic','green','light','inter','#052e2b','#0f766e'],['Midnight Blue','blue','dark','inter','#0b1b4a','#2563eb'],['Royal Purple','purple','light','poppins','#2e1065','#9333ea'],['Executive Navy','indigo','light','plex','#1e1b4b','#4f46e5'],['Sunset Orange','orange','light','nunito','#431407','#ea580c'],['Rosewood','rose','light','lora','#4c0519','#e11d48'],['Graphite Dark','grey','dark','plex','#111827','#64748b'],['Golden Paper','yellow','light','lora','#3b2f05','#ca8a04']];
-[['blue','Blue','#0b1b4a','#1d4ed8'],['indigo','Indigo','#1e1b4b','#4338ca'],['purple','Purple','#2e1065','#7e22ce'],['rose','Rose','#4c0519','#be123c']].forEach(p=>{if(!PALS.some(x=>x[0]===p[0]))PALS.push(p)});
+const PR=[['Forest Green','green','light','inter','#10291f','#16845d'],['Royal Purple','purple','light','poppins','#2e1065','#9333ea'],['Sunset Orange','orange','light','nunito','#431407','#ea580c'],['Rosewood','rose','light','lora','#4c0519','#e11d48'],['Graphite Dark','grey','dark','plex','#111827','#64748b'],['Golden Paper','yellow','light','lora','#3b2f05','#ca8a04']];
+[['purple','Purple','#2e1065','#7e22ce'],['rose','Rose','#4c0519','#be123c']].forEach(p=>{if(!PALS.some(x=>x[0]===p[0]))PALS.push(p)});
 const K='fwt2-look',D={font:'inter',size:'m',dens:'cosy',rad:'std'};let L=Object.assign({},D);try{Object.assign(L,JSON.parse(localStorage.getItem(K))||{})}catch(e){}
 const ap=()=>{const r=document.documentElement.dataset;r.font=L.font;r.size=L.size;r.dens=L.dens==='cosy'?'':L.dens;r.rad=L.rad==='std'?'':L.rad;try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}};ap();window.vrLookSet=(k,v)=>{L[k]=v;ap()};window.vrLookReset=()=>{L=Object.assign({},D);ap()};
 const sg=(k,t,o)=>'<div><div class="mu" style="margin-bottom:6px">'+t+'</div><div class="seg" role="group" aria-label="'+t+'">'+o.map(([v,n])=>'<button type="button" data-lk="'+k+':'+v+'" aria-pressed="'+(L[k]===v)+'">'+n+'</button>').join('')+'</div></div>';
@@ -51,9 +51,9 @@ if(a.dataset.look!=null){const p=PR[+a.dataset.look];S.palette=p[1];S.cc=null;S.
 const[k,v]=a.dataset.lk.split(':');if(k==='reset'){L=Object.assign({},D)}else L[k]=v;ap();render()});
 })();
 (function(){var K='vr-ui',D={uth:'mono',ubt:'filled',ush:'round',uin:'outlined',utd:'normal',uhd:'plain',utz:'off',utl:'on',utc:'on',ufn:'system',utx:'default',uic:'on'},U=Object.assign({},D);
-try{Object.assign(U,JSON.parse(localStorage.getItem(K))||{})}catch(e){}
+try{Object.assign(U,JSON.parse(localStorage.getItem(K))||{})}catch(e){}if(U.utx==='navy')U.utx='forest';
 var O={ufn:['Font',[['system','System'],['inter','Inter'],['serif','Serif'],['humanist','Humanist'],['mono','Monospace']]],
-utx:['Text colour',[['default','Default'],['charcoal','Charcoal'],['navy','Navy'],['forest','Forest']]],
+utx:['Text colour',[['default','Default'],['charcoal','Charcoal'],['forest','Forest']]],
 ubt:['Button style',[['filled','Filled'],['soft','Soft'],['outline','Outline']]],
 ush:['Corner shape',[['sharp','Sharp'],['round','Rounded'],['pill','Pill']]],
 uin:['Input style',[['outlined','Outlined'],['filled','Filled'],['underline','Underline']]],
