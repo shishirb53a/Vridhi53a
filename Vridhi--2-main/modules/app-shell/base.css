@@ -1035,3 +1035,44 @@ html[data-skin="enterprise"] body header.hd .logo {
 html[data-skin="enterprise"] body header.hd .logo :is(rect,path,circle) {
   fill:#fff!important;
 }
+
+/* ===== Advanced Appearance: effective text colour and weight controls =====
+   Enterprise skin sets palette tokens on body with higher specificity than
+   the earlier preference rules. These selectors intentionally win that
+   cascade so the Text colour dropdown updates the rendered application. */
+html[data-utx="charcoal"] body,
+html[data-skin="enterprise"][data-utx="charcoal"] body {
+  --tx:#343a40 !important;
+  --mu:#626b73 !important;
+  color:var(--tx) !important;
+}
+html[data-utx="forest"] body,
+html[data-skin="enterprise"][data-utx="forest"] body {
+  --tx:#14532d !important;
+  --mu:#3f6b50 !important;
+  color:var(--tx) !important;
+}
+html[data-theme="dark"][data-utx="charcoal"] body,
+html[data-skin="enterprise"][data-theme="dark"][data-utx="charcoal"] body {
+  --tx:#e5e7eb !important;
+  --mu:#aeb8c4 !important;
+}
+html[data-theme="dark"][data-utx="forest"] body,
+html[data-skin="enterprise"][data-theme="dark"][data-utx="forest"] body {
+  --tx:#d1fae5 !important;
+  --mu:#9bc5aa !important;
+}
+@media (prefers-color-scheme:dark) {
+  html:not([data-theme="light"])[data-utx="charcoal"] body {
+    --tx:#e5e7eb !important; --mu:#aeb8c4 !important;
+  }
+  html:not([data-theme="light"])[data-utx="forest"] body {
+    --tx:#d1fae5 !important; --mu:#9bc5aa !important;
+  }
+}
+
+/* Text weight is deliberately global and user-configurable. */
+html[data-uwt="normal"] body :where(*) { font-weight:400 !important; }
+html[data-uwt="medium"] body :where(*) { font-weight:500 !important; }
+html[data-uwt="semibold"] body :where(*) { font-weight:600 !important; }
+html[data-uwt="bold"] body :where(*) { font-weight:700 !important; }
