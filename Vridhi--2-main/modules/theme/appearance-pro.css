@@ -12,6 +12,13 @@
 .ap-nm{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
 .ap-nm em{font-style:normal;font-weight:500;font-size:11px;padding:1px 8px;border-radius:99px;background:color-mix(in srgb,var(--ac) 12%,var(--card));color:var(--ac)}
 .ap-ds{font-size:12px;color:var(--mu)}
+.ap-sw{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.ap-s{width:32px;height:32px;min-width:32px;min-height:32px;padding:0;border-radius:50%;background:var(--sw);border:2px solid var(--card);box-shadow:0 0 0 1px var(--bd);cursor:pointer}
+.ap-s:hover{transform:scale(1.08)}
+.ap-s[aria-checked=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--sw)}
+.ap-cu{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 10px 0 4px;border:1px dashed var(--bd);border-radius:99px;color:var(--mu);font-size:12px;cursor:pointer}
+.ap-cu input{width:28px;height:28px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer}
+.ap-cu code{font-size:11px;color:var(--tx)}
 .ap-adv{margin-top:18px;border:1px dashed var(--bd);border-radius:10px;padding:10px 12px}
 .ap-adv>summary{cursor:pointer;color:var(--mu);font-size:13px}
 .ap-adv[open]>summary{margin-bottom:12px}

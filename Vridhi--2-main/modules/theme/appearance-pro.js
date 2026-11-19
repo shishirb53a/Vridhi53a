@@ -28,13 +28,32 @@
         (on ? '<em>Selected</em>' : '') + '</span><span class="ap-ds">' + p.d + '</span></button>';
     }).join('') + '</div>';
   }
+  var SW = [['#14392b', 'Forest'], ['#2f6b52', 'Sage'], ['#1e3a5f', 'Navy'], ['#2563eb', 'Blue'], ['#4f46e5', 'Indigo'],
+    ['#7c3aed', 'Purple'], ['#be185d', 'Rose'], ['#c2410c', 'Orange'], ['#a16207', 'Amber'], ['#3b4252', 'Graphite']];
+  function accent() {
+    var cur = (window.brandOf ? window.brandOf() : '#14392b').toLowerCase();
+    return '<div class="ap-l">Accent colour</div><div class="ap-sw" role="radiogroup" aria-label="Accent colour">' + SW.map(function (s) {
+      return '<button type="button" class="ap-s" role="radio" aria-checked="' + (s[0] === cur) + '" aria-label="' + s[1] + '" title="' + s[1] + '" data-ap-cc="' + s[0] + '" style="--sw:' + s[0] + '"></button>';
+    }).join('') + '<label class="ap-cu" title="Pick any colour"><input type="color" id="ap-cc" value="' + cur + '" aria-label="Custom accent colour"><span>Custom</span><code id="ap-cc-v">' + cur + '</code></label></div>' +
+      '<p class="mu ap-n">Changes buttons, highlights and charts. Text colour is adjusted automatically so it stays readable.' + (root.hasAttribute('data-minimal-theme') ? ' The Minimal theme is monochrome, so pick another theme to see your colour.' : '') + '</p>';
+  }
   window.apUI = function () {
     var ds = root.dataset, dens = ds.dens === 'compact' ? 'compact' : 'cosy', size = ds.size || 'm', mode = (window.S && S.theme) || 'system';
-    return '<div class="ap"><div class="ap-l">Theme</div>' + cards() + seg('Mode', 'data-ap-mode', MODES, mode) +
+    return '<div class="ap"><div class="ap-l">Theme</div>' + cards() + accent() + seg('Mode', 'data-ap-mode', MODES, mode) +
       seg('Density', 'data-ap-dens', DENS, dens, 'Compact tightens table rows to show more data per screen.') + seg('Text size', 'data-ap-size', SIZES, size) +
       '<details class="ap-adv"><summary>Advanced: font, corners, table lines, stripes, icons</summary>' + (OLD ? OLD() : '') + '</details>' +
       '<div class="ap-ft"><span class="mu">Changes apply instantly.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
   };
+  function setCC(hex, final) {
+    S.cc = String(hex).toLowerCase();
+    if (final) commit('Accent colour applied'); else { try { theme(); } catch (x) { } }
+  }
+  d.addEventListener('input', function (e) {
+    if (e.target.id !== 'ap-cc') return;
+    var v = d.getElementById('ap-cc-v'); if (v) v.textContent = e.target.value; setCC(e.target.value, false);
+  });
+  d.addEventListener('change', function (e) { if (e.target.id === 'ap-cc') setCC(e.target.value, true); });
+  d.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-ap-cc]'); if (b) setCC(b.dataset.apCc, true); });
   /* keep the Advanced fold open across re-renders */
   d.addEventListener('toggle', function (e) { if (e.target.classList && e.target.classList.contains('ap-adv')) window.__apOpen = e.target.open; }, true);
   function reopen() { var a = d.querySelector('.ap-adv'); if (a && window.__apOpen) a.open = true; }

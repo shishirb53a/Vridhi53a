@@ -42,8 +42,8 @@
   function state() { return app ? app.getState() : null; }
   function brand() {
     var current = state(), color = current && current.cc ? String(current.cc).toLowerCase() : null;
-    if (!color) return THEMES[0].c;
-    return THEMES.some(function (item) { return item.c === color; }) ? color : nearest(color);
+    /* any valid #rrggbb is allowed (custom accent); applyColor() keeps text contrast accessible */
+    return color && /^#[0-9a-f]{6}$/.test(color) ? color : THEMES[0].c;
   }
   function contrastAgainst(color) {
     return Math.max(contrast(color), (luminance(color) + 0.05) / 0.05);
