@@ -22,7 +22,7 @@ html body header.hd .ap-mode{display:inline-flex;align-items:center;justify-cont
 html body header.hd .ap-mode:hover{background:color-mix(in srgb,currentColor 10%,transparent)}
 html body header.hd .ap-mode svg{display:block;flex:none}
 
-/* Retirement Planner summary: clean white cards, hairline borders, slim navy bars (no grey tinted fills, no black blocks) */
+/* Retirement Planner summary: clean white cards, hairline borders, slim green accent bars (no grey tinted fills, no black blocks) */
 html body .sx .sx-hero,html body .sx .sx-r,html body .sx .sx-pill,html body .sx .sx-as,html body .sx .sx-seg{background:var(--card)!important;border:1px solid var(--bd)!important;color:var(--tx)}
 html body .sx .sx-bar{height:6px;background:color-mix(in srgb,var(--mu) 16%,var(--card))!important}
 html body .sx .sx-bar i{background:var(--ac)!important}
