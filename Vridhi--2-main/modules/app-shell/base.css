@@ -54,8 +54,8 @@ button{min-height:44px;font-size:16px}
 dialog{width:94vw;padding:14px}.r{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
 }:root{--sh:0 1px 2px #0000000a,0 8px 24px #0f1e3c14}
 .card{border-radius:12px;box-shadow:var(--sh)}
-.brand{display:flex;gap:11px;align-items:center}.logo{width:40px;height:40px;border-radius:12px;background:#142B4A;display:grid;place-items:center;box-shadow:var(--sh)}
-.hero{position:relative;overflow:hidden;border-radius:12px;padding:22px;color:#fff;background:#142B4A;box-shadow:var(--sh);margin-bottom:14px;min-height:190px}
+.brand{display:flex;gap:11px;align-items:center}.logo{width:40px;height:40px;border-radius:12px;background:#14392b;display:grid;place-items:center;box-shadow:var(--sh)}
+.hero{position:relative;overflow:hidden;border-radius:12px;padding:22px;color:#fff;background:#14392b;box-shadow:var(--sh);margin-bottom:14px;min-height:190px}
 .hero .lb{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}.hero .big{font-size:28px;font-weight:800;margin:6px 0 2px}.hero .sb{opacity:.92;font-size:14px;max-width:58%}
 .hero svg{position:absolute;right:-4px;bottom:-4px;width:44%;max-width:340px;height:auto}
 .pg{height:8px;background:#ffffff38;border-radius:6px;margin-top:14px;max-width:55%}.pg i{display:block;height:100%;border-radius:6px;background:#fff}
@@ -76,7 +76,7 @@ dialog{width:94vw;padding:14px}.r{grid-template-columns:repeat(auto-fit,minmax(1
 .yc.sel{background:color-mix(in srgb,var(--ac) 16%,transparent);border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
 .hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--card);border-bottom:1px solid var(--bd);box-shadow:0 1px 0 #0000000a}
 .hdi{max-width:1100px;margin:0 auto;padding:9px 14px;display:flex;align-items:center;gap:14px}
-.logo{background:#142B4A}
+.logo{background:#14392b}
 .wm{font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.15}.wm b{color:var(--ac)}.tg{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mu)}
 .who{font-size:12px;font-weight:600;color:var(--mu);border:1px solid var(--bd);border-radius:99px;padding:5px 11px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}.who[hidden]{display:none}@media (max-width:720px){.who{max-width:34%;padding:4px 8px}}
 .sync{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mu);border:1px solid var(--bd);border-radius:99px;padding:5px 11px;max-width:300px}.sync #sy{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -108,19 +108,19 @@ dialog{width:94vw;padding:14px}.r{grid-template-columns:repeat(auto-fit,minmax(1
 @media (max-width:720px){.alr{grid-template-columns:minmax(135px,44%) 1fr;gap:6px 12px}}
 .pb{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px}.pt{font-size:20px;font-weight:700;letter-spacing:-.01em}.pd{display:inline-flex;align-items:center;gap:7px;font-size:14px;color:var(--mu);border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:5px 13px}.ds{display:none}
 @media (max-width:720px){.dl{display:none}.ds{display:inline}.pt{font-size:20px}}
-.hero{background:#142B4A}.hero svg.hbg{position:absolute;inset:0;right:auto;bottom:auto;width:100%;height:100%;max-width:none;opacity:1}
+.hero{background:#14392b}.hero svg.hbg{position:absolute;inset:0;right:auto;bottom:auto;width:100%;height:100%;max-width:none;opacity:1}
 .hsh{position:absolute;inset:0;background:linear-gradient(90deg,#032420db 0%,#032420a8 45%,#03242000 88%)}
 .hero .hrow,.hero .big,.hero .sb,.hero .pg{position:relative;z-index:1}.hero .lb,.hero .big,.hero .sb{text-shadow:0 1px 8px #00000066}
 .hero .pg i{background:var(--sun)}.hero .pg{background:#ffffff40}.hero{min-height:210px}
-.logo{background:#142B4A}
+.logo{background:#14392b}
 @media (max-width:720px){.hsh{background:linear-gradient(90deg,#032420e0 0%,#032420b0 60%,#03242070 100%)}.hero svg.hbg{opacity:1}}
-.bn{background:#142B4A;color:#fff;border-color:#142B4A}
+.bn{background:#14392b;color:#fff;border-color:#14392b}
 .bn .mu{color:#ffffffe0}.bn .tv,.bn h2{color:#fff}.bn button{background:#ffffff1f;color:#fff;border-color:#ffffff59}.bn button:hover{background:#ffffff33}
 .bnh{margin:-18px -18px 16px;border-radius:12px 16px 0 0;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.bnh h2{margin:0}
 .ht th,.rt th{background:var(--thc);color:#fff;border-bottom:0}.ht th button,.rt th button{color:#fff}.ht th:first-child,.rt th:first-child{border-top-left-radius:10px}.ht th:last-child,.rt th:last-child{border-top-right-radius:10px}
 .ht th button:focus-visible,.rt th button:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
 @media (max-width:720px){.bnh{margin:-15px -15px 14px;padding:14px 15px}}
-:root{--acb:#142B4A;--b1:#142B4A;--b2:#142B4A;--thc:#142B4A;--sun:#D99A32;--sk1:#142B4A;--sk2:#142B4A;--sk3:#D99A32;--h1:#142B4A;--h2:#10233B;--h3:#0C1B2F;--pth:#F8F1DF;--shd:#101B2A;}
+:root{--acb:#14392b;--b1:#14392b;--b2:#14392b;--thc:#14392b;--sun:#D99A32;--sk1:#14392b;--sk2:#14392b;--sk3:#D99A32;--h1:#14392b;--h2:#10233B;--h3:#0C1B2F;--pth:#F8F1DF;--shd:#101B2A;}
 .logo{background:var(--brand)}.hero{background:var(--sk1)}
 .hsh{background:linear-gradient(90deg,color-mix(in srgb,var(--shd) 86%,transparent) 0%,color-mix(in srgb,var(--shd) 66%,transparent) 45%,transparent 88%)}
 .bn{background:var(--b1);border-color:var(--b1)}
@@ -303,7 +303,7 @@ background:var(--bg);color:var(--tx);font-size:14px;accent-color:var(--ac)}
 @media (prefers-color-scheme:dark){html:not([data-theme=light]) body{--bg:var(--bgd);--card:var(--cdd);--tx:var(--txd);--ac:color-mix(in srgb,var(--acb) 62%,#fff);--ac2:var(--ond);--on:var(--ond);--mu:#A8B6C8;--bd:#34465C;--bd2:#465A72;--hv:#26384E;--er:#FF8888;--ok:#53C7A6;--sh:0 1px 3px rgba(0,0,0,.24)}}
 html[data-theme=dark] body{--bg:var(--bgd);--card:var(--cdd);--tx:var(--txd);--ac:color-mix(in srgb,var(--acb) 62%,#fff);--ac2:var(--ond);--on:var(--ond);--mu:#A8B6C8;--bd:#34465C;--bd2:#465A72;--hv:#26384E;--er:#FF8888;--ok:#53C7A6;--sh:0 1px 3px rgba(0,0,0,.24)}
 /* appearance presets (Settings > Appearance) */
-html[data-uth=ocean] body,html[data-uth=emerald] body,html[data-uth=indigo] body,html[data-uth=amber] body{--acl:#142B4A;--acd:#8FB4E8;--bgl:#F4F7FB;--bgd:#101B2A;--cdd:#1B2B40;--ond:#101B2A}
+html[data-uth=ocean] body,html[data-uth=emerald] body,html[data-uth=indigo] body,html[data-uth=amber] body{--acl:#14392b;--acd:#8bc5a5;--bgl:#F4F7FB;--bgd:#101B2A;--cdd:#1B2B40;--ond:#101B2A}
 /* Advanced text colour: apply to the app's actual text tokens, not only
    the optional minimal-theme palette variables. */
 html[data-utx=charcoal] body{--txl:#1f2937;--txd:#e5e7eb;--tx:#1f2937;--mu:#626b73}
@@ -689,9 +689,9 @@ html body #lg .lform .lgv{margin:24px 0 0;text-align:left}
 
 
 /* ===== Enterprise look: tokens + components (scope: data-skin=enterprise) ===== */
-html[data-skin=enterprise]{--e-navy:#142B4A;--e-ac:var(--acb);--e-ach:color-mix(in srgb,var(--e-ac) 80%,#000);--e-bd:#DCE4ED;--e-sub:#F4F7FB;--e-hov:#EEF3F8;--e-surface:#FFFFFF;--e-on-ac:#FFFFFF;--e-ok:#167D68;--e-wa:#D99A32;--e-er:#C92A2A}
-@media (prefers-color-scheme:dark){html[data-skin=enterprise]:not([data-theme=light]){--e-ac:#8FB4E8;--e-ach:#B5D0F2;--e-bd:#34465C;--e-sub:#17263A;--e-hov:#26384E;--e-surface:#1B2B40;--e-on-ac:#101B2A;--e-ok:#53C7A6;--e-er:#FF8888}}
-html[data-skin=enterprise][data-theme=dark]{--e-ac:#8FB4E8;--e-ach:#B5D0F2;--e-bd:#34465C;--e-sub:#17263A;--e-hov:#26384E;--e-surface:#1B2B40;--e-on-ac:#101B2A;--e-ok:#53C7A6;--e-er:#FF8888}
+html[data-skin=enterprise]{--e-navy:#14392b;--e-ac:var(--acb);--e-ach:color-mix(in srgb,var(--e-ac) 80%,#000);--e-bd:#DCE4ED;--e-sub:#F4F7FB;--e-hov:#EEF3F8;--e-surface:#FFFFFF;--e-on-ac:#FFFFFF;--e-ok:#167D68;--e-wa:#D99A32;--e-er:#C92A2A}
+@media (prefers-color-scheme:dark){html[data-skin=enterprise]:not([data-theme=light]){--e-ac:#8bc5a5;--e-ach:#b6dfc6;--e-bd:#34465C;--e-sub:#17263A;--e-hov:#26384E;--e-surface:#1B2B40;--e-on-ac:#101B2A;--e-ok:#53C7A6;--e-er:#FF8888}}
+html[data-skin=enterprise][data-theme=dark]{--e-ac:#8bc5a5;--e-ach:#b6dfc6;--e-bd:#34465C;--e-sub:#17263A;--e-hov:#26384E;--e-surface:#1B2B40;--e-on-ac:#101B2A;--e-ok:#53C7A6;--e-er:#FF8888}
 html[data-skin=enterprise][data-theme=light] body{--on:#FFFFFF;--hv:#EEF3F8;--bg:#F4F7FB;--card:#FFFFFF;--tx:#1B2939;--mu:#536273;--bd:#DCE4ED}
 html[data-skin=enterprise][lang][data-font]:not(.x):not(.x):not(.x) body {font-size:14px;line-height:1.5;--r:12px}
 html[data-skin=enterprise][lang][data-font]:not(.x):not(.x):not(.x) body main#m{max-width:1320px;margin:0 auto;padding:16px 20px 84px}
@@ -994,4 +994,56 @@ html[data-ufn] body,
 html[data-ufn] body :where(*),
 html[data-ufn] body :where(*::before,*::after) {
   font-family:var(--ff) !important;
+}
+
+/* ===== Remove the old navy/blue enterprise chrome =====
+   Keep the application header neutral and use the Forest green brand accent. */
+html[data-skin="enterprise"] {
+  --e-navy:#14392b;
+  --e-ac:var(--acb,#14392b);
+  --e-ach:color-mix(in srgb,var(--e-ac) 82%,#000);
+}
+@media (prefers-color-scheme:dark) {
+  html[data-skin="enterprise"]:not([data-theme="light"]) {
+    --e-ac:#8bc5a5;
+    --e-ach:#b6dfc6;
+  }
+}
+html[data-skin="enterprise"][data-theme="dark"] {
+  --e-ac:#8bc5a5;
+  --e-ach:#b6dfc6;
+}
+html[data-skin="enterprise"] body header.hd {
+  background:var(--card)!important;
+  color:var(--tx)!important;
+  border-bottom:1px solid var(--bd)!important;
+  box-shadow:0 1px 3px rgba(20,40,30,.06)!important;
+}
+html[data-skin="enterprise"] body header.hd .wm,
+html[data-skin="enterprise"] body header.hd .tg {
+  color:var(--tx)!important;
+}
+html[data-skin="enterprise"] body header.hd nav button {
+  color:var(--mu)!important;
+  background:transparent!important;
+  border-bottom-color:transparent!important;
+}
+html[data-skin="enterprise"] body header.hd nav button:hover,
+html[data-skin="enterprise"] body header.hd nav button[aria-current],
+html[data-skin="enterprise"] body header.hd nav button.on,
+html[data-skin="enterprise"] body header.hd nav button[aria-selected=true] {
+  color:var(--ac)!important;
+  background:color-mix(in srgb,var(--ac) 8%,var(--card))!important;
+  border-bottom-color:var(--ac)!important;
+}
+html[data-skin="enterprise"] body header.hd :is(select,.fhp-add,.sync,.who,.hdi>button,.hdi>div>button) {
+  background:var(--card)!important;
+  color:var(--tx)!important;
+  border:1px solid var(--bd)!important;
+}
+html[data-skin="enterprise"] body header.hd .logo {
+  background:var(--ac)!important;
+}
+html[data-skin="enterprise"] body header.hd .logo :is(rect,path,circle) {
+  fill:#fff!important;
 }
