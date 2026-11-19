@@ -50,9 +50,16 @@ assert.ok(settings.includes('window.apUI?window.apUI()'), 'Settings uses the sim
 assert.ok(!/Display mode/.test(settings.split('const look=')[1].split('`;')[0]), 'Display mode is a segmented control, not a dropdown');
 assert.ok(/ap-adv/.test(ap) && /Advanced: font, corners/.test(ap), 'Detailed options sit under an Advanced fold');
 assert.ok(!/uth:\[/.test(prefs) && !/utd:\[/.test(prefs), 'Duplicate colour-theme and table-density dropdowns are removed');
+assert.ok(/uwt:\['Text weight'/.test(prefs) && /uwt:'normal'/.test(prefs),
+  'Advanced Appearance exposes a persisted text-weight dropdown');
+const shell = read('modules/app-shell/base.css');
+assert.ok(shell.includes('html[data-skin="enterprise"][data-utx="forest"] body') &&
+  shell.includes('html[data-skin="enterprise"][data-utx="charcoal"] body'),
+  'Text-colour preferences override Enterprise body palette tokens');
+assert.ok(['normal','medium','semibold','bold'].every(v => shell.includes('html[data-uwt="'+v+'"] body :where(*)')),
+  'Text-weight dropdown has four effective global weight modes');
 assert.ok(/id = 'ap-mode'/.test(ap), 'Header light/dark toggle');
 assert.ok(/\.sx-hero[^{]*\{background:var\(--card\)!important/.test(css), 'Planner cards are white, not tinted grey');
 assert.ok(pro.includes('default\":\"forest\"') && pro.includes('ledger:\"forest\"'), 'Forest green is the default and saved Ledger selections migrate away from navy');
-const shell = read('modules/app-shell/base.css');
 assert.ok(shell.includes('background:var(--card)!important') && shell.includes('color:var(--tx)!important'), 'Enterprise header uses neutral surfaces instead of a navy background');
 console.log('Appearance: green default, neutral header, four themes, one screen, header toggle, flat planner cards');
