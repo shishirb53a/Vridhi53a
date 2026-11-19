@@ -27,9 +27,12 @@ html[data-minimal-theme=true]:not(#vrx) body *::after{
   color:var(--tx)!important;border-color:var(--bd)!important;border-radius:0!important;
   box-shadow:none!important;text-shadow:none!important;background-image:none!important
 }
-html[data-minimal-theme=true] body :is(button,input,select,textarea){
-  color:var(--tx)!important;background:var(--card)!important;border:1px solid var(--bd)!important;
+html[data-minimal-theme=true]:not(#vrx) body :is(button,input,select,textarea){
+  color:var(--tx)!important;background:var(--hl)!important;border:1px solid var(--bd)!important;
   box-shadow:none!important
+}
+html[data-minimal-theme=true]:not(#vrx) body button:is(.p,.go,.hp-add){
+  color:var(--bg)!important;background:var(--tx)!important;border-color:var(--tx)!important
 }
 html[data-minimal-theme=true] body :is(.card,.hero,.bn,.hd,nav,dialog,[role=dialog],.gpp-drawer,.gpp-best-banner,th,td){
   color:var(--tx)!important;background-color:var(--card)!important;border-color:var(--bd)!important
