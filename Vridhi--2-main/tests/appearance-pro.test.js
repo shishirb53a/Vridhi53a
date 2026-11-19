@@ -14,7 +14,7 @@ const sandbox = { window: { matchMedia: () => ({ matches: false, addEventListene
 sandbox.document = { documentElement: { getAttribute: name => attributes[name] || null, setAttribute(name, value) { attributes[name] = value; }, removeAttribute(name) { delete attributes[name]; }, style: { setProperty() {}, removeProperty() {} } }, body: null, addEventListener() {}, querySelectorAll: () => [] };
 sandbox.window.document = sandbox.document; sandbox.window.localStorage = sandbox.localStorage; sandbox.matchMedia = sandbox.window.matchMedia; sandbox.MutationObserver = function () { this.observe = () => {}; };
 vm.createContext(sandbox); vm.runInContext(pro, sandbox);
-assert.deepStrictEqual(Array.from(sandbox.window.vrPro.T.map(t => t[0])), ['ledger', 'bank', 'graphite', 'minimal'], 'Four professional themes');
+assert.deepStrictEqual(Array.from(sandbox.window.vrPro.T.map(t => t[0])), ['forest', 'bank', 'graphite', 'minimal'], 'Four professional themes');
 assert.strictEqual(sandbox.window.vrPro.get(), 'graphite', 'A saved legacy "mono" theme maps to Graphite');
 sandbox.window.vrPro.set('minimal');
 assert.strictEqual(attributes['data-minimal-theme'], 'true', 'Minimal theme enables its presentation mode');
@@ -22,9 +22,9 @@ sandbox.window.vrPro.set('ledger');
 assert.strictEqual(attributes['data-minimal-theme'], undefined, 'Other themes disable Minimal presentation mode');
 const theme = { window: { matchMedia: () => ({ matches: false, addEventListener() {} }) }, document: { documentElement: { dataset: {}, style: { setProperty() {} }, removeAttribute() {} }, addEventListener() {} } };
 theme.window.document = theme.document; vm.createContext(theme); vm.runInContext(read('modules/theme/theme.js'), theme);
-assert.deepStrictEqual(Array.from(theme.window.THEMES.map(t => t.c)), ['#0b2545', '#14392b', '#3b4252'], 'Brand colours for the three themes');
+assert.deepStrictEqual(Array.from(theme.window.THEMES.map(t => t.c)), ['#14392b', '#2f6b52', '#3b4252'], 'Brand colours for the three themes');
 theme.window.VRTheme.configure({ getState: () => ({ cc: '#065f46' }) });
-assert.strictEqual(theme.window.brandOf(), '#14392b', 'A legacy emerald accent maps to Private bank');
+assert.strictEqual(theme.window.brandOf(), '#2f6b52', 'A legacy emerald accent maps to Sage green');
 
 /* one Appearance screen, no floating Look menu */
 assert.ok(!html.includes('id="lk-sw"') && !html.includes('skin-selector.js'), 'The floating Look menu is gone');
@@ -52,4 +52,7 @@ assert.ok(/ap-adv/.test(ap) && /Advanced: font, corners/.test(ap), 'Detailed opt
 assert.ok(!/uth:\[/.test(prefs) && !/utd:\[/.test(prefs), 'Duplicate colour-theme and table-density dropdowns are removed');
 assert.ok(/id = 'ap-mode'/.test(ap), 'Header light/dark toggle');
 assert.ok(/\.sx-hero[^{]*\{background:var\(--card\)!important/.test(css), 'Planner cards are white, not tinted grey');
-console.log('Appearance: four themes, one screen, header toggle, flat planner cards');
+assert.ok(pro.includes('default\":\"forest\"') && pro.includes('ledger:\"forest\"'), 'Forest green is the default and saved Ledger selections migrate away from navy');
+const shell = read('modules/app-shell/base.css');
+assert.ok(shell.includes('background:var(--card)!important') && shell.includes('color:var(--tx)!important'), 'Enterprise header uses neutral surfaces instead of a navy background');
+console.log('Appearance: green default, neutral header, four themes, one screen, header toggle, flat planner cards');
