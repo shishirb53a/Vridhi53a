@@ -3,8 +3,8 @@
    dashboard-preferences.js (vrLookSet / vrUISet) and the app globals S, save, theme, render, toast. */
 (function () {
   var PRE = [
-    { k: 'ledger', n: 'Ledger navy', d: 'Clean and trusted', cc: '#0b2545', l: ['#f4f6f9', '#ffffff', '#dfe4ec', '#0b2545'], x: ['#0c1220', '#141c2e', '#26324a', '#8fb0e6'] },
-    { k: 'bank', n: 'Private bank', d: 'Warm ivory and green', cc: '#14392b', l: ['#f6f3ec', '#fffefb', '#e6dfd0', '#14392b'], x: ['#16130f', '#201c16', '#352f25', '#7fcfa8'] },
+    { k: 'forest', n: 'Forest green', d: 'Calm, premium green', cc: '#14392b', l: ['#f4f7f3', '#ffffff', '#dce7df', '#14392b'], x: ['#101b15', '#19271e', '#2c4033', '#8bc5a5'] },
+    { k: 'bank', n: 'Private bank', d: 'Warm ivory and green', cc: '#2f6b52', l: ['#f6f3ec', '#fffefb', '#e6dfd0', '#2f6b52'], x: ['#16130f', '#201c16', '#352f25', '#7fcfa8'] },
     { k: 'graphite', n: 'Graphite', d: 'Charcoal with gold', cc: '#3b4252', l: ['#eef0f4', '#ffffff', '#dde1e8', '#3b4252'], x: ['#0f1319', '#171c24', '#2a313d', '#c9a24b'] },
     { k: 'minimal', n: 'Minimal', d: 'Flat monochrome without shadows or gradients', cc: '#111111', l: ['#ffffff', '#ffffff', '#888888', '#111111'], x: ['#000000', '#000000', '#888888', '#ffffff'] }
   ];
@@ -20,7 +20,7 @@
       '</div>' + (note ? '<p class="mu ap-n">' + note + '</p>' : '');
   }
   function cards() {
-    var cur = window.vrPro ? window.vrPro.get() : 'ledger', dk = dark();
+    var cur = window.vrPro ? window.vrPro.get() : 'forest', dk = dark();
     return '<div class="ap-th" role="radiogroup" aria-label="Theme">' + PRE.map(function (p) {
       var c = dk ? p.x : p.l, on = p.k === cur;
       return '<button type="button" class="ap-c" role="radio" aria-checked="' + on + '" data-ap-theme="' + p.k + '"><span class="ap-pv" style="background:' + c[0] +
@@ -52,7 +52,7 @@
     if (t.dataset.apDens) { var v = t.dataset.apDens; window.vrLookSet('dens', v); window.vrUISet('utd', v === 'compact' ? 'compact' : 'normal'); commit(); return; }
     if (t.dataset.apSize) { window.vrLookSet('size', t.dataset.apSize); commit(); return; }
     if (t.dataset.apReset) {
-      window.vrPro.set('ledger'); S.cc = PRE[0].cc; S.theme = 'system';
+      window.vrPro.set('forest'); S.cc = PRE[0].cc; S.theme = 'system';
       if (window.vrLookReset) window.vrLookReset(); if (window.vrUIReset) window.vrUIReset();
       commit('Appearance reset'); return;
     }
