@@ -1082,7 +1082,7 @@ html body .pt{border:1px solid var(--bd);border-radius:12px;padding:12px 14px;ba
 html body .pt-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mu);margin-bottom:8px}
 html body .pt-bar{position:relative;display:flex;gap:3px}
 html body .pt-seg{min-width:92px;display:flex;flex-direction:column;gap:2px}
-html body .pt-seg i{display:block;height:8px;border-radius:99px;background:var(--rpc,var(--ac,#2563eb))}
+html body .pt-seg i{display:block;height:8px;border-radius:99px;background:var(--rpc,var(--ac,#14392b))}
 html body .pt-seg.pt-e i{background:#10b981}
 html body .pt-seg b{font-size:14px;font-weight:800}
 html body .pt-seg small,html body .pt .pt-g small{font-size:11px;color:var(--mu);line-height:1.3}
