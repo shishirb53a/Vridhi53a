@@ -7,11 +7,11 @@ const assert = require('assert');
 
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const styles = fs.readFileSync(path.join(root, 'modules', 'app-shell', 'ux-final.css'), 'utf8');
+const styles = fs.readFileSync(path.join(root, 'modules', 'app-shell', 'base.css'), 'utf8');
 const clientStyles = fs.readFileSync(path.join(root, 'modules', 'goal-planner-clients', 'client-compare.css'), 'utf8');
 
-assert.ok(html.includes('modules/app-shell/ux-final.css?v=154'),
-  'The mobile client-switcher stylesheet uses a refreshed cache version');
+assert.ok(html.includes('modules/app-shell/base.css?v=155'),
+  'The consolidated stylesheet is refreshed for the mobile client switcher');
 assert.ok(styles.includes('"nav nav nav nav" "client client client client"'),
   'The mobile header reserves a full-width row for the client switcher');
 assert.ok(styles.includes('#fhp:not(:has(.gpp-client-trigger))') &&
