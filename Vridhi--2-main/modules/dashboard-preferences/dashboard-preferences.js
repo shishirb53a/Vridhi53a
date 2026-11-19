@@ -50,10 +50,11 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
 if(a.dataset.look!=null){const p=PR[+a.dataset.look];S.palette=p[1];S.cc=null;S.theme=p[2];L.font=p[3];save();theme();ap();render();toast(p[0]+' look applied');return}
 const[k,v]=a.dataset.lk.split(':');if(k==='reset'){L=Object.assign({},D)}else L[k]=v;ap();render()});
 })();
-(function(){var K='vr-ui',D={uth:'mono',ubt:'filled',ush:'round',uin:'outlined',utd:'normal',uhd:'plain',utz:'off',utl:'on',utc:'on',ufn:'system',utx:'default',uic:'on'},U=Object.assign({},D);
+(function(){var K='vr-ui',D={uth:'mono',ubt:'filled',ush:'round',uin:'outlined',utd:'normal',uhd:'plain',utz:'off',utl:'on',utc:'on',ufn:'system',utx:'default',uic:'on',uwt:'normal'},U=Object.assign({},D);
 try{Object.assign(U,JSON.parse(localStorage.getItem(K))||{})}catch(e){}if(U.utx==='navy')U.utx='forest';
 var O={ufn:['Font',[['system','System'],['inter','Inter'],['serif','Serif'],['humanist','Humanist'],['mono','Monospace']]],
 utx:['Text colour',[['default','Default'],['charcoal','Charcoal'],['forest','Forest']]],
+uwt:['Text weight',[['normal','Normal'],['medium','Medium'],['semibold','Semibold'],['bold','Bold']]],
 ubt:['Button style',[['filled','Filled'],['soft','Soft'],['outline','Outline']]],
 ush:['Corner shape',[['sharp','Sharp'],['round','Rounded'],['pill','Pill']]],
 uin:['Input style',[['outlined','Outlined'],['filled','Filled'],['underline','Underline']]],
