@@ -947,3 +947,51 @@ html:not(#vrx) body #fhp .client-add{flex:none;width:100%;height:auto;min-height
  html:not(#vrx) body .fhp.fhp-m .client-trigger{width:100%;min-width:0;max-width:none;height:44px;min-height:44px}
  html:not(#vrx) body .fhp.fhp-m .client-popup{right:0;max-width:calc(100vw - 24px)}
 }
+
+/* ===== Advanced Appearance overrides (Settings > Appearance > Advanced) =====
+   The preferences are stored on <html> as data-ufn and data-utx.
+   Use important token overrides because the enterprise skin defines its own
+   body-level palette, and force the font on descendants as the app has
+   inherited/hard-coded font declarations in multiple components. */
+html[data-utx="charcoal"] {
+  --tx:#1f2937 !important;
+  --mu:#626b73 !important;
+  --txl:#1f2937 !important;
+  --txd:#e5e7eb !important;
+}
+html[data-utx="navy"] {
+  --tx:#0f2a4a !important;
+  --mu:#52677f !important;
+  --txl:#0f2a4a !important;
+  --txd:#dbeafe !important;
+}
+html[data-utx="forest"] {
+  --tx:#14342b !important;
+  --mu:#3f6b50 !important;
+  --txl:#14342b !important;
+  --txd:#d1fae5 !important;
+}
+html[data-theme="dark"][data-utx="charcoal"] {
+  --tx:#e5e7eb !important; --mu:#aeb8c4 !important;
+}
+html[data-theme="dark"][data-utx="navy"] {
+  --tx:#dbeafe !important; --mu:#a8c4e8 !important;
+}
+html[data-theme="dark"][data-utx="forest"] {
+  --tx:#d1fae5 !important; --mu:#9bc5aa !important;
+}
+@media (prefers-color-scheme:dark) {
+  html:not([data-theme="light"])[data-utx="charcoal"] { --tx:#e5e7eb !important; --mu:#aeb8c4 !important; }
+  html:not([data-theme="light"])[data-utx="navy"] { --tx:#dbeafe !important; --mu:#a8c4e8 !important; }
+  html:not([data-theme="light"])[data-utx="forest"] { --tx:#d1fae5 !important; --mu:#9bc5aa !important; }
+}
+html[data-ufn="system"], html[data-ufn="system"] body { --ff:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important; }
+html[data-ufn="inter"], html[data-ufn="inter"] body { --ff:Inter,-apple-system,"Segoe UI",Roboto,Arial,sans-serif !important; }
+html[data-ufn="serif"], html[data-ufn="serif"] body { --ff:Georgia,"Times New Roman",serif !important; }
+html[data-ufn="humanist"], html[data-ufn="humanist"] body { --ff:"Trebuchet MS",Arial,sans-serif !important; }
+html[data-ufn="mono"], html[data-ufn="mono"] body { --ff:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace !important; }
+html[data-ufn] body,
+html[data-ufn] body :where(*),
+html[data-ufn] body :where(*::before,*::after) {
+  font-family:var(--ff) !important;
+}
