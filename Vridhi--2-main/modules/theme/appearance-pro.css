@@ -71,3 +71,9 @@ html body .sx .sx-ok{background:#0f7b5f}
 html body .sx .sx-mid{background:#b7791f}
 html body .sx .sx-bad{background:#b42318}
 html body :is(.card,.sx,.rp2) :is(td,th,.n,.num,.v,.amt){font-variant-numeric:tabular-nums}
+
+/* Mobile header: keep the light/dark toggle on the first row, between the profile chip and the menu button */
+@media (max-width:720px){
+ html:not(#vrx) body header.hd .hdi{grid-template-columns:minmax(0,1fr) auto auto auto auto!important;grid-template-areas:"brand who mode settings so" "nav nav nav nav nav" "client client client client client"!important}
+ html:not(#vrx) body header.hd .ap-mode{grid-area:mode;width:38px;height:38px;min-width:38px!important;min-height:38px!important;padding:0!important;margin:0!important;border-radius:10px!important;color:inherit!important;background:color-mix(in srgb,currentColor 10%,transparent)!important;border:1px solid color-mix(in srgb,currentColor 35%,transparent)!important;box-shadow:none!important}
+}
