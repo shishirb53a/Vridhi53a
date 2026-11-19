@@ -1,28 +1,59 @@
+/* Appearance settings (redesigned). Scoped under "html body .ap" so it wins over the global tinted-button rules. */
+html body .ap{display:grid;gap:28px}
+html body .ap .ap-sec{display:grid;gap:14px}
+html body .ap .ap-sh h3{margin:0;font-size:15px;font-weight:650;color:var(--tx)}
+html body .ap .ap-sh p{margin:3px 0 0;font-size:13px;color:var(--mu)}
+html body .ap .ap-note{margin:0;font-size:12px;color:var(--mu)}
+html body .ap .ap-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* theme cards */
+html body .ap .ap-th{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+html body .ap button.ap-c{position:relative;display:flex !important;flex-direction:column;align-items:stretch;gap:4px;height:auto;min-height:0;padding:10px 10px 12px !important;text-align:left;background:var(--card) !important;color:var(--tx) !important;border:1px solid var(--bd) !important;border-radius:var(--r-card,12px);box-shadow:none !important;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s}
+html body .ap button.ap-c:hover{border-color:var(--ac) !important;transform:translateY(-1px)}
+html body .ap button.ap-c[aria-checked="true"]{border-color:var(--ac) !important;box-shadow:0 0 0 1px var(--ac) !important}
+html body .ap button.ap-c:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+html body .ap .ap-pv{display:flex;flex-direction:column;height:84px;margin-bottom:8px;border:1px solid;border-radius:8px;overflow:hidden}
+html body .ap .ap-pb{display:block;height:14px;flex:none}
+html body .ap .ap-pm{display:flex;flex:1;gap:6px;padding:7px}
+html body .ap .ap-pm>b{display:block;border:1px solid;border-radius:4px}
+html body .ap .ap-pm>b:first-child{width:26%}
+html body .ap .ap-pm>b:last-child{flex:1;padding:6px}
+html body .ap .ap-pm u{display:block;width:55%;height:5px;border-radius:3px;opacity:.85}
+html body .ap .ap-nm{font-size:14px;font-weight:650;line-height:1.25}
+html body .ap .ap-ds{font-size:12px;line-height:1.35;color:var(--mu)}
+html body .ap .ap-ck{position:absolute;top:18px;right:18px;display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--ac);color:var(--ac2,#fff);box-shadow:0 0 0 2px var(--card)}
+html body .ap button.ap-c[aria-checked="true"] .ap-ck{display:flex}
+
+/* accent swatches */
+html body .ap .ap-sw{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+html body .ap button.ap-s{display:inline-flex !important;align-items:center;justify-content:center;width:36px;height:36px;min-width:36px;min-height:36px !important;padding:0 !important;border-radius:50%;background:var(--sw) !important;color:#fff !important;border:2px solid var(--card) !important;box-shadow:0 0 0 1px var(--bd) !important;cursor:pointer;transition:transform .12s,box-shadow .12s}
+html body .ap button.ap-s:hover{transform:scale(1.1)}
+html body .ap button.ap-s:focus-visible{outline:2px solid var(--tx);outline-offset:3px}
+html body .ap button.ap-s svg{display:none}
+html body .ap button.ap-s[aria-checked="true"]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--sw) !important}
+html body .ap button.ap-s[aria-checked="true"] svg{display:block}
+html body .ap .ap-cu{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px 0 5px;border:1px dashed var(--bd);border-radius:99px;background:var(--card);color:var(--mu);font-size:13px;font-weight:600;cursor:pointer}
+html body .ap .ap-cu:hover,html body .ap .ap-cu.on{border-style:solid;border-color:var(--ac);color:var(--tx)}
+html body .ap .ap-cu input{width:30px;height:30px;min-height:0;padding:0;border:0;border-radius:50%;background:none;cursor:pointer}
+html body .ap .ap-cu code{padding:2px 6px;border-radius:6px;background:color-mix(in srgb,var(--tx) 6%,var(--card));color:var(--tx);font-size:12px;font-weight:500}
+
+/* display settings: label left, control right */
+html body .ap .ap-rows{border:1px solid var(--bd);border-radius:var(--r-card,12px);background:var(--card);overflow:hidden}
+html body .ap .ap-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 16px}
+html body .ap .ap-row+.ap-row{border-top:1px solid var(--bd)}
+html body .ap .ap-rl{display:grid;gap:2px;min-width:0}
+html body .ap .ap-rl b{font-size:14px;font-weight:600;color:var(--tx)}
+html body .ap .ap-rl span{font-size:12px;color:var(--mu)}
+html body .ap .ap-seg{flex:none}
+
+/* advanced + footer */
+html body .ap .ap-adv{border:1px solid var(--bd);border-radius:var(--r-card,12px);padding:12px 16px;background:var(--card)}
+html body .ap .ap-adv>summary{cursor:pointer;color:var(--tx);font-size:13px;font-weight:600}
+html body .ap .ap-adv[open]>summary{margin-bottom:14px}
+html body .ap .ap-ft{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:4px;border-top:1px solid var(--bd)}
+@media (max-width:560px){html body .ap .ap-th{grid-template-columns:1fr 1fr}html body .ap .ap-row{flex-direction:column;align-items:stretch}html body .ap .ap-seg{width:100%}}
+
 /* Simplified Appearance screen */
-.ap{display:grid;gap:4px}
-.ap-l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:16px 0 6px}
-.ap-n{margin:6px 0 0;font-size:12px}
-.ap-th{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-.ap-c{display:grid;gap:4px;text-align:left;padding:10px;border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx);cursor:pointer;min-height:0}
-.ap-c:hover{border-color:var(--ac)}
-.ap-c[aria-checked=true]{border:2px solid var(--ac);padding:9px}
-.ap-pv{display:flex;gap:6px;height:54px;padding:8px;border-radius:8px}
-.ap-pv i{flex:1;border-radius:4px;display:block}
-.ap-pv b{width:26px;border-radius:4px;display:block}
-.ap-nm{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
-.ap-nm em{font-style:normal;font-weight:500;font-size:11px;padding:1px 8px;border-radius:99px;background:color-mix(in srgb,var(--ac) 12%,var(--card));color:var(--ac)}
-.ap-ds{font-size:12px;color:var(--mu)}
-.ap-sw{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.ap-s{width:32px;height:32px;min-width:32px;min-height:32px;padding:0;border-radius:50%;background:var(--sw);border:2px solid var(--card);box-shadow:0 0 0 1px var(--bd);cursor:pointer}
-.ap-s:hover{transform:scale(1.08)}
-.ap-s[aria-checked=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--sw)}
-.ap-cu{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 10px 0 4px;border:1px dashed var(--bd);border-radius:99px;color:var(--mu);font-size:12px;cursor:pointer}
-.ap-cu input{width:28px;height:28px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer}
-.ap-cu code{font-size:11px;color:var(--tx)}
-.ap-adv{margin-top:18px;border:1px dashed var(--bd);border-radius:10px;padding:10px 12px}
-.ap-adv>summary{cursor:pointer;color:var(--mu);font-size:13px}
-.ap-adv[open]>summary{margin-bottom:12px}
-.ap-ft{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
 
 /* Header light/dark toggle (replaces the floating "Look" menu) */
 html body header.hd .ap-mode{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;min-height:40px;padding:0;margin-right:6px;border-radius:10px;background:transparent;color:inherit;border:1px solid color-mix(in srgb,currentColor 28%,transparent);cursor:pointer}

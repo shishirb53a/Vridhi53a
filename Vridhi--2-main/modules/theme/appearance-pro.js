@@ -14,33 +14,41 @@
   var OLD = window.lookUI, d = document, root = d.documentElement;
 
   function dark() { var a = root.getAttribute('data-theme'); return a === 'dark' || (!a && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
+  var CHK = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+  function sec(title, desc, body) {
+    return '<section class="ap-sec"><header class="ap-sh"><h3>' + title + '</h3>' + (desc ? '<p>' + desc + '</p>' : '') + '</header>' + body + '</section>';
+  }
   function seg(label, attr, opts, on, note) {
-    return '<div class="ap-l">' + label + '</div><div class="seg ap-seg" role="group" aria-label="' + label + '">' +
-      opts.map(function (o) { return '<button type="button" ' + attr + '="' + o[0] + '" aria-pressed="' + (o[0] === on) + '">' + o[1] + '</button>'; }).join('') +
-      '</div>' + (note ? '<p class="mu ap-n">' + note + '</p>' : '');
+    return '<div class="ap-row"><div class="ap-rl"><b>' + label + '</b>' + (note ? '<span>' + note + '</span>' : '') + '</div><div class="seg ap-seg" role="group" aria-label="' + label + '">' +
+      opts.map(function (o) { return '<button type="button" ' + attr + '="' + o[0] + '" aria-pressed="' + (o[0] === on) + '">' + o[1] + '</button>'; }).join('') + '</div></div>';
   }
   function cards() {
     var cur = window.vrPro ? window.vrPro.get() : 'forest', dk = dark();
     return '<div class="ap-th" role="radiogroup" aria-label="Theme">' + PRE.map(function (p) {
       var c = dk ? p.x : p.l, on = p.k === cur;
-      return '<button type="button" class="ap-c" role="radio" aria-checked="' + on + '" data-ap-theme="' + p.k + '"><span class="ap-pv" style="background:' + c[0] +
-        '"><i style="background:' + c[1] + ';border:1px solid ' + c[2] + '"></i><b style="background:' + c[3] + '"></b></span><span class="ap-nm">' + p.n +
-        (on ? '<em>Selected</em>' : '') + '</span><span class="ap-ds">' + p.d + '</span></button>';
+      return '<button type="button" class="ap-c" role="radio" aria-checked="' + on + '" data-ap-theme="' + p.k + '"><span class="ap-pv" style="background:' + c[0] + ';border-color:' + c[2] + '">' +
+        '<i class="ap-pb" style="background:' + c[3] + '"></i><span class="ap-pm"><b style="background:' + c[1] + ';border-color:' + c[2] + '"></b><b style="background:' + c[1] + ';border-color:' + c[2] + '"><u style="background:' + c[3] + '"></u></b></span></span>' +
+        '<span class="ap-nm">' + p.n + '</span><span class="ap-ds">' + p.d + '</span><span class="ap-ck" aria-hidden="true">' + CHK + '</span>' + (on ? '<span class="ap-sr">Selected</span>' : '') + '</button>';
     }).join('') + '</div>';
   }
   var SW = [['#14392b', 'Forest'], ['#2f6b52', 'Sage'], ['#1e3a5f', 'Navy'], ['#2563eb', 'Blue'], ['#4f46e5', 'Indigo'],
     ['#7c3aed', 'Purple'], ['#be185d', 'Rose'], ['#c2410c', 'Orange'], ['#a16207', 'Amber'], ['#3b4252', 'Graphite']];
   function accent() {
-    var cur = (window.brandOf ? window.brandOf() : '#14392b').toLowerCase();
-    return '<div class="ap-l">Accent colour</div><div class="ap-sw" role="radiogroup" aria-label="Accent colour">' + SW.map(function (s) {
-      return '<button type="button" class="ap-s" role="radio" aria-checked="' + (s[0] === cur) + '" aria-label="' + s[1] + '" title="' + s[1] + '" data-ap-cc="' + s[0] + '" style="--sw:' + s[0] + '"></button>';
-    }).join('') + '<label class="ap-cu" title="Pick any colour"><input type="color" id="ap-cc" value="' + cur + '" aria-label="Custom accent colour"><span>Custom</span><code id="ap-cc-v">' + cur + '</code></label></div>' +
-      '<p class="mu ap-n">Changes buttons, highlights and charts. Text colour is adjusted automatically so it stays readable.' + (root.hasAttribute('data-minimal-theme') ? ' The Minimal theme is monochrome, so pick another theme to see your colour.' : '') + '</p>';
+    var cur = (window.brandOf ? window.brandOf() : '#14392b').toLowerCase(), pre = SW.some(function (s) { return s[0] === cur; });
+    return '<div class="ap-sw" role="radiogroup" aria-label="Accent colour">' + SW.map(function (s) {
+      return '<button type="button" class="ap-s" role="radio" aria-checked="' + (s[0] === cur) + '" aria-label="' + s[1] + '" title="' + s[1] + '" data-ap-cc="' + s[0] + '" style="--sw:' + s[0] + '">' + CHK + '</button>';
+    }).join('') + '<label class="ap-cu' + (pre ? '' : ' on') + '" title="Pick any colour"><input type="color" id="ap-cc" value="' + cur + '" aria-label="Custom accent colour"><span>Custom</span><code id="ap-cc-v">' + cur + '</code></label></div>' +
+      '<p class="ap-note">Changes buttons, highlights and charts. Text colour is adjusted automatically so it stays readable.' + (root.hasAttribute('data-minimal-theme') ? ' The Minimal theme is monochrome, so pick another theme to see your colour.' : '') + '</p>';
   }
   window.apUI = function () {
     var ds = root.dataset, dens = ds.dens === 'compact' ? 'compact' : 'cosy', size = ds.size || 'm', mode = (window.S && S.theme) || 'system';
-    return '<div class="ap"><div class="ap-l">Theme</div>' + cards() + accent() + seg('Mode', 'data-ap-mode', MODES, mode) +
-      seg('Density', 'data-ap-dens', DENS, dens, 'Compact tightens table rows to show more data per screen.') + seg('Text size', 'data-ap-size', SIZES, size) +
+    return '<div class="ap">' +
+      sec('Theme', 'Surface colours for the whole app. Works with light, dark and your accent colour.', cards()) +
+      sec('Accent colour', 'Pick a preset or choose any colour.', accent()) +
+      sec('Display', 'How the app looks and how much fits on screen.',
+        '<div class="ap-rows">' + seg('Mode', 'data-ap-mode', MODES, mode, 'Light, dark, or follow your device') +
+        seg('Density', 'data-ap-dens', DENS, dens, 'Compact tightens table rows to show more data per screen') +
+        seg('Text size', 'data-ap-size', SIZES, size, 'Scales text across the app') + '</div>') +
       '<details class="ap-adv"><summary>Advanced: font, corners, table lines, stripes, icons</summary>' + (OLD ? OLD() : '') + '</details>' +
       '<div class="ap-ft"><span class="mu">Changes apply instantly.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
   };
