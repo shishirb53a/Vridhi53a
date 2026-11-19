@@ -1,11 +1,11 @@
 (function(){
 var T=[
-["ledger","Ledger navy","Clean and trusted",{bg:"#f4f6f9",card:"#ffffff",tx:"#0f1b2d",mu:"#4a586c",bd:"#dfe4ec"},{bg:"#0c1220",card:"#141c2e",tx:"#e6ebf5",mu:"#aab6cc",bd:"#26324a"}],
+["forest","Forest green","A calm, premium green palette",{bg:"#f4f6f9",card:"#ffffff",tx:"#0f1b2d",mu:"#4a586c",bd:"#dfe4ec"},{bg:"#0c1220",card:"#141c2e",tx:"#e6ebf5",mu:"#aab6cc",bd:"#26324a"}],
 ["bank","Private bank","Warm ivory and green",{bg:"#f6f3ec",card:"#fffefb",tx:"#2a241b",mu:"#5e5446",bd:"#e6dfd0",hl:"#fbefc7",hl2:"#e0efdc"},{bg:"#16130f",card:"#201c16",tx:"#efe8dc",mu:"#bfb5a3",bd:"#352f25"}],
 ["graphite","Graphite","Charcoal with gold",{bg:"#eef0f4",card:"#ffffff",tx:"#141922",mu:"#4b5565",bd:"#dde1e8"},{bg:"#0f1319",card:"#171c24",tx:"#eef1f6",mu:"#9aa5b8",bd:"#2a313d"}],
 ["minimal","Minimal","Flat monochrome with no shadows or gradients",{bg:"#ffffff",card:"#ffffff",tx:"#111111",mu:"#444444",bd:"#888888"},{bg:"#000000",card:"#000000",tx:"#ffffff",mu:"#cccccc",bd:"#888888"}]
-],K="vr-pro",r=document.documentElement,used={},LG={ledger:["#0b1220","#13233f"],bank:["#241c14","#4a3a26"],graphite:["#0f1216","#2b303a"]},AL={"default":"ledger",boardroom:"ledger",contrast:"ledger",evergreen:"bank",mono:"graphite"};
-function get(){var v="ledger";try{v=localStorage.getItem(K)||"ledger"}catch(e){}return AL[v]||v}
+],K="vr-pro",r=document.documentElement,used={},LG={forest:["#10291f","#1d4935"],bank:["#241c14","#4a3a26"],graphite:["#0f1216","#2b303a"]},AL={"default":"forest",ledger:"forest",boardroom:"forest",contrast:"forest",evergreen:"bank",mono:"graphite"};
+function get(){var v="forest";try{v=localStorage.getItem(K)||"forest"}catch(e){}return AL[v]||v}
 function dark(){var a=r.getAttribute("data-theme");return a==="dark"||(!a&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)}
 function sp(n,v){r.style.setProperty(n,v);if(document.body)document.body.style.setProperty(n,v)}function rp(n){r.style.removeProperty(n);if(document.body)document.body.style.removeProperty(n)}
 function apply(){Object.keys(used).forEach(function(k){rp("--"+k)});used={};var k=get(),x=T.filter(function(z){return z[0]===k})[0];if(k==="minimal")r.setAttribute("data-minimal-theme","true");else r.removeAttribute("data-minimal-theme");if(!x||!x[3])return;var v=dark()?x[4]:x[3];Object.keys(v).forEach(function(n){sp("--"+n,v[n]);used[n]=1});var g=LG[k];if(g){sp("--lg1",g[0]);sp("--lg2",g[1]);used.lg1=1;used.lg2=1}}
