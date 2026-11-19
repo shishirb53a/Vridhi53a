@@ -1076,3 +1076,34 @@ html[data-uwt="normal"] body :where(*) { font-weight:400 !important; }
 html[data-uwt="medium"] body :where(*) { font-weight:500 !important; }
 html[data-uwt="semibold"] body :where(*) { font-weight:600 !important; }
 html[data-uwt="bold"] body :where(*) { font-weight:700 !important; }
+
+/* ===== Fix Modules navigation label visibility =====
+   Keep the Modules trigger and its menu readable after Advanced text-colour
+   and text-weight overrides. The Enterprise header button rule must not
+   fade this label into the neutral header surface. */
+html[data-skin="enterprise"] body header.hd nav#nav .nav-modules > button[data-modules-toggle],
+html[data-skin="enterprise"] body header.hd nav#nav .nav-modules > button[data-modules-toggle] *,
+html body header.hd nav#nav .nav-modules > button[data-modules-toggle],
+html body header.hd nav#nav .nav-modules > button[data-modules-toggle] * {
+  color:var(--tx,#17212b)!important;
+  -webkit-text-fill-color:var(--tx,#17212b)!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+html[data-skin="enterprise"] body header.hd nav#nav .nav-modules > button[data-modules-toggle] {
+  background:var(--card,#fff)!important;
+  border:1px solid var(--bd,#cbd5e1)!important;
+  border-bottom:2px solid var(--ac,#14532d)!important;
+}
+html[data-skin="enterprise"] body header.hd nav#nav .nav-modules .module-menu,
+html body header.hd nav#nav .nav-modules .module-menu {
+  background:var(--card,#fff)!important;
+  color:var(--tx,#17212b)!important;
+}
+html[data-skin="enterprise"] body header.hd nav#nav .nav-modules .module-menu > button,
+html body header.hd nav#nav .nav-modules .module-menu > button {
+  color:var(--tx,#17212b)!important;
+  -webkit-text-fill-color:var(--tx,#17212b)!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
