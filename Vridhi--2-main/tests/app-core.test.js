@@ -89,4 +89,10 @@ assert.ok(holdingsPage.includes('id="hsf"') && holdingsPage.includes('id="hsd"')
   appCore.includes("id==='hsf'") && appCore.includes("#rsd,#rp-max,#htools,#hsd')"),
 'Mobile Holdings adds a Sort control, a Tools menu, compact cards and a sticky Total, and read-only users can still use them');
 
+const holdingRenderer = appCore.slice(appCore.indexOf('const nm=o=>'), appCore.indexOf('const actIcon='));
+assert.ok(holdingRenderer.includes("!UI.g?") &&
+  holdingRenderer.includes("esc(o.x.cat)") &&
+  !holdingRenderer.includes("Added ") &&
+  !holdingRenderer.includes("Entry date not set"),
+'Grouped holdings hide per-holding category labels, ungrouped holdings show categories, and added dates are omitted');
 console.log('App core loads synchronously and preserves its initialization boundaries');
