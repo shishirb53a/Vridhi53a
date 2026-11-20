@@ -201,3 +201,8 @@ html body .hd-back{display:inline-flex;align-items:center;gap:8px;min-height:44p
 /* Inline holding row actions: keep edit/delete beside the holding name, not in a separate table column. */
 html body .hp-card .hp-inline-actions{display:flex;justify-content:flex-start;align-items:center;gap:5px;margin-top:7px}
 html body .hp-card .hp-inline-actions button{width:30px;height:30px;min-width:30px!important;min-height:30px;padding:0;border-radius:7px}
+
+/* Place View, Edit and Delete controls immediately before each holding name. */
+html body .hp-card .hp-holding-title{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+html body .hp-card .hp-inline-actions{display:inline-flex;align-items:center;gap:3px;margin:0;flex:0 0 auto}
+html body .hp-card .hp-inline-actions button{width:27px;height:27px;min-width:27px!important;min-height:27px;padding:0;border-radius:6px}
