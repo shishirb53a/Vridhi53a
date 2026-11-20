@@ -93,7 +93,7 @@ html[lang=hi] body,html[lang=hi] button,html[lang=hi] input,html[lang=hi] select
 <script src="modules/landing/landing.js?v=131"></script>
 <script src="modules/portfolio-calculations/engine.js?v=136"></script>
 
-<script src="modules/app-core/app.js?v=178"></script>
+<script src="modules/app-core/app.js?v=179"></script>
 <script src="modules/app-shell/reports-menu.js?v=1"></script>
 <script src="modules/family-management/family-management.js?v=144"></script>
 <script src="modules/help/help.js?v=143"></script>
@@ -218,7 +218,7 @@ set();document.addEventListener('DOMContentLoaded',set)})();</script>
 html body .rt tr.a:not(.sel){--tn:transparent}
 html body .rt tr.a:not(.sel) td{background-color:transparent}
 html body .yc.a:not(.sel){background:transparent}</style>
-<link rel="stylesheet" href="modules/holdings/holdings.css?v=163">
+<link rel="stylesheet" href="modules/holdings/holdings.css?v=164">
 <script src="modules/report-filters/report-filters.js?v=134"></script>
 <style>@import url("modules/report-filters/report-filters.css?v=134");</style>
 <script src="modules/report-columns/report-columns.js?v=128"></script>
@@ -227,11 +227,8 @@ html body .yc.a:not(.sel){background:transparent}</style>
 <script src="modules/dashboard-preferences/mobile-tabs.js?v=147"></script>
 <script src="modules/ui-pagination/ui-pagination.js?v=135"></script>
 <style id="no-hscroll">
-/* No horizontal scrolling on Holdings / Add holding (desktop + mobile). Layout only. */
+/* Holdings table scrolling is defined in holdings.css; keep Add holding controls wrapping. */
 html body .hdi{flex-wrap:wrap}
-html body .ht.tw{overflow-x:hidden}
-html body .ht table{width:100%;min-width:0;table-layout:auto}
-html body .ht table th{white-space:normal}
 html body dialog.hf,html body dialog.hf form{max-width:100%;overflow-x:hidden}
 html body dialog.hf .wzt{flex-wrap:wrap}
 html body dialog.hf .wzt button{min-width:0}
