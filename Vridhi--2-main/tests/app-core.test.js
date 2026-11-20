@@ -112,7 +112,7 @@ assert.ok(holdingsCss.includes('overflow-x:auto!important') &&
   holdingsCss.includes('.ht.tw:focus-visible'),
 'Holdings table remains readable in a horizontally scrollable, keyboard-accessible region');
 assert.ok(!html.includes('html body .ht.tw{overflow-x:hidden}') &&
-  html.includes('modules/holdings/holdings.css?v=166'),
+  html.includes('modules/holdings/holdings.css?v=169'),
 'Holdings page does not hide table overflow and loads the responsive table styles');
 
 
