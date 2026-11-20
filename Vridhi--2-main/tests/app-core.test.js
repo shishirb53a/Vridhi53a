@@ -11,7 +11,7 @@ const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js')
 const i18n = html.indexOf('<script src="modules/i18n/i18n.js?v=132"></script>');
 const landing = html.indexOf('<script src="modules/landing/landing.js?v=131"></script>');
 const calculations = html.indexOf('<script src="modules/portfolio-calculations/engine.js?v=136"></script>');
-const coreTag = '<script src="modules/app-core/app.js?v=178"></script>';
+const coreTag = '<script src="modules/app-core/app.js?v=179"></script>';
 const core = html.indexOf(coreTag);
 const family = html.indexOf('<script src="modules/family-management/family-management.js?v=144"></script>');
 
@@ -96,7 +96,8 @@ assert.ok(holdingRenderer.includes("!UI.g?") &&
   !holdingRenderer.includes("Entry date not set"),
 'Grouped holdings hide per-holding category labels, ungrouped holdings show categories, and added dates are omitted');
 const holdingTable = appCore.slice(appCore.indexOf('function holdRows()'), appCore.indexOf('function hold(){'));
-assert.ok(holdingTable.includes('<th class="hp-action-heading">Action</th>') &&
+assert.ok(holdingTable.includes('<div class="ht tw" role="region" aria-label="Holdings table" tabindex="0"><table>') &&
+  holdingTable.includes('<th class="hp-action-heading">Action</th>') &&
   holdingTable.includes('<td class="hp-action-cell">${bt(o)}</td>') &&
   holdingTable.includes('data-holding-view="${esc(String(o.x.id))}"') &&
   holdingTable.includes('data-e="${o.i}"') &&
@@ -104,4 +105,14 @@ assert.ok(holdingTable.includes('<th class="hp-action-heading">Action</th>') &&
   !holdingTable.includes('nm(o,true)') &&
   !holdingTable.includes('hp-inline-actions'),
 'View Holdings has a dedicated Action column with View, Edit and Delete icons');
+const holdingsCss = fs.readFileSync(path.join(root, 'modules', 'holdings', 'holdings.css'), 'utf8');
+assert.ok(holdingsCss.includes('overflow-x:auto!important') &&
+  holdingsCss.includes('min-width:960px') &&
+  holdingsCss.includes('overscroll-behavior-x:contain') &&
+  holdingsCss.includes('.ht.tw:focus-visible'),
+'Holdings table remains readable in a horizontally scrollable, keyboard-accessible region');
+assert.ok(!html.includes('html body .ht.tw{overflow-x:hidden}') &&
+  html.includes('modules/holdings/holdings.css?v=164'),
+'Holdings page does not hide table overflow and loads the responsive table styles');
+
 console.log('App core loads synchronously and preserves its initialization boundaries');
