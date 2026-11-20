@@ -6,7 +6,7 @@ const source = fs.readFileSync(path.join(root, 'modules', 'auth', 'idle-timeout.
 const authSource = fs.readFileSync(path.join(root, 'modules', 'auth', 'auth.js'), 'utf8');
 const buildInfo = fs.readFileSync(path.join(root, 'modules', 'auth', 'build-info.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const workflow = fs.readFileSync(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
+const workflow = fs.readFileSync(path.join(root, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
 const configScript = html.indexOf('<script src="config.js"></script>');
 const buildInfoScript = html.indexOf('<script src="modules/auth/build-info.js?v=151"></script>');
 const authScript = html.indexOf('<script id="vr-prod" src="modules/auth/auth.js?v=153"></script>');
@@ -23,20 +23,22 @@ assert.ok(authSource.includes("window.VR_VERSION='2.8.0.'+window.VR_BUILD_NO"),
   'Displayed version includes the incremental build number');
 assert.ok(buildInfo.includes("window.VR_BUILD_DATE='2026-11-02'"),
   'Local fallback build date is defined alongside its build number');
-assert.ok(authScript >= 0 && html.includes('auth.js?v=' + buildNumber) &&
-  html.includes('build-info.js?v=' + buildNumber),
-  'Local cache keys match the fallback build number');
+assert.ok(authScript >= 0 && html.includes('build-info.js?v=' + buildNumber),
+  'Local build metadata cache key matches the fallback build number');
 assert.ok(workflow.includes('BUILD_RUN_NUMBER: ${{ github.run_number }}') &&
   workflow.includes("BASE_BUILD: '151'") &&
   workflow.includes('build_number=$((BASE_BUILD + BUILD_RUN_NUMBER))'),
-  'Each Pages workflow trigger advances the suffix from the current release');
+  'Each Pages workflow run advances the suffix from the current release');
 assert.ok(workflow.includes('actions/configure-pages@v5') &&
   !workflow.includes('PAGES_ADMIN_TOKEN') &&
-  workflow.includes('actions/deploy-pages@v4'),
+  workflow.includes('actions/deploy-pages@v5'),
   'Pages deploys its versioned workflow artifact without requiring a personal access token');
-assert.ok(workflow.includes('build-info.js?v=${build_number}') &&
-  workflow.includes('auth.js?v=${build_number}'),
+assert.ok(workflow.includes('modules/auth/build-info.js?v=${build_number}') &&
+  workflow.includes('modules/auth/auth.js?v=${build_number}'),
   'Each Pages build updates both cache keys to its generated version');
+assert.ok(workflow.includes("printf \"window.VR_BUILD_NO=%s;\\nwindow.VR_BUILD_DATE='%s';\\n\"") &&
+  workflow.includes('build_date="$(date -u +%F)"'),
+  'Each Pages build writes its generated version and UTC build date');
 
 let now = 0, id = 0, signedOut = 0, reloads = 0;
 const timers = new Map(), documentEvents = {}, windowEvents = {};

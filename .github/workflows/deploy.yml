@@ -24,6 +24,19 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Generate build version
+        env:
+          BUILD_RUN_NUMBER: ${{ github.run_number }}
+          BASE_BUILD: '151'
+        run: |
+          set -eu
+          site_dir=Vridhi--2-main
+          build_number=$((BASE_BUILD + BUILD_RUN_NUMBER))
+          build_date="$(date -u +%F)"
+          printf "window.VR_BUILD_NO=%s;\nwindow.VR_BUILD_DATE='%s';\n" "$build_number" "$build_date" > "$site_dir/modules/auth/build-info.js"
+          sed -i "s#modules/auth/build-info.js?v=[0-9]*#modules/auth/build-info.js?v=${build_number}#" "$site_dir/index.html"
+          sed -i "s#modules/auth/auth.js?v=[0-9]*#modules/auth/auth.js?v=${build_number}#" "$site_dir/index.html"
+
       - name: Upload site folder
         uses: actions/upload-pages-artifact@v4
         with:
