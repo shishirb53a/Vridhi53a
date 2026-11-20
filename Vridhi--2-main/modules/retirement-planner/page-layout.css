@@ -17,3 +17,6 @@ html body .rp-head{align-items:stretch}html body .rp-head .acts,html body .rp-he
 html body .hz-sec .rph2 button{width:100%;min-height:42px}
 html body .hz-t td:first-child,html body .hz-t thead tr:nth-child(2) th:first-child{min-width:56px}html body .hz-t td.hz-w,html body .hz-t th.hz-w{min-width:170px;max-width:200px}html body .hz-t thead th{min-width:84px}
 }
+
+/* Retirement banner: initials badge text stays white on the accent circle (was dark on dark) */
+html body .rp-ban .fhp-av:not(button):not(.p){color:#fff!important}
