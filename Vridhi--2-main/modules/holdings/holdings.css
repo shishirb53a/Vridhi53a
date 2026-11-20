@@ -217,3 +217,12 @@ html body .hp-card .hp-inline-actions button:active{width:23px;height:23px;min-w
 html body .hp-card .hp-inline-actions button svg{width:15px;height:15px}
 html body .hp-card .hp-inline-actions button:focus{outline:none;box-shadow:none!important}
 html body .hp-card .hp-category-label{display:inline;background:none!important;border:0!important;border-radius:0!important;padding:0!important;color:var(--mu,var(--tx))!important;font-weight:400!important;box-shadow:none!important}
+
+/* Dedicated Action column for holding row controls. */
+html body .hp-card .hp-action-heading{text-align:center;white-space:nowrap}
+html body .hp-card .hp-action-cell{white-space:nowrap;text-align:center;vertical-align:middle}
+html body .hp-card .hp-action-cell .hp-actions{display:inline-flex;align-items:center;justify-content:center;gap:1px;margin:0}
+html body .hp-card .hp-action-cell .hp-act-icon,
+html body .hp-card .hp-action-cell .hp-act-icon:hover,
+html body .hp-card .hp-action-cell .hp-act-icon:active{width:25px;height:25px;min-width:25px!important;min-height:25px;padding:0;margin:0;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;color:var(--tx)!important}
+html body .hp-card .hp-action-cell .hp-act-icon svg{width:16px;height:16px}
