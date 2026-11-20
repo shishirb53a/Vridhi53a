@@ -112,11 +112,11 @@ assert.ok(holdingsCss.includes('overflow-x:auto!important') &&
   holdingsCss.includes('.ht.tw:focus-visible'),
 'Holdings table remains readable in a horizontally scrollable, keyboard-accessible region');
 assert.ok(!html.includes('html body .ht.tw{overflow-x:hidden}') &&
-  html.includes('modules/holdings/holdings.css?v=164'),
+  html.includes('modules/holdings/holdings.css?v=166'),
 'Holdings page does not hide table overflow and loads the responsive table styles');
 
 const actionStyles = fs.readFileSync(path.join(root, 'modules', 'holdings', 'holdings.css'), 'utf8');
 assert.ok(actionStyles.includes('th.hp-action-heading,') && actionStyles.includes('width:120px;min-width:120px;max-width:120px') && actionStyles.includes('justify-content:center;gap:6px') && actionStyles.includes('[data-x]:hover') && actionStyles.includes('.hp-act-icon:focus-visible'), 'Holdings action controls use a fixed aligned column, subtle delete styling and visible keyboard focus');
-assert.ok(html.includes('modules/holdings/holdings.css?v=165'), 'Action column style cache version is refreshed');
+assert.ok(html.includes('modules/holdings/holdings.css?v=166'), 'Action column style cache version is refreshed');
 
 console.log('App core loads synchronously and preserves its initialization boundaries');
