@@ -116,4 +116,19 @@ assert.ok(!html.includes('html body .ht.tw{overflow-x:hidden}') &&
 'Holdings page does not hide table overflow and loads the responsive table styles');
 
 
+
+assert.ok(holdingsCss.includes('overflow-x:auto!important') &&
+  holdingsCss.includes('width:1080px!important') &&
+  holdingsCss.includes('min-width:1080px!important') &&
+  holdingsCss.includes('touch-action:pan-x pan-y') &&
+  holdingsCss.includes('min-width:36px!important'),
+'Mobile holdings table scrolls horizontally and row actions remain touch-friendly');
+assert.ok(holdingsCss.includes('.hp-card .hp-more.open{display:flex}') &&
+  holdingsCss.includes('button.hp-cat:not(.hp-csv) span{display:inline!important}') &&
+  holdingsCss.includes('position:relative;') &&
+  holdingsCss.includes('.hd-page{width:100%;max-width:100%;min-width:0}'),
+'Mobile tools retain clear category text and holding details fit narrow screens');
+assert.ok(html.includes('modules/holdings/holdings.css?v=169'),
+'Mobile holdings fixes load with a refreshed stylesheet cache key');
+
 console.log('App core loads synchronously and preserves its initialization boundaries');
