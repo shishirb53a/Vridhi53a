@@ -206,3 +206,14 @@ html body .hp-card .hp-inline-actions button{width:30px;height:30px;min-width:30
 html body .hp-card .hp-holding-title{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
 html body .hp-card .hp-inline-actions{display:inline-flex;align-items:center;gap:3px;margin:0;flex:0 0 auto}
 html body .hp-card .hp-inline-actions button{width:27px;height:27px;min-width:27px!important;min-height:27px;padding:0;border-radius:6px}
+
+
+/* Compact, unboxed holding actions aligned to the right of the holding name. */
+html body .hp-card .hp-holding-title{display:flex;align-items:center;gap:5px;min-width:0;flex-wrap:wrap}
+html body .hp-card .hp-inline-actions{display:inline-flex;align-items:center;justify-content:flex-start;gap:0;margin:0;flex:0 0 auto}
+html body .hp-card .hp-inline-actions button,
+html body .hp-card .hp-inline-actions button:hover,
+html body .hp-card .hp-inline-actions button:active{width:23px;height:23px;min-width:23px!important;min-height:23px;padding:0;margin:0;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;color:var(--tx)!important}
+html body .hp-card .hp-inline-actions button svg{width:15px;height:15px}
+html body .hp-card .hp-inline-actions button:focus{outline:none;box-shadow:none!important}
+html body .hp-card .hp-category-label{display:inline;background:none!important;border:0!important;border-radius:0!important;padding:0!important;color:var(--mu,var(--tx))!important;font-weight:400!important;box-shadow:none!important}
