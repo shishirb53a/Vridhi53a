@@ -98,9 +98,12 @@ assert.ok(holdingRenderer.includes("!UI.g?") &&
 const holdingTable = appCore.slice(appCore.indexOf('function holdRows()'), appCore.indexOf('function hold(){'));
 assert.ok(!holdingTable.includes('<th>Actions</th>') &&
   holdingTable.includes('nm(o,true)') &&
+  holdingTable.includes('hp-holding-title') &&
   holdingTable.includes('hp-inline-actions') &&
+  holdingTable.includes('data-holding-view="${esc(String(o.x.id))}"') &&
   holdingTable.includes('data-e="${o.i}"') &&
   holdingTable.includes('data-x="${o.i}"') &&
+  holdingTable.indexOf('hp-inline-actions') < holdingTable.indexOf('<b><a href="#" class="hyl"') &&
   !holdingTable.includes('<td class="nw">${bt(o)}</td>'),
-'View Holdings removes the Actions column and places Edit and Delete icons beside each holding name');
+'View Holdings removes the Actions column and places View, Edit and Delete icons before each holding name');
 console.log('App core loads synchronously and preserves its initialization boundaries');
