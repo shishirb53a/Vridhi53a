@@ -131,4 +131,8 @@ assert.ok(holdingsCss.includes('.hp-card .hp-more.open{display:flex}') &&
 assert.ok(html.includes('modules/holdings/holdings.css?v=169'),
 'Mobile holdings fixes load with a refreshed stylesheet cache key');
 
+assert.ok(holdingTable.includes("(o.x.madd||0)*12") &&
+  holdingTable.includes("L.reduce((q,o)=>q+(o.x.type?0:(o.x.add||0)+(o.x.madd||0)*12),0)") &&
+  holdingTable.includes("'Monthly: '"),
+'Holdings Total and category totals annualise monthly contributions, while the tooltip shows the monthly breakdown');
 console.log('App core loads synchronously and preserves its initialization boundaries');
