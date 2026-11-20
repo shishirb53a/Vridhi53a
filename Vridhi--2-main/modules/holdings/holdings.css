@@ -197,3 +197,7 @@ html body .hd-back{display:inline-flex;align-items:center;gap:8px;min-height:44p
 @media (max-width:900px){
  html[data-skin=enterprise][lang][data-font]:not(.x):not(.x):not(.x) body .hp-card{overflow:clip}
 }
+
+/* Inline holding row actions: keep edit/delete beside the holding name, not in a separate table column. */
+html body .hp-card .hp-inline-actions{display:flex;justify-content:flex-start;align-items:center;gap:5px;margin-top:7px}
+html body .hp-card .hp-inline-actions button{width:30px;height:30px;min-width:30px!important;min-height:30px;padding:0;border-radius:7px}
