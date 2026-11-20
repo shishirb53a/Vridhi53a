@@ -621,3 +621,147 @@ html body .hp-card .hp-mob{display:none}
   html body .hp-card .hp-more button{justify-content:flex-start}
   html body .hp-card .ht table td:nth-child(3) .hp-recurring{font-size:10px}
 }
+
+
+/* Mobile hardening: preserve usable controls, scrollable holdings data and detail layouts. */
+@media(max-width:900px){
+  html body .hp-card{overflow:hidden}
+  html body .hp-card .hp-tools{
+    position:relative;
+    top:auto;
+    z-index:auto;
+    grid-template-columns:minmax(0,1fr);
+    padding:10px;
+    gap:8px;
+  }
+  html body .hp-card .hp-more{
+    display:none;
+    grid-template-columns:none;
+    align-items:center;
+    justify-content:flex-start;
+    gap:8px;
+    padding:9px;
+    overflow:visible;
+  }
+  html body .hp-card .hp-more.open{display:flex}
+  html body .hp-card .hp-more .hp-sort,
+  html body .hp-card .hp-more .hp-portfolio-actions{display:contents}
+  html body .hp-card .hp-more button{
+    flex:0 0 44px;
+    width:44px;
+    min-width:44px;
+    max-width:44px;
+    height:44px;
+    min-height:44px;
+    padding:0;
+    display:inline-grid;
+    place-items:center;
+    justify-content:center;
+  }
+  html body .hp-card .hp-more button.hp-tgl,
+  html body .hp-card .hp-more button.hp-grp,
+  html body .hp-card .hp-more button.hp-csv{font-size:0}
+  html body .hp-card .hp-more button.hp-cat:not(.hp-csv){
+    flex:0 0 auto;
+    width:auto;
+    min-width:44px;
+    max-width:none;
+    padding:0 12px;
+    display:inline-flex;
+    gap:7px;
+    font-size:12px;
+  }
+  html body .hp-card .hp-more button.hp-cat:not(.hp-csv) span{display:inline!important}
+  html body .hp-card .hp-more button.hp-tgl svg,
+  html body .hp-card .hp-more button.hp-grp svg,
+  html body .hp-card .hp-more button.hp-csv svg{width:19px;height:19px}
+  html body .hp-card .ht.tw{
+    display:block;
+    width:100%;
+    max-width:100%;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    touch-action:pan-x pan-y;
+    scrollbar-width:thin;
+  }
+  html body .hp-card .ht table{
+    width:1080px!important;
+    min-width:1080px!important;
+    max-width:none!important;
+    table-layout:fixed;
+  }
+  html body .hp-card .ht table th,
+  html body .hp-card .ht table td{
+    min-width:0!important;
+    overflow-wrap:normal;
+  }
+  html body .hp-card .ht table th:nth-child(1),
+  html body .hp-card .ht table td:nth-child(1){width:250px;min-width:250px!important}
+  html body .hp-card .ht table th:nth-child(2),
+  html body .hp-card .ht table td:nth-child(2){width:145px;min-width:145px!important}
+  html body .hp-card .ht table th:nth-child(3),
+  html body .hp-card .ht table td:nth-child(3){width:180px;min-width:180px!important}
+  html body .hp-card .ht table th:nth-child(4),
+  html body .hp-card .ht table td:nth-child(4){width:155px;min-width:155px!important}
+  html body .hp-card .ht table th:nth-child(5),
+  html body .hp-card .ht table td:nth-child(5){width:110px;min-width:110px!important}
+  html body .hp-card .ht table th:nth-child(6),
+  html body .hp-card .ht table td:nth-child(6){width:140px;min-width:140px!important}
+  html body .hp-card .ht table td:nth-child(2),
+  html body .hp-card .ht table td:nth-child(3),
+  html body .hp-card .ht table td:nth-child(5){white-space:nowrap!important}
+  html body .hp-card .ht .hp-action-cell{padding-left:5px;padding-right:5px}
+  html body .hp-card .ht .hp-action-cell .hp-actions{display:flex;gap:0;justify-content:center}
+  html body .hp-card .ht .hp-action-cell .hp-act-icon{
+    flex:0 0 36px;
+    width:36px;
+    min-width:36px!important;
+    height:40px;
+    min-height:40px;
+    padding:0;
+  }
+  html body .hp-card .ht .hp-action-cell .hp-act-icon svg{width:17px;height:17px}
+  html body .hp-card .hp-tools button:focus-visible,
+  html body .hp-card .ht .hp-act-icon:focus-visible,
+  html body .hp-card .hp-more button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+  html body .hd-page{width:100%;max-width:100%;min-width:0}
+  html body .hd-head,
+  html body .hd-title,
+  html body .hd-panel,
+  html body .hd-section{min-width:0;max-width:100%}
+  html body .hd-metrics article b{min-width:0;overflow-wrap:anywhere}
+  html body .hd-section-head{flex-wrap:wrap}
+  html body .hd-tag{white-space:normal}
+}
+@media(max-width:560px){
+  html body #hr{padding-left:10px;padding-right:10px}
+  html body .hp-head{gap:10px;margin-bottom:12px}
+  html body .hp-ttl h1{font-size:25px}
+  html body .hp-ttl p{font-size:12px;line-height:1.45}
+  html body .hp-card .hp-search input{font-size:16px}
+  html body .hp-card .hp-mob{grid-template-columns:minmax(0,1fr) 44px 44px}
+  html body .hp-card .hp-more{gap:7px;padding:8px}
+  html body .hd-top{flex-wrap:wrap}
+  html body .hd-kicker{margin-left:auto}
+  html body .hd-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  html body .hd-actions button,
+  html body .hd-actions .hd-report{min-height:44px}
+  html body .hd-metrics article{grid-template-columns:minmax(0,1fr) minmax(0,auto)}
+  html body .hd-metrics article b{max-width:46vw;font-size:16px}
+  html body .hd-chart-labels{align-items:flex-start}
+  html body .hd-chart-labels span{max-width:48%;overflow-wrap:anywhere}
+  html body .hd-panel,
+  html body .hd-section{padding:10px}
+}
+@media(max-width:360px){
+  html body .hd-head h1{font-size:24px}
+  html body .hd-kicker{font-size:8px;letter-spacing:.07em}
+  html body .hd-actions{grid-template-columns:minmax(0,1fr)}
+  html body .hd-actions .hd-report{grid-column:auto;grid-row:auto}
+  html body .hd-metrics article{grid-template-columns:minmax(0,1fr)}
+  html body .hd-metrics article b{grid-column:1;grid-row:auto;max-width:100%;text-align:left}
+  html body .hd-metrics article>span,
+  html body .hd-metrics article small{grid-column:1}
+}
