@@ -11,7 +11,7 @@ const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js')
 const i18n = html.indexOf('<script src="modules/i18n/i18n.js?v=132"></script>');
 const landing = html.indexOf('<script src="modules/landing/landing.js?v=131"></script>');
 const calculations = html.indexOf('<script src="modules/portfolio-calculations/engine.js?v=136"></script>');
-const coreTag = '<script src="modules/app-core/app.js?v=174"></script>';
+const coreTag = '<script src="modules/app-core/app.js?v=175"></script>';
 const core = html.indexOf(coreTag);
 const family = html.indexOf('<script src="modules/family-management/family-management.js?v=144"></script>');
 
@@ -95,4 +95,12 @@ assert.ok(holdingRenderer.includes("!UI.g?") &&
   !holdingRenderer.includes("Added ") &&
   !holdingRenderer.includes("Entry date not set"),
 'Grouped holdings hide per-holding category labels, ungrouped holdings show categories, and added dates are omitted');
+const holdingTable = appCore.slice(appCore.indexOf('function holdRows()'), appCore.indexOf('function hold(){'));
+assert.ok(!holdingTable.includes('<th>Actions</th>') &&
+  holdingTable.includes('nm(o,true)') &&
+  holdingTable.includes('hp-inline-actions') &&
+  holdingTable.includes('data-e="${o.i}"') &&
+  holdingTable.includes('data-x="${o.i}"') &&
+  !holdingTable.includes('<td class="nw">${bt(o)}</td>'),
+'View Holdings removes the Actions column and places Edit and Delete icons beside each holding name');
 console.log('App core loads synchronously and preserves its initialization boundaries');
