@@ -259,3 +259,18 @@ html body .hp-card .ht .hp-action-cell{padding-left:6px;padding-right:6px}
   html body .hp-card .ht table{min-width:960px}
   html body .hp-card .ht table th{white-space:normal;line-height:1.25}
 }
+
+
+/* View Holdings action column: fixed geometry, aligned controls and visible focus. */
+html body .hp-card .ht table th.hp-action-heading,
+html body .hp-card .ht table td.hp-action-cell{width:120px;min-width:120px;max-width:120px;text-align:center;vertical-align:middle}
+html body .hp-card .ht table th.hp-action-heading{padding-left:6px;padding-right:6px;white-space:nowrap}
+html body .hp-card .ht table td.hp-action-cell{padding-left:6px;padding-right:6px}
+html body .hp-card .ht .hp-action-cell .hp-actions{display:flex;width:100%;align-items:center;justify-content:center;gap:6px;margin:0;white-space:nowrap}
+html body .hp-card .ht .hp-action-cell .hp-act-icon,
+html body .hp-card .ht .hp-action-cell .hp-act-icon:hover,
+html body .hp-card .ht .hp-action-cell .hp-act-icon:active{box-sizing:border-box;display:inline-flex;flex:0 0 30px;align-items:center;justify-content:center;width:30px;height:30px;min-width:30px!important;min-height:30px;padding:0;margin:0;border:1px solid transparent!important;border-radius:7px;background:transparent!important;box-shadow:none!important;color:var(--tx)!important;cursor:pointer}
+html body .hp-card .ht .hp-action-cell .hp-act-icon[data-x]{color:var(--er)!important}
+html body .hp-card .ht .hp-action-cell .hp-act-icon[data-x]:hover{border-color:color-mix(in srgb,var(--er) 30%,transparent)!important;color:var(--er)!important;background:transparent!important}
+html body .hp-card .ht .hp-action-cell .hp-act-icon svg{display:block;width:17px;height:17px;flex:none}
+html body .hp-card .ht .hp-action-cell .hp-act-icon:focus-visible{outline:2px solid var(--ac)!important;outline-offset:2px;box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 16%,transparent)!important}
