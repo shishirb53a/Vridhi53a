@@ -72,11 +72,11 @@ assert.ok(appCore.includes('<div class="hp-portfolio-actions"><button type="butt
   appCore.indexOf('id="mcat"') < appCore.indexOf('id="hcsvi"') &&
   appCore.indexOf('id="hcsvi"') < appCore.indexOf('id="hcsv"'),
 'Category, import, and export actions are grouped in their own toolbar area');
-assert.ok(appCore.includes("th('name','Holding name')") &&
+assert.ok(appCore.includes("th('name','Holding')") &&
   appCore.includes("th('cur','Current value')") &&
   appCore.includes("th('add','Yearly contribution')") &&
-  appCore.includes("th('yrs','Contribution period')") &&
-  appCore.includes("th('ret','Expected return')"),
+  appCore.includes("th('yrs','Contribution')") &&
+  appCore.includes("th('ret','ROI')"),
 'Holdings table headers clearly describe each column');
 const holdingsPage = appCore.slice(appCore.indexOf('function hold(){'), appCore.indexOf('function rep(){'));
 assert.ok(!holdingsPage.includes('id="sf"') &&
