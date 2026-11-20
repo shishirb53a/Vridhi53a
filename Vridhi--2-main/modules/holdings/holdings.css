@@ -226,3 +226,36 @@ html body .hp-card .hp-action-cell .hp-act-icon,
 html body .hp-card .hp-action-cell .hp-act-icon:hover,
 html body .hp-card .hp-action-cell .hp-act-icon:active{width:25px;height:25px;min-width:25px!important;min-height:25px;padding:0;margin:0;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;color:var(--tx)!important}
 html body .hp-card .hp-action-cell .hp-act-icon svg{width:16px;height:16px}
+
+/* View Holdings: keep all six columns readable without hiding content.
+   Narrow screens can scroll the table horizontally; mobile cards remain available below. */
+html body .hp-card .ht.tw{
+  display:block;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto!important;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  scrollbar-color:var(--mu) transparent;
+  border-bottom:1px solid color-mix(in srgb,var(--bd) 65%,transparent);
+}
+html body .hp-card .ht.tw:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:8px}
+html body .hp-card .ht table{width:100%;min-width:960px;table-layout:fixed}
+html body .hp-card .ht table th:nth-child(1),html body .hp-card .ht table td:nth-child(1){width:27%;min-width:230px}
+html body .hp-card .ht table th:nth-child(2),html body .hp-card .ht table td:nth-child(2){width:15%;min-width:135px}
+html body .hp-card .ht table th:nth-child(3),html body .hp-card .ht table td:nth-child(3){width:19%;min-width:165px}
+html body .hp-card .ht table th:nth-child(4),html body .hp-card .ht table td:nth-child(4){width:16%;min-width:145px}
+html body .hp-card .ht table th:nth-child(5),html body .hp-card .ht table td:nth-child(5){width:11%;min-width:105px}
+html body .hp-card .ht table th:nth-child(6),html body .hp-card .ht table td:nth-child(6){width:12%;min-width:110px}
+html body .hp-card .ht table td:first-child{overflow-wrap:anywhere}
+html body .hp-card .ht table td:nth-child(2),html body .hp-card .ht table td:nth-child(5){font-variant-numeric:tabular-nums;white-space:nowrap}
+html body .hp-card .ht table td:nth-child(3){white-space:normal}
+html body .hp-card .ht table td:nth-child(4){white-space:normal;overflow-wrap:anywhere}
+html body .hp-card .ht .hp-action-cell{padding-left:6px;padding-right:6px}
+@media(max-width:640px){
+  html body .hp-card .ht.tw{margin-right:-2px}
+  html body .hp-card .ht table{min-width:960px}
+  html body .hp-card .ht table th{white-space:normal;line-height:1.25}
+}
