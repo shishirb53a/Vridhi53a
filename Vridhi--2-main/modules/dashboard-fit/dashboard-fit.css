@@ -122,3 +122,14 @@ html body #dsh .seg button{min-height:28px;padding:3px 12px;font-size:12px}
  html body #dsh .dz-hr{flex:none;gap:8px}
  html body:has(#dsh) #bv{bottom:calc(3px + env(safe-area-inset-bottom,0px));font-size:11px;padding:3px 8px;left:6px}
 }
+
+/* Phones: Summary header wraps instead of squeezing the name into a sliver, and the four section tabs fit the width (icon above label). */
+@media (max-width:720px){
+ html body #dsh .dz-hero{flex-wrap:wrap!important;gap:8px 12px;padding:10px 12px}
+ html body #dsh .dz-hero .dz-hl{flex:1 1 100%;min-width:0}
+ html body #dsh .dz-hero .dz-hr{flex:1 1 100%;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;white-space:normal}
+ html body #dsh .dz-hero .fhp-nm,html body #dsh .dz-hero .dz-nr .fhp-nm{overflow-wrap:normal;word-break:normal}
+ html body #dsh .mtabs{grid-template-columns:repeat(4,minmax(0,1fr))!important;overflow:visible}
+ html body #dsh .mtabs button{flex-direction:column;justify-content:center;gap:2px;min-width:0;min-height:48px;padding:5px 2px;font-size:11px;white-space:normal;line-height:1.15;text-align:center}
+ html:not([data-uic=off]) body #dsh .mtabs button::before{margin:0;width:16px;height:16px}
+}
