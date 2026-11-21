@@ -1,4 +1,3 @@
-
 /* Holdings page redesign */
 .hp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px 20px;flex-wrap:wrap;margin:6px 0 20px}
 .hp-ttl h1{margin:0;font-size:var(--fs-h1,28px);font-weight:800;letter-spacing:-.02em;line-height:1.15}
@@ -786,4 +785,13 @@ html body .hp-card .hp-mob{display:none}
   html body .hp-card .hc .hgh .gtg .pill{flex:none;margin:0}
   html body .hp-card .hc .hgh .gtg small{flex:1 1 100%;margin:0;font-size:12px;line-height:1.3;white-space:normal}
   html body .hp-card .hc .hgh>b{flex:none;font-size:15px;white-space:nowrap}
+}
+
+/* Group header rows: a quiet neutral top rule. The category colour stays on the left edge and the pill only,
+   so a red or blue category no longer draws a bold line across the whole table. */
+html body .hp-card .ht table tr.gh td {
+  border-top: 1px solid var(--bd);
+}
+html body .hp-card .ht table tr.gh td:first-child {
+  border-left: 4px solid var(--c, var(--ac));
 }
