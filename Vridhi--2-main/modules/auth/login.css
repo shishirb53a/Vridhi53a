@@ -1,219 +1,359 @@
-/* Vriddhi sign-in: minimal, accessible, responsive and aligned with the forest-green theme. */
-html body #lg {
+/* Vriddhi sign-in: polished, accessible, responsive and aligned with the forest-green theme.
+   Selectors use a repeated #lg id so they win over the skin / theme overrides loaded earlier. */
+
+/* ---------- Page backdrop ---------- */
+html body #lg#lg#lg {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #f3f6f2;
+  font-family: var(--ff, Inter, "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif);
+  background:
+    radial-gradient(900px 520px at 12% -8%, rgba(32, 91, 67, .13), transparent 62%),
+    radial-gradient(760px 480px at 108% 108%, rgba(52, 116, 86, .12), transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(32, 91, 67, .07) 1px, transparent 1.4px) 0 0 / 22px 22px,
+    #f2f6f3;
 }
 
-html body #lg .lc {
+/* ---------- Card ---------- */
+html body #lg#lg#lg .lc {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0;
   width: min(420px, 100%);
   box-sizing: border-box;
   margin: auto;
-  padding: 36px 34px 28px;
-  border: 1px solid #e0e7e0;
-  border-radius: 18px;
+  padding: 40px 36px 26px;
+  overflow: hidden;
+  border: 1px solid #e1e8e2;
+  border-radius: 16px;
   background: #fff;
-  box-shadow: 0 22px 55px -24px rgba(24, 55, 39, .24),
-              0 5px 18px -10px rgba(24, 55, 39, .16);
+  box-shadow: 0 1px 2px rgba(16, 40, 28, .05),
+              0 12px 28px -12px rgba(16, 40, 28, .16),
+              0 34px 70px -28px rgba(16, 40, 28, .28);
 }
 
-html body #lg .lb {
+html body #lg#lg#lg .lc::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #205b43 0%, #3b8a67 55%, #8bc4a3 100%);
+}
+
+/* ---------- Brand ---------- */
+html body #lg#lg#lg .lb {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 11px;
-  margin: 0 0 12px;
+  gap: 12px;
+  margin: 0 0 10px;
 }
 
-html body #lg .ll {
+html body #lg#lg#lg .ll,
+html body #lg#lg#lg .ll:not(#nx) {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: #205b43;
-  color: #fff;
-  box-shadow: none;
+  width: 46px;
+  height: 46px;
+  border: 0 !important;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #2f7a58 0%, #1a4f38 100%) !important;
+  box-shadow: 0 8px 18px -8px rgba(32, 91, 67, .7),
+              inset 0 1px 0 rgba(255, 255, 255, .22);
 }
 
-html body #lg .ll span {
-  color: #fff;
-  font-size: 23px;
-  font-weight: 600;
-  line-height: 1;
+html body #lg#lg#lg .ll svg {
+  width: 30px;
+  height: 30px;
 }
 
-html body #lg .lw {
-  color: #183b2d;
-  font-size: 27px;
+html body #lg#lg#lg .ll svg *,
+html body #lg#lg#lg .ll:not(#nx) :is(rect, path, circle) {
+  fill: #fff !important;
+}
+
+html body #lg#lg#lg .lw {
+  color: #143b2c;
+  font-size: 28px;
   font-weight: 650;
-  letter-spacing: -.045em;
+  letter-spacing: -.02em !important;
+  line-height: 1.1;
 }
 
-html body #lg .lgt {
-  margin: 0 0 27px;
-  color: #68766d;
-  font-size: 13px;
+html body #lg#lg#lg .lgt {
+  margin: 0 0 24px;
+  padding: 0 4px 22px;
+  border-bottom: 1px solid #e9efea;
+  color: #6a786e;
+  font-size: 13.5px;
   font-weight: 400;
   line-height: 1.55;
   text-align: center;
+  text-wrap: balance;
 }
 
-html body #lg h1 {
-  margin: 0 0 20px;
-  color: #24382d;
-  font-size: 21px;
-  font-weight: 600;
-  letter-spacing: -.025em;
+html body #lg#lg#lg h1 {
+  margin: 0 0 18px;
+  color: #1c3228;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -.01em !important;
   line-height: 1.3;
 }
 
-html body #lg .fl {
+/* ---------- Fields ---------- */
+html body #lg#lg#lg .fl {
   position: relative;
-  margin: 0 0 17px;
+  margin: 0 0 14px;
 }
 
-html body #lg .fl input {
+html body #lg#lg#lg .fl input {
+  display: block;
   width: 100%;
-  min-height: 49px;
+  height: 54px;
+  min-height: 54px;
   box-sizing: border-box;
-  padding: 17px 14px 9px;
-  border: 1px solid #d7e0d8;
-  border-radius: 9px;
-  background: #fff;
-  color: #26372d;
+  padding: 22px 14px 6px;
+  border: 1.5px solid #d6dfd8;
+  border-radius: 10px;
+  background: #fbfcfb;
+  color: #1f3328;
   font: inherit;
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 15px;
+  font-weight: 500;
   outline: none;
-  transition: border-color .16s ease, box-shadow .16s ease;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
 }
 
-html body #lg .fl label {
-  color: #77847b;
-  font-size: 13px;
-  font-weight: 400;
+html body #lg#lg#lg .fl input:hover:not(:focus) {
+  border-color: #bccabf;
 }
 
-html body #lg .fl input:focus {
-  border-color: #347456;
-  box-shadow: 0 0 0 3px rgba(52, 116, 86, .13);
+html body #lg#lg#lg .fl input:focus,
+html body #lg#lg#lg .fl input:focus-visible {
+  outline: 0 !important;
+  border-color: #2f7a58;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(47, 122, 88, .15);
 }
 
-html body #lg .fl.pw input {
-  padding-right: 76px;
+html body #lg#lg#lg .fl input:-webkit-autofill {
+  -webkit-text-fill-color: #1f3328;
+  box-shadow: 0 0 0 40px #fff inset;
 }
 
-html body #lg .fl.pw button {
+html body #lg#lg#lg .fl label {
+  left: 15px;
+  color: #77857b;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+html body #lg#lg#lg .fl input:focus + label,
+html body #lg#lg#lg .fl input:not(:placeholder-shown) + label,
+html body #lg#lg#lg .fl input:-webkit-autofill + label {
+  top: 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+html body #lg#lg#lg .fl input:focus + label {
+  color: #2a6e50;
+}
+
+html body #lg#lg#lg .fl.pw input {
+  padding-right: 74px;
+}
+
+html body #lg#lg#lg .fl.pw button {
   position: absolute;
   top: 50%;
-  right: 12px;
+  right: 9px;
   transform: translateY(-50%);
-  padding: 5px 4px;
+  padding: 6px 9px;
   border: 0;
-  border-radius: 5px;
+  border-radius: 7px;
   background: transparent;
-  color: #286447;
-  font-size: 12px;
+  color: #25704f;
+  font-size: 12.5px;
   font-weight: 600;
+  cursor: pointer;
+  transition: background-color .16s ease;
+}
+
+html body #lg#lg#lg .fl.pw button:hover {
+  background: rgba(37, 112, 79, .1);
+}
+
+html body #lg#lg#lg .fl.pw button:focus-visible {
+  outline: 2px solid #2f7a58;
+  outline-offset: 1px;
+}
+
+/* ---------- Remember me ---------- */
+html body #lg#lg#lg label.lgsv {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 18px;
+  color: #4d5d52;
+  font-size: 13.5px;
+  font-weight: 400;
+  cursor: pointer;
+  user-select: none;
+}
+
+html body #lg#lg#lg label.lgsv input {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  margin: 0;
+  accent-color: #205b43;
   cursor: pointer;
 }
 
-html body #lg .fl.pw button:focus-visible {
-  outline: 2px solid #347456;
+html body #lg#lg#lg label.lgsv input:focus-visible {
+  outline: 2px solid #2f7a58;
   outline-offset: 2px;
 }
 
-html body #lg .lgsv {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 16px;
-  color: #59675e;
-  font-size: 13px;
-  font-weight: 400;
-  cursor: pointer;
-}
-
-html body #lg .lgsv input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: #286447;
-}
-
-html body #lg .er {
-  margin: 0 0 10px;
+/* ---------- Error message (hidden until there is something to say) ---------- */
+html body #lg#lg#lg .er {
+  margin: 0 0 14px;
   color: #b42318;
   font-size: 13px;
   line-height: 1.45;
 }
 
-html body #lg .go {
-  width: 100%;
-  min-height: 48px;
-  margin-top: 2px;
-  border: 1px solid #205b43;
+html body #lg#lg#lg .er:empty {
+  display: none;
+}
+
+html body #lg#lg#lg .er:not(:empty) {
+  padding: 10px 12px;
+  border: 1px solid #fecdca;
   border-radius: 9px;
-  background: #205b43;
-  color: #fff;
-  font-size: 14px;
+  background: #fef3f2;
+}
+
+/* ---------- Primary button ---------- */
+html body #lg#lg#lg .go {
+  width: 100%;
+  height: 50px;
+  min-height: 50px;
+  margin: 0;
+  border: 1px solid #205b43 !important;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #2a7050 0%, #205b43 100%) !important;
+  color: #fff !important;
+  font-size: 15px;
   font-weight: 600;
-  box-shadow: none;
+  letter-spacing: .01em;
+  cursor: pointer;
+  box-shadow: 0 6px 14px -6px rgba(32, 91, 67, .6),
+              inset 0 1px 0 rgba(255, 255, 255, .18);
   transition: background .16s ease, transform .16s ease, box-shadow .16s ease;
 }
 
-html body #lg .go:hover {
-  background: #174832;
-  box-shadow: 0 5px 14px rgba(32, 91, 67, .18);
+html body #lg#lg#lg .go:hover:not(:disabled) {
+  background: linear-gradient(180deg, #25664a 0%, #194a35 100%) !important;
+  box-shadow: 0 10px 20px -8px rgba(32, 91, 67, .65),
+              inset 0 1px 0 rgba(255, 255, 255, .18);
+  transform: translateY(-1px);
 }
 
-html body #lg .go:active {
-  transform: translateY(1px);
+html body #lg#lg#lg .go:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px -4px rgba(32, 91, 67, .6);
 }
 
-html body #lg .go:focus-visible {
-  outline: 3px solid rgba(52, 116, 86, .3);
+html body #lg#lg#lg .go:focus-visible {
+  outline: 3px solid rgba(47, 122, 88, .35);
   outline-offset: 2px;
 }
 
-html body #lg .login-security {
+html body #lg#lg#lg .go:disabled {
+  opacity: .65;
+  cursor: progress;
+}
+
+/* ---------- Footer: privacy note and version ---------- */
+html body #lg#lg#lg .login-security {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  margin: 20px 0 0;
-  color: #7a877e;
-  font-size: 11px;
+  margin: 24px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid #e9efea;
+  color: #6f7d73;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.4;
   text-align: center;
 }
 
-html body #lg .login-security span {
-  color: #347456;
-  font-size: 9px;
+html body #lg#lg#lg .login-security span {
+  display: none;
 }
 
+html body #lg#lg#lg .login-security::before {
+  content: "";
+  flex: none;
+  width: 13px;
+  height: 13px;
+  background: #2f7a58;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+html body #lg#lg#lg .vr-ver-lg {
+  margin: 10px 0 0;
+  padding: 0;
+  color: #9aa79e;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+/* ---------- Small screens ---------- */
 @media (max-width: 480px) {
-  html body #lg {
-    padding: 16px;
+  html body #lg#lg#lg {
+    align-items: center;
+    padding: 14px;
   }
 
-  html body #lg .lc {
+  html body #lg#lg#lg .lc {
     width: min(420px, 100%);
-    padding: 30px 23px 24px;
-    border-radius: 15px;
+    height: auto;
+    min-height: 0;
+    padding: 32px 22px 22px;
+    border-radius: 14px;
+  }
+
+  html body #lg#lg#lg .lw {
+    font-size: 25px;
+  }
+}
+
+@media (max-height: 640px) {
+  html body #lg#lg#lg {
+    align-items: flex-start;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html body #lg .fl input,
-  html body #lg .go {
+  html body #lg#lg#lg .fl input,
+  html body #lg#lg#lg .fl.pw button,
+  html body #lg#lg#lg .go {
     transition: none;
+  }
+
+  html body #lg#lg#lg .go:hover:not(:disabled) {
+    transform: none;
   }
 }
