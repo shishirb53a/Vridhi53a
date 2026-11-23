@@ -126,6 +126,17 @@
     if (Object.keys(P.profiles).some(function (key) { return key !== id && P.profiles[key].name.toLowerCase() === nm.toLowerCase(); })) return { ok: false, error: 'A policy client with this name already exists.' };
     P.profiles[id].name = nm; persist(); return { ok: true };
   }
+  function deleteClient(id) {
+    var P = policyStore();
+    if (!P || !Object.prototype.hasOwnProperty.call(P.profiles, id)) return { ok: false, error: 'That policy client no longer exists.' };
+    var ids = Object.keys(P.profiles);
+    if (ids.length < 2) return { ok: false, error: 'Keep at least one policy client.' };
+    var index = ids.indexOf(id), removed = P.profiles[id], nextId = ids[index + 1] || ids[index - 1];
+    delete P.profiles[id];
+    if (P.active === id) P.active = nextId;
+    persist();
+    return { ok: true, client: removed, active: P.active };
+  }
   function setClients(who, ids) {
     var P = policyStore(), p = activeClient(), available = plannerClients(who);
     if (!P || !p || (who !== 'goal' && who !== 'retirement')) return false;
@@ -524,7 +535,7 @@
     list: all, count: function () { return all().length; }, get: function (i) { return all()[i] || null; },
     put: put, remove: remove, setPaid: setPaid, markPaidUpTo: markPaidUpTo, clean: clean, cleanState: cleanState, cleanClients: cleanClients,
     clients: clients, activeClient: function () { var P = policyStore(); return P ? P.active : ''; }, selectClient: selectClient,
-    addClient: addClient, renameClient: renameClient, plannerClients: plannerClients, setClients: setClients,
+    addClient: addClient, renameClient: renameClient, deleteClient: deleteClient, plannerClients: plannerClients, setClients: setClients,
     /* calculations for one policy */
     schedule: schedule, premSchedule: premSchedule, totals: totals, premTotals: premTotals, maturity: maturity, status: status,
     /* calculations across policies */
