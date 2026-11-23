@@ -206,45 +206,59 @@ const TOOLS = [
   },
 ];
 
+const TRANSIENT_STATUSES = new Set([500, 502, 503, 504]);
+const RETRY_DELAYS_MS = [500, 1200];
+
 async function callGemini(apiKey: string, model: string, contents: unknown[], systemInstruction: string) {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-    },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-      contents,
-      tools: [{
-        functionDeclarations: TOOLS.map((tool) => {
-          const declaration: Record<string, unknown> = {
-            name: tool.name,
-            description: tool.description,
-          };
-          if (Object.keys(tool.input_schema.properties).length > 0) {
-            declaration.parameters = tool.input_schema;
-          }
-          return declaration;
-        }),
-      }],
-      toolConfig: { functionCallingConfig: { mode: "AUTO" } },
-      generationConfig: { temperature: 0.2, maxOutputTokens: 900 },
-    }),
+  const payload = JSON.stringify({
+    systemInstruction: { parts: [{ text: systemInstruction }] },
+    contents,
+    tools: [{
+      functionDeclarations: TOOLS.map((tool) => {
+        const declaration: Record<string, unknown> = {
+          name: tool.name,
+          description: tool.description,
+        };
+        if (Object.keys(tool.input_schema.properties).length > 0) {
+          declaration.parameters = tool.input_schema;
+        }
+        return declaration;
+      }),
+    }],
+    toolConfig: { functionCallingConfig: { mode: "AUTO" } },
+    generationConfig: { temperature: 0.2, maxOutputTokens: 900 },
   });
-  const result = await response.json().catch(() => null);
-  if (!response.ok) {
+
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: payload,
+    });
+    const result = await response.json().catch(() => null);
+    if (response.ok) return result;
+
     const apiError = result && typeof result.error === "object" && result.error !== null
       ? result.error as Record<string, unknown>
       : {};
     // Keep bounded diagnostics in Supabase logs; never log the API key or plan payload.
     console.error("Gemini request failed:", JSON.stringify({
       status: response.status,
+      attempt: attempt + 1,
       code: typeof apiError.status === "string" ? apiError.status : null,
       message: typeof apiError.message === "string" ? apiError.message.slice(0, 500) : null,
       requestId: response.headers.get("x-goog-request-id") || response.headers.get("x-request-id"),
       model,
     }));
+
+    if (TRANSIENT_STATUSES.has(response.status) && attempt < RETRY_DELAYS_MS.length) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+      continue;
+    }
+
     if (response.status === 400) {
       const detail = typeof apiError.message === "string" ? apiError.message.slice(0, 200) : "Invalid request sent to Gemini.";
       throw new Error(`Gemini rejected the request (400): ${detail}`);
@@ -258,9 +272,12 @@ async function callGemini(apiKey: string, model: string, contents: unknown[], sy
     if (response.status === 429) {
       throw new Error("The AI assistant is temporarily rate-limited. Please wait a moment and try again.");
     }
+    if (response.status === 503) {
+      throw new Error("The Gemini model is temporarily busy (HTTP 503). Please try again in a moment.");
+    }
     throw new Error(`Gemini could not complete this request (HTTP ${response.status}). Please try again later.`);
   }
-  return result;
+  throw new Error("Gemini could not complete this request. Please try again later.");
 }
 
 async function runAgent(apiKey: string, model: string, question: string, plan: Plan): Promise<string> {
