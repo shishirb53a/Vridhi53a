@@ -233,7 +233,19 @@ async function callOpenAI(apiKey: string, model: string, messages: unknown[]) {
   });
   const result = await response.json().catch(() => null);
   if (!response.ok) {
-    console.error("OpenAI request failed:", response.status, result?.error?.type || "unknown error");
+    const apiError = result && typeof result.error === "object" && result.error !== null
+      ? result.error as Record<string, unknown>
+      : {};
+    // Keep diagnostics in Supabase logs without exposing the API key or request payload.
+    console.error("OpenAI request failed:", JSON.stringify({
+      status: response.status,
+      type: typeof apiError.type === "string" ? apiError.type : "unknown",
+      code: typeof apiError.code === "string" ? apiError.code : null,
+      param: typeof apiError.param === "string" ? apiError.param : null,
+      message: typeof apiError.message === "string" ? apiError.message.slice(0, 500) : null,
+      requestId: response.headers.get("x-request-id"),
+      model,
+    }));
     throw new Error("OpenAI could not complete this request. Please try again later.");
   }
   return result;
