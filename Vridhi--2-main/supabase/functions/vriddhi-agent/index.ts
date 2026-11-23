@@ -209,7 +209,7 @@ const TOOLS = [
 ];
 
 async function callGemini(apiKey: string, model: string, contents: unknown[], systemInstruction: string) {
-  const response = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/\${encodeURIComponent(model)}:generateContent\`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -252,7 +252,7 @@ async function runAgent(apiKey: string, model: string, question: string, plan: P
   const contents: Array<Record<string, unknown>> = [
     {
       role: "user",
-      parts: [{ text: \`Question: \${question}\n\nOpen plan data (JSON): \${JSON.stringify(plan)}\` }],
+      parts: [{ text: `Question: ${question}\n\nOpen plan data (JSON): ${JSON.stringify(plan)}` }],
     },
   ];
   for (let turn = 0; turn < TOOL_LIMIT; turn++) {
