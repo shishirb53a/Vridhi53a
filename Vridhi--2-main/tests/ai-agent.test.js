@@ -33,9 +33,10 @@ assert.ok(edge.includes('admin.auth.getUser(bearer[1])') &&
   edge.includes('.eq("permission_key", "read_data")') &&
   edge.includes('You do not have permission to read plan data.'),
 'The Edge Function independently verifies the token and read_data permission');
-assert.ok(edge.includes('ANTHROPIC_API_KEY') &&
-  edge.includes('anthropic-version') &&
-  edge.includes('function futureValue('), 'The provider key stays server-side and projections are calculated in code');
+assert.ok(edge.includes('OPENAI_API_KEY') &&
+  edge.includes('api.openai.com/v1/chat/completions') &&
+  edge.includes('Authorization') &&
+  edge.includes('function futureValue('), 'The OpenAI key stays server-side and projections are calculated in code');
 assert.ok(!edge.includes('.insert(') && !edge.includes('.update(') && !edge.includes('.delete('),
   'The AI Edge Function has no database write operations');
 
