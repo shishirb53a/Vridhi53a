@@ -1,0 +1,15 @@
+{
+  "name": "vriddhi",
+  "version": "2.8.0",
+  "private": true,
+  "description": "Vriddhi - Retirement & Wealth Planner",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "build": "node -e \"const fs = require('node:fs'); if (!fs.existsSync('Vridhi--2-main/index.html')) process.exit(1); console.log('Static site verified');\"",
+    "lint": "node --check server.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

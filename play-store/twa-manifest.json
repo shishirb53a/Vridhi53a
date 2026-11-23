@@ -1,0 +1,39 @@
+{
+  "packageId": "com.vriddhi.planner",
+  "host": "shishirb53a.github.io",
+  "name": "Vriddhi · Retirement & Wealth Planner",
+  "launcherName": "Vriddhi",
+  "display": "standalone",
+  "themeColor": "#205B43",
+  "themeColorDark": "#143B2C",
+  "navigationColor": "#F2F6F3",
+  "navigationColorDark": "#101B2A",
+  "navigationDividerColor": "#E1E8E2",
+  "navigationDividerColorDark": "#1E293B",
+  "backgroundColor": "#F2F6F3",
+  "enableNotifications": false,
+  "startUrl": "/Vridhi53a/",
+  "iconUrl": "https://shishirb53a.github.io/Vridhi53a/icons/icon-512.png",
+  "maskableIconUrl": "https://shishirb53a.github.io/Vridhi53a/icons/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "vriddhi-upload"
+  },
+  "appVersionName": "2.8.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://shishirb53a.github.io/Vridhi53a/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://shishirb53a.github.io/Vridhi53a/",
+  "minSdkVersion": 21,
+  "orientation": "default"
+}
