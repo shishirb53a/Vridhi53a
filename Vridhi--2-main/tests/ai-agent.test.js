@@ -37,6 +37,10 @@ assert.ok(edge.includes('OPENAI_API_KEY') &&
   edge.includes('api.openai.com/v1/chat/completions') &&
   edge.includes('Authorization') &&
   edge.includes('function futureValue('), 'The OpenAI key stays server-side and projections are calculated in code');
+assert.ok(edge.includes('requestId: response.headers.get(\'x-request-id\')') &&
+  edge.includes('apiError.code') &&
+  edge.includes('apiError.message.slice(0, 500)'),
+'OpenAI failures log a request ID and bounded diagnostic details without exposing request payloads');
 assert.ok(!edge.includes('.insert(') && !edge.includes('.update(') && !edge.includes('.delete('),
   'The AI Edge Function has no database write operations');
 
