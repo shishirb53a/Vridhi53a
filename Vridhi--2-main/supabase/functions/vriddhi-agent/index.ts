@@ -173,12 +173,12 @@ const TOOLS = [
   {
     name: "get_plan_overview",
     description: "Compare the plan's projected retirement corpus with its target and report the gap.",
-    input_schema: { type: "object", properties: {}, additionalProperties: false },
+    input_schema: { type: "object", properties: {} },
   },
   {
     name: "list_holdings",
     description: "List the open plan's holdings, contributions, assumed returns, and projected retirement values.",
-    input_schema: { type: "object", properties: {}, additionalProperties: false },
+    input_schema: { type: "object", properties: {} },
   },
   {
     name: "project_holding",
@@ -191,7 +191,6 @@ const TOOLS = [
         return_adjustment_pct: { type: "number", minimum: -20, maximum: 20 },
       },
       required: ["holding_name"],
-      additionalProperties: false,
     },
   },
   {
@@ -203,7 +202,6 @@ const TOOLS = [
         years_earlier: { type: "integer", minimum: 0, maximum: 30 },
         return_adjustment_pct: { type: "number", minimum: -20, maximum: 20 },
       },
-      additionalProperties: false,
     },
   },
 ];
@@ -219,11 +217,16 @@ async function callGemini(apiKey: string, model: string, contents: unknown[], sy
       systemInstruction: { parts: [{ text: systemInstruction }] },
       contents,
       tools: [{
-        functionDeclarations: TOOLS.map((tool) => ({
-          name: tool.name,
-          description: tool.description,
-          parameters: tool.input_schema,
-        })),
+        functionDeclarations: TOOLS.map((tool) => {
+          const declaration: Record<string, unknown> = {
+            name: tool.name,
+            description: tool.description,
+          };
+          if (Object.keys(tool.input_schema.properties).length > 0) {
+            declaration.parameters = tool.input_schema;
+          }
+          return declaration;
+        }),
       }],
       toolConfig: { functionCallingConfig: { mode: "AUTO" } },
       generationConfig: { temperature: 0.2, maxOutputTokens: 900 },
@@ -242,7 +245,20 @@ async function callGemini(apiKey: string, model: string, contents: unknown[], sy
       requestId: response.headers.get("x-goog-request-id") || response.headers.get("x-request-id"),
       model,
     }));
-    throw new Error("Gemini could not complete this request. Please try again later.");
+    if (response.status === 400) {
+      const detail = typeof apiError.message === "string" ? apiError.message.slice(0, 200) : "Invalid request sent to Gemini.";
+      throw new Error(`Gemini rejected the request (400): ${detail}`);
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("The Gemini API key was rejected. Check GEMINI_API_KEY in Edge Function secrets.");
+    }
+    if (response.status === 404) {
+      throw new Error("The configured Gemini model was not found. Check GEMINI_MODEL in Edge Function secrets.");
+    }
+    if (response.status === 429) {
+      throw new Error("The AI assistant is temporarily rate-limited. Please wait a moment and try again.");
+    }
+    throw new Error(`Gemini could not complete this request (HTTP ${response.status}). Please try again later.`);
   }
   return result;
 }
@@ -355,7 +371,7 @@ if (import.meta.main !== false && typeof Deno !== "undefined" && Deno.serve) {
   const url = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   const apiKey = Deno.env.get("GEMINI_API_KEY") || "";
-  const model = Deno.env.get("GEMINI_MODEL") || "gemini-3.8-flash";
+  const model = Deno.env.get("GEMINI_MODEL") || "gemini-4-hydrogen";
   if (!url || !serviceKey) {
     console.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.");
   } else {
