@@ -33,6 +33,8 @@ assert.ok(edge.includes('admin.auth.getUser(bearer[1])') &&
   edge.includes('.eq("permission_key", "read_data")') &&
   edge.includes('You do not have permission to read plan data.'),
 'The Edge Function independently verifies the token and read_data permission');
+assert.ok(edge.includes('Deno.env.get("GEMINI_MODEL") || "gemini-3.8-flash"'),
+  'A currently supported Gemini Flash model is selected by default');
 assert.ok(edge.includes('GEMINI_API_KEY') &&
   edge.includes('generativelanguage.googleapis.com/v1beta/models/') &&
   edge.includes('"x-goog-api-key": apiKey') &&
