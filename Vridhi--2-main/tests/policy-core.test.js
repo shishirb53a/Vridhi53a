@@ -201,6 +201,27 @@ t('new Policy clients start empty and switching isolates their policies', () => 
   assert.strictEqual(V.count(), 1);
   assert.ok(V.renameClient(added.id, 'Alice S.').ok);
 });
+t('deleting a Policy client removes its policies and switches to another available client', () => {
+  win.__setS({ policies: [], polGp: true, polFh: true });
+  const first = V.clients()[0];
+  const second = V.addClient('Delete me');
+  assert.ok(V.put(mk({ name: 'Private policy' }), null).ok);
+  const result = V.deleteClient(second.id);
+  assert.ok(result.ok);
+  assert.strictEqual(result.client.policies.length, 1);
+  assert.strictEqual(V.clients().length, 1);
+  assert.strictEqual(V.clients()[0].id, first.id);
+  assert.strictEqual(V.clients()[0].active, true);
+  assert.strictEqual(V.count(), 0);
+  assert.strictEqual(V.deleteClient(first.id).ok, false, 'The final client cannot be deleted');
+});
+t('deleting a non-active Policy client leaves the current selection unchanged', () => {
+  win.__setS({ policies: [], polGp: true, polFh: true });
+  const first = V.clients()[0], second = V.addClient('Second');
+  assert.ok(V.selectClient(first.id));
+  assert.ok(V.deleteClient(second.id).ok);
+  assert.strictEqual(V.activeClient(), first.id);
+});
 t('Policies sharing lists existing Goal and Retirement Planner clients', () => {
   win.__setS({
     polClients: { active: 'policy-a', profiles: { 'policy-a': {
