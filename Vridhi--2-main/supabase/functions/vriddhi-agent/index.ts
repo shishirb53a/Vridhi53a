@@ -355,7 +355,7 @@ if (import.meta.main !== false && typeof Deno !== "undefined" && Deno.serve) {
   const url = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   const apiKey = Deno.env.get("GEMINI_API_KEY") || "";
-  const model = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
+  const model = Deno.env.get("GEMINI_MODEL") || "gemini-3.8-flash";
   if (!url || !serviceKey) {
     console.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.");
   } else {
