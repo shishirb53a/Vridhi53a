@@ -82,7 +82,7 @@
     var ini = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || 'P';
     return '<div class="vp-top"><span class="vp-av" aria-hidden="true">' + esc(ini) + '</span><div class="vp-who"><span class="vp-eb">Policy plan prepared for</span><div class="vp-wr"><label for="vp-client" class="vp-sr">Policy client</label><select id="vp-client" aria-label="Policy client">'
       + L.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.active ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('')
-      + '</select><details class="vp-more vp-cm"><summary aria-label="Client options">\u22ef</summary><div class="vp-menu"><button type="button" data-vpc="add">Add client</button>' + (active ? '<button type="button" data-vpc="rename">Rename</button>' : '') + '</div></details></div></div>'
+      + '</select><details class="vp-more vp-cm"><summary aria-label="Client options">\u22ef</summary><div class="vp-menu"><button type="button" data-vpc="add">Add client</button>' + (active ? '<button type="button" data-vpc="rename">Rename</button><button type="button" class="d" data-vpc="delete">Delete</button>' : '') + '</div></details></div></div>'
       + '<span class="vp-sp"></span><span class="vp-meta">' + plural(n, 'policy', 'policies') + '</span></div>';
   }
   function body() {
@@ -340,6 +340,19 @@
   function redrawPremDlg() { var w = $$('vp-psd'), h = w && w.closest('[data-pi]'); if (w && h && dg.open) w.innerHTML = premBody(+h.dataset.pi); }
 
   /* ---------- behaviour ---------- */
+  function deleteActiveClient() {
+    var active = V.clients().filter(function (c) { return c.active; })[0];
+    if (!active) return;
+    var count = Array.isArray(active.policies) ? active.policies.length : 0;
+    if (V.clients().length < 2) { toast('Keep at least one policy client'); return; }
+    confirmBox('Delete client “' + active.name + '”? This will permanently delete the client and all ' + count + ' associated ' + (count === 1 ? 'policy' : 'policies') + ', including premium records, payouts, maturity details and report data. This action cannot be undone.', function () {
+      var result = V.deleteClient(active.id);
+      if (!result.ok) { toast(result.error); return; }
+      ST.q = ''; ST.rq = ''; ST.sf = 'all'; ST.gc = {};
+      refresh(); toast('Client and associated policies deleted');
+    });
+  }
+
   function clientForm(mode) {
     var active = V.clients().filter(function (c) { return c.active; })[0], name = mode === 'rename' && active ? active.name : '';
     open('<form id="vpc-form" novalidate data-mode="' + mode + '"><h2>' + (mode === 'rename' ? 'Rename policy client' : 'Add policy client') + '</h2>'
@@ -381,6 +394,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('.vp-more[open]'), function (d) { if (!d.contains(e.target)) d.open = false; });
     var b = e.target.closest && e.target.closest('[data-vp],[data-vpp],[data-vpc]'); if (!b) return;
     var mn = b.closest && b.closest('.vp-more'); if (mn) mn.open = false;
+    if (b.dataset.vpc === 'delete') { deleteActiveClient(); return; }
     if (b.dataset.vpc) { clientForm(b.dataset.vpc); return; }
     if (b.dataset.vpp) { if (typeof UI !== 'undefined' && UI.tab === TAB) go(b.dataset.vpp); return; }
     act(b.dataset.vp, b);
