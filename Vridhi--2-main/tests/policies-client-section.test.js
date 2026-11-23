@@ -28,5 +28,8 @@ assert.ok(policyUI.includes('class="vp-tw" tabindex="0" role="region"') &&
   'Policy report tables can receive keyboard focus');
 assert.ok(policyUI.includes('var L = V.clients()'), 'Policies builds its client list from Policy clients');
 assert.ok(policyUI.includes("V.selectClient(t.value)"), 'Policies switches between Policy clients');
+assert.ok(policyUI.includes('data-vpc="rename"') && policyUI.includes('data-vpc="delete"') && policyUI.indexOf('data-vpc="delete"') > policyUI.indexOf('data-vpc="rename"'), 'Delete appears immediately after Rename in the client menu');
+assert.ok(policyUI.includes('function deleteActiveClient()') && policyUI.includes('V.deleteClient(active.id)') && policyUI.includes('confirmBox('), 'Deleting a client requires confirmation and removes it through the Policy core');
+assert.ok(policyUI.includes('associated ') && policyUI.includes('This action cannot be undone.'), 'Client deletion warns that associated policies and records will be deleted');
 for (const tab of ['Retirement planner', 'RP Reports']) assert.strictEqual(run(tab).innerHTML, 'RETIREMENT-CLIENT-BAR', tab + ' keeps its own Client section');
 console.log('Policies uses its own client selector without showing Goal Planner clients');
