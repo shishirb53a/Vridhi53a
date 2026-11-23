@@ -207,13 +207,8 @@ const TOOLS = [
 ];
 
 async function callGemini(apiKey: string, model: string, contents: unknown[], systemInstruction: string) {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-    },
-    body: JSON.stringify({
+  const requestModel = async (modelName: string) => {
+    const body = JSON.stringify({
       systemInstruction: { parts: [{ text: systemInstruction }] },
       contents,
       tools: [{
@@ -230,37 +225,79 @@ async function callGemini(apiKey: string, model: string, contents: unknown[], sy
       }],
       toolConfig: { functionCallingConfig: { mode: "AUTO" } },
       generationConfig: { temperature: 0.2, maxOutputTokens: 900 },
-    }),
-  });
-  const result = await response.json().catch(() => null);
-  if (!response.ok) {
-    const apiError = result && typeof result.error === "object" && result.error !== null
-      ? result.error as Record<string, unknown>
-      : {};
-    // Keep bounded diagnostics in Supabase logs; never log the API key or plan payload.
-    console.error("Gemini request failed:", JSON.stringify({
-      status: response.status,
-      code: typeof apiError.status === "string" ? apiError.status : null,
-      message: typeof apiError.message === "string" ? apiError.message.slice(0, 500) : null,
-      requestId: response.headers.get("x-goog-request-id") || response.headers.get("x-request-id"),
-      model,
-    }));
-    if (response.status === 400) {
-      const detail = typeof apiError.message === "string" ? apiError.message.slice(0, 200) : "Invalid request sent to Gemini.";
-      throw new Error(`Gemini rejected the request (400): ${detail}`);
+    });
+
+    let lastError: Error | null = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      let response: Response;
+      try {
+        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelName)}:generateContent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body,
+          signal: AbortSignal.timeout(30_000),
+        });
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error("Gemini network request failed.");
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * (2 ** attempt)));
+          continue;
+        }
+        throw new Error("Could not reach Gemini. Check network connectivity and try again.");
+      }
+
+      const result = await response.json().catch(() => null);
+      if (response.ok) return result;
+
+      const apiError = result && typeof result.error === "object" && result.error !== null
+        ? result.error as Record<string, unknown>
+        : {};
+      console.error("Gemini request failed:", JSON.stringify({
+        status: response.status,
+        code: typeof apiError.status === "string" ? apiError.status : null,
+        message: typeof apiError.message === "string" ? apiError.message.slice(0, 500) : null,
+        requestId: response.headers.get("x-goog-request-id") || response.headers.get("x-request-id"),
+        model: modelName,
+        attempt: attempt + 1,
+      }));
+
+      if ([500, 502, 503, 504].includes(response.status) && attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * (2 ** attempt)));
+        continue;
+      }
+      if (response.status === 400) {
+        const detail = typeof apiError.message === "string" ? apiError.message.slice(0, 200) : "Invalid request sent to Gemini.";
+        throw new Error(`Gemini rejected the request (400): ${detail}`);
+      }
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("The Gemini API key was rejected. Check GEMINI_API_KEY in Edge Function secrets.");
+      }
+      if (response.status === 404) {
+        throw new Error(`Gemini model "${modelName}" was not found. Check GEMINI_MODEL in Edge Function secrets.`);
+      }
+      if (response.status === 429) {
+        throw new Error("The AI assistant is temporarily rate-limited. Please wait a moment and try again.");
+      }
+      throw new Error(`Gemini could not complete this request (HTTP ${response.status}). Please try again later.`);
     }
-    if (response.status === 401 || response.status === 403) {
-      throw new Error("The Gemini API key was rejected. Check GEMINI_API_KEY in Edge Function secrets.");
+    throw lastError || new Error("Gemini request failed after retries.");
+  };
+
+  try {
+    return await requestModel(model);
+  } catch (error) {
+    // A temporary outage or stale custom model setting should not take the assistant offline.
+    // Retry once through the current stable Flash model after the primary model's retry budget.
+    if (model === "gemini-3.8-flash" || !(error instanceof Error) ||
+        !/(HTTP (500|502|503|504)|model .* was not found)/i.test(error.message)) {
+      throw error;
     }
-    if (response.status === 404) {
-      throw new Error("The configured Gemini model was not found. Check GEMINI_MODEL in Edge Function secrets.");
-    }
-    if (response.status === 429) {
-      throw new Error("The AI assistant is temporarily rate-limited. Please wait a moment and try again.");
-    }
-    throw new Error(`Gemini could not complete this request (HTTP ${response.status}). Please try again later.`);
+    console.warn("Gemini primary model unavailable; trying fallback model gemini-3.8-flash.");
+    return await requestModel("gemini-3.8-flash");
   }
-  return result;
 }
 
 async function runAgent(apiKey: string, model: string, question: string, plan: Plan): Promise<string> {
@@ -371,7 +408,7 @@ if (import.meta.main !== false && typeof Deno !== "undefined" && Deno.serve) {
   const url = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   const apiKey = Deno.env.get("GEMINI_API_KEY") || "";
-  const model = Deno.env.get("GEMINI_MODEL") || "gemini-4-hydrogen";
+  const model = Deno.env.get("GEMINI_MODEL") || "gemini-3.8-flash";
   if (!url || !serviceKey) {
     console.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.");
   } else {
