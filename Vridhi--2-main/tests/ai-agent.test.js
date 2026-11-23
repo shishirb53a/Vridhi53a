@@ -33,14 +33,17 @@ assert.ok(edge.includes('admin.auth.getUser(bearer[1])') &&
   edge.includes('.eq("permission_key", "read_data")') &&
   edge.includes('You do not have permission to read plan data.'),
 'The Edge Function independently verifies the token and read_data permission');
-assert.ok(edge.includes('OPENAI_API_KEY') &&
-  edge.includes('api.openai.com/v1/chat/completions') &&
-  edge.includes('Authorization') &&
-  edge.includes('function futureValue('), 'The OpenAI key stays server-side and projections are calculated in code');
-assert.ok(edge.includes('requestId: response.headers.get(\'x-request-id\')') &&
-  edge.includes('apiError.code') &&
+assert.ok(edge.includes('GEMINI_API_KEY') &&
+  edge.includes('generativelanguage.googleapis.com/v1beta/models/') &&
+  edge.includes('"x-goog-api-key": apiKey') &&
+  edge.includes('function futureValue('), 'The Gemini key stays server-side and projections are calculated in code');
+assert.ok(edge.includes('functionDeclarations: TOOLS.map') &&
+  edge.includes('functionResponse:') &&
+  edge.includes('mode: "AUTO"'),
+'Gemini function calling is wired to the existing read-only calculation tools');
+assert.ok(edge.includes('requestId: response.headers.get("x-goog-request-id")') &&
   edge.includes('apiError.message.slice(0, 500)'),
-'OpenAI failures log a request ID and bounded diagnostic details without exposing request payloads');
+'Gemini failures log a request ID and bounded diagnostic details without exposing request payloads');
 assert.ok(!edge.includes('.insert(') && !edge.includes('.update(') && !edge.includes('.delete('),
   'The AI Edge Function has no database write operations');
 
