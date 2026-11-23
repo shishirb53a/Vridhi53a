@@ -56,7 +56,7 @@
     panel.setAttribute('aria-label', 'Ask Vriddhi AI');
     panel.hidden = true;
     panel.innerHTML = '<div class="vr-ai-head"><h2>Ask Vriddhi AI</h2><button type="button" aria-label="Close chat">&times;</button></div>' +
-      '<p class="vr-ai-intro">Ask about this plan. Your read-only plan details are sent to the configured AI provider for an answer. Forecasts are estimates, not financial advice.</p>' +
+      '<p class="vr-ai-intro">Ask about this plan. Your read-only plan details are sent securely to OpenAI for an answer. Forecasts are estimates, not financial advice.</p>' +
       '<div class="vr-ai-messages" role="log" aria-live="polite"><div class="vr-ai-message">I can explain your plan and run read-only projections. What would you like to know?</div></div>' +
       '<form class="vr-ai-form"><textarea rows="2" maxlength="1000" aria-label="Your question" placeholder="Ask about your plan…" required></textarea><button type="submit" class="p">Send</button></form>';
     document.body.append(launch, panel);
