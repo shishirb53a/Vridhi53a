@@ -1107,3 +1107,13 @@ html body header.hd nav#nav .nav-modules .module-menu > button {
   opacity:1!important;
   visibility:visible!important;
 }
+
+/* Modules / Goal Planner header button: no heavy bottom line (same thin border on all four sides) */
+html:not(#vrx) body header.hd nav#nav .nav-modules > button[data-modules-toggle],
+html:not(#vrx)[data-skin="enterprise"] body header.hd nav#nav .nav-modules > button[data-modules-toggle],
+html:not(#vrx) body header.hd nav#nav .nav-modules > button[data-modules-toggle][aria-current] {
+  border-bottom:1px solid var(--bd,#cbd5e1)!important;
+  border-bottom-color:var(--bd,#cbd5e1)!important;
+  box-shadow:none!important;
+  text-decoration:none!important;
+}
