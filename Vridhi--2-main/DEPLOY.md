@@ -91,7 +91,7 @@ not financial advice. The chat explains that plan data is sent to Google Gemini.
 
 1. Create a Gemini API key in [Google AI Studio](https://aistudio.google.com/apikey).
 2. In Supabase **Project Settings → Edge Functions → Secrets**, add `GEMINI_API_KEY` with your key.
-   Optionally set `GEMINI_MODEL` (default: `gemini-2.5-flash`) and `ALLOWED_ORIGIN` to your site's origin.
+   Optionally set `GEMINI_MODEL` (default: `gemini-3.8-flash`) and `ALLOWED_ORIGIN` to your site's origin.
 3. Deploy `supabase/functions/vriddhi-agent/index.ts` as an Edge Function named `vriddhi-agent`
    with JWT verification enabled.
 4. Ensure the `read_data` role permission has been installed by running the latest `supabase/schema.sql`.
