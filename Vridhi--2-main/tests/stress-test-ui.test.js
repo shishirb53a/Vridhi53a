@@ -20,7 +20,12 @@ assert.strictEqual(h.querySelectorAll('.st-main .st-t tbody tr').length, 14, 'al
 const row1 = h.querySelector('.st-main .st-t tbody tr').textContent;
 assert.ok(row1.includes('1. Base Case') && row1.includes('51.39 yrs') && row1.includes('Covers plan'), 'base case row');
 assert.ok(txt().includes('Falls short') && txt().includes('Never runs out'), 'status labels');
-for (const g of ['What changes', 'Result']) assert.ok(h.querySelector('.st-main .st-t').textContent.includes(g), g + ' group shown');
+for (const g of ['Monthly expense', 'Survival']) assert.ok(h.querySelector('.st-main .st-t').textContent.includes(g), g + ' column shown');
+assert.ok(!txt().includes('What changes') && !txt().includes('Linked to planner') && !txt().includes('Changed by this scenario') && !txt().includes('You can edit'), 'removed group banners and legend clutter');
+h.querySelector('[data-st-max]').click();
+assert.ok(h.querySelector('.st-scen-card').classList.contains('st-max'), 'Maximize opens full-window table');
+h.querySelector('[data-st-max]').click();
+assert.ok(!h.querySelector('.st-scen-card').classList.contains('st-max'), 'Restore exits full-window table');
 assert.ok(!h.querySelector('.st-main .st-t').textContent.includes('Emergency buffer'), 'Starting position hidden by default');
 const chip = h.querySelector('[data-g=st]'); chip.checked = true; chip.dispatchEvent(new w.Event('change', { bubbles: true }));
 assert.ok(h.querySelector('.st-main .st-t').textContent.includes('Emergency buffer') && h.querySelector('.st-main .st-t').textContent.includes('Investable'), 'Starting position columns can be shown');

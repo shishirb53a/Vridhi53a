@@ -1,7 +1,7 @@
 /* Stress Test · screen (UI only). All maths lives in window.StressTest (engine.js).
    4-Tab Executive layout:
      Tab 1 (overview)  : 70-year corpus trajectory across stress scenarios + Resilience summary
-     Tab 2 (scenarios) : How long does the corpus last under each condition? (14 scenarios + filters)
+     Tab 2 (scenarios) : How long does the corpus last under each condition? (14 scenarios, Maximize full-window view, filters)
      Tab 3 (settings)  : Stress settings (11 editable per-client parameters in 4 groups)
      Tab 4 (engine)    : Year-by-year money balance (70 years) + Notes: how the numbers are worked out
    Colours come from the app's theme variables (light / dark / accent).
@@ -20,6 +20,8 @@
   const pct = (n, d) => (n * 100).toFixed(d == null ? 2 : d) + "%";
   const yrs = v => v >= ST.MAXY ? "Never runs out" : v.toFixed(2) + " yrs";
   const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const IC_MAX = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  const IC_MIN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
 
   const go = tab => { try { if (typeof UI !== "undefined" && typeof render === "function") { UI.tab = tab; render(); } } catch (e) { /* ignore */ } };
   const rp = (tab, rv) => { if (window.RPUI) { window.RPUI.tab = tab; if (rv) window.RPUI.rv = rv; } go("Retirement planner"); };
@@ -52,11 +54,26 @@
     ["Income", [["freelance", "Freelance covers % of yearly costs", "Scenarios 10, 14", "p"], ["partTime", "Part-time job covers % of yearly costs", "Scenario 11", "p"]]]];
   const TIPS = { corpus: "Planner: total money available today", monthly: "Planner: monthly household spending today", buffer: "Planner: emergency reserve",
     other: "Planner: other income running in year 1 (today’s rupees)", roi: "Planner: annual portfolio return", bufferRoi: "Planner: emergency-reserve return", infl: "Planner: annual household inflation" };
-  /* column groups: [key, heading, override letter (the Excel column), cell renderer] */
-  const GROUPS = [
-    ["chg", "What changes", [["monthly", "Monthly expense", "C"], ["roi", "Investment return", "G"], ["infl", "Inflation", "I"], ["shock", "One-time shock", "E"], ["other", "Other income p.a.", "F"]]],
-    ["res", "Result", [["surv", "Survival", "L"], ["age", "Runs out at age", "M"], ["on", "Runs out on", "N"], ["left", "Money left at end of plan", "O"], ["funded", "Full years funded", "P"]]],
-    ["st", "Starting position", [["corpus", "Corpus", "B"], ["buffer", "Emergency buffer", "D"], ["invest", "Investable", "J"], ["need", "Net need p.a.", "K"], ["bufRoi", "Buffer return", "H"]]]];
+  /* Scenario table columns: primary columns are always shown; Starting position is optional via toggle */
+  const PRIMARY_COLS = [
+    ["monthly", "Monthly expense", "C"],
+    ["roi", "Investment return", "G"],
+    ["infl", "Inflation", "I"],
+    ["shock", "One-time shock", "E"],
+    ["other", "Other income p.a.", "F"],
+    ["surv", "Survival", "L"],
+    ["age", "Runs out at age", "M"],
+    ["on", "Runs out on", "N"],
+    ["left", "Money left at end of plan", "O"],
+    ["funded", "Full years funded", "P"]
+  ];
+  const STARTING_COLS = [
+    ["corpus", "Corpus", "B"],
+    ["buffer", "Emergency buffer", "D"],
+    ["invest", "Investable", "J"],
+    ["need", "Net need p.a.", "K"],
+    ["bufRoi", "Buffer return", "H"]
+  ];
   const LINKED = { corpus: 1, monthly: 1, buffer: 1, other: 1, roi: 1, bufRoi: 1, infl: 1 };
   const TABS = [
     ["overview", "1. Trajectory & Summary"],
@@ -67,7 +84,7 @@
 
   function mount(host, provider) {
     const P = provider || appProvider();
-    const st = { client: P.activeId(), tab: "overview", result: null, issues: null, cols: { chg: true, res: true, st: false }, filter: "all", rowFilter: "all", open: { engine: true, notes: true }, dirty: false };
+    const st = { client: P.activeId(), tab: "overview", result: null, issues: null, cols: { st: false }, filter: "all", rowFilter: "all", open: { engine: true, notes: true }, dirty: false, max: false };
 
     function compute() {
       const b = ST.fromPlanner(P.inputs(st.client));
@@ -163,9 +180,13 @@
         </div>
       </section>`;
     }
-    function cell(r, i, c, R) {
+    function cell(r, c, R, sep) {
       const base = r.no === 1, ov = r.ov.includes(c[2]);
-      let cls = base && LINKED[c[0]] ? "l" : ""; if (ov) cls = "o";
+      const clsList = [];
+      if (base && LINKED[c[0]]) clsList.push("l");
+      if (ov) clsList.push("o");
+      if (sep) clsList.push("st-sep");
+      const cls = clsList.length ? ` class="${clsList.join(" ")}"` : "";
       const tip = base && LINKED[c[0]] ? ` title="${esc(TIPS[c[0]] || "Linked to the Retirement Planner")}"` : "";
       const b = R.base; let t;
       switch (c[0]) {
@@ -181,32 +202,37 @@
         case "corpus": t = inr(r.corpus); break; case "buffer": t = inr(r.buffer); break; case "invest": t = inr(r.investable); break;
         case "need": t = inr(r.netNeed); break; default: t = pct(b.bufferRoi);
       }
-      return `<td class="${cls}"${tip}>${t}</td>`;
+      return `<td${cls}${tip}>${t}</td>`;
     }
     function table(R) {
-      const on = GROUPS.filter(g => st.cols[g[0]]);
+      const activeCols = st.cols.st ? PRIMARY_COLS.concat(STARTING_COLS) : PRIMARY_COLS;
       const rows = R.rows.map((r, i) => { r.no = i + 1; return r; }).filter(r => {
         if (st.rowFilter === "short") return r.survival < R.base.planYears;
         if (st.rowFilter === "ok") return r.survival >= R.base.planYears;
         return true;
       });
-      const head = `<thead><tr><th rowspan="2">Scenario</th>${on.map(g => `<th class="g" colspan="${g[2].length}">${g[1]}</th>`).join("")}</tr><tr>${on.map(g => g[2].map(c => `<th>${c[1]}</th>`).join("")).join("")}</tr></thead>`;
+      const head = `<thead><tr><th>Scenario</th>${activeCols.map((c, idx) => `<th${st.cols.st && idx === PRIMARY_COLS.length ? ' class="st-sep"' : ""}>${c[1]}</th>`).join("")}</tr></thead>`;
       const body = rows.length
-        ? rows.map((r, i) => `<tr><td>${esc(r.name)}</td>${on.map(g => g[2].map(c => cell(r, i, c, R)).join("")).join("")}</tr>`).join("")
-        : `<tr><td colspan="20" class="st-empty">No scenarios match this filter.</td></tr>`;
-      const chips = GROUPS.map(g => `<label><input type="checkbox" data-g="${g[0]}"${st.cols[g[0]] ? " checked" : ""}>${g[1]}</label>`).join("");
+        ? rows.map(r => `<tr${r.no === 1 ? ' class="st-base"' : ""}><td>${esc(r.name)}</td>${activeCols.map((c, idx) => cell(r, c, R, st.cols.st && idx === PRIMARY_COLS.length)).join("")}</tr>`).join("")
+        : `<tr><td colspan="${activeCols.length + 1}" class="st-empty">No scenarios match this filter.</td></tr>`;
       const rFilter = `<div class="st-seg" role="group" aria-label="Filter scenarios">` +
         [["all", "All 14"], ["short", "Falls short"], ["ok", "Covers plan"]].map(([k, lbl]) => `<button type="button" data-st-rf="${k}" aria-pressed="${st.rowFilter === k}">${lbl}</button>`).join("") +
         `</div>`;
+      const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-max aria-pressed="${st.max}" title="${st.max ? "Exit full window (Esc)" : "Open full window"}">${st.max ? IC_MIN : IC_MAX}<span>${st.max ? "Restore" : "Maximize"}</span></button>`;
+      const startToggle = `<label class="st-chip"><input type="checkbox" data-g="st"${st.cols.st ? " checked" : ""}>Show starting position</label>`;
       const mobCards = rows.map(r => {
         const ok = r.survival >= R.base.planYears, w = Math.min(100, r.survival / ST.MAXY * 100);
         return `<article class="st-mcard"><div class="st-mhead"><strong>${esc(r.name)}</strong><span class="st-ch ${ok ? "ok" : "bad"}">${ok ? "Covers plan" : "Falls short"}</span></div>` +
           `<div class="st-msurv"><b>${yrs(r.survival)}</b><span class="st-mb" aria-hidden="true"><i style="width:${w}%;background:${ok ? "var(--ok,#167d68)" : "var(--er,#c92a2a)"}"></i></span></div>` +
           `<div class="st-mkv"><span>Monthly expense</span><b>${inr(r.monthly)}</b><span>Return / Inflation</span><b>${pct(r.roi)} / ${pct(r.infl)}</b><span>Money left at end</span><b>${r.left == null ? "Runs out first" : inr(r.left)}</b></div></article>`;
       }).join("");
-      return `<div class="st-main"><div class="st-card"><div class="st-chead"><div><h2>How long does the corpus last under each condition?</h2>` +
-        `<p class="st-note">Scenario 1 is linked live to this client’s Retirement Planner. Change anything there and all 14 rows update. Hover a grey cell to see where it comes from.</p></div>${rFilter}</div>` +
-        `<div class="st-tb"><div class="st-chips"><b>Columns</b>${chips}</div><span class="st-sp"></span><div class="st-key"><span><i class="l"></i>Linked to planner</span><span><i class="o"></i>Changed by this scenario</span><span><i class="e"></i>You can edit</span></div></div>` +
+      const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
+      const extraClass = (st.max ? " st-max" : "") + (st.cols.st ? " st-wide-cols" : "");
+      return `<div class="st-main"><div class="st-card st-scen-card${extraClass}">` +
+        `<div class="st-chead st-scen-head"><div><h2>How long does the corpus last under each condition?</h2>` +
+        `<p class="st-note">${esc(clientName)} · Scenario 1 matches your live Retirement Planner (${rows.length} of 14 shown).</p></div>` +
+        `<div class="st-scen-actions">${rFilter}${st.max ? `<button type="button" class="st-btn" data-st="export">Export CSV</button>` : ""}${maxBtn}</div></div>` +
+        `<div class="st-tb st-scen-tb">${startToggle}<span class="st-sp"></span><span class="st-count">${R.summary.fullPlan} of 14 scenarios cover the ${R.base.planYears}-year plan</span></div>` +
         `<div class="st-wrap"><table class="st-t">${head}<tbody>${body}</tbody></table></div>` +
         `<div class="st-mcards">${mobCards}</div></div></div>`;
     }
@@ -218,7 +244,7 @@
       }).join("") + `</div>`).join("");
       return `<div class="st-card st-set-panel" aria-label="Stress settings">
         <div class="st-chead">
-          <div><h2>Stress settings</h2><p class="st-note">How hard each test hits. Yellow boxes are editable and saved for this client.</p></div>
+          <div><h2>Stress settings</h2><p class="st-note">Adjust how severe each shock is. Changes are saved per client.</p></div>
           <div class="st-acts st-acts-top"><button type="button" class="st-btn p" data-st="apply" disabled>Apply</button><button type="button" class="st-btn" data-st="reset">Reset to defaults</button></div>
         </div>
         <div class="st-sgrid">${fields}</div>
@@ -241,13 +267,19 @@
     }
     function switchTab(id) {
       if (!TABS.some(t => t[0] === id)) return;
+      if (id !== "scenarios" && st.max) toggleMax(false);
       st.tab = id;
       host.querySelectorAll("[data-st-tab]").forEach(b => b.setAttribute("aria-selected", String(b.getAttribute("data-st-tab") === id)));
       host.querySelectorAll("[data-st-panel]").forEach(p => { p.hidden = p.getAttribute("data-st-panel") !== id; });
     }
+    function toggleMax(next) {
+      st.max = typeof next === "boolean" ? next : !st.max;
+      render();
+    }
     function render() {
       compute();
       const R = st.result;
+      if (!R) st.max = false;
       const body = R
         ? tabBar() +
           panel("overview", hero(R)) +
@@ -275,6 +307,8 @@
       return ST.cleanSettings(Object.assign({}, st.result.settings, o));
     }
     host.addEventListener("click", e => {
+      const maxBtn = e.target.closest("[data-st-max]");
+      if (maxBtn) { toggleMax(); return; }
       const tabBtn = e.target.closest("[data-st-tab]");
       if (tabBtn) { switchTab(tabBtn.getAttribute("data-st-tab")); return; }
       const rf = e.target.closest("[data-st-rf]");
@@ -298,15 +332,21 @@
       e.target.classList.add("dirty");
       e.target.classList.add("chg");
       const a = host.querySelector("[data-st=apply]"); if (a) a.disabled = false;
-      const stBtn = host.querySelector('#st-tab-settings');
-      if (stBtn && !stBtn.querySelector('.st-dot')) stBtn.insertAdjacentHTML('beforeend', '<span class="st-dot" aria-label="Unsaved changes"></span>');
+      const stBtn = host.querySelector("#st-tab-settings");
+      if (stBtn && !stBtn.querySelector(".st-dot")) stBtn.insertAdjacentHTML("beforeend", '<span class="st-dot" aria-label="Unsaved changes"></span>');
     });
     host.addEventListener("keydown", e => {
+      if (e.key === "Escape" && st.max) { e.preventDefault(); toggleMax(false); return; }
       if (e.key === "Enter" && e.target.matches && e.target.matches("[data-set]")) { e.preventDefault(); P.saveSettings(st.client, readSettings()); render(); }
     });
+    if (document.addEventListener) {
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && st.max && host.isConnected) { e.preventDefault(); toggleMax(false); }
+      });
+    }
     host.addEventListener("toggle", e => { const d = e.target; if (d.dataset && d.dataset.open) st.open[d.dataset.open] = d.open; }, true);
     render();
-    return { refresh: render, state: st, switchTab };
+    return { refresh: render, state: st, switchTab, toggleMax };
   }
 
   /* Retirement Planner > Reports > Stress Test: fhPage() (retirement-planner/ui.js) renders a host element; mount the screen as soon as it is in the page. */
