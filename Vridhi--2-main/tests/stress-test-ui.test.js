@@ -21,9 +21,12 @@ assert.ok(row6.textContent.includes('1. Base Case') && row6.textContent.includes
 assert.strictEqual(h.querySelectorAll('[data-set]').length, 11, 'nine settings plus the two return settings are editable');
 const inpEl = h.querySelector('[data-set=conservative]'); inpEl.value = '5'; inpEl.dispatchEvent(new w.Event('change', { bubbles: true }));
 assert.ok(Math.abs(saved.conservative - 0.05) < 1e-9, 'edited setting is saved for the client');
-w.UI = { tab: 'RP Reports', rps: 'stress' }; w.fhReportTab = () => '<div id="rptv">summary</div>';
-let page = w.rpReportsPage();
-assert.ok(page.includes('data-rps="summary"') && page.includes('data-rps="stress"') && page.includes('data-st-host') && !page.includes('id="rptv"'), 'Stress Test section shows the host');
-w.UI.rps = 'summary'; page = w.rpReportsPage();
-assert.ok(page.includes('id="rptv"') && !page.includes('data-st-host'), 'Summary section keeps the planner report');
+/* navigation buttons go to Retirement Planner > Reports */
+w.UI = { tab: 'Goal Planner' }; w.RPUI = { tab: 'status', rv: 'clients' }; let rendered = 0; w.render = () => { rendered++; };
+const nav = w.StressTestUI.appProvider();
+nav.onYearByYear(); assert.ok(w.RPUI.tab === 'report' && w.RPUI.rv === 'yy' && w.UI.tab === 'Retirement planner' && rendered === 1, 'Year-by-Year opens Retirement Planner > Reports > Year by Year');
+nav.onBack(); assert.ok(w.RPUI.tab === 'status' && w.UI.tab === 'Retirement planner', 'Back returns to the planner');
+/* the planner page edit */
+const pu = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
+assert.ok(pu.includes('data-rp="rv:stress"') && pu.includes('view === "stress"') && pu.includes('data-st-host'), 'planner Reports tab has the Stress Test button and host');
 console.log('stress-test-ui: all checks passed');
