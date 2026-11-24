@@ -106,7 +106,7 @@
         const badge = id === "settings" && st.dirty ? `<span class="st-dot" aria-label="Unsaved changes"></span>` : "";
         return `<button type="button" role="tab" id="st-tab-${id}" class="st-tab" data-st-tab="${id}" aria-selected="${active}" aria-controls="st-panel-${id}">${esc(label)}${badge}</button>`;
       }).join("");
-      return `<nav class="st-tabs" role="tablist" aria-label="Stress Test sections">${btns}</nav>`;
+      return `<div class="st-tabs" role="tablist" aria-label="Stress Test sections">${btns}</div>`;
     }
     function problem() {
       const list = (st.issues || []).slice(0, 4).map(i => `<li>${esc(i.message)}</li>`).join("");
@@ -205,26 +205,30 @@
       return `<td${cls}${tip}>${t}</td>`;
     }
     function table(R) {
-      const activeCols = st.cols.st ? PRIMARY_COLS.concat(STARTING_COLS) : PRIMARY_COLS;
+      const activeCols = st.cols.st ? STARTING_COLS.concat(PRIMARY_COLS) : PRIMARY_COLS;
+      const splitAt = st.cols.st ? STARTING_COLS.length : -1;
       const rows = R.rows.map((r, i) => { r.no = i + 1; return r; }).filter(r => {
         if (st.rowFilter === "short") return r.survival < R.base.planYears;
         if (st.rowFilter === "ok") return r.survival >= R.base.planYears;
         return true;
       });
-      const head = `<thead><tr><th>Scenario</th>${activeCols.map((c, idx) => `<th${st.cols.st && idx === PRIMARY_COLS.length ? ' class="st-sep"' : ""}>${c[1]}</th>`).join("")}</tr></thead>`;
+      const head = `<thead><tr><th>Scenario</th>${activeCols.map((c, idx) => `<th${idx === splitAt ? ' class="st-sep"' : ""}>${c[1]}</th>`).join("")}</tr></thead>`;
       const body = rows.length
-        ? rows.map(r => `<tr${r.no === 1 ? ' class="st-base"' : ""}><td>${esc(r.name)}</td>${activeCols.map((c, idx) => cell(r, c, R, st.cols.st && idx === PRIMARY_COLS.length)).join("")}</tr>`).join("")
+        ? rows.map(r => `<tr${r.no === 1 ? ' class="st-base"' : ""}><td>${esc(r.name)}</td>${activeCols.map((c, idx) => cell(r, c, R, idx === splitAt)).join("")}</tr>`).join("")
         : `<tr><td colspan="${activeCols.length + 1}" class="st-empty">No scenarios match this filter.</td></tr>`;
       const rFilter = `<div class="st-seg" role="group" aria-label="Filter scenarios">` +
         [["all", "All 14"], ["short", "Falls short"], ["ok", "Covers plan"]].map(([k, lbl]) => `<button type="button" data-st-rf="${k}" aria-pressed="${st.rowFilter === k}">${lbl}</button>`).join("") +
         `</div>`;
       const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-max aria-pressed="${st.max}" title="${st.max ? "Exit full window (Esc)" : "Open full window"}">${st.max ? IC_MIN : IC_MAX}<span>${st.max ? "Restore" : "Maximize"}</span></button>`;
-      const startToggle = `<label class="st-chip"><input type="checkbox" data-g="st"${st.cols.st ? " checked" : ""}>Show starting position</label>`;
+      const startToggle = `<label class="st-chip${st.cols.st ? " on" : ""}"><input type="checkbox" data-g="st"${st.cols.st ? " checked" : ""}>Show starting position${st.cols.st ? " (5 cols)" : ""}</label>`;
       const mobCards = rows.map(r => {
         const ok = r.survival >= R.base.planYears, w = Math.min(100, r.survival / ST.MAXY * 100);
+        const startKV = st.cols.st
+          ? `<span>Corpus</span><b>${inr(r.corpus)}</b><span>Emergency buffer</span><b>${inr(r.buffer)}</b><span>Investable</span><b>${inr(r.investable)}</b><span>Net need p.a.</span><b>${inr(r.netNeed)}</b>`
+          : "";
         return `<article class="st-mcard"><div class="st-mhead"><strong>${esc(r.name)}</strong><span class="st-ch ${ok ? "ok" : "bad"}">${ok ? "Covers plan" : "Falls short"}</span></div>` +
           `<div class="st-msurv"><b>${yrs(r.survival)}</b><span class="st-mb" aria-hidden="true"><i style="width:${w}%;background:${ok ? "var(--ok,#167d68)" : "var(--er,#c92a2a)"}"></i></span></div>` +
-          `<div class="st-mkv"><span>Monthly expense</span><b>${inr(r.monthly)}</b><span>Return / Inflation</span><b>${pct(r.roi)} / ${pct(r.infl)}</b><span>Money left at end</span><b>${r.left == null ? "Runs out first" : inr(r.left)}</b></div></article>`;
+          `<div class="st-mkv">${startKV}<span>Monthly expense</span><b>${inr(r.monthly)}</b><span>Return / Inflation</span><b>${pct(r.roi)} / ${pct(r.infl)}</b><span>Money left at end</span><b>${r.left == null ? "Runs out first" : inr(r.left)}</b></div></article>`;
       }).join("");
       const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
       const extraClass = (st.max ? " st-max" : "") + (st.cols.st ? " st-wide-cols" : "");
