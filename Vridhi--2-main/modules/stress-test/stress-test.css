@@ -1,4 +1,4 @@
-/* Stress Test screen — Desktop Executive layout. Every colour is derived from the app's theme variables
+/* Stress Test screen — 4-Tab Desktop Executive layout. Every colour is derived from the app's theme variables
    (--card --tx --mu --bd --bg --ac --ac2 --ok --er --hl), so it follows Light, Dark and the chosen accent colour. */
 .st-root{--c-card:var(--card,#fff);--c-tx:var(--tx,#1b2939);--c-mu:var(--mu,#536273);--c-bd:var(--bd,#dce4ed);--c-bg:var(--bg,#f4f7fb);--c-ac:var(--ac,#14392b);--c-ac2:var(--ac2,#fff);--c-ok:var(--ok,#167d68);--c-er:var(--er,#c92a2a);
  --c-warn:color-mix(in srgb,var(--c-er) 45%,var(--c-ok));
@@ -10,20 +10,29 @@
 .st-btn:hover:not(:disabled){background:var(--c-soft)}
 .st-btn.p{background:var(--c-ac);color:var(--c-ac2);border-color:var(--c-ac)}.st-btn:disabled{opacity:.5;cursor:default}
 .st-link{background:none;border:0;color:var(--c-ac);text-decoration:underline;cursor:pointer;padding:5px 6px;white-space:nowrap}
-.st-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:11px 16px;margin-bottom:14px}
+.st-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:11px 16px;margin-bottom:12px}
 .st-bar h1{font-size:18px;margin:0}.st-sp{flex:1}.st-live{color:var(--c-ok);font-weight:600;font-size:13px;white-space:nowrap}
 .st-bar select{background:var(--c-card);border:1px solid var(--c-bd);border-radius:7px;padding:5px 9px}
 
-/* Executive Hero Strip: 70-Year Fan Chart + 5-KPI Summary */
-.st-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:14px;margin-bottom:14px;align-items:stretch}
-.st-card{background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:14px 16px;min-width:0}
-.st-card h2{font-size:15.5px;margin:0}.st-note{color:var(--c-mu);margin:3px 0 0;font-size:13px}
-.st-chead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 14px;margin-bottom:10px}
+/* 4-Tab Navigation */
+.st-tabs{display:flex;flex-wrap:wrap;gap:6px;background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:6px;margin-bottom:14px}
+.st-tab{position:relative;display:inline-flex;align-items:center;gap:7px;border:1px solid transparent;background:transparent;color:var(--c-mu);font-weight:600;font-size:13.5px;padding:8px 15px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.st-tab:hover{background:var(--c-soft);color:var(--c-tx)}
+.st-tab[aria-selected="true"]{background:var(--c-ac);color:var(--c-ac2);border-color:var(--c-ac)}
+.st-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c-warn)}
+.st-tab[aria-selected="true"] .st-dot{background:var(--c-ac2)}
+.st-panel[hidden]{display:none!important}
+
+/* Tab 1: Executive Hero Strip (70-Year Fan Chart + 5-KPI Summary) */
+.st-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);gap:14px;align-items:stretch}
+.st-card{background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:16px 18px;min-width:0}
+.st-card h2{font-size:16px;margin:0}.st-note{color:var(--c-mu);margin:3px 0 0;font-size:13px}
+.st-chead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 14px;margin-bottom:12px}
 .st-cleg{display:flex;flex-wrap:wrap;gap:10px 14px;font-size:12px;color:var(--c-mu);align-items:center}
 .st-cleg span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .st-cleg .sw{display:inline-block;width:14px;height:3px;border-radius:2px}
 .st-cleg .sw.best{background:var(--c-ok)}.st-cleg .sw.base{background:var(--c-ac)}.st-cleg .sw.bear{background:var(--c-warn)}.st-cleg .sw.worst{background:var(--c-er)}
-.st-fan{width:100%;height:210px;display:block}
+.st-fan{width:100%;height:244px;display:block}
 .st-fan .st-grid{stroke:var(--c-soft);stroke-width:1}
 .st-fan .st-ax{font-size:11px;fill:var(--c-mu);font-variant-numeric:tabular-nums}
 .st-fan .st-band{fill:var(--c-ac);opacity:.09}
@@ -31,30 +40,32 @@
 .st-fan .st-plan-line{stroke:var(--c-ac);stroke-width:1.3;stroke-dasharray:4 4}
 .st-fan .st-plan-lbl{font-size:11px;font-weight:600;fill:var(--c-ac)}
 .st-fan .st-cv{fill:none;stroke-linecap:round;stroke-linejoin:round}
-.st-fan .st-cv-best{stroke:var(--c-ok);stroke-width:2}
-.st-fan .st-cv-base{stroke:var(--c-ac);stroke-width:2.6}
-.st-fan .st-cv-bear{stroke:var(--c-warn);stroke-width:1.8;stroke-dasharray:5 3}
-.st-fan .st-cv-worst{stroke:var(--c-er);stroke-width:2}
+.st-fan .st-cv-best{stroke:var(--c-ok);stroke-width:2.2}
+.st-fan .st-cv-base{stroke:var(--c-ac);stroke-width:2.8}
+.st-fan .st-cv-bear{stroke:var(--c-warn);stroke-width:1.9;stroke-dasharray:5 3}
+.st-fan .st-cv-worst{stroke:var(--c-er);stroke-width:2.2}
 
-.st-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.st-tile{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 12px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.st-kpi-card{display:flex;flex-direction:column}
+.st-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;flex:1}
+.st-tile{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:11px 13px;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .st-tile-wide{grid-column:1 / -1;flex-direction:row;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .st-tile small{display:block;color:var(--c-mu);font-size:12px}.st-tile b{font-size:20px;font-variant-numeric:tabular-nums;margin:2px 0}.st-tile span{display:block;color:var(--c-mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-qlinks{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 14px;border-top:1px solid var(--c-soft);margin-top:12px;padding-top:10px;font-size:13px}
 
 /* Segmented Row Filter */
 .st-seg{display:inline-flex;background:var(--c-soft);border:1px solid var(--c-bd);border-radius:8px;padding:3px;gap:2px}
 .st-seg button{border:0;background:transparent;padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--c-mu);cursor:pointer;white-space:nowrap}
 .st-seg button[aria-pressed="true"]{background:var(--c-ac);color:var(--c-ac2)}
 
-/* Main Workspace */
-.st-main{display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:14px;align-items:start}
+/* Tab 2: Full-Width Scenario Matrix */
+.st-main{display:block}
 .st-tb{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:10px 0}
 .st-chips b{font-size:12px;margin-right:6px}
 .st-chips label{display:inline-flex;gap:5px;align-items:center;border:1px solid var(--c-bd);border-radius:7px;padding:4px 10px;margin-right:6px;cursor:pointer;font-size:12.5px;background:var(--c-card)}
 .st-key{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--c-mu)}
 .st-key i{display:inline-block;width:12px;height:12px;border:1px solid var(--c-bd);border-radius:3px;vertical-align:-2px;margin-right:4px}
 .st-key .l{background:var(--c-lnk)}.st-key .o{background:var(--c-ovr)}.st-key .e{background:var(--c-edt)}
-.st-wrap{overflow:auto;border:1px solid var(--c-bd);border-radius:9px;max-height:580px}.st-short{max-height:340px}
+.st-wrap{overflow:auto;border:1px solid var(--c-bd);border-radius:9px;max-height:660px}.st-short{max-height:460px}
 .st-t{border-collapse:separate;border-spacing:0;font-size:13px;width:100%}
 .st-t th,.st-t td{padding:8px 10px;border-bottom:1px solid var(--c-soft);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
 .st-t th{position:sticky;top:0;background:var(--c-soft);z-index:2;font-weight:600}
@@ -72,18 +83,20 @@
 .st-mb{position:relative;width:72px;height:7px;background:var(--c-soft);border-radius:4px;flex:none}
 .st-mb i{display:block;height:100%;border-radius:4px}.st-mb u{position:absolute;top:-3px;bottom:-3px;border-left:2px dashed var(--c-ac)}
 
-/* Sticky Settings Rail */
-.st-set{position:sticky;top:12px}
-.st-sg h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-mu);margin:14px 0 5px}
-.st-f{display:grid;grid-template-columns:1fr 94px;gap:8px;align-items:center;margin:6px 0}
-.st-f small{display:block;color:var(--c-mu);font-size:11px}
-.st-f input{width:100%;text-align:right;background:var(--c-edt);border:1px solid var(--c-bd);border-radius:6px;padding:5px 7px;box-sizing:border-box;font-variant-numeric:tabular-nums}
+/* Tab 3: Stress Settings Grid */
+.st-sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:8px}
+.st-sg-card{border:1px solid var(--c-bd);border-radius:10px;padding:12px 14px;background:var(--c-card)}
+.st-sg-card h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-mu);margin:0 0 10px}
+.st-f{display:grid;grid-template-columns:1fr 104px;gap:10px;align-items:center;margin:8px 0}
+.st-f small{display:block;color:var(--c-mu);font-size:11.5px}
+.st-f input{width:100%;text-align:right;background:var(--c-edt);border:1px solid var(--c-bd);border-radius:6px;padding:6px 8px;box-sizing:border-box;font-variant-numeric:tabular-nums}
 .st-f input.chg,.st-f input.dirty{outline:2px solid var(--c-ac)}
-.st-acts{margin-top:14px;display:flex;gap:8px}.st-acts .st-btn{flex:1;text-align:center}
+.st-acts{display:flex;gap:8px;align-items:center}
 
-/* Expandable Engine & Notes */
-.st-d{background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:12px 16px;margin-top:14px}
-.st-d summary{cursor:pointer;font-weight:700}.st-d ul{padding-left:18px}.st-d li{margin:5px 0;color:var(--c-mu)}
+/* Tab 4: Calculation Engine & Notes */
+.st-d{background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:14px 16px}
+.st-d+.st-d{margin-top:14px}
+.st-d summary{cursor:pointer;font-weight:700;font-size:15px}.st-d ul{padding-left:18px;margin:10px 0 2px}.st-d li{margin:6px 0;color:var(--c-mu)}
 .st-problem{border:1px solid var(--c-bd);border-radius:12px;padding:16px 18px;background:var(--c-card);margin-top:12px}
 
 /* Mobile Scenario Cards (hidden on desktop) */
@@ -95,8 +108,9 @@
 .st-mkv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:12.5px;border-top:1px solid var(--c-soft);padding-top:8px}
 .st-mkv span{color:var(--c-mu)}.st-mkv b{font-variant-numeric:tabular-nums}
 
-@media (max-width:1040px){.st-hero,.st-main{grid-template-columns:1fr}.st-set{position:static;order:-1}}
+@media (max-width:1040px){.st-hero,.st-sgrid{grid-template-columns:1fr}}
 @media (max-width:720px){
+  .st-tabs{gap:4px}.st-tab{flex:1 1 auto;justify-content:center;padding:7px 10px;font-size:12.5px}
   .st-sum{grid-template-columns:1fr 1fr}
   .st-main .st-wrap{display:none}
   .st-mcards{display:block}

@@ -1,7 +1,9 @@
 /* Stress Test · screen (UI only). All maths lives in window.StressTest (engine.js).
-   Desktop Executive layout: top action bar, 70-year trajectory fan chart + 5 resilience KPIs,
-   14 scenarios matrix (grouped columns + row filter + mobile cards) beside sticky Stress Settings,
-   then the 70-year calculation engine (with filtered curve overlay) and methodology notes.
+   4-Tab Executive layout:
+     Tab 1 (overview)  : 70-year corpus trajectory across stress scenarios + Resilience summary
+     Tab 2 (scenarios) : How long does the corpus last under each condition? (14 scenarios + filters)
+     Tab 3 (settings)  : Stress settings (11 editable per-client parameters in 4 groups)
+     Tab 4 (engine)    : Year-by-year money balance (70 years) + Notes: how the numbers are worked out
    Colours come from the app's theme variables (light / dark / accent).
    Mount:  StressTestUI.mount(hostElement, provider?)   provider = { clients, activeId, inputs, settings, saveSettings, onBack, onYearByYear } */
 (function () {
@@ -56,10 +58,16 @@
     ["res", "Result", [["surv", "Survival", "L"], ["age", "Runs out at age", "M"], ["on", "Runs out on", "N"], ["left", "Money left at end of plan", "O"], ["funded", "Full years funded", "P"]]],
     ["st", "Starting position", [["corpus", "Corpus", "B"], ["buffer", "Emergency buffer", "D"], ["invest", "Investable", "J"], ["need", "Net need p.a.", "K"], ["bufRoi", "Buffer return", "H"]]]];
   const LINKED = { corpus: 1, monthly: 1, buffer: 1, other: 1, roi: 1, bufRoi: 1, infl: 1 };
+  const TABS = [
+    ["overview", "1. Trajectory & Summary"],
+    ["scenarios", "2. Scenarios (14)"],
+    ["settings", "3. Stress Settings"],
+    ["engine", "4. Engine & Notes"]
+  ];
 
   function mount(host, provider) {
     const P = provider || appProvider();
-    const st = { client: P.activeId(), result: null, issues: null, cols: { chg: true, res: true, st: false }, filter: "all", rowFilter: "all", open: {}, dirty: false };
+    const st = { client: P.activeId(), tab: "overview", result: null, issues: null, cols: { chg: true, res: true, st: false }, filter: "all", rowFilter: "all", open: { engine: true, notes: true }, dirty: false };
 
     function compute() {
       const b = ST.fromPlanner(P.inputs(st.client));
@@ -75,12 +83,20 @@
         `<button type="button" class="st-link" data-st="back">◀ Back to Planner</button><button type="button" class="st-link" data-st="yby">▶ Year-by-Year (base case)</button>` +
         `<button type="button" class="st-btn" data-st="refresh">Refresh from planner</button><button type="button" class="st-btn p" data-st="export">Export CSV</button></div>`;
     }
+    function tabBar() {
+      const btns = TABS.map(([id, label]) => {
+        const active = st.tab === id;
+        const badge = id === "settings" && st.dirty ? `<span class="st-dot" aria-label="Unsaved changes"></span>` : "";
+        return `<button type="button" role="tab" id="st-tab-${id}" class="st-tab" data-st-tab="${id}" aria-selected="${active}" aria-controls="st-panel-${id}">${esc(label)}${badge}</button>`;
+      }).join("");
+      return `<nav class="st-tabs" role="tablist" aria-label="Stress Test sections">${btns}</nav>`;
+    }
     function problem() {
       const list = (st.issues || []).slice(0, 4).map(i => `<li>${esc(i.message)}</li>`).join("");
       return `<div class="st-problem" role="alert"><b>This client’s Retirement Planner plan is not complete yet.</b><ul>${list}</ul><button type="button" class="st-btn" data-st="back">◀ Back to Planner</button></div>`;
     }
     function fanChart(R, includeBear) {
-      const W = 720, H = 220, L = 66, Rpad = 20, T = 18, B = 28;
+      const W = 720, H = 248, L = 66, Rpad = 20, T = 20, B = 28;
       const baseRow = R.rows[0], bearRow = R.rows[4], worstRow = R.rows[12], bestRow = R.rows[13];
       const curves = includeBear ? [bestRow, baseRow, bearRow, worstRow] : [bestRow, baseRow, worstRow];
       const vals = [0];
@@ -140,6 +156,10 @@
         <div class="st-card st-kpi-card">
           <div class="st-chead"><div><h2>Resilience summary</h2><p class="st-note">14 conditions tested</p></div></div>
           ${kpis}
+          <div class="st-qlinks">
+            <button type="button" class="st-link" data-st-tab="scenarios">View all 14 scenarios →</button>
+            <button type="button" class="st-link" data-st-tab="settings">Adjust stress settings →</button>
+          </div>
         </div>
       </section>`;
     }
@@ -184,20 +204,25 @@
           `<div class="st-msurv"><b>${yrs(r.survival)}</b><span class="st-mb" aria-hidden="true"><i style="width:${w}%;background:${ok ? "var(--ok,#167d68)" : "var(--er,#c92a2a)"}"></i></span></div>` +
           `<div class="st-mkv"><span>Monthly expense</span><b>${inr(r.monthly)}</b><span>Return / Inflation</span><b>${pct(r.roi)} / ${pct(r.infl)}</b><span>Money left at end</span><b>${r.left == null ? "Runs out first" : inr(r.left)}</b></div></article>`;
       }).join("");
-      return `<div class="st-card"><div class="st-chead"><div><h2>How long does the corpus last under each condition?</h2>` +
+      return `<div class="st-main"><div class="st-card"><div class="st-chead"><div><h2>How long does the corpus last under each condition?</h2>` +
         `<p class="st-note">Scenario 1 is linked live to this client’s Retirement Planner. Change anything there and all 14 rows update. Hover a grey cell to see where it comes from.</p></div>${rFilter}</div>` +
         `<div class="st-tb"><div class="st-chips"><b>Columns</b>${chips}</div><span class="st-sp"></span><div class="st-key"><span><i class="l"></i>Linked to planner</span><span><i class="o"></i>Changed by this scenario</span><span><i class="e"></i>You can edit</span></div></div>` +
         `<div class="st-wrap"><table class="st-t">${head}<tbody>${body}</tbody></table></div>` +
-        `<div class="st-mcards">${mobCards}</div></div>`;
+        `<div class="st-mcards">${mobCards}</div></div></div>`;
     }
     function settings(R) {
       const s = R.settings;
-      const fields = SETTINGS.map(g => `<div class="st-sg"><h3>${g[0]}</h3>` + g[1].map(f => {
+      const fields = SETTINGS.map(g => `<div class="st-sg-card"><h3>${g[0]}</h3>` + g[1].map(f => {
         const k = f[0], v = f[3] === "r" ? Math.round(s[k]).toLocaleString("en-IN") : +(s[k] * 100).toFixed(2);
         return `<div class="st-f"><label for="st-${k}">${esc(f[1])}<small>${esc(f[2])}${f[3] === "p" ? " · %" : ""}</small></label><input id="st-${k}" data-set="${k}" data-fmt="${f[3]}" inputmode="decimal" value="${v}"></div>`;
       }).join("") + `</div>`).join("");
-      return `<aside class="st-card st-set" aria-label="Stress settings"><h2>Stress settings</h2><p class="st-note">How hard each test hits. Yellow boxes are editable and saved for this client.</p>${fields}` +
-        `<div class="st-acts"><button type="button" class="st-btn p" data-st="apply" disabled>Apply</button><button type="button" class="st-btn" data-st="reset">Reset to defaults</button></div></aside>`;
+      return `<div class="st-card st-set-panel" aria-label="Stress settings">
+        <div class="st-chead">
+          <div><h2>Stress settings</h2><p class="st-note">How hard each test hits. Yellow boxes are editable and saved for this client.</p></div>
+          <div class="st-acts st-acts-top"><button type="button" class="st-btn p" data-st="apply" disabled>Apply</button><button type="button" class="st-btn" data-st="reset">Reset to defaults</button></div>
+        </div>
+        <div class="st-sgrid">${fields}</div>
+      </div>`;
     }
     function engine(R) {
       let idx = R.rows.map((r, i) => i);
@@ -211,10 +236,26 @@
     }
     const notes = () => `<details class="st-d" data-open="notes"${st.open.notes ? " open" : ""}><summary>Notes: how the numbers are worked out</summary><ul>${NOTES.map(n => `<li>${esc(n)}</li>`).join("")}</ul></details>`;
 
+    function panel(id, content) {
+      return `<div id="st-panel-${id}" class="st-panel" role="tabpanel" aria-labelledby="st-tab-${id}" data-st-panel="${id}"${st.tab === id ? "" : " hidden"}>${content}</div>`;
+    }
+    function switchTab(id) {
+      if (!TABS.some(t => t[0] === id)) return;
+      st.tab = id;
+      host.querySelectorAll("[data-st-tab]").forEach(b => b.setAttribute("aria-selected", String(b.getAttribute("data-st-tab") === id)));
+      host.querySelectorAll("[data-st-panel]").forEach(p => { p.hidden = p.getAttribute("data-st-panel") !== id; });
+    }
     function render() {
       compute();
       const R = st.result;
-      host.innerHTML = `<section class="st-root" aria-label="Stress Test">${bar()}${R ? hero(R) + `<div class="st-main">${table(R)}${settings(R)}</div>` + engine(R) + notes() : problem()}</section>`;
+      const body = R
+        ? tabBar() +
+          panel("overview", hero(R)) +
+          panel("scenarios", table(R)) +
+          panel("settings", settings(R)) +
+          panel("engine", engine(R) + notes())
+        : problem();
+      host.innerHTML = `<section class="st-root" aria-label="Stress Test">${bar()}${body}</section>`;
     }
     function csv() {
       const R = st.result; if (!R) return;
@@ -234,6 +275,8 @@
       return ST.cleanSettings(Object.assign({}, st.result.settings, o));
     }
     host.addEventListener("click", e => {
+      const tabBtn = e.target.closest("[data-st-tab]");
+      if (tabBtn) { switchTab(tabBtn.getAttribute("data-st-tab")); return; }
       const rf = e.target.closest("[data-st-rf]");
       if (rf) { st.rowFilter = rf.getAttribute("data-st-rf"); render(); return; }
       const t = e.target.closest("[data-st]"); if (!t) return;
@@ -251,16 +294,19 @@
     });
     host.addEventListener("input", e => {
       if (!e.target.matches("[data-set]")) return;
+      st.dirty = true;
       e.target.classList.add("dirty");
       e.target.classList.add("chg");
       const a = host.querySelector("[data-st=apply]"); if (a) a.disabled = false;
+      const stBtn = host.querySelector('#st-tab-settings');
+      if (stBtn && !stBtn.querySelector('.st-dot')) stBtn.insertAdjacentHTML('beforeend', '<span class="st-dot" aria-label="Unsaved changes"></span>');
     });
     host.addEventListener("keydown", e => {
       if (e.key === "Enter" && e.target.matches && e.target.matches("[data-set]")) { e.preventDefault(); P.saveSettings(st.client, readSettings()); render(); }
     });
     host.addEventListener("toggle", e => { const d = e.target; if (d.dataset && d.dataset.open) st.open[d.dataset.open] = d.open; }, true);
     render();
-    return { refresh: render, state: st };
+    return { refresh: render, state: st, switchTab };
   }
 
   /* Retirement Planner > Reports > Stress Test: fhPage() (retirement-planner/ui.js) renders a host element; mount the screen as soon as it is in the page. */
