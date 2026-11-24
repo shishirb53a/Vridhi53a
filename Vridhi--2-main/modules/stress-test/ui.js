@@ -103,6 +103,44 @@
     lumpInc: "Scheduled lump-sum inflows in that plan year from the Retirement Planner.",
     lumpPrin: "Net lump-sum principal flows (received − spent − held + added) in that plan year from the Retirement Planner."
   };
+  const ENG_DETAIL_COLS = [
+    ["age", "Your age"],
+    ["kids", "Kids: college + weddings"],
+    ["lumpInc", "Lump-sum income"],
+    ["lumpPrin", "Lump-sum principal back"]
+  ];
+  const ENG_TOGGLE_KEYS = ENG_DETAIL_COLS.map(c => c[0]);
+  const ENG_COLS_KEY = "vr-st-eng-cols" + (typeof window !== "undefined" && window.__UK ? "-" + window.__UK : "");
+  function defaultEngCols() {
+    const o = {};
+    ENG_DETAIL_COLS.forEach(c => { o[c[0]] = true; });
+    return o;
+  }
+  function loadEngCols() {
+    const base = defaultEngCols();
+    try {
+      const raw = typeof localStorage !== "undefined" && localStorage.getItem(ENG_COLS_KEY);
+      if (!raw) return base;
+      const saved = JSON.parse(raw);
+      if (saved && typeof saved === "object") {
+        ENG_TOGGLE_KEYS.forEach(k => { if (typeof saved[k] === "boolean") base[k] = saved[k]; });
+      }
+    } catch (e) { /* ignore */ }
+    return base;
+  }
+  function saveEngCols(cols) {
+    try {
+      if (typeof localStorage === "undefined") return;
+      const def = defaultEngCols(), diff = {};
+      ENG_TOGGLE_KEYS.forEach(k => { if (!!cols[k] !== def[k]) diff[k] = !!cols[k]; });
+      if (Object.keys(diff).length) localStorage.setItem(ENG_COLS_KEY, JSON.stringify(diff));
+      else localStorage.removeItem(ENG_COLS_KEY);
+    } catch (e) { /* ignore */ }
+  }
+  function isDefaultEngCols(cols) {
+    const def = defaultEngCols();
+    return ENG_TOGGLE_KEYS.every(k => !!cols[k] === def[k]);
+  }
   const ALL_COLS = STARTING_COLS.concat(PRIMARY_COLS);
   const TOGGLE_KEYS = ["sno"].concat(ALL_COLS.map(c => c[0]));
   const scenLabel = r => String((r && r.name) || "").replace(/^\d+\.\s*/, "");
@@ -177,16 +215,21 @@
       cols: loadCols(),
       outcomes: { ok: true, short: true },
       scens: null,          /* null = all 14 selected; or Set/map of scenario numbers 1..14 */
-      msd: null,            /* open dropdown key: 'out' | 'scen' | 'cols' | null */
+      msd: null,            /* open dropdown key: 'out' | 'scen' | 'cols' | 'eng-out' | 'eng-scen' | 'eng-cols' | null */
       rq: "",               /* scenario search text */
       sortKey: "no",
       sortDir: 1,
       selRow: null,         /* highlighted scenario number */
-      filter: "all",        /* engine filter: all | out | base */
-      engQ: "",             /* engine year/age search */
-      open: { engine: true, notes: true },
+      engCols: loadEngCols(),
+      engOutcomes: { ok: true, short: true },
+      engScens: null,       /* null = all 14 scenario columns shown; or map 1..14 */
+      engQ: "",             /* engine year/age/amount search */
+      engSortKey: "year",
+      engSortDir: 1,
+      engSelRow: null,      /* highlighted year in engine */
       dirty: false,
-      max: false
+      max: false,
+      engMax: false
     };
 
     function compute() {
@@ -486,27 +529,158 @@
         <div class="st-sgrid">${fields}</div>
       </div>`;
     }
-    function engTh(label, tip) {
-      return `<th><div class="st-thw"><span title="${esc(tip)}">${esc(label)}</span>${infoBtn(tip, `How ${label} is calculated`)}</div></th>`;
+    function engActiveScenIdx(R) {
+      const idx = [];
+      R.rows.forEach((r, i) => {
+        const no = i + 1;
+        const ok = r.survival >= R.base.planYears;
+        if (ok && !st.engOutcomes.ok) return;
+        if (!ok && !st.engOutcomes.short) return;
+        if (st.engScens && !st.engScens[no]) return;
+        idx.push(i);
+      });
+      return idx;
+    }
+    function engSortVal(e, k) {
+      if (k === "age") return e.age;
+      if (k === "kids") return e.kids;
+      if (k === "lumpInc") return e.lumpIncome;
+      if (k === "lumpPrin") return e.lumpPrincipal;
+      if (k && k.charAt(0) === "s") {
+        const si = Number(k.slice(1)) - 1;
+        if (Number.isInteger(si) && si >= 0 && si < e.balances.length) return e.balances[si];
+      }
+      return e.year;
+    }
+    function engFilteredRows(R, idx) {
+      const q = st.engQ.trim().toLowerCase();
+      const activeSet = new Set(idx);
+      const rows = R.engine.filter(e => {
+        if (!q) return true;
+        const parts = [
+          "year " + e.year, e.year,
+          "age " + e.age, e.age,
+          e.year === R.base.planYears ? "plan end" : "",
+          inr(e.kids), inr(e.lumpIncome), inr(e.lumpPrincipal)
+        ];
+        idx.forEach(i => parts.push(inr(e.balances[i])));
+        return parts.join(" ").toLowerCase().includes(q);
+      });
+      let k = st.engSortKey;
+      if (k && k.charAt(0) === "s" && !activeSet.has(Number(k.slice(1)) - 1)) k = "year";
+      const d = st.engSortDir;
+      rows.sort((x, y) => {
+        const a = engSortVal(x, k), b = engSortVal(y, k);
+        if (a === b) return (x.year - y.year) * d;
+        return (a > b ? 1 : -1) * d;
+      });
+      return rows;
+    }
+    function engScenTip(r, i) {
+      return `${scenLabel(r)} (S${i + 1}): Year-end balance = Previous balance × (1 + ${(r.roi * 100).toFixed(2)}%) + Buffer interest + Other income + Lump sums − Household & kids outflows.`;
+    }
+    function engThBtn(k, label, tip, extraCls) {
+      const on = st.engSortKey === k;
+      const ariaSort = on ? (st.engSortDir > 0 ? "ascending" : "descending") : "none";
+      const arrow = on ? (st.engSortDir > 0 ? " ▲" : " ▼") : "";
+      const tipEl = tip ? infoBtn(tip, `How ${label} is calculated`) : "";
+      return `<th${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><div class="st-thw"><button type="button" data-st-eng-rk="${k}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(label)}${arrow}</button>${tipEl}</div></th>`;
     }
     function engineTableHTML(R) {
-      let idx = R.rows.map((r, i) => i);
-      if (st.filter === "out") idx = idx.filter(i => !R.rows[i].never); else if (st.filter === "base") idx = [0];
-      const q = st.engQ.trim().toLowerCase();
-      const engRows = R.engine.filter(e => !q || String(e.year).includes(q) || String(e.age).includes(q));
-      const head = `<thead><tr>${engTh("Year", ENG_TIPS.year)}${engTh("Your age", ENG_TIPS.age)}${engTh("Kids: college + weddings", ENG_TIPS.kids)}${engTh("Lump-sum income", ENG_TIPS.lumpInc)}${engTh("Lump-sum principal back", ENG_TIPS.lumpPrin)}${idx.map(i => engTh(`S${i + 1}`, `${R.rows[i].name}: Year-end balance = Previous balance × (1 + ${(R.rows[i].roi * 100).toFixed(2)}%) + Buffer interest + Other income + Lump sums − Household & kids outflows.`)).join("")}</tr></thead>`;
-      const body = engRows.length
-        ? engRows.map(e => `<tr><td>${e.year}</td><td>${e.age}</td><td>${inr(e.kids)}</td><td>${inr(e.lumpIncome)}</td><td>${inr(e.lumpPrincipal)}</td>${idx.map(i => `<td class="${e.balances[i] < 0 ? "neg" : ""}">${inr(e.balances[i])}</td>`).join("")}</tr>`).join("")
-        : `<tr><td colspan="${5 + idx.length}" class="st-empty">No years match your search.</td></tr>`;
-      return `<div class="st-wrap st-short"><table class="st-t">${head}<tbody>${body}</tbody></table></div>`;
+      const idx = engActiveScenIdx(R);
+      const noneSelected = (!st.engOutcomes.ok && !st.engOutcomes.short) || (st.engScens && Object.keys(st.engScens).every(k => !st.engScens[k])) || !idx.length;
+      if (noneSelected) {
+        return `<div class="em st-empty-box">Please select at least one scenario or outcome.</div>`;
+      }
+      const engRows = engFilteredRows(R, idx);
+      if (!engRows.length) {
+        return `<div class="em st-empty-box">No years match your search.</div>`;
+      }
+      const showAge = !!st.engCols.age;
+      const detailCols = ENG_DETAIL_COLS.filter(c => !!st.engCols[c[0]]);
+      const head = `<thead><tr>${engThBtn("year", "Year", ENG_TIPS.year, "st-ey-col")}${detailCols.map(c => engThBtn(c[0], c[1], ENG_TIPS[c[0]], c[0] === "age" ? "st-ea-col" : "")).join("")}${idx.map((i, pos) => engThBtn(`s${i + 1}`, `S${i + 1}`, engScenTip(R.rows[i], i), pos === 0 ? "st-sep" : "")).join("")}</tr></thead>`;
+      const body = engRows.map(e => {
+        const cls = [e.year === R.base.planYears ? "st-base" : "", st.engSelRow === e.year ? "st-sel" : ""].filter(Boolean).join(" ");
+        const detCells = detailCols.map(c => {
+          if (c[0] === "age") return `<td class="st-ea-col">${e.age}</td>`;
+          if (c[0] === "kids") return `<td>${inr(e.kids)}</td>`;
+          if (c[0] === "lumpInc") return `<td>${inr(e.lumpIncome)}</td>`;
+          return `<td>${inr(e.lumpPrincipal)}</td>`;
+        }).join("");
+        const scCells = idx.map((i, pos) => {
+          const tdCls = [e.balances[i] < 0 ? "neg" : "", pos === 0 ? "st-sep" : ""].filter(Boolean).join(" ");
+          return `<td${tdCls ? ` class="${tdCls}"` : ""}>${inr(e.balances[i])}</td>`;
+        }).join("");
+        return `<tr data-st-er="${e.year}"${cls ? ` class="${cls}"` : ""} tabindex="0" aria-selected="${st.engSelRow === e.year}"><td class="st-ey-col">${e.year}</td>${detCells}${scCells}</tr>`;
+      }).join("");
+      const mobCards = engRows.map(e => {
+        const selCls = st.engSelRow === e.year ? " st-sel" : "";
+        const isPlanEnd = e.year === R.base.planYears;
+        const detKV = detailCols.map(c => {
+          const val = c[0] === "age" ? String(e.age) : c[0] === "kids" ? inr(e.kids) : c[0] === "lumpInc" ? inr(e.lumpIncome) : inr(e.lumpPrincipal);
+          return `<span title="${esc(ENG_TIPS[c[0]])}">${esc(c[1])} ${infoBtn(ENG_TIPS[c[0]], `How ${c[1]} is calculated`)}</span><b>${esc(val)}</b>`;
+        }).join("");
+        const scKV = idx.map(i => {
+          const tip = engScenTip(R.rows[i], i);
+          const negCls = e.balances[i] < 0 ? ' class="neg"' : "";
+          return `<span title="${esc(tip)}">S${i + 1} · ${esc(scenLabel(R.rows[i]))} ${infoBtn(tip, `How S${i + 1} is calculated`)}</span><b${negCls}>${esc(inr(e.balances[i]))}</b>`;
+        }).join("");
+        return `<article class="st-mcard${selCls}" data-st-er="${e.year}"><div class="st-mhead"><strong>Year ${e.year}${showAge ? ` · Age ${e.age}` : ""}</strong><span class="st-ch ${isPlanEnd ? "ok" : ""}">${isPlanEnd ? "Plan end" : `Year ${e.year}`}</span></div><div class="st-mkv">${detKV}${scKV}</div></article>`;
+      }).join("");
+      return `<div class="st-wrap st-short"><table class="st-t st-te${showAge ? " has-age" : ""}">${head}<tbody>${body}</tbody></table></div><div class="st-mcards">${mobCards}</div>`;
+    }
+    function engDrops(R) {
+      const allRows = R.rows.map((r, i) => { r.no = i + 1; return r; });
+      const nOk = allRows.filter(r => r.survival >= R.base.planYears).length;
+      const nShort = allRows.length - nOk;
+      const outSummary = st.engOutcomes.ok && st.engOutcomes.short ? "All outcomes" : st.engOutcomes.ok ? "Covers plan" : st.engOutcomes.short ? "Falls short" : "None selected";
+      const outBody = `<label class="msd-i"><input type="checkbox" data-st-eng-out="ok"${st.engOutcomes.ok ? " checked" : ""}><i style="background:var(--c-ok)"></i><span>Covers plan</span><em>${nOk}</em></label>` +
+        `<label class="msd-i"><input type="checkbox" data-st-eng-out="short"${st.engOutcomes.short ? " checked" : ""}><i style="background:var(--c-er)"></i><span>Falls short</span><em>${nShort}</em></label>`;
+      const outAct = `<button type="button" data-st-msda="eng-out:all">Select all</button><button type="button" data-st-msda="eng-out:none">Clear</button>`;
+
+      const selCount = st.engScens ? allRows.filter(r => !!st.engScens[r.no]).length : allRows.length;
+      const firstSel = st.engScens ? allRows.find(r => !!st.engScens[r.no]) : null;
+      const scenSummary = selCount === allRows.length ? "All 14 scenarios" : selCount === 0 ? "None selected" : selCount === 1 && firstSel ? `S${firstSel.no} · ${scenLabel(firstSel)}` : `${selCount} of 14 selected`;
+      const scenBody = allRows.map(r => {
+        const checked = !st.engScens || !!st.engScens[r.no];
+        const ok = r.survival >= R.base.planYears;
+        return `<label class="msd-i"><input type="checkbox" data-st-eng-sc="${r.no}"${checked ? " checked" : ""}><i style="background:${ok ? "var(--c-ok)" : "var(--c-er)"}"></i><span>${esc(scenLabel(r))}</span><em>S${r.no} · ${ok ? "Covers" : "Short"}</em></label>`;
+      }).join("");
+      const scenAct = `<button type="button" data-st-msda="eng-scen:all">Select all</button><button type="button" data-st-msda="eng-scen:none">Clear</button>`;
+
+      const totalCols = ENG_TOGGLE_KEYS.length + 1;
+      const visCols = 1 + ENG_TOGGLE_KEYS.filter(k => !!st.engCols[k]).length;
+      const colsSummary = isDefaultEngCols(st.engCols) ? "All detail columns" : `${visCols} of ${totalCols} shown`;
+      const colsBody = `<label class="msd-i"><input type="checkbox" checked disabled><span>Year</span><em>Fixed 🔒</em></label>` +
+        ENG_DETAIL_COLS.map(c => `<label class="msd-i"><input type="checkbox" data-st-eng-col="${c[0]}"${st.engCols[c[0]] ? " checked" : ""}><span>${esc(c[1])}</span><em>Default</em></label>`).join("");
+      const colsAct = `<button type="button" data-st-msda="eng-cols:reset">Reset to default</button><button type="button" data-st-msda="eng-cols:all">Show all</button>`;
+
+      return `<div class="msds">${msdBox("eng-out", "Outcome", outSummary, outAct, outBody)}${msdBox("eng-scen", "Scenarios", scenSummary, scenAct, scenBody)}${msdBox("eng-cols", "Columns", colsSummary, colsAct, colsBody)}</div>`;
     }
     function engine(R) {
-      const f = [["all", "All 14 scenarios"], ["out", "Only scenarios that run out"], ["base", "Base case only"]].map(o => `<option value="${o[0]}"${st.filter === o[0] ? " selected" : ""}>${o[1]}</option>`).join("");
-      return `<details class="st-d" data-open="engine"${st.open.engine ? " open" : ""}><summary>Year-by-year money balance for each scenario (calculation engine, 70 years)</summary>` +
-        `<div class="st-tb"><label>Show <select data-st="filter">${f}</select></label><input id="st-eng-q" type="search" class="st-eng-q" placeholder="Search year or age…" aria-label="Search year or age" value="${esc(st.engQ)}"><span class="st-note">Negative balance = the money has run out. S1 to S14 are the scenarios above, in order.</span></div>` +
-        `<div id="st-eng-rr">${engineTableHTML(R)}</div></details>`;
+      const idx = engActiveScenIdx(R);
+      const rows = idx.length ? engFilteredRows(R, idx) : [];
+      const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
+      const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-eng-max aria-pressed="${st.engMax}" title="${st.engMax ? "Exit full window (Esc)" : "Open full window"}">${st.engMax ? IC_MIN : IC_MAX}<span>${st.engMax ? "Restore" : "Maximize"}</span></button>`;
+      const aboutTip = "Year-by-year closing balances for all 14 scenarios over 70 years. Use Outcome, Scenarios, and Columns dropdowns to pick columns, click any header to sort, or click a row to highlight that year. Negative balance means money has run out.";
+      const sortOpts = [
+        ["year", "Year"],
+        ["age", "Your age"],
+        ["kids", "Kids: college + weddings"],
+        ["lumpInc", "Lump-sum income"],
+        ["lumpPrin", "Lump-sum principal back"]
+      ].concat(idx.map(i => [`s${i + 1}`, `S${i + 1} (${scenLabel(R.rows[i])})`]));
+      const activeSortKey = sortOpts.some(o => o[0] === st.engSortKey) ? st.engSortKey : "year";
+      const sortOptHTML = sortOpts.map(([k, lbl]) => `<option value="${k}"${activeSortKey === k ? " selected" : ""}>Sort: ${esc(lbl)}</option>`).join("");
+      return `<div class="st-main"><div class="st-card st-eng-card${st.engMax ? " st-max st-wide-cols" : ""}">` +
+        `<div class="rph2 st-scen-head"><div class="rpt"><h2>Year-by-year money balance for each scenario</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${maxBtn}</div></div>` +
+        `<p class="st-note st-scen-sub">${esc(clientName)} · <span data-st-eng-count>${rows.length} of ${R.engine.length} years shown</span> · Plan horizon: ${R.base.planYears} yrs (age ${R.base.age + R.base.planYears}) · Negative balance = money has run out.</p>` +
+        engDrops(R) +
+        `<div class="tb st-tb-bar"><input id="st-eng-q" type="search" placeholder="Search year, age, amount…" aria-label="Search calculation engine" value="${esc(st.engQ)}"><select id="st-eng-rsf" aria-label="Sort by">${sortOptHTML}</select><button type="button" id="st-eng-rsd" aria-label="Toggle sort direction" title="Toggle sort direction">${st.engSortDir > 0 ? "▲" : "▼"}</button></div>` +
+        `<div id="st-eng-rr">${engineTableHTML(R)}</div>` +
+        `</div></div>`;
     }
-    const notes = () => `<details class="st-d" data-open="notes"${st.open.notes ? " open" : ""}><summary>Notes: how the numbers are worked out</summary><ul>${NOTES.map(n => `<li>${esc(n)}</li>`).join("")}</ul></details>`;
+    const notes = () => `<section class="st-card st-notes-card" aria-label="Notes: how the numbers are worked out"><div class="rph2 st-scen-head"><div class="rpt"><h2>Notes: how the numbers are worked out</h2></div></div><ul class="st-notes-list">${NOTES.map(n => `<li>${esc(n)}</li>`).join("")}</ul></section>`;
 
     function panel(id, content) {
       return `<div id="st-panel-${id}" class="st-panel" role="tabpanel" aria-labelledby="st-tab-${id}" data-st-panel="${id}"${st.tab === id ? "" : " hidden"}>${content}</div>`;
@@ -527,9 +701,22 @@
       if (cnt) cnt.textContent = `${filteredRows(R).length} of 14 scenarios shown`;
       if (st.max) fitMaxTable();
     }
+    function updateEngBody() {
+      const R = st.result; if (!R) return;
+      const rr = host.querySelector("#st-eng-rr");
+      if (rr) rr.innerHTML = engineTableHTML(R);
+      const cnt = host.querySelector("[data-st-eng-count]");
+      if (cnt) {
+        const idx = engActiveScenIdx(R);
+        const shown = idx.length ? engFilteredRows(R, idx).length : 0;
+        cnt.textContent = `${shown} of ${R.engine.length} years shown`;
+      }
+      if (st.engMax) fitMaxTable();
+    }
     function switchTab(id) {
       if (!TABS.some(t => t[0] === id)) return;
       if (id !== "scenarios" && st.max) toggleMax(false);
+      if (id !== "engine" && st.engMax) toggleEngMax(false);
       st.msd = null;
       syncMsd();
       st.tab = id;
@@ -544,8 +731,8 @@
       if (typeof window !== "undefined" && window.scrollTo) window.scrollTo(0, 0);
     }
     function fitMaxTable() {
-      if (!st.max) return;
-      const wrap = host.querySelector(".st-scen-card.st-max .st-wrap");
+      if (!st.max && !st.engMax) return;
+      const wrap = host.querySelector(".st-scen-card.st-max .st-wrap, .st-eng-card.st-max .st-wrap");
       const tbl = wrap && wrap.querySelector("table.st-t");
       if (!wrap || !tbl) return;
       tbl.style.zoom = "";
@@ -557,12 +744,18 @@
     }
     function toggleMax(next) {
       st.max = typeof next === "boolean" ? next : !st.max;
+      if (st.max) st.engMax = false;
+      render();
+    }
+    function toggleEngMax(next) {
+      st.engMax = typeof next === "boolean" ? next : !st.engMax;
+      if (st.engMax) st.max = false;
       render();
     }
     function render(refocusSel) {
       compute();
       const R = st.result;
-      if (!R) st.max = false;
+      if (!R) { st.max = false; st.engMax = false; }
       const body = R
         ? panel("overview", hero(R)) +
           panel("scenarios", table(R)) +
@@ -571,7 +764,7 @@
           bottomNav()
         : problem();
       host.innerHTML = `<section class="st-root" aria-label="Stress Test">${bar()}${body}</section>`;
-      if (st.max) {
+      if (st.max || st.engMax) {
         fitMaxTable();
         if (typeof requestAnimationFrame === "function") requestAnimationFrame(fitMaxTable);
       }
@@ -597,10 +790,20 @@
         if (x.tagName === "TR") x.setAttribute("aria-selected", String(s));
       });
     }
+    function selectEngRow(yr) {
+      st.engSelRow = st.engSelRow === yr ? null : yr;
+      host.querySelectorAll("#st-eng-rr [data-st-er]").forEach(x => {
+        const s = Number(x.getAttribute("data-st-er")) === st.engSelRow;
+        x.classList.toggle("st-sel", s);
+        if (x.tagName === "TR") x.setAttribute("aria-selected", String(s));
+      });
+    }
 
     host.addEventListener("click", e => {
       const maxBtn = e.target.closest("[data-st-max]");
       if (maxBtn) { st.msd = null; toggleMax(); return; }
+      const engMaxBtn = e.target.closest("[data-st-eng-max]");
+      if (engMaxBtn) { st.msd = null; toggleEngMax(); return; }
       const tabBtn = e.target.closest("[data-st-tab]");
       if (tabBtn) { switchTab(tabBtn.getAttribute("data-st-tab")); return; }
       const msdb = e.target.closest("[data-st-msdb]");
@@ -631,8 +834,30 @@
         }
         if (parts[0] === "scen") {
           if (parts[1] === "all") st.scens = null;
-          else { st.scens = {}; }
+          else st.scens = {};
           st.msd = "scen";
+          render(`[data-st-msda="${act}"]`);
+          return;
+        }
+        if (parts[0] === "eng-cols") {
+          if (parts[1] === "all") ENG_TOGGLE_KEYS.forEach(k => { st.engCols[k] = true; });
+          else st.engCols = defaultEngCols();
+          saveEngCols(st.engCols);
+          st.msd = "eng-cols";
+          render(`[data-st-msda="${act}"]`);
+          return;
+        }
+        if (parts[0] === "eng-out") {
+          const v = parts[1] === "all";
+          st.engOutcomes = { ok: v, short: v };
+          st.msd = "eng-out";
+          render(`[data-st-msda="${act}"]`);
+          return;
+        }
+        if (parts[0] === "eng-scen") {
+          if (parts[1] === "all") st.engScens = null;
+          else st.engScens = {};
+          st.msd = "eng-scen";
           render(`[data-st-msda="${act}"]`);
           return;
         }
@@ -658,9 +883,30 @@
         updateScenBody();
         return;
       }
+      const engRkBtn = e.target.closest("[data-st-eng-rk]");
+      if (engRkBtn) {
+        const k = engRkBtn.getAttribute("data-st-eng-rk");
+        st.engSortDir = st.engSortKey === k ? -st.engSortDir : 1;
+        st.engSortKey = k;
+        const sf = host.querySelector("#st-eng-rsf"); if (sf) sf.value = st.engSortKey;
+        const sd = host.querySelector("#st-eng-rsd"); if (sd) sd.textContent = st.engSortDir > 0 ? "▲" : "▼";
+        updateEngBody();
+        return;
+      }
+      if (e.target.closest("#st-eng-rsd")) {
+        st.engSortDir = -st.engSortDir;
+        const sd = host.querySelector("#st-eng-rsd"); if (sd) sd.textContent = st.engSortDir > 0 ? "▲" : "▼";
+        updateEngBody();
+        return;
+      }
       const rowEl = e.target.closest("#st-rr [data-st-r]");
       if (rowEl && !e.target.closest("button")) {
         selectRow(Number(rowEl.getAttribute("data-st-r")));
+        return;
+      }
+      const engRowEl = e.target.closest("#st-eng-rr [data-st-er]");
+      if (engRowEl && !e.target.closest("button")) {
+        selectEngRow(Number(engRowEl.getAttribute("data-st-er")));
         return;
       }
       const t = e.target.closest("[data-st]"); if (!t) return;
@@ -671,10 +917,12 @@
     host.addEventListener("change", e => {
       const t = e.target;
       if (t.matches("[data-st=client]")) { st.client = t.value; render(); }
-      else if (t.matches("[data-st=filter]")) { st.filter = t.value; render(); }
       else if (t.id === "st-rsf") {
         st.sortKey = t.value;
         updateScenBody();
+      } else if (t.id === "st-eng-rsf") {
+        st.engSortKey = t.value;
+        updateEngBody();
       } else if (t.matches("[data-st-col]")) {
         const c = t.getAttribute("data-st-col");
         st.cols[c] = !!t.checked;
@@ -698,6 +946,29 @@
         if (allOn) st.scens = null;
         st.msd = "scen";
         render(`[data-st-sc="${no}"]`);
+      } else if (t.matches("[data-st-eng-col]")) {
+        const c = t.getAttribute("data-st-eng-col");
+        st.engCols[c] = !!t.checked;
+        saveEngCols(st.engCols);
+        st.msd = "eng-cols";
+        render(`[data-st-eng-col="${c}"]`);
+      } else if (t.matches("[data-st-eng-out]")) {
+        const k = t.getAttribute("data-st-eng-out");
+        st.engOutcomes[k] = !!t.checked;
+        st.msd = "eng-out";
+        render(`[data-st-eng-out="${k}"]`);
+      } else if (t.matches("[data-st-eng-sc]")) {
+        const no = Number(t.getAttribute("data-st-eng-sc"));
+        if (!st.engScens) {
+          st.engScens = {};
+          for (let i = 1; i <= 14; i++) st.engScens[i] = true;
+        }
+        st.engScens[no] = !!t.checked;
+        let allOn = true;
+        for (let i = 1; i <= 14; i++) { if (!st.engScens[i]) { allOn = false; break; } }
+        if (allOn) st.engScens = null;
+        st.msd = "eng-scen";
+        render(`[data-st-eng-sc="${no}"]`);
       }
     });
     host.addEventListener("input", e => {
@@ -709,8 +980,7 @@
       }
       if (t.id === "st-eng-q") {
         st.engQ = t.value;
-        const wrap = host.querySelector("#st-eng-rr");
-        if (wrap && st.result) wrap.innerHTML = engineTableHTML(st.result);
+        updateEngBody();
         return;
       }
       if (!t.matches("[data-set]")) return;
@@ -728,9 +998,16 @@
         selectRow(Number(rowEl.getAttribute("data-st-r")));
         return;
       }
+      const engRowEl = e.target.closest && e.target.closest("#st-eng-rr tr[data-st-er]");
+      if (engRowEl && e.target === engRowEl && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        selectEngRow(Number(engRowEl.getAttribute("data-st-er")));
+        return;
+      }
       if (e.key === "Escape") {
         if (st.msd) { e.preventDefault(); st.msd = null; syncMsd(); return; }
         if (st.max) { e.preventDefault(); toggleMax(false); return; }
+        if (st.engMax) { e.preventDefault(); toggleEngMax(false); return; }
       }
       if (e.key === "Enter" && e.target.matches && e.target.matches("[data-set]")) {
         e.preventDefault(); P.saveSettings(st.client, readSettings()); render();
@@ -746,16 +1023,16 @@
       document.addEventListener("keydown", e => {
         if (e.key === "Escape" && host.isConnected) {
           if (st.msd) { e.preventDefault(); st.msd = null; syncMsd(); return; }
-          if (st.max) { e.preventDefault(); toggleMax(false); }
+          if (st.max) { e.preventDefault(); toggleMax(false); return; }
+          if (st.engMax) { e.preventDefault(); toggleEngMax(false); }
         }
       });
     }
     if (typeof window !== "undefined" && window.addEventListener) {
-      window.addEventListener("resize", () => { if (st.max && host.isConnected) fitMaxTable(); });
+      window.addEventListener("resize", () => { if ((st.max || st.engMax) && host.isConnected) fitMaxTable(); });
     }
-    host.addEventListener("toggle", e => { const d = e.target; if (d.dataset && d.dataset.open) st.open[d.dataset.open] = d.open; }, true);
     render();
-    return { refresh: render, state: st, switchTab, toggleMax, fitMaxTable };
+    return { refresh: render, state: st, switchTab, toggleMax, toggleEngMax, fitMaxTable };
   }
 
   /* Register Stress Test as a top-level module (Modules dropdown > Stress Test) and mount into [data-st-host]. */
