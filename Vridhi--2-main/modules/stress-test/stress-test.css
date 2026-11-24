@@ -10,8 +10,8 @@ html body .st-root .st-btn{background:var(--c-card);border:1px solid var(--c-bd)
 html body .st-root .st-btn:hover:not(:disabled){background:var(--c-soft)}
 html body .st-root .st-btn.p{background:var(--c-ac)!important;color:var(--c-ac2)!important;border-color:var(--c-ac)!important}.st-btn:disabled{opacity:.5;cursor:default}
 html body .st-root .st-link{background:none!important;border:0!important;color:var(--c-ac);text-decoration:underline;cursor:pointer;padding:5px 6px;min-height:0;white-space:nowrap;font-weight:600}
-.st-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:11px 16px;margin-bottom:12px}
-.st-bar h1{font-size:18px;margin:0}.st-sp{flex:1}.st-live{color:var(--c-ok);font-weight:600;font-size:13px;white-space:nowrap}
+.st-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:11px 16px;margin-bottom:12px}
+.st-bar h1{font-size:18px;margin:0}.st-sp{flex:1}
 .st-bar label{display:inline-flex;align-items:center;gap:6px;margin:0}
 .st-bar select{background:var(--c-card);border:1px solid var(--c-bd);border-radius:7px;padding:5px 9px}
 

@@ -42,7 +42,9 @@ assert.strictEqual(h.querySelectorAll('.st-d').length, 2, 'engine and notes sect
 assert.strictEqual(h.querySelectorAll('.st-d .st-t tbody tr').length, 70, 'engine table has 70 years');
 const f = h.querySelector('[data-st=filter]'); f.value = 'base'; f.dispatchEvent(new w.Event('change', { bubbles: true }));
 assert.strictEqual(h.querySelectorAll('.st-d .st-t thead th').length, 6, 'filter shows base case only');
-assert.ok(txt().includes('Export CSV') && txt().includes('Refresh from planner'), 'toolbar buttons');
+for (const removed of ['Live from Retirement Planner', 'Back to Planner', 'Year-by-Year (base case)', 'Refresh from planner', 'Export CSV']) {
+  assert.ok(!txt().includes(removed), removed + ' is removed');
+}
 /* navigation goes to Retirement Planner > Reports */
 w.UI = { tab: 'Goal Planner' }; w.RPUI = { tab: 'status', rv: 'clients' }; let rendered = 0; w.render = () => { rendered++; };
 const nav = w.StressTestUI.appProvider();

@@ -97,9 +97,7 @@
 
     function bar() {
       const opts = P.clients().map(c => `<option value="${esc(c.id)}"${c.id === st.client ? " selected" : ""}>${esc(c.name)}</option>`).join("");
-      return `<div class="st-bar"><h1>Stress Test</h1><label>Client <select data-st="client">${opts}</select></label><span class="st-live">Live from Retirement Planner</span><span class="st-sp"></span>` +
-        `<button type="button" class="st-link" data-st="back">◀ Back to Planner</button><button type="button" class="st-link" data-st="yby">▶ Year-by-Year (base case)</button>` +
-        `<button type="button" class="st-btn" data-st="refresh">Refresh from planner</button><button type="button" class="st-btn p" data-st="export">Export CSV</button></div>`;
+      return `<div class="st-bar"><h1>Stress Test</h1><label>Client <select data-st="client">${opts}</select></label></div>`;
     }
     function bottomNav() {
       const btns = TABS.map(([id, label, icon]) => {
@@ -111,7 +109,7 @@
     }
     function problem() {
       const list = (st.issues || []).slice(0, 4).map(i => `<li>${esc(i.message)}</li>`).join("");
-      return `<div class="st-problem" role="alert"><b>This client’s Retirement Planner plan is not complete yet.</b><ul>${list}</ul><button type="button" class="st-btn" data-st="back">◀ Back to Planner</button></div>`;
+      return `<div class="st-problem" role="alert"><b>This client’s Retirement Planner plan is not complete yet.</b><ul>${list}</ul></div>`;
     }
     function fanChart(R, includeBear) {
       const W = 720, H = 248, L = 66, Rpad = 20, T = 20, B = 28;
@@ -236,7 +234,7 @@
       return `<div class="st-main"><div class="st-card st-scen-card${extraClass}">` +
         `<div class="st-chead st-scen-head"><div><h2>How long does the corpus last under each condition?</h2>` +
         `<p class="st-note">${esc(clientName)} · Scenario 1 matches your live Retirement Planner (${rows.length} of 14 shown).</p></div>` +
-        `<div class="st-scen-actions">${rFilter}${st.max ? `<button type="button" class="st-btn" data-st="export">Export CSV</button>` : ""}${maxBtn}</div></div>` +
+        `<div class="st-scen-actions">${rFilter}${maxBtn}</div></div>` +
         `<div class="st-tb st-scen-tb">${startToggle}<span class="st-sp"></span><span class="st-count">${R.summary.fullPlan} of 14 scenarios cover the ${R.base.planYears}-year plan</span></div>` +
         `<div class="st-wrap"><table class="st-t">${head}<tbody>${body}</tbody></table></div>` +
         `<div class="st-mcards">${mobCards}</div></div></div>`;
