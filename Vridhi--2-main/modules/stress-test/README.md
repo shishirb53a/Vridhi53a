@@ -33,15 +33,15 @@ All-safe (Conservative) return, default 6.00%, and Aggressive (Optimistic) retur
 2. The pre-retirement earning phase, multiple income streams and multiple lump sums from the planner are honoured.
 3. Conservative and Optimistic returns are Stress Settings, not planner fields.
 
-## Files changed in the existing app (all included in this zip, same paths as the repo)
+## Where it lives
+Retirement Planner > **Reports** tab. The tab now has two sections, **Summary** (the planner's existing report, unchanged)
+and **Stress Test**. The general portfolio Reports menu is not touched.
+
+## Files changed in the existing app (included in this zip, same paths as the repo)
 | File | Change |
 |---|---|
 | `index.html` | loads `stress-test.css`, `engine.js`, `ui.js` after the Retirement Planner scripts |
-| `modules/reports/monthly-projection.js` | adds "Stress Test" to the Reports views (`RV_VIEWS` and the allowed-view list) |
-| `modules/app-shell/reports-menu.js` | adds "Stress Test" to the Reports menu fallback list |
-| `modules/app-core/app.js` | `cleanStress()` lets `S.stress` (Stress Settings per client) survive state cleaning; `rep()` shows the screen for the `stress` view; the undo snapshot leaves `S.stress` alone |
-
-Copy the files over the repo, keeping paths. The screen appears under Reports > Stress Test.
+| `modules/app-core/app.js` | the 'RP Reports' tab renders through `rpReportsPage()` (falls back to the old report if the module is absent); `cleanStress()` keeps `S.stress` (Stress Settings per client) through state cleaning; the undo snapshot leaves `S.stress` alone |
 
 ## Tests
     node tests/stress-test-engine.test.js

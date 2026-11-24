@@ -22,7 +22,7 @@
       settings(id) { return (A().stress || {})[id]; },
       saveSettings(id, s) { try { A().stress = Object.assign({}, A().stress, { [id]: s }); if (typeof save === "function") save(); } catch (e) { /* best effort */ } },
       onBack() { go("Retirement planner"); },
-      onYearByYear() { go("RP Reports"); }
+      onYearByYear() { if (typeof UI !== "undefined") UI.rps = "summary"; go("RP Reports"); }
     };
   }
 
@@ -146,8 +146,19 @@
     render();
     return { refresh: render, state: st };
   }
-  /* Reports > Stress Test: app.js rep() returns this host; the screen is mounted as soon as the host is in the page. */
-  window.repStress = () => '<div class="st-host" data-st-host></div>';
+  /* Retirement Planner > Reports: two sections, Summary (the planner's own report) and Stress Test.
+     app.js renders the 'RP Reports' tab through rpReportsPage(); the Stress Test screen mounts as soon as its host is in the page. */
+  const sub = () => (typeof UI !== "undefined" && UI.rps === "stress") ? "stress" : "summary";
+  window.rpReportsPage = function () {
+    const cur = sub(), tabs = [["summary", "Summary"], ["stress", "Stress Test"]];
+    const nav = '<div class="st-subnav" role="tablist" aria-label="Retirement planner reports">' + tabs.map(t =>
+      `<button type="button" role="tab" class="st-subtab" data-rps="${t[0]}" aria-selected="${cur === t[0]}">${t[1]}</button>`).join("") + "</div>";
+    return nav + (cur === "stress" ? '<div class="st-host" data-st-host></div>' : (window.fhReportTab ? window.fhReportTab() : ""));
+  };
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest("[data-rps]");
+    if (t && typeof UI !== "undefined" && typeof render === "function") { UI.rps = t.getAttribute("data-rps"); render(); }
+  });
   const fill = () => { const h = document.querySelector("[data-st-host]"); if (h && !h.firstChild) mount(h); };
   new MutationObserver(fill).observe(document.documentElement, { childList: true, subtree: true });
   window.StressTestUI = { mount, appProvider };
