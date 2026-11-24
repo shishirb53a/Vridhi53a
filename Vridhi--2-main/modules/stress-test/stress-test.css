@@ -22,9 +22,3 @@ td.st-sec{background:var(--st-navy);color:#fff;font-weight:700}td.st-eng{backgro
 .st-in:focus-visible,.st-bar button:focus-visible,.st-nav:focus-visible{outline:2px solid #4a7bd0;outline-offset:1px}
 .st-nav{font:inherit;color:var(--st-edtfg);background:none;border:0;text-decoration:underline;cursor:pointer}
 .st-problem{border:1px solid var(--st-line);border-radius:6px;padding:14px 18px;background:var(--st-card)}
-.st-subnav{display:flex;gap:6px;margin:0 0 12px;border-bottom:1px solid #c9d0db}
-.st-subtab{font:inherit;font-weight:600;color:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:8px 14px;cursor:pointer}
-.st-subtab[aria-selected="true"]{border-bottom-color:#1f3864;color:#1f3864}
-:root[data-theme="dark"] .st-subtab[aria-selected="true"]{border-bottom-color:#9db8ff;color:#9db8ff}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .st-subtab[aria-selected="true"]{border-bottom-color:#9db8ff;color:#9db8ff}}
-.st-subtab:focus-visible{outline:2px solid #4a7bd0;outline-offset:1px}

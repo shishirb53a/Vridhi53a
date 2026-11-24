@@ -34,14 +34,15 @@ All-safe (Conservative) return, default 6.00%, and Aggressive (Optimistic) retur
 3. Conservative and Optimistic returns are Stress Settings, not planner fields.
 
 ## Where it lives
-Retirement Planner > **Reports** tab. The tab now has two sections, **Summary** (the planner's existing report, unchanged)
-and **Stress Test**. The general portfolio Reports menu is not touched.
+Retirement Planner > Reports, as a third button beside **Clients** and **Year by Year**. The general (Goal Planner) Reports menu has no Stress Test.
 
-## Files changed in the existing app (included in this zip, same paths as the repo)
+## Files in this zip (same paths as the repo; copy them over)
 | File | Change |
 |---|---|
-| `index.html` | loads `stress-test.css`, `engine.js`, `ui.js` after the Retirement Planner scripts |
-| `modules/app-core/app.js` | the 'RP Reports' tab renders through `rpReportsPage()` (falls back to the old report if the module is absent); `cleanStress()` keeps `S.stress` (Stress Settings per client) through state cleaning; the undo snapshot leaves `S.stress` alone |
+| `modules/retirement-planner/ui.js` | `fhPage()`: adds the **Stress Test** button next to Year by Year and the page that hosts the screen |
+| `modules/app-core/app.js` | `cleanStress()` keeps `S.stress` (Stress Settings per client); the undo snapshot leaves it alone |
+| `index.html` | loads the three Stress Test files; planner `ui.js` cache version 160 -> 161 |
+| `modules/reports/monthly-projection.js`, `modules/app-shell/reports-menu.js` | original copies, restored. They remove the earlier Goal Planner > Reports > Stress Test entry |
 
 ## Tests
     node tests/stress-test-engine.test.js

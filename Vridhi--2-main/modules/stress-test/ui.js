@@ -12,6 +12,7 @@
 
   /* Default provider: the app's own state. Clients are the Retirement Planner profiles (S.fhp); the active one is S.fh. */
   const go = tab => { try { if (typeof UI !== "undefined" && typeof render === "function") { UI.tab = tab; render(); } } catch (e) { /* ignore */ } };
+  const rp = (tab, rv) => { if (window.RPUI) { window.RPUI.tab = tab; if (rv) window.RPUI.rv = rv; } go("Retirement planner"); };
   function appProvider() {
     const A = () => (typeof S !== "undefined" && S) || {};
     const profiles = () => (A().fhp && A().fhp.profiles) || {};
@@ -21,8 +22,8 @@
       inputs(id) { const p = profiles()[id]; return p && p.v ? p.v : (id === this.activeId() && A().fh ? A().fh.v : null); },
       settings(id) { return (A().stress || {})[id]; },
       saveSettings(id, s) { try { A().stress = Object.assign({}, A().stress, { [id]: s }); if (typeof save === "function") save(); } catch (e) { /* best effort */ } },
-      onBack() { go("Retirement planner"); },
-      onYearByYear() { if (typeof UI !== "undefined") UI.rps = "summary"; go("RP Reports"); }
+      onBack() { rp("status"); },
+      onYearByYear() { rp("report", "yy"); }
     };
   }
 
@@ -146,19 +147,7 @@
     render();
     return { refresh: render, state: st };
   }
-  /* Retirement Planner > Reports: two sections, Summary (the planner's own report) and Stress Test.
-     app.js renders the 'RP Reports' tab through rpReportsPage(); the Stress Test screen mounts as soon as its host is in the page. */
-  const sub = () => (typeof UI !== "undefined" && UI.rps === "stress") ? "stress" : "summary";
-  window.rpReportsPage = function () {
-    const cur = sub(), tabs = [["summary", "Summary"], ["stress", "Stress Test"]];
-    const nav = '<div class="st-subnav" role="tablist" aria-label="Retirement planner reports">' + tabs.map(t =>
-      `<button type="button" role="tab" class="st-subtab" data-rps="${t[0]}" aria-selected="${cur === t[0]}">${t[1]}</button>`).join("") + "</div>";
-    return nav + (cur === "stress" ? '<div class="st-host" data-st-host></div>' : (window.fhReportTab ? window.fhReportTab() : ""));
-  };
-  document.addEventListener("click", e => {
-    const t = e.target.closest && e.target.closest("[data-rps]");
-    if (t && typeof UI !== "undefined" && typeof render === "function") { UI.rps = t.getAttribute("data-rps"); render(); }
-  });
+  /* Retirement Planner > Reports > Stress Test: fhPage() (retirement-planner/ui.js) renders a host element; mount the screen as soon as it is in the page. */
   const fill = () => { const h = document.querySelector("[data-st-host]"); if (h && !h.firstChild) mount(h); };
   new MutationObserver(fill).observe(document.documentElement, { childList: true, subtree: true });
   window.StressTestUI = { mount, appProvider };
