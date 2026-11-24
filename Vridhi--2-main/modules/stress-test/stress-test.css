@@ -58,30 +58,59 @@ html body .st-bnav button[aria-current="page"]{color:var(--c-ac)!important}
 html body .st-root .st-seg button{border:0!important;background:transparent;padding:5px 12px;min-height:30px;border-radius:6px!important;font-size:12.5px;font-weight:600;color:var(--c-mu);cursor:pointer;white-space:nowrap}
 html body .st-root .st-seg button[aria-pressed="true"]{background:var(--c-ac)!important;color:var(--c-ac2)!important}
 
-/* Tab 2: Professional Scenario Matrix & Full-Window Maximize */
+/* Tab 2: Scenarios Report (Goal Planner Annual Portfolio Projection format + Full-Window Maximize) */
 .st-main{display:block}
-.st-scen-head{align-items:center}
+.st-scen-head{align-items:center;margin-bottom:4px}
+.st-scen-sub{margin:0 0 12px}
 .st-scen-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
 html body .st-root .st-max-btn{border-color:color-mix(in srgb,var(--c-ac) 35%,var(--c-bd))!important;color:var(--c-ac)}
 html body .st-root .st-max-btn[aria-pressed="true"]{background:var(--c-ac)!important;color:var(--c-ac2)!important;border-color:var(--c-ac)!important}
-.st-scen-tb{margin:0 0 12px;padding-top:10px;border-top:1px solid var(--c-soft)}
-.st-chip{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--c-bd);border-radius:8px;padding:6px 12px;margin:0;cursor:pointer;font-size:12.5px;font-weight:600;background:var(--c-card);color:var(--c-tx);user-select:none;transition:background .15s,border-color .15s,color .15s}
-.st-chip:hover{background:var(--c-soft)}
-.st-chip.on{background:color-mix(in srgb,var(--c-ac) 11%,var(--c-card));border-color:var(--c-ac);color:var(--c-ac)}
-.st-chip input[type="checkbox"]{flex:none;width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:var(--c-ac);cursor:pointer}
-.st-count{font-size:12.5px;color:var(--c-mu);font-weight:600}
+
+/* Multi-select dropdowns (.msds / .msd) fallback & Stress Test overrides */
+.st-root .msds{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 12px}
+.st-root .msd{position:relative;display:flex;flex-direction:column;gap:5px;flex:1 1 220px;max-width:340px;min-width:0}
+.st-root .msd-t{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c-mu)}
+html body .st-root .msd-b{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:42px;padding:0 12px;border:1px solid var(--c-bd)!important;border-radius:10px!important;background:var(--c-card)!important;color:var(--c-tx)!important;font-weight:600;text-align:left;cursor:pointer}
+html body .st-root .msd-b b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+html body .st-root .msd-b svg{flex:none;transition:transform .15s}
+html body .st-root .msd-b[aria-expanded="true"] svg{transform:rotate(180deg)}
+.st-root .msd-p{position:absolute;z-index:45;top:calc(100% + 6px);left:0;min-width:100%;width:max-content;max-width:min(92vw,390px);background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;box-shadow:0 18px 40px -12px #0f172a66;padding:8px}
+.st-root .msd-p[hidden]{display:none!important}
+.st-root .msd-a{display:flex;justify-content:space-between;gap:8px;padding:2px 2px 8px;border-bottom:1px solid var(--c-bd);margin-bottom:6px}
+html body .st-root .msd-a button{min-height:0;padding:5px 12px;border-radius:99px!important;border:1px solid var(--c-bd)!important;background:var(--c-soft)!important;color:var(--c-tx)!important;font-size:12px;font-weight:600;cursor:pointer}
+.st-root .msd-l{max-height:min(380px,56vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+.st-root .msd-i{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;margin:0}
+.st-root .msd-i:hover{background:color-mix(in srgb,var(--c-ac) 8%,transparent)}
+.st-root .msd-i i{width:9px;height:9px;border-radius:3px;flex:none}
+.st-root .msd-i span{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:600;color:var(--c-tx)}
+.st-root .msd-i em{font-style:normal;font-size:11.5px;color:var(--c-mu);white-space:nowrap}
+html body .st-root .msd-i input{width:17px;height:17px;min-height:0;flex:none;margin:0;accent-color:var(--c-ac)}
+
+/* Search & Sort bar (.st-tb-bar) matching Goal Planner report .tb */
+.st-tb-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.st-tb-bar input[type="search"],.st-eng-q{flex:1 1 220px;min-width:160px;min-height:38px;padding:6px 12px;border:1px solid var(--c-bd);border-radius:8px;background:var(--c-card);color:var(--c-tx)}
+.st-tb-bar select{min-height:38px;padding:6px 10px;border:1px solid var(--c-bd);border-radius:8px;background:var(--c-card);color:var(--c-tx);width:auto}
+html body .st-root #st-rsd{min-width:38px;min-height:38px;padding:0 10px;border:1px solid var(--c-bd)!important;border-radius:8px!important;background:var(--c-card)!important;color:var(--c-tx)!important;font-weight:700;cursor:pointer}
+html body .st-root #st-rsd:hover{background:var(--c-soft)!important}
+.st-empty-box{padding:24px 16px;text-align:center;color:var(--c-mu);border:1px dashed var(--c-bd);border-radius:10px}
 
 .st-tb{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:10px 0}
 .st-wrap{overflow:auto;border:1px solid var(--c-bd);border-radius:10px;max-height:660px;background:var(--c-card)}.st-short{max-height:460px}
 .st-t{border-collapse:separate;border-spacing:0;font-size:13px;width:100%;min-width:0}
 .st-t th,.st-t td{padding:9px 11px;border-bottom:1px solid var(--c-soft);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
 html body .st-root .st-t thead th{position:sticky;top:0;background:var(--c-soft)!important;z-index:2;font-weight:700;font-size:12px;color:var(--c-mu)!important;border-bottom:1px solid var(--c-bd)!important;padding:10px 11px}
+html body .st-root .st-t thead th button{display:inline-flex;align-items:center;justify-content:flex-end;gap:4px;width:100%;background:none!important;border:0!important;padding:0!important;min-height:0!important;font:inherit;font-weight:700;color:inherit!important;cursor:pointer;text-align:inherit;box-shadow:none!important}
+html body .st-root .st-t thead th:first-child button{justify-content:flex-start}
+html body .st-root .st-t thead th button:hover{color:var(--c-ac)!important}
 html body .st-root .st-t td:first-child,html body .st-root .st-t th:first-child{text-align:left;position:sticky;left:0;z-index:1;background:var(--c-card);min-width:225px;border-right:1px solid var(--c-bd)}
 html body .st-root .st-t thead th:first-child{background:var(--c-soft)!important;z-index:3;color:var(--c-tx)!important}
+html body .st-root .st-t tbody tr[data-st-r]{cursor:pointer}
 html body .st-root .st-t tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--c-soft) 45%,var(--c-card))}
 html body .st-root .st-t tbody tr:nth-child(even) td:first-child{background:color-mix(in srgb,var(--c-soft) 45%,var(--c-card))}
 html body .st-root .st-t tbody tr.st-base td{font-weight:600;background:color-mix(in srgb,var(--c-ac) 5%,var(--c-card))}
 html body .st-root .st-t tbody tr.st-base td:first-child{box-shadow:inset 3px 0 0 var(--c-ac);color:var(--c-ac)}
+html body .st-root .st-t tbody tr.st-sel td{background:color-mix(in srgb,var(--c-ac) 16%,var(--c-card))!important;box-shadow:inset 0 1px 0 var(--c-ac),inset 0 -1px 0 var(--c-ac)}
+html body .st-root .st-t tbody tr.st-sel td:first-child{box-shadow:inset 4px 0 0 var(--c-ac),inset 0 1px 0 var(--c-ac),inset 0 -1px 0 var(--c-ac)}
 html body .st-root .st-t tbody tr:hover td{background:var(--c-soft)}
 html body .st-root .st-t tbody tr:hover td:first-child{background:var(--c-soft)}
 html body .st-root .st-t td.o{background:var(--c-ovr)!important;font-weight:600;color:var(--c-tx)}
@@ -94,11 +123,14 @@ html body .st-root .st-t th.st-sep,html body .st-root .st-t td.st-sep{border-lef
 .st-sv{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:205px}
 .st-mb{position:relative;width:64px;height:6px;background:var(--c-soft);border-radius:4px;flex:none}
 .st-mb i{display:block;height:100%;border-radius:4px}.st-mb u{position:absolute;top:-3px;bottom:-3px;border-left:2px dashed var(--c-ac)}
+.st-mcard.st-sel{border-color:var(--c-ac);background:color-mix(in srgb,var(--c-ac) 9%,var(--c-card))}
 
-/* Full-Window Maximize Mode: fits all columns (11 default or all 16 with Starting position) on one screen without horizontal scroll */
+/* Full-Window Maximize Mode: fits all selected columns on one screen without horizontal scroll */
 .st-scen-card.st-max{position:fixed;inset:0;z-index:120;margin:0;border-radius:0;border:0;padding:14px 18px 16px;display:flex;flex-direction:column;background:var(--c-bg);box-shadow:none}
-.st-scen-card.st-max .st-scen-head{margin-bottom:8px}
-.st-scen-card.st-max .st-scen-tb{border-top:0;padding-top:0;margin-bottom:8px}
+.st-scen-card.st-max .st-scen-head{margin-bottom:2px}
+.st-scen-card.st-max .st-scen-sub{margin-bottom:8px}
+.st-scen-card.st-max .msds{margin:0 0 8px}
+.st-scen-card.st-max .st-tb-bar{margin-bottom:8px}
 .st-scen-card.st-max .st-wrap{flex:1;max-height:none;overflow-x:auto;overflow-y:auto;box-shadow:0 4px 24px color-mix(in srgb,var(--c-tx) 8%,transparent)}
 .st-scen-card.st-max .st-t{font-size:12px;width:100%}
 html body .st-root .st-scen-card.st-max .st-t thead th{white-space:normal;line-height:1.2;vertical-align:bottom;padding:8px 6px;font-size:11px}
