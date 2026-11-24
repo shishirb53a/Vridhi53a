@@ -108,15 +108,21 @@ html body .st-root .st-t thead th:first-child button{justify-content:flex-start}
 html body .st-root .st-t thead th button:hover{color:var(--c-ac)!important}
 html body .st-root .st-t td:first-child,html body .st-root .st-t th:first-child{text-align:left;position:sticky;left:0;z-index:1;background:var(--c-card);min-width:225px;border-right:1px solid var(--c-bd)}
 html body .st-root .st-t thead th:first-child{background:var(--c-soft)!important;z-index:3;color:var(--c-tx)!important}
+html body .st-root .st-ts.has-sno td:first-child,html body .st-root .st-ts.has-sno th:first-child{min-width:56px;width:56px;max-width:64px;text-align:center;left:0;border-right:1px solid var(--c-soft)}
+html body .st-root .st-ts.has-sno th:first-child .st-thw,html body .st-root .st-ts.has-sno th:first-child button{justify-content:center}
+html body .st-root .st-ts.has-sno td:nth-child(2),html body .st-root .st-ts.has-sno th:nth-child(2){text-align:left;position:sticky;left:56px;z-index:1;background:var(--c-card);min-width:215px;border-right:1px solid var(--c-bd)}
+html body .st-root .st-ts.has-sno thead th:nth-child(2){background:var(--c-soft)!important;z-index:3;color:var(--c-tx)!important}
+html body .st-root .st-ts.has-sno thead th:nth-child(2) .st-thw,html body .st-root .st-ts.has-sno thead th:nth-child(2) button{justify-content:flex-start}
 html body .st-root .st-t tbody tr[data-st-r]{cursor:pointer}
 html body .st-root .st-t tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--c-soft) 45%,var(--c-card))}
-html body .st-root .st-t tbody tr:nth-child(even) td:first-child{background:color-mix(in srgb,var(--c-soft) 45%,var(--c-card))}
+html body .st-root .st-t tbody tr:nth-child(even) td:first-child,html body .st-root .st-ts.has-sno tbody tr:nth-child(even) td:nth-child(2){background:color-mix(in srgb,var(--c-soft) 45%,var(--c-card))}
 html body .st-root .st-t tbody tr.st-base td{font-weight:600;background:color-mix(in srgb,var(--c-ac) 5%,var(--c-card))}
 html body .st-root .st-t tbody tr.st-base td:first-child{box-shadow:inset 3px 0 0 var(--c-ac);color:var(--c-ac)}
+html body .st-root .st-ts.has-sno tbody tr.st-base td:nth-child(2){color:var(--c-ac)}
 html body .st-root .st-t tbody tr.st-sel td{background:color-mix(in srgb,var(--c-ac) 16%,var(--c-card))!important;box-shadow:inset 0 1px 0 var(--c-ac),inset 0 -1px 0 var(--c-ac)}
 html body .st-root .st-t tbody tr.st-sel td:first-child{box-shadow:inset 4px 0 0 var(--c-ac),inset 0 1px 0 var(--c-ac),inset 0 -1px 0 var(--c-ac)}
 html body .st-root .st-t tbody tr:hover td{background:var(--c-soft)}
-html body .st-root .st-t tbody tr:hover td:first-child{background:var(--c-soft)}
+html body .st-root .st-t tbody tr:hover td:first-child,html body .st-root .st-ts.has-sno tbody tr:hover td:nth-child(2){background:var(--c-soft)}
 html body .st-root .st-t td.o{background:var(--c-ovr)!important;font-weight:600;color:var(--c-tx)}
 html body .st-root .st-t td.neg{color:var(--c-er);font-weight:600}
 html body .st-root .st-t th.st-sep,html body .st-root .st-t td.st-sep{border-left:2px solid var(--c-bd)}
@@ -142,6 +148,8 @@ html body .st-root .st-scen-card.st-max .st-t thead th .rpi{width:13px;height:13
 html body .st-root .st-scen-card.st-max .st-t thead th .rpi-i{font-size:9px}
 .st-scen-card.st-max .st-t td{padding:7px 6px}
 html body .st-root .st-scen-card.st-max .st-t td:first-child,html body .st-root .st-scen-card.st-max .st-t th:first-child{min-width:138px;max-width:210px;white-space:normal;line-height:1.25;position:static;border-right:1px solid var(--c-soft)}
+html body .st-root .st-scen-card.st-max .st-ts.has-sno td:first-child,html body .st-root .st-scen-card.st-max .st-ts.has-sno th:first-child{min-width:44px;width:44px;max-width:52px;position:static;text-align:center}
+html body .st-root .st-scen-card.st-max .st-ts.has-sno td:nth-child(2),html body .st-root .st-scen-card.st-max .st-ts.has-sno th:nth-child(2){min-width:132px;max-width:195px;white-space:normal;line-height:1.25;position:static;border-right:1px solid var(--c-soft)}
 .st-scen-card.st-max .st-sv{display:grid;grid-template-columns:auto 1fr;gap:3px 6px;align-items:center;justify-items:end;min-width:112px}
 .st-scen-card.st-max .st-sv b{grid-column:1 / -1;font-size:12px}
 .st-scen-card.st-max .st-sv .st-ch{padding:1px 6px;font-size:10.5px}
@@ -150,6 +158,8 @@ html body .st-root .st-scen-card.st-max .st-t td:first-child,html body .st-root 
 html body .st-root .st-scen-card.st-max.st-wide-cols .st-t thead th{font-size:10.5px;padding:7px 4px}
 .st-scen-card.st-max.st-wide-cols .st-t td{padding:6px 4px}
 html body .st-root .st-scen-card.st-max.st-wide-cols .st-t td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-t th:first-child{min-width:124px;max-width:160px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno th:first-child{min-width:40px;width:40px;max-width:46px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno td:nth-child(2),html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno th:nth-child(2){min-width:118px;max-width:155px}
 .st-scen-card.st-max.st-wide-cols .st-sv{min-width:104px}
 .st-scen-card.st-max.st-wide-cols .st-mb{width:30px}
 

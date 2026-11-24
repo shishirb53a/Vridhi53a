@@ -77,6 +77,8 @@
     ["bufRoi", "Buffer return", "H"]
   ];
   const COL_TIPS = {
+    no: "Serial number (1 to 14) of each tested stress scenario.",
+    sno: "Serial number (1 to 14) of each tested stress scenario.",
     name: "The 14 stress conditions tested. Base Case uses your live Retirement Planner assumptions; Scenarios 2–14 vary spending, returns, inflation, income, or a day-1 shock.",
     corpus: "Total starting corpus today from your Retirement Planner.",
     buffer: "Emergency reserve kept outside the investable pool. Earns Buffer return during the plan and rejoins the corpus in the final plan year.",
@@ -102,10 +104,11 @@
     lumpPrin: "Net lump-sum principal flows (received − spent − held + added) in that plan year from the Retirement Planner."
   };
   const ALL_COLS = STARTING_COLS.concat(PRIMARY_COLS);
-  const DEFAULT_KEYS = PRIMARY_COLS.map(c => c[0]);
+  const TOGGLE_KEYS = ["sno"].concat(ALL_COLS.map(c => c[0]));
+  const scenLabel = r => String((r && r.name) || "").replace(/^\d+\.\s*/, "");
   const COLS_KEY = "vr-st-cols" + (typeof window !== "undefined" && window.__UK ? "-" + window.__UK : "");
   function defaultCols() {
-    const o = {};
+    const o = { sno: true };
     STARTING_COLS.forEach(c => { o[c[0]] = false; });
     PRIMARY_COLS.forEach(c => { o[c[0]] = true; });
     return o;
@@ -117,7 +120,7 @@
       if (!raw) return base;
       const saved = JSON.parse(raw);
       if (saved && typeof saved === "object") {
-        ALL_COLS.forEach(c => { if (typeof saved[c[0]] === "boolean") base[c[0]] = saved[c[0]]; });
+        TOGGLE_KEYS.forEach(k => { if (typeof saved[k] === "boolean") base[k] = saved[k]; });
       }
     } catch (e) { /* ignore */ }
     return base;
@@ -126,14 +129,14 @@
     try {
       if (typeof localStorage === "undefined") return;
       const def = defaultCols(), diff = {};
-      ALL_COLS.forEach(c => { if (!!cols[c[0]] !== def[c[0]]) diff[c[0]] = !!cols[c[0]]; });
+      TOGGLE_KEYS.forEach(k => { if (!!cols[k] !== def[k]) diff[k] = !!cols[k]; });
       if (Object.keys(diff).length) localStorage.setItem(COLS_KEY, JSON.stringify(diff));
       else localStorage.removeItem(COLS_KEY);
     } catch (e) { /* ignore */ }
   }
   function isDefaultCols(cols) {
     const def = defaultCols();
-    return ALL_COLS.every(c => !!cols[c[0]] === def[c[0]]);
+    return TOGGLE_KEYS.every(k => !!cols[k] === def[k]);
   }
 
   const LINKED = { corpus: 1, monthly: 1, buffer: 1, other: 1, roi: 1, bufRoi: 1, infl: 1 };
@@ -144,8 +147,8 @@
     ["engine", "Engine & Notes", "\ud83d\udcc4"]
   ];
   const SORT_OPTS = [
-    ["no", "Scenario (#)"],
-    ["name", "Scenario name"],
+    ["no", "S.No"],
+    ["name", "Scenario"],
     ["surv", "Survival"],
     ["monthly", "Monthly expense"],
     ["roi", "Investment return"],
@@ -294,7 +297,7 @@
     }
     function sortVal(r, k, R) {
       switch (k) {
-        case "name": return r.name.toLowerCase();
+        case "name": return scenLabel(r).toLowerCase();
         case "monthly": return r.monthly;
         case "roi": return r.roi;
         case "infl": return r.infl;
@@ -387,6 +390,7 @@
     }
     function scenRowsHTML(R) {
       const cols = activeCols();
+      const showSno = !!st.cols.sno;
       const rows = filteredRows(R);
       const noneSelected = (!st.outcomes.ok && !st.outcomes.short) || (st.scens && Object.keys(st.scens).every(k => !st.scens[k]));
       if (noneSelected) {
@@ -395,22 +399,23 @@
       if (!rows.length) {
         return `<div class="em st-empty-box">No scenarios match your search.</div>`;
       }
-      const head = `<thead><tr>${thBtn("name", "Scenario")}${cols.list.map((c, idx) => thBtn(c[0], c[1], idx === cols.splitAt ? "st-sep" : "")).join("")}</tr></thead>`;
+      const head = `<thead><tr>${showSno ? thBtn("no", "S.No", "st-sno-col") : ""}${thBtn("name", "Scenario", "st-sc-col")}${cols.list.map((c, idx) => thBtn(c[0], c[1], idx === cols.splitAt ? "st-sep" : "")).join("")}</tr></thead>`;
       const body = rows.map(r => {
         const cls = [r.no === 1 ? "st-base" : "", st.selRow === r.no ? "st-sel" : ""].filter(Boolean).join(" ");
-        return `<tr data-st-r="${r.no}"${cls ? ` class="${cls}"` : ""} tabindex="0" aria-selected="${st.selRow === r.no}"><td>${esc(r.name)}</td>${cols.list.map((c, idx) => cell(r, c, R, idx === cols.splitAt)).join("")}</tr>`;
+        return `<tr data-st-r="${r.no}"${cls ? ` class="${cls}"` : ""} tabindex="0" aria-selected="${st.selRow === r.no}">${showSno ? `<td class="st-sno-col">${r.no}</td>` : ""}<td class="st-sc-col">${esc(scenLabel(r))}</td>${cols.list.map((c, idx) => cell(r, c, R, idx === cols.splitAt)).join("")}</tr>`;
       }).join("");
       const mobCards = rows.map(r => {
         const ok = r.survival >= R.base.planYears, w = Math.min(100, r.survival / ST.MAXY * 100);
         const selCls = st.selRow === r.no ? " st-sel" : "";
         const kvCols = cols.list.filter(c => c[0] !== "surv");
-        const kvHTML = kvCols.map(c => `<span title="${esc(COL_TIPS[c[0]] || "")}">${esc(c[1])}${COL_TIPS[c[0]] ? " " + infoBtn(COL_TIPS[c[0]], `How ${c[1]} is calculated`) : ""}</span><b>${esc(cellVal(r, c[0], R))}</b>`).join("");
-        return `<article class="st-mcard${selCls}" data-st-r="${r.no}"><div class="st-mhead"><strong>${esc(r.name)}</strong><span class="st-ch ${ok ? "ok" : "bad"}">${ok ? "Covers plan" : "Falls short"}</span></div>` +
+        const snoKV = showSno ? `<span title="${esc(COL_TIPS.sno)}">S.No ${infoBtn(COL_TIPS.sno, "How S.No is calculated")}</span><b>${r.no}</b>` : "";
+        const kvHTML = snoKV + kvCols.map(c => `<span title="${esc(COL_TIPS[c[0]] || "")}">${esc(c[1])}${COL_TIPS[c[0]] ? " " + infoBtn(COL_TIPS[c[0]], `How ${c[1]} is calculated`) : ""}</span><b>${esc(cellVal(r, c[0], R))}</b>`).join("");
+        return `<article class="st-mcard${selCls}" data-st-r="${r.no}"><div class="st-mhead"><strong>${esc(scenLabel(r))}</strong><span class="st-ch ${ok ? "ok" : "bad"}">${ok ? "Covers plan" : "Falls short"}</span></div>` +
           (st.cols.surv ? `<div class="st-msurv" title="${esc(COL_TIPS.surv)}"><b>${yrs(r.survival)}</b><span class="st-mb" aria-hidden="true"><i style="width:${w}%;background:${ok ? "var(--ok,#167d68)" : "var(--er,#c92a2a)"}"></i></span></div>` : "") +
           (kvHTML ? `<div class="st-mkv">${kvHTML}</div>` : "") +
           `</article>`;
       }).join("");
-      return `<div class="st-wrap"><table class="st-t">${head}<tbody>${body}</tbody></table></div><div class="st-mcards">${mobCards}</div>`;
+      return `<div class="st-wrap"><table class="st-t st-ts${showSno ? " has-sno" : ""}">${head}<tbody>${body}</tbody></table></div><div class="st-mcards">${mobCards}</div>`;
     }
     function msdBox(key, title, summaryText, actionsHTML, bodyHTML) {
       const open = st.msd === key;
@@ -429,21 +434,22 @@
 
       const selCount = st.scens ? allRows.filter(r => !!st.scens[r.no]).length : allRows.length;
       const firstSel = st.scens ? allRows.find(r => !!st.scens[r.no]) : null;
-      const scenSummary = selCount === allRows.length ? "All 14 scenarios" : selCount === 0 ? "None selected" : selCount === 1 && firstSel ? firstSel.name : `${selCount} of 14 selected`;
+      const scenSummary = selCount === allRows.length ? "All 14 scenarios" : selCount === 0 ? "None selected" : selCount === 1 && firstSel ? scenLabel(firstSel) : `${selCount} of 14 selected`;
       const scenBody = allRows.map(r => {
         const checked = !st.scens || !!st.scens[r.no];
         const ok = r.survival >= R.base.planYears;
-        return `<label class="msd-i"><input type="checkbox" data-st-sc="${r.no}"${checked ? " checked" : ""}><i style="background:${ok ? "var(--c-ok)" : "var(--c-er)"}"></i><span>${esc(r.name)}</span><em>${ok ? "Covers" : "Short"}</em></label>`;
+        return `<label class="msd-i"><input type="checkbox" data-st-sc="${r.no}"${checked ? " checked" : ""}><i style="background:${ok ? "var(--c-ok)" : "var(--c-er)"}"></i><span>${esc(scenLabel(r))}</span><em>${r.no} · ${ok ? "Covers" : "Short"}</em></label>`;
       }).join("");
       const scenAct = `<button type="button" data-st-msda="scen:all">Select all</button><button type="button" data-st-msda="scen:none">Clear</button>`;
 
-      const totalCols = ALL_COLS.length + 1;
-      const visCols = 1 + ALL_COLS.filter(c => !!st.cols[c[0]]).length;
+      const totalCols = TOGGLE_KEYS.length + 1;
+      const visCols = 1 + TOGGLE_KEYS.filter(k => !!st.cols[k]).length;
       const colsSummary = isDefaultCols(st.cols) ? "Default columns" : visCols === totalCols ? `All columns (${totalCols})` : `${visCols} of ${totalCols} shown`;
       const colRow = (key, label, tierLabel, fixed) => fixed
         ? `<label class="msd-i"><input type="checkbox" checked disabled><span>${esc(label)}</span><em>Fixed 🔒</em></label>`
         : `<label class="msd-i"><input type="checkbox" data-st-col="${key}"${st.cols[key] ? " checked" : ""}><span>${esc(label)}</span><em>${tierLabel}</em></label>`;
-      const colsBody = colRow("scenario", "Scenario", "Fixed 🔒", true) +
+      const colsBody = colRow("sno", "S.No", "Default", false) +
+        colRow("scenario", "Scenario", "Fixed 🔒", true) +
         PRIMARY_COLS.map(c => colRow(c[0], c[1], "Default", false)).join("") +
         STARTING_COLS.map(c => colRow(c[0], c[1], "Optional", false)).join("");
       const colsAct = `<button type="button" data-st-msda="cols:reset">Reset to default</button><button type="button" data-st-msda="cols:all">Show all</button>`;
@@ -609,7 +615,7 @@
         const act = msda.getAttribute("data-st-msda");
         const parts = act.split(":");
         if (parts[0] === "cols") {
-          if (parts[1] === "all") ALL_COLS.forEach(c => { st.cols[c[0]] = true; });
+          if (parts[1] === "all") TOGGLE_KEYS.forEach(k => { st.cols[k] = true; });
           else st.cols = defaultCols();
           saveCols(st.cols);
           st.msd = "cols";
