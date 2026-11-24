@@ -76,6 +76,31 @@
     ["need", "Net need p.a.", "K"],
     ["bufRoi", "Buffer return", "H"]
   ];
+  const COL_TIPS = {
+    name: "The 14 stress conditions tested. Base Case uses your live Retirement Planner assumptions; Scenarios 2–14 vary spending, returns, inflation, income, or a day-1 shock.",
+    corpus: "Total starting corpus today from your Retirement Planner.",
+    buffer: "Emergency reserve kept outside the investable pool. Earns Buffer return during the plan and rejoins the corpus in the final plan year.",
+    invest: "Investable = Corpus − Emergency buffer − One-time shock − Today’s wedding reserve (starting capital on day 1).",
+    need: "Net need p.a. = (Monthly expense × 12) − Other income p.a. (year-1 shortfall drawn from the portfolio).",
+    bufRoi: "Annual interest rate earned on the Emergency buffer during the plan period, from your Retirement Planner.",
+    monthly: "Starting monthly household expense today. Grown each year by Inflation and reduced after your chosen expense-reduction age.",
+    roi: "Annual portfolio return applied each year: Ending balance grows by Balance × (1 + Investment return) before net cashflows.",
+    infl: "Annual household inflation rate: Yearly household cost = 12 × Monthly expense × (1 + Inflation)^year × Age-cut factor.",
+    shock: "One-time medical or emergency outflow deducted from Investable capital on day 1 before compounding starts.",
+    other: "Year-1 non-portfolio income (pension, rent, or scenario side income). Grows yearly by your Retirement Planner income growth rate during the plan.",
+    surv: "Survival = Full years funded + (Last positive year-end balance ÷ Next year’s drawdown), capped at 70 years ('Never runs out').",
+    age: "Runs out at age = Current age + Survival years. Shows '—' if the corpus lasts past 70 years.",
+    on: "Runs out on = Current month + round(Survival × 12) months. Shows 'never runs out' if still positive after 70 years.",
+    left: "Money left at end of plan = Projected portfolio balance (after Emergency buffer rejoins) at plan end; 'Runs out first' if depleted earlier.",
+    funded: "Count of complete years (out of 70) with a non-negative year-end balance before money runs out."
+  };
+  const ENG_TIPS = {
+    year: "Simulation year number (1 to 70) counted from today.",
+    age: "Your age at the end of that year = Current age + Year.",
+    kids: "Scheduled children’s college fees and wedding costs in that plan year from the Retirement Planner.",
+    lumpInc: "Scheduled lump-sum inflows in that plan year from the Retirement Planner.",
+    lumpPrin: "Net lump-sum principal flows (received − spent − held + added) in that plan year from the Retirement Planner."
+  };
   const ALL_COLS = STARTING_COLS.concat(PRIMARY_COLS);
   const DEFAULT_KEYS = PRIMARY_COLS.map(c => c[0]);
   const COLS_KEY = "vr-st-cols" + (typeof window !== "undefined" && window.__UK ? "-" + window.__UK : "");
@@ -356,7 +381,9 @@
       const on = st.sortKey === k;
       const ariaSort = on ? (st.sortDir > 0 ? "ascending" : "descending") : "none";
       const arrow = on ? (st.sortDir > 0 ? " ▲" : " ▼") : "";
-      return `<th${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><button type="button" data-st-rk="${k}">${esc(label)}${arrow}</button></th>`;
+      const tip = COL_TIPS[k] || "";
+      const tipEl = tip ? infoBtn(tip, `How ${label} is calculated`) : "";
+      return `<th${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><div class="st-thw"><button type="button" data-st-rk="${k}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(label)}${arrow}</button>${tipEl}</div></th>`;
     }
     function scenRowsHTML(R) {
       const cols = activeCols();
@@ -377,9 +404,9 @@
         const ok = r.survival >= R.base.planYears, w = Math.min(100, r.survival / ST.MAXY * 100);
         const selCls = st.selRow === r.no ? " st-sel" : "";
         const kvCols = cols.list.filter(c => c[0] !== "surv");
-        const kvHTML = kvCols.map(c => `<span>${esc(c[1])}</span><b>${esc(cellVal(r, c[0], R))}</b>`).join("");
+        const kvHTML = kvCols.map(c => `<span title="${esc(COL_TIPS[c[0]] || "")}">${esc(c[1])}${COL_TIPS[c[0]] ? " " + infoBtn(COL_TIPS[c[0]], `How ${c[1]} is calculated`) : ""}</span><b>${esc(cellVal(r, c[0], R))}</b>`).join("");
         return `<article class="st-mcard${selCls}" data-st-r="${r.no}"><div class="st-mhead"><strong>${esc(r.name)}</strong><span class="st-ch ${ok ? "ok" : "bad"}">${ok ? "Covers plan" : "Falls short"}</span></div>` +
-          (st.cols.surv ? `<div class="st-msurv"><b>${yrs(r.survival)}</b><span class="st-mb" aria-hidden="true"><i style="width:${w}%;background:${ok ? "var(--ok,#167d68)" : "var(--er,#c92a2a)"}"></i></span></div>` : "") +
+          (st.cols.surv ? `<div class="st-msurv" title="${esc(COL_TIPS.surv)}"><b>${yrs(r.survival)}</b><span class="st-mb" aria-hidden="true"><i style="width:${w}%;background:${ok ? "var(--ok,#167d68)" : "var(--er,#c92a2a)"}"></i></span></div>` : "") +
           (kvHTML ? `<div class="st-mkv">${kvHTML}</div>` : "") +
           `</article>`;
       }).join("");
@@ -453,12 +480,15 @@
         <div class="st-sgrid">${fields}</div>
       </div>`;
     }
+    function engTh(label, tip) {
+      return `<th><div class="st-thw"><span title="${esc(tip)}">${esc(label)}</span>${infoBtn(tip, `How ${label} is calculated`)}</div></th>`;
+    }
     function engineTableHTML(R) {
       let idx = R.rows.map((r, i) => i);
       if (st.filter === "out") idx = idx.filter(i => !R.rows[i].never); else if (st.filter === "base") idx = [0];
       const q = st.engQ.trim().toLowerCase();
       const engRows = R.engine.filter(e => !q || String(e.year).includes(q) || String(e.age).includes(q));
-      const head = `<thead><tr><th>Year</th><th>Your age</th><th>Kids: college + weddings</th><th>Lump-sum income</th><th>Lump-sum principal back</th>${idx.map(i => `<th title="${esc(R.rows[i].name)}">S${i + 1}</th>`).join("")}</tr></thead>`;
+      const head = `<thead><tr>${engTh("Year", ENG_TIPS.year)}${engTh("Your age", ENG_TIPS.age)}${engTh("Kids: college + weddings", ENG_TIPS.kids)}${engTh("Lump-sum income", ENG_TIPS.lumpInc)}${engTh("Lump-sum principal back", ENG_TIPS.lumpPrin)}${idx.map(i => engTh(`S${i + 1}`, `${R.rows[i].name}: Year-end balance = Previous balance × (1 + ${(R.rows[i].roi * 100).toFixed(2)}%) + Buffer interest + Other income + Lump sums − Household & kids outflows.`)).join("")}</tr></thead>`;
       const body = engRows.length
         ? engRows.map(e => `<tr><td>${e.year}</td><td>${e.age}</td><td>${inr(e.kids)}</td><td>${inr(e.lumpIncome)}</td><td>${inr(e.lumpPrincipal)}</td>${idx.map(i => `<td class="${e.balances[i] < 0 ? "neg" : ""}">${inr(e.balances[i])}</td>`).join("")}</tr>`).join("")
         : `<tr><td colspan="${5 + idx.length}" class="st-empty">No years match your search.</td></tr>`;

@@ -29,12 +29,13 @@ assert.ok(!h.querySelector('.st-scen-card').classList.contains('st-max'), 'Resto
 assert.ok(!h.querySelector('.st-main .st-t').textContent.includes('Emergency buffer'), 'Starting position columns hidden by default');
 assert.ok(h.querySelector('[data-st-msdb="cols"]').textContent.includes('Default columns'), 'Columns dropdown shows Default columns');
 h.querySelector('[data-st-msda="cols:all"]').click();
-let ths = Array.from(h.querySelectorAll('.st-main .st-t thead th')).map(x => x.textContent.replace(/\s*[▲▼]$/, ''));
+let ths = Array.from(h.querySelectorAll('.st-main .st-t thead th [data-st-rk]')).map(x => x.textContent.replace(/\s*[▲▼]$/, ''));
 assert.ok(ths.indexOf('Emergency buffer') === 2 && ths.includes('Investable') && ths.includes('Net need p.a.'), 'Show all inserts starting position columns right after Scenario');
+assert.strictEqual(h.querySelectorAll('.st-main .st-t thead th .rpi').length, 16, 'Every column header includes a calculation tooltip');
 h.querySelector('[data-st-msda="cols:reset"]').click();
 assert.ok(!h.querySelector('.st-main .st-t').textContent.includes('Emergency buffer'), 'Reset to default hides optional columns');
 const bufCol = h.querySelector('[data-st-col="buffer"]'); bufCol.checked = true; bufCol.dispatchEvent(new w.Event('change', { bubbles: true }));
-ths = Array.from(h.querySelectorAll('.st-main .st-t thead th')).map(x => x.textContent.replace(/\s*[▲▼]$/, ''));
+ths = Array.from(h.querySelectorAll('.st-main .st-t thead th [data-st-rk]')).map(x => x.textContent.replace(/\s*[▲▼]$/, ''));
 assert.ok(ths.indexOf('Emergency buffer') === 1 && !ths.includes('Corpus'), 'Individual optional column toggle shows only that column');
 const rq = h.querySelector('#st-rq'); rq.value = 'Bear Market'; rq.dispatchEvent(new w.Event('input', { bubbles: true }));
 assert.strictEqual(h.querySelectorAll('.st-main .st-t tbody tr').length, 1, 'Search filters scenarios live');
