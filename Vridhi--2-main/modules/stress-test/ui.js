@@ -76,15 +76,16 @@
   ];
   const LINKED = { corpus: 1, monthly: 1, buffer: 1, other: 1, roi: 1, bufRoi: 1, infl: 1 };
   const TABS = [
-    ["overview", "1. Trajectory & Summary"],
-    ["scenarios", "2. Scenarios (14)"],
-    ["settings", "3. Stress Settings"],
-    ["engine", "4. Engine & Notes"]
+    ["overview", "Trajectory & Summary", "\ud83d\udcc8"],
+    ["scenarios", "Scenarios", "\ud83d\udccb"],
+    ["settings", "Stress Settings", "\u2699\ufe0f"],
+    ["engine", "Engine & Notes", "\ud83d\udcc4"]
   ];
+  let lastTab = "overview";
 
   function mount(host, provider) {
     const P = provider || appProvider();
-    const st = { client: P.activeId(), tab: "overview", result: null, issues: null, cols: { st: false }, filter: "all", rowFilter: "all", open: { engine: true, notes: true }, dirty: false, max: false };
+    const st = { client: P.activeId(), tab: lastTab, result: null, issues: null, cols: { st: false }, filter: "all", rowFilter: "all", open: { engine: true, notes: true }, dirty: false, max: false };
 
     function compute() {
       const b = ST.fromPlanner(P.inputs(st.client));
@@ -100,13 +101,13 @@
         `<button type="button" class="st-link" data-st="back">◀ Back to Planner</button><button type="button" class="st-link" data-st="yby">▶ Year-by-Year (base case)</button>` +
         `<button type="button" class="st-btn" data-st="refresh">Refresh from planner</button><button type="button" class="st-btn p" data-st="export">Export CSV</button></div>`;
     }
-    function tabBar() {
-      const btns = TABS.map(([id, label]) => {
+    function bottomNav() {
+      const btns = TABS.map(([id, label, icon]) => {
         const active = st.tab === id;
-        const badge = id === "settings" && st.dirty ? `<span class="st-dot" aria-label="Unsaved changes"></span>` : "";
-        return `<button type="button" role="tab" id="st-tab-${id}" class="st-tab" data-st-tab="${id}" aria-selected="${active}" aria-controls="st-panel-${id}">${esc(label)}${badge}</button>`;
+        const badge = id === "settings" && st.dirty ? `<i class="st-dot" aria-label="Unsaved changes"></i>` : "";
+        return `<button type="button" id="st-tab-${id}" class="st-btab" data-st-tab="${id}" role="tab" aria-selected="${active}"${active ? ' aria-current="page"' : ""} aria-controls="st-panel-${id}"><span aria-hidden="true">${icon}</span><span>${esc(label)}</span>${badge}</button>`;
       }).join("");
-      return `<div class="st-tabs" role="tablist" aria-label="Stress Test sections">${btns}</div>`;
+      return `<div class="rp2-nav st-bnav" role="tablist" aria-label="Stress Test sections">${btns}</div>`;
     }
     function problem() {
       const list = (st.issues || []).slice(0, 4).map(i => `<li>${esc(i.message)}</li>`).join("");
@@ -273,8 +274,15 @@
       if (!TABS.some(t => t[0] === id)) return;
       if (id !== "scenarios" && st.max) toggleMax(false);
       st.tab = id;
-      host.querySelectorAll("[data-st-tab]").forEach(b => b.setAttribute("aria-selected", String(b.getAttribute("data-st-tab") === id)));
+      lastTab = id;
+      host.querySelectorAll(".st-btab[data-st-tab]").forEach(b => {
+        const on = b.getAttribute("data-st-tab") === id;
+        b.setAttribute("aria-selected", String(on));
+        if (on) b.setAttribute("aria-current", "page");
+        else if (b.removeAttribute) b.removeAttribute("aria-current");
+      });
       host.querySelectorAll("[data-st-panel]").forEach(p => { p.hidden = p.getAttribute("data-st-panel") !== id; });
+      if (typeof window !== "undefined" && window.scrollTo) window.scrollTo(0, 0);
     }
     function fitMaxTable() {
       if (!st.max) return;
@@ -297,11 +305,11 @@
       const R = st.result;
       if (!R) st.max = false;
       const body = R
-        ? tabBar() +
-          panel("overview", hero(R)) +
+        ? panel("overview", hero(R)) +
           panel("scenarios", table(R)) +
           panel("settings", settings(R)) +
-          panel("engine", engine(R) + notes())
+          panel("engine", engine(R) + notes()) +
+          bottomNav()
         : problem();
       host.innerHTML = `<section class="st-root" aria-label="Stress Test">${bar()}${body}</section>`;
       if (st.max) {
@@ -353,7 +361,7 @@
       e.target.classList.add("chg");
       const a = host.querySelector("[data-st=apply]"); if (a) a.disabled = false;
       const stBtn = host.querySelector("#st-tab-settings");
-      if (stBtn && !stBtn.querySelector(".st-dot")) stBtn.insertAdjacentHTML("beforeend", '<span class="st-dot" aria-label="Unsaved changes"></span>');
+      if (stBtn && !stBtn.querySelector(".st-dot")) stBtn.insertAdjacentHTML("beforeend", '<i class="st-dot" aria-label="Unsaved changes"></i>');
     });
     host.addEventListener("keydown", e => {
       if (e.key === "Escape" && st.max) { e.preventDefault(); toggleMax(false); return; }
@@ -372,8 +380,15 @@
     return { refresh: render, state: st, switchTab, toggleMax, fitMaxTable };
   }
 
-  /* Retirement Planner > Reports > Stress Test: fhPage() (retirement-planner/ui.js) renders a host element; mount the screen as soon as it is in the page. */
+  /* Register Stress Test as a top-level module (Modules dropdown > Stress Test) and mount into [data-st-host]. */
+  window.VRMODULES = (window.VRMODULES || []).concat([{
+    tab: "Stress Test",
+    label: "Stress Test",
+    bar: function () { return ""; },
+    page: function () { return '<div class="fh-page rp2-pagew st-page"><div class="st-host" data-st-host></div></div>'; },
+    nav: function () { return ""; }
+  }]);
   const fill = () => { const h = document.querySelector("[data-st-host]"); if (h && !h.firstChild) mount(h); };
   new MutationObserver(fill).observe(document.documentElement, { childList: true, subtree: true });
-  window.StressTestUI = { mount, appProvider };
+  window.StressTestUI = { mount, appProvider, open: function (tab) { if (tab && TABS.some(t => t[0] === tab)) lastTab = tab; if (typeof UI !== "undefined" && typeof render === "function") { UI.tab = "Stress Test"; render(); } } };
 })();

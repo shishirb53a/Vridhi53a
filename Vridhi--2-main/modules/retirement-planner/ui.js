@@ -2578,11 +2578,10 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
     const sv = savedState(), ok = !!(sv && FHE.validateAll(sv.v).length === 0);
     const cur = (fhpList().find(p => p.active) || { name: "" }).name;
     if (RP.tab === "report") {
-      const view = RP.rv === "yy" ? "yy" : RP.rv === "stress" && window.StressTestUI ? "stress" : "clients";
-      const sub = `<div class="seg" role="group" aria-label="Report type"><button type="button" data-rp="rv:clients" aria-pressed="${view === "clients"}">Clients</button><button type="button" data-rp="rv:yy" aria-pressed="${view === "yy"}">Year by Year</button>${window.StressTestUI ? `<button type="button" data-rp="rv:stress" aria-pressed="${view === "stress"}">Stress Test</button>` : ""}</div>`;
+      const view = RP.rv === "yy" ? "yy" : "clients";
+      const sub = `<div class="seg" role="group" aria-label="Report type"><button type="button" data-rp="rv:clients" aria-pressed="${view === "clients"}">Clients</button><button type="button" data-rp="rv:yy" aria-pressed="${view === "yy"}">Year by Year</button></div>`;
       const none = `<div class="card em">No saved retirement plan yet. Open <b>Edit Inputs</b> below, answer the steps and press <b>Finish</b>.</div>`;
       const mb = `<div class="fhp fhp-m">${fhpBarHTML(false)}</div>`;
-      if (view === "stress") return `<div class="fh-page rp2-pagew">${mb}<div class="rph"><div>${window.rptHead("Stress Test", cur + " \u00b7 how long the money lasts under 14 stress conditions, linked to this retirement plan.")}</div><div class="rpr">${sub}</div></div><div class="st-host" data-st-host></div>${rp2Nav("report")}</div>`;
       if (view === "clients") return `<div class="fh-page rp2-pagew">${mb}<div class="rph"><div>${window.rptHead("Clients", "Every saved retirement plan. Switch to a plan to see its summary, goals and cash flow.")}</div><div class="rpr">${sub}</div></div>${fhpCards()}${rp2Nav("report")}</div>`;
       return `<div class="fh-page rp2-pagew">${mb}<div class="rph"><div>${window.rptHead("Year By Year Status", cur + " \u00b7 retirement plan, year by year: money out, money coming in, and the money left at the end of each year.")}</div><div class="rpr">${sub}</div></div>${ok ? `<div class="hz-sec">${window.hzReport()}</div>` : none}${rp2Nav("report")}</div>`;
     }

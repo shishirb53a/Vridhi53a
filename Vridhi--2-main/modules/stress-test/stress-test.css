@@ -15,13 +15,13 @@ html body .st-root .st-link{background:none!important;border:0!important;color:v
 .st-bar label{display:inline-flex;align-items:center;gap:6px;margin:0}
 .st-bar select{background:var(--c-card);border:1px solid var(--c-bd);border-radius:7px;padding:5px 9px}
 
-/* 4-Tab Navigation */
-.st-tabs{display:flex;flex-wrap:wrap;gap:6px;background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:6px;margin-bottom:14px}
-html body .st-root .st-tab{position:relative;display:inline-flex;align-items:center;gap:7px;border:1px solid transparent!important;background:transparent;color:var(--c-mu);font-weight:600;font-size:13.5px;padding:8px 15px;min-height:36px;border-radius:8px!important;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
-html body .st-root .st-tab:hover{background:var(--c-soft);color:var(--c-tx)}
-html body .st-root .st-tab[aria-selected="true"]{background:var(--c-ac)!important;color:var(--c-ac2)!important;border-color:var(--c-ac)!important}
-.st-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--c-warn)}
-.st-tab[aria-selected="true"] .st-dot{background:var(--c-ac2)}
+/* Bottom 4-Tab Bar (matches Retirement Planner & Goal Planner .rp2-nav) */
+.st-page{--rpc:var(--ac,#14392b)}
+.st-root{--rpc:var(--c-ac)}
+html body .st-bnav{grid-template-columns:repeat(4,1fr);width:min(100%,680px)}
+html body .st-bnav button{position:relative;font-size:11px;min-width:0;padding:4px 4px}
+html body .st-bnav button[aria-current="page"]{color:var(--c-ac)!important}
+.st-dot{position:absolute;top:7px;right:calc(50% - 18px);width:7px;height:7px;border-radius:50%;background:var(--c-warn)}
 .st-panel[hidden]{display:none!important}
 
 /* Tab 1: Executive Hero Strip (70-Year Fan Chart + 5-KPI Summary) */
@@ -143,7 +143,7 @@ html body .st-root .st-scen-card.st-max.st-wide-cols .st-t td:first-child,html b
 
 @media (max-width:1040px){.st-hero,.st-sgrid{grid-template-columns:1fr}}
 @media (max-width:720px){
-  .st-tabs{gap:4px}html body .st-root .st-tab{flex:1 1 auto;justify-content:center;padding:7px 10px;font-size:12.5px}
+  html body .st-bnav{width:100%}html body .st-bnav button{font-size:10.5px;padding:4px 2px}
   .st-sum{grid-template-columns:1fr 1fr}
   .st-main .st-wrap{display:none}
   .st-mcards{display:block}

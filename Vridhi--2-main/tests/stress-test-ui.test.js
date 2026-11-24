@@ -51,6 +51,9 @@ nav.onBack(); assert.ok(w.RPUI.tab === 'status' && w.UI.tab === 'Retirement plan
 const css = fs.readFileSync(path.join(root, 'modules', 'stress-test', 'stress-test.css'), 'utf8');
 assert.ok(!/#[0-9a-fA-F]{3,6}/.test(css.replace(/var\([^)]*\)/g, '')) || /var\(--card/.test(css), 'colours come from app theme variables');
 for (const v of ['--card', '--tx', '--mu', '--bd', '--ac', '--ok', '--er']) assert.ok(css.includes('var(' + v), 'uses theme variable ' + v);
-const pu = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
-assert.ok(pu.includes('data-rp="rv:stress"') && pu.includes('view === "stress"') && pu.includes('data-st-host'), 'planner Reports tab has the Stress Test button and host');
+assert.strictEqual(h.querySelectorAll('.st-bnav [data-st-tab]').length, 4, 'four bottom tabs shown');
+const appCore = fs.readFileSync(path.join(root, 'modules', 'app-core', 'app.js'), 'utf8');
+assert.ok(appCore.includes("m.tab==='Stress Test'") && appCore.includes("UI.tab==='Stress Test'" || appCore.includes("tab==='Stress Test'")), 'Stress Test wired in top Modules dropdown');
+const stSrc = fs.readFileSync(path.join(root, 'modules', 'stress-test', 'ui.js'), 'utf8');
+assert.ok(stSrc.includes('VRMODULES') && stSrc.includes('tab: "Stress Test"'), 'Stress Test registers as a top-level module');
 console.log('stress-test-ui: all checks passed');
