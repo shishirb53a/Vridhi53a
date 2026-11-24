@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vriddhi · Stress Test Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7f6;
+    --card: #ffffff;
+    --soft: #eff3f1;
+    --tx: #14221b;
+    --mu: #52635a;
+    --bd: #d8e1dc;
+    --ac: #14392b;
+    --ac-soft: #e7efe9;
+    --on-ac: #ffffff;
+    --ok: #167d68;
+    --ok-bg: #e7f4f0;
+    --er: #c92a2a;
+    --er-bg: #fdecec;
+    --lnk: #eef2f0;
+    --ovr: #fef0e4;
+    --edt: #fcf7e6;
+    --ff-display: "Plus Jakarta Sans", system-ui, sans-serif;
+    --ff-body: "DM Sans", system-ui, sans-serif;
+    --ff-mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--tx);
+    font: 14px/1.5 var(--ff-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: var(--ff-mono); font-variant-numeric: tabular-nums; }
+  .wf-shell { max-width: 1380px; margin: 0 auto; padding: 20px 24px 48px; }
+
+  /* Wireframe Studio Header */
+  .wf-studio {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--bd);
+  }
+  .wf-title h1 {
+    margin: 0;
+    font: 700 20px/1.25 var(--ff-display);
+    letter-spacing: -0.02em;
+  }
+  .wf-title p {
+    margin: 4px 0 0;
+    color: var(--mu);
+    font-size: 13px;
+  }
+  .wf-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    background: var(--soft);
+    border: 1px solid var(--bd);
+    border-radius: 10px;
+  }
+  .wf-tabs button {
+    border: 0;
+    background: transparent;
+    color: var(--mu);
+    font: 600 13px/1 var(--ff-body);
+    padding: 9px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .wf-tabs button[aria-selected="true"] {
+    background: var(--card);
+    color: var(--tx);
+    box-shadow: 0 1px 2px rgba(20, 34, 27, 0.08);
+  }
+
+  /* App Context Bar inside Wireframe */
+  .app-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+  }
+  .crumb {
+    font-size: 13px;
+    color: var(--mu);
+    white-space: nowrap;
+  }
+  .crumb strong { color: var(--tx); font-weight: 600; }
+  .seg {
+    display: inline-flex;
+    background: var(--soft);
+    border: 1px solid var(--bd);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button {
+    border: 0;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font: 600 12.5px/1 var(--ff-body);
+    color: var(--mu);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .seg button[aria-pressed="true"] {
+    background: var(--ac);
+    color: var(--on-ac);
+  }
+  .spacer { flex: 1; }
+  .ctrl-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .ctrl-label { font-size: 12.5px; color: var(--mu); display: inline-flex; align-items: center; gap: 6px; }
+  select, input {
+    font: inherit;
+    color: var(--tx);
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 7px;
+    padding: 6px 10px;
+  }
+  .btn {
+    border: 1px solid var(--bd);
+    background: var(--card);
+    color: var(--tx);
+    font: 600 12.5px/1 var(--ff-body);
+    padding: 8px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--soft); }
+  .btn.primary {
+    background: var(--ac);
+    border-color: var(--ac);
+    color: var(--on-ac);
+  }
+  .btn.primary:disabled { opacity: 0.45; cursor: default; }
+  .btn.ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--ac);
+    text-decoration: underline;
+    padding: 8px 6px;
+  }
+  .live-note { font-size: 12.5px; font-weight: 600; color: var(--ok); white-space: nowrap; }
+
+  /* Hero Executive Strip */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: stretch;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    padding: 16px 18px;
+    min-width: 0;
+  }
+  .card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 10px;
+  }
+  .card-head h2 {
+    margin: 0;
+    font: 700 15.5px/1.3 var(--ff-display);
+  }
+  .meta-line { font-size: 12.5px; color: var(--mu); }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--mu);
+    margin-bottom: 8px;
+  }
+  .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .fan-svg { width: 100%; height: 220px; display: block; }
+
+  /* 5 KPI Strip */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    height: 100%;
+  }
+  .kpi-box {
+    border: 1px solid var(--bd);
+    border-radius: 10px;
+    padding: 11px 13px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--card);
+  }
+  .kpi-box.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+  .kpi-box small { color: var(--mu); font-size: 12px; }
+  .kpi-box b { font: 700 20px/1.2 var(--ff-mono); margin: 3px 0 2px; font-variant-numeric: tabular-nums; }
+  .kpi-box span { color: var(--mu); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Two-Column Workspace */
+  .main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 16px;
+    align-items: start;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    margin: 10px 0 12px;
+  }
+  .col-toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .col-toggles label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--bd);
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--card);
+  }
+  .legend-key { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--mu); }
+  .legend-key i {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border: 1px solid var(--bd);
+    border-radius: 3px;
+    vertical-align: -1px;
+    margin-right: 5px;
+  }
+  .legend-key .l { background: var(--lnk); }
+  .legend-key .o { background: var(--ovr); }
+  .legend-key .e { background: var(--edt); }
+
+  /* Data Tables */
+  .table-wrap {
+    overflow: auto;
+    border: 1px solid var(--bd);
+    border-radius: 9px;
+    max-height: 540px;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--soft);
+    white-space: nowrap;
+    text-align: right;
+  }
+  td.num-cell { font-family: var(--ff-mono); font-variant-numeric: tabular-nums; }
+  th {
+    position: sticky;
+    top: 0;
+    background: var(--soft);
+    z-index: 2;
+    font-weight: 600;
+    color: var(--tx);
+  }
+  th.grp {
+    background: var(--ac);
+    color: var(--on-ac);
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  thead tr:nth-child(2) th { top: 32px; }
+  th:first-child, td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--card);
+    min-width: 240px;
+    border-right: 1px solid var(--bd);
+  }
+  th:first-child { background: var(--soft); z-index: 3; }
+  tbody tr:hover td { background: #f8faf9; }
+  td.l { background: var(--lnk) !important; }
+  td.o { background: var(--ovr) !important; }
+  td.neg { color: var(--er); background: var(--er-bg); }
+
+  .surv-cell { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 230px; }
+  .status-txt { font-size: 12px; font-weight: 700; }
+  .status-txt.ok { color: var(--ok); }
+  .status-txt.bad { color: var(--er); }
+  .bar-track {
+    position: relative;
+    width: 72px;
+    height: 7px;
+    background: var(--soft);
+    border-radius: 4px;
+    flex: none;
+  }
+  .bar-fill { display: block; height: 100%; border-radius: 4px; }
+  .bar-mark { position: absolute; top: -3px; bottom: -3px; border-left: 2px dashed var(--ac); }
+
+  /* Sticky Settings Inspector */
+  .settings-panel { position: sticky; top: 16px; }
+  .set-group h3 {
+    margin: 14px 0 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--mu);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .set-row {
+    display: grid;
+    grid-template-columns: 1fr 96px;
+    gap: 8px;
+    align-items: center;
+    margin: 6px 0;
+  }
+  .set-row label { font-size: 13px; line-height: 1.3; }
+  .set-row small { display: block; font-size: 11px; color: var(--mu); }
+  .set-row input {
+    width: 100%;
+    text-align: right;
+    background: var(--edt);
+    padding: 6px 8px;
+    font-family: var(--ff-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+  }
+  .set-row input.dirty { outline: 2px solid var(--ac); }
+  .set-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .set-actions .btn { flex: 1; text-align: center; }
+
+  /* Accordion sections */
+  details.wf-acc {
+    margin-top: 16px;
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  details.wf-acc summary {
+    cursor: pointer;
+    font: 700 14.5px/1.3 var(--ff-display);
+  }
+  .notes-list { margin: 10px 0 0; padding-left: 18px; color: var(--mu); }
+  .notes-list li { margin: 6px 0; }
+
+  /* Mobile Preview Frame */
+  .mobile-canvas {
+    max-width: 430px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 1px solid var(--bd);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .mob-kpis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .mob-card {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .mob-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .mob-kv {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 5px 12px;
+    font-size: 12.5px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--soft);
+  }
+
+  /* Visual Boards View */
+  .boards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .board-card figure { margin: 0; }
+  .board-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid var(--bd);
+  }
+  .board-card figcaption {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--mu);
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 1024px) {
+    .hero-grid, .main-grid { grid-template-columns: 1fr; }
+    .settings-panel { position: static; }
+  }
+</style>
+</head>
+<body>
+<div class="wf-shell">
+  <header class="wf-studio">
+    <div class="wf-title">
+      <h1>Vriddhi Stress Test · Wireframe Preview</h1>
+      <p>Interactive architectural wireframes preserving all 14 scenarios, 11 stress settings, 70-year engine, and CSV export.</p>
+    </div>
+    <nav class="wf-tabs" role="tablist" aria-label="Wireframe views">
+      <button type="button" role="tab" data-view="desktop" aria-selected="true">Desktop Executive</button>
+      <button type="button" role="tab" data-view="engine" aria-selected="false">70-Year Engine &amp; Curves</button>
+      <button type="button" role="tab" data-view="mobile" aria-selected="false">Mobile Stack</button>
+      <button type="button" role="tab" data-view="boards" aria-selected="false">Concept Mockups</button>
+    </nav>
+  </header>
+
+  <div id="view-desktop"></div>
+  <div id="view-engine" class="hidden"></div>
+  <div id="view-mobile" class="hidden"></div>
+  <div id="view-boards" class="hidden">
+    <div class="boards-grid">
+      <section class="card board-card">
+        <div class="card-head">
+          <h2>Concept 1 · Desktop Executive Stress Test Workspace</h2>
+          <span class="meta-line">Hero survival fan chart · 5-KPI summary · 14 scenarios · Sticky settings</span>
+        </div>
+        <figure>
+          <img src="/wireframes/assets/stress_test_desktop_wireframe_1795517997089.jpg" alt="Desktop Executive Stress Test wireframe mockup">
+          <figcaption>Executive overview combining the 70-year survival fan chart with the full 14-scenario comparison matrix and sticky Stress Settings rail.</figcaption>
+        </figure>
+      </section>
+      <section class="card board-card">
+        <div class="card-head">
+          <h2>Concept 2 · 70-Year Engine Overlay &amp; Responsive Mobile Cards</h2>
+          <span class="meta-line">Multi-scenario balance curves · 70-year ledger · Narrow viewport card stack</span>
+        </div>
+        <figure>
+          <img src="/wireframes/assets/stress_test_engine_mobile_wireframe_1795517997864.jpg" alt="70-year calculation engine and responsive mobile wireframe mockup">
+          <figcaption>Expanded 70-year ledger with crossover balance chart on the left, and responsive single-column scenario cards for narrow screens on the right.</figcaption>
+        </figure>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="/wireframes/engine-rp.js"></script>
+<script src="/wireframes/engine-st.js"></script>
+<script>
+(function () {
+  "use strict";
+  const FH = window.FreedomHorizon;
+  const ST = window.StressTest;
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+  const cr = n => Math.abs(n) >= 1e7 ? "₹" + (n / 1e7).toFixed(2) + " Cr" : Math.abs(n) >= 1e5 ? "₹" + (n / 1e5).toFixed(1) + " L" : inr(n);
+  const pct = n => (n * 100).toFixed(2) + "%";
+  const yrs = v => v >= ST.MAXY ? "Never runs out" : v.toFixed(2) + " yrs";
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const SAMPLE_CLIENTS = {
+    shishir: {
+      name: "Shishir (Plan to age 74)",
+      inputs: Object.assign(FH.defaults(), {
+        age: 48, children: 0, until: 74, corpus: 30000000, roi: 8.05,
+        preOn: "0", houseFund: 14000000, buffer: 1500000, bufferRoi: 6,
+        monthly: 112000, houseInflation: 4, reduceAge: 60, reducePercent: 0,
+        incomeOn: "0", lumpCount: "0"
+      }),
+      settings: ST.defaultSettings()
+    },
+    meera: {
+      name: "Meera & Rohan (Conservative)",
+      inputs: Object.assign(FH.defaults(), {
+        age: 52, children: 0, until: 80, corpus: 42000000, roi: 7.5,
+        preOn: "0", houseFund: 18000000, buffer: 2500000, bufferRoi: 5.5,
+        monthly: 125000, houseInflation: 5, reduceAge: 65, reducePercent: 15,
+        incomeOn: "0", lumpCount: "0"
+      }),
+      settings: ST.defaultSettings()
+    }
+  };
+
+  const state = {
+    view: "desktop",
+    client: "shishir",
+    cols: { chg: true, res: true, st: false },
+    rowFilter: "all",
+    engFilter: "all",
+    openEngine: false,
+    openNotes: false
+  };
+
+  const GROUPS = [
+    ["chg", "What changes", [["monthly", "Monthly expense", "C"], ["roi", "Investment return", "G"], ["infl", "Inflation", "I"], ["shock", "One-time shock", "E"], ["other", "Other income p.a.", "F"]]],
+    ["res", "Result", [["surv", "Survival", "L"], ["age", "Runs out at age", "M"], ["on", "Runs out on", "N"], ["left", "Money left at end of plan", "O"], ["funded", "Full years funded", "P"]]],
+    ["st", "Starting position", [["corpus", "Corpus", "B"], ["buffer", "Emergency buffer", "D"], ["invest", "Investable", "J"], ["need", "Net need p.a.", "K"], ["bufRoi", "Buffer return", "H"]]]
+  ];
+  const LINKED = { corpus: 1, monthly: 1, buffer: 1, other: 1, roi: 1, bufRoi: 1, infl: 1 };
+  const SETTINGS_UI = [
+    ["Spending", [["lean", "Lean living: cut expenses by", "Scenarios 2, 14", "p"], ["belt", "Belt-tightened: cut expenses by", "Scenario 3", "p"], ["expUp", "Lifestyle unchanged: expenses rise by", "Scenarios 4, 13", "p"]]],
+    ["Markets", [["bear", "Bear market: return falls by (pts)", "Scenarios 5, 13", "p"], ["bull", "Bull market: return rises by (pts)", "Scenarios 6, 14", "p"], ["conservative", "All-safe portfolio return", "Scenario 8", "p"], ["optimistic", "Aggressive portfolio return", "Scenario 9", "p"]]],
+    ["Inflation & shocks", [["highInfl", "High inflation of", "Scenarios 7, 13", "p"], ["shock", "Medical / emergency shock (₹)", "Scenario 12, day 1", "r"]]],
+    ["Income", [["freelance", "Freelance covers % of costs", "Scenarios 10, 14", "p"], ["partTime", "Part-time job covers % of costs", "Scenario 11", "p"]]]
+  ];
+  const NOTES = [
+    "Each year: money at end = money at start × (1 + investment return) + buffer interest + other income + lump sums − household cost − children’s costs. Scenario 1 matches the Year-by-Year report.",
+    "Household cost = monthly expense × 12, grown by the scenario’s inflation and reduced by the planner’s expense-reduction rule after the chosen age. Costs continue after the plan ends up to 70 years.",
+    "The emergency buffer is kept aside and earns its own return; it joins the corpus when the plan ends. A one-time shock is taken from the investable money on day 1.",
+    "Children’s college fees and weddings, lump sums, other-income growth, pre-retirement earning phase and expense-reduction rule come from the Retirement Planner in every scenario.",
+    "Survival is full years funded plus the fraction of the next year before reaching zero. “Never runs out” means positive after 70 years.",
+    "Money is held in one blended pool. “All-safe” uses the Conservative return and “Aggressive” uses the Optimistic return from Stress Settings."
+  ];
+
+  function compute() {
+    const c = SAMPLE_CLIENTS[state.client];
+    const b = ST.fromPlanner(c.inputs, FH);
+    return ST.run(b, c.settings);
+  }
+
+  function fanChartSvg(R, showCurves) {
+    const W = 720, H = 220, L = 64, Rpad = 24, T = 18, B = 28;
+    const baseRow = R.rows[0], worstRow = R.rows[12], bestRow = R.rows[13], bearRow = R.rows[4];
+    const pick = showCurves ? [bestRow, baseRow, bearRow, worstRow] : [bestRow, baseRow, worstRow];
+    const vals = [0];
+    pick.forEach(r => r.series.forEach(v => vals.push(v)));
+    const maxV = Math.max(1e6, Math.max(...vals));
+    const minV = Math.min(0, Math.min(...vals));
+    const span = maxV - minV || 1;
+    const X = yr => L + (yr / ST.MAXY) * (W - L - Rpad);
+    const Y = v => T + ((maxV - v) / span) * (H - T - B);
+    const pathFor = row => {
+      const pts = [[0, row.investable]].concat(row.series.map((v, i) => [i + 1, v]));
+      return pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ");
+    };
+    const areaPts = [[0, bestRow.investable]].concat(bestRow.series.map((v, i) => [i + 1, v]))
+      .concat([[ST.MAXY, Math.max(0, worstRow.series[ST.MAXY - 1])]]).concat(
+        worstRow.series.slice().reverse().map((v, i) => [ST.MAXY - 1 - i, Math.max(minV, v)])
+      );
+    const area = areaPts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" ") + " Z";
+    const yZero = Y(0), xPlan = X(R.base.planYears);
+    const grid = [0, 0.5, 1].map(f => {
+      const v = minV + span * f, y = Y(v);
+      return `<line x1="${L}" x2="${W - Rpad}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e4ebe7"/><text x="${L - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#52635a">${cr(v)}</text>`;
+    }).join("");
+    const xTicks = [0, 10, 20, 30, 40, 50, 60, 70].map(yr => `<text x="${X(yr).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#52635a">${yr}y</text>`).join("");
+    return `<svg class="fan-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="70-year corpus trajectory across stress scenarios">
+      ${grid}${xTicks}
+      <path d="${area}" fill="#14392b" opacity="0.09"/>
+      <line x1="${L}" x2="${W - Rpad}" y1="${yZero.toFixed(1)}" y2="${yZero.toFixed(1)}" stroke="#c92a2a" stroke-dasharray="4 4" opacity="0.65"/>
+      <line x1="${xPlan.toFixed(1)}" x2="${xPlan.toFixed(1)}" y1="${T}" y2="${H - B}" stroke="#14392b" stroke-dasharray="4 4"/>
+      <text x="${(xPlan + 6).toFixed(1)}" y="${T + 12}" font-size="11" font-weight="600" fill="#14392b">Plan end (${R.base.planYears} yrs · age ${R.base.age + R.base.planYears})</text>
+      <path d="${pathFor(bestRow)}" fill="none" stroke="#167d68" stroke-width="2"/>
+      <path d="${pathFor(baseRow)}" fill="none" stroke="#14392b" stroke-width="2.6"/>
+      ${showCurves ? `<path d="${pathFor(bearRow)}" fill="none" stroke="#d97706" stroke-width="1.8" stroke-dasharray="5 3"/>` : ""}
+      <path d="${pathFor(worstRow)}" fill="none" stroke="#c92a2a" stroke-width="2"/>
+    </svg>`;
+  }
+
+  function renderBar() {
+    const opts = Object.keys(SAMPLE_CLIENTS).map(k => `<option value="${k}"${state.client === k ? " selected" : ""}>${esc(SAMPLE_CLIENTS[k].name)}</option>`).join("");
+    return `<div class="app-bar">
+      <span class="crumb">Retirement Planner / <strong>Reports</strong></span>
+      <div class="seg" role="group" aria-label="Report type">
+        <button type="button" aria-pressed="false">Clients</button>
+        <button type="button" aria-pressed="false">Year by Year</button>
+        <button type="button" aria-pressed="true">Stress Test</button>
+      </div>
+      <label class="ctrl-label">Client <select data-wf="client">${opts}</select></label>
+      <span class="live-note">Live from Retirement Planner</span>
+      <span class="spacer"></span>
+      <div class="ctrl-group">
+        <button type="button" class="btn ghost">Back to Planner</button>
+        <button type="button" class="btn ghost">Year-by-Year (base case)</button>
+        <button type="button" class="btn" data-wf="refresh">Refresh from planner</button>
+        <button type="button" class="btn primary" data-wf="export">Export CSV</button>
+      </div>
+    </div>`;
+  }
+
+  function renderCell(r, c, R) {
+    const base = r.no === 1, ov = r.ov.includes(c[2]);
+    let cls = base && LINKED[c[0]] ? "l" : "";
+    if (ov) cls = "o";
+    let t = "";
+    switch (c[0]) {
+      case "monthly": cls += " num-cell"; t = inr(r.monthly); break;
+      case "roi": cls += " num-cell"; t = pct(r.roi); break;
+      case "infl": cls += " num-cell"; t = pct(r.infl); break;
+      case "shock": cls += " num-cell"; t = r.shock ? inr(r.shock) : "–"; break;
+      case "other": cls += " num-cell"; t = r.other ? inr(r.other) : "–"; break;
+      case "surv": {
+        const ok = r.survival >= R.base.planYears;
+        const w = Math.min(100, r.survival / ST.MAXY * 100);
+        const pm = R.base.planYears / ST.MAXY * 100;
+        t = `<div class="surv-cell"><span class="status-txt ${ok ? "ok" : "bad"}">${ok ? "Covers plan" : "Falls short"}</span><b class="num">${yrs(r.survival)}</b><span class="bar-track" aria-hidden="true"><i class="bar-fill" style="width:${w}%;background:${ok ? "var(--ok)" : "var(--er)"}"></i><u class="bar-mark" style="left:${pm}%"></u></span></div>`;
+        break;
+      }
+      case "age": cls += " num-cell"; t = r.never ? "—" : r.runsAtAge.toFixed(1); break;
+      case "on": t = r.never ? "never runs out" : MON[r.runsOn.m - 1] + "-" + r.runsOn.y; break;
+      case "left": cls += " num-cell"; t = r.left == null ? "Runs out first" : inr(r.left); break;
+      case "funded": cls += " num-cell"; t = r.funded; break;
+      case "corpus": cls += " num-cell"; t = inr(r.corpus); break;
+      case "buffer": cls += " num-cell"; t = inr(r.buffer); break;
+      case "invest": cls += " num-cell"; t = inr(r.investable); break;
+      case "need": cls += " num-cell"; t = inr(r.netNeed); break;
+      default: cls += " num-cell"; t = pct(R.base.bufferRoi);
+    }
+    return `<td class="${cls.trim()}">${t}</td>`;
+  }
+
+  function renderDesktop(R) {
+    const s = R.summary;
+    const on = GROUPS.filter(g => state.cols[g[0]]);
+    const filteredRows = R.rows.map((r, i) => Object.assign(r, { no: i + 1 })).filter(r => {
+      if (state.rowFilter === "short") return r.survival < R.base.planYears;
+      if (state.rowFilter === "ok") return r.survival >= R.base.planYears;
+      return true;
+    });
+    const head = `<thead><tr><th rowspan="2">Scenario</th>${on.map(g => `<th class="grp" colspan="${g[2].length}">${g[1]}</th>`).join("")}</tr><tr>${on.map(g => g[2].map(c => `<th>${c[1]}</th>`).join("")).join("")}</tr></thead>`;
+    const body = filteredRows.map(r => `<tr><td>${esc(r.name)}</td>${on.map(g => g[2].map(c => renderCell(r, c, R)).join("")).join("")}</tr>`).join("");
+    const chips = GROUPS.map(g => `<label><input type="checkbox" data-col="${g[0]}"${state.cols[g[0]] ? " checked" : ""}>${g[1]}</label>`).join("");
+    const setFields = SETTINGS_UI.map(g => `<div class="set-group"><h3>${g[0]}</h3>` + g[1].map(f => {
+      const k = f[0], v = f[3] === "r" ? Math.round(R.settings[k]).toLocaleString("en-IN") : +(R.settings[k] * 100).toFixed(2);
+      return `<div class="set-row"><label for="wf-${k}">${esc(f[1])}<small>${esc(f[2])}${f[3] === "p" ? " · %" : ""}</small></label><input id="wf-${k}" data-set="${k}" data-fmt="${f[3]}" value="${v}"></div>`;
+    }).join("") + `</div>`).join("");
+
+    return `${renderBar()}
+    <section class="hero-grid">
+      <div class="card">
+        <div class="card-head">
+          <h2>70-year corpus trajectory across stress scenarios</h2>
+          <span class="meta-line">Age ${R.base.age} today · ${R.base.planYears}-year plan</span>
+        </div>
+        <div class="chart-legend">
+          <span><i class="sw" style="background:#167d68"></i>Best case</span>
+          <span><i class="sw" style="background:#14392b"></i>Base case (planner)</span>
+          <span><i class="sw" style="background:#c92a2a"></i>Worst case</span>
+        </div>
+        ${fanChartSvg(R, false)}
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>Resilience summary</h2>
+          <span class="meta-line">14 conditions tested</span>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-box"><small>Shortest survival (worst case)</small><b>${yrs(s.min)}</b><span>${esc(s.minName)}</span></div>
+          <div class="kpi-box"><small>Longest survival (best case)</small><b>${yrs(s.max)}</b><span>${esc(s.maxName)}</span></div>
+          <div class="kpi-box"><small>Lasting full ${s.planYears}-yr plan</small><b>${s.fullPlan} of 14</b><span>scenarios</span></div>
+          <div class="kpi-box"><small>Runs out inside 70 yrs</small><b>${s.runOut} of 14</b><span>scenarios</span></div>
+          <div class="kpi-box wide"><small>Average across all 14 scenarios (70-yr cap)</small><b>${s.avg.toFixed(2)} yrs</b></div>
+        </div>
+      </div>
+    </section>
+    <div class="main-grid">
+      <section class="card">
+        <div class="card-head">
+          <h2>How long does the corpus last under each condition?</h2>
+          <div class="seg" role="group" aria-label="Filter scenarios">
+            <button type="button" data-rf="all" aria-pressed="${state.rowFilter === "all"}">All 14</button>
+            <button type="button" data-rf="short" aria-pressed="${state.rowFilter === "short"}">Falls short</button>
+            <button type="button" data-rf="ok" aria-pressed="${state.rowFilter === "ok"}">Covers plan</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="col-toggles">${chips}</div>
+          <div class="legend-key"><span><i class="l"></i>Linked to planner</span><span><i class="o"></i>Changed by scenario</span><span><i class="e"></i>Editable</span></div>
+        </div>
+        <div class="table-wrap"><table>${head}<tbody>${body}</tbody></table></div>
+      </section>
+      <aside class="card settings-panel">
+        <div class="card-head">
+          <h2>Stress settings</h2>
+          <span class="meta-line">Saved per client</span>
+        </div>
+        ${setFields}
+        <div class="set-actions">
+          <button type="button" class="btn primary" data-wf="apply" disabled>Apply</button>
+          <button type="button" class="btn" data-wf="reset">Reset to defaults</button>
+        </div>
+      </aside>
+    </div>
+    <details class="wf-acc" data-acc="engine"${state.openEngine ? " open" : ""}>
+      <summary>Year-by-year money balance for each scenario (calculation engine, 70 years)</summary>
+      ${renderEngineInner(R)}
+    </details>
+    <details class="wf-acc" data-acc="notes"${state.openNotes ? " open" : ""}>
+      <summary>Notes: how the numbers are worked out</summary>
+      <ul class="notes-list">${NOTES.map(n => `<li>${esc(n)}</li>`).join("")}</ul>
+    </details>`;
+  }
+
+  function renderEngineInner(R) {
+    let idx = R.rows.map((r, i) => i);
+    if (state.engFilter === "out") idx = idx.filter(i => !R.rows[i].never);
+    else if (state.engFilter === "base") idx = [0];
+    const head = `<thead><tr><th>Year</th><th>Age</th><th>Kids costs</th><th>Lump-sum income</th><th>Lump-sum principal</th>${idx.map(i => `<th title="${esc(R.rows[i].name)}">S${i + 1}</th>`).join("")}</tr></thead>`;
+    const body = R.engine.slice(0, 35).map(e => `<tr><td class="num-cell">${e.year}</td><td class="num-cell">${e.age}</td><td class="num-cell">${inr(e.kids)}</td><td class="num-cell">${inr(e.lumpIncome)}</td><td class="num-cell">${inr(e.lumpPrincipal)}</td>${idx.map(i => `<td class="num-cell ${e.balances[i] < 0 ? "neg" : ""}">${inr(e.balances[i])}</td>`).join("")}</tr>`).join("");
+    return `<div class="toolbar" style="margin-top:12px">
+      <label class="ctrl-label">Show <select data-wf="engFilter"><option value="all"${state.engFilter === "all" ? " selected" : ""}>All 14 scenarios</option><option value="out"${state.engFilter === "out" ? " selected" : ""}>Only scenarios that run out</option><option value="base"${state.engFilter === "base" ? " selected" : ""}>Base case only</option></select></label>
+      <span class="meta-line">Showing years 1–35 of 70 in wireframe preview · Negative balance = money has run out</span>
+    </div>
+    <div class="table-wrap" style="max-height:360px"><table>${head}<tbody>${body}</tbody></table></div>`;
+  }
+
+  function renderEngineTab(R) {
+    return `${renderBar()}
+    <section class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <h2>70-Year Calculation Engine &amp; Depletion Curves</h2>
+        <span class="meta-line">Includes Bear Market comparison curve · Zero-rupee depletion floor</span>
+      </div>
+      <div class="chart-legend">
+        <span><i class="sw" style="background:#167d68"></i>Best case</span>
+        <span><i class="sw" style="background:#14392b"></i>Base case</span>
+        <span><i class="sw" style="background:#d97706"></i>Bear market</span>
+        <span><i class="sw" style="background:#c92a2a"></i>Worst case</span>
+      </div>
+      ${fanChartSvg(R, true)}
+      ${renderEngineInner(R)}
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>Notes: how the numbers are worked out</h2></div>
+      <ul class="notes-list">${NOTES.map(n => `<li>${esc(n)}</li>`).join("")}</ul>
+    </section>`;
+  }
+
+  function renderMobile(R) {
+    const s = R.summary;
+    const cards = R.rows.slice(0, 6).map(r => {
+      const ok = r.survival >= R.base.planYears;
+      const w = Math.min(100, r.survival / ST.MAXY * 100);
+      return `<article class="mob-card">
+        <div class="mob-card-top">
+          <strong>${esc(r.name)}</strong>
+          <span class="status-txt ${ok ? "ok" : "bad"}">${ok ? "Covers plan" : "Falls short"}</span>
+        </div>
+        <div class="num" style="font-size:16px;font-weight:700;margin-bottom:6px">${yrs(r.survival)}</div>
+        <div class="bar-track" style="width:100%"><i class="bar-fill" style="width:${w}%;background:${ok ? "var(--ok)" : "var(--er)"}"></i></div>
+        <div class="mob-kv">
+          <span>Monthly expense</span><b class="num">${inr(r.monthly)}</b>
+          <span>Return / Inflation</span><b class="num">${pct(r.roi)} / ${pct(r.infl)}</b>
+          <span>Money left at end</span><b class="num">${r.left == null ? "Runs out first" : inr(r.left)}</b>
+        </div>
+      </article>`;
+    }).join("");
+
+    return `<div class="mobile-canvas">
+      <div class="mob-card" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <strong style="font-family:var(--ff-display)">Stress Test</strong>
+        <button type="button" class="btn primary" style="padding:6px 10px">Export CSV</button>
+      </div>
+      <div class="mob-kpis">
+        <div class="kpi-box"><small>Worst case</small><b>${yrs(s.min)}</b><span>${esc(s.minName)}</span></div>
+        <div class="kpi-box"><small>Best case</small><b>${yrs(s.max)}</b><span>${esc(s.maxName)}</span></div>
+        <div class="kpi-box"><small>Full plan</small><b>${s.fullPlan} / 14</b><span>scenarios</span></div>
+        <div class="kpi-box"><small>Runs out &lt;70y</small><b>${s.runOut} / 14</b><span>scenarios</span></div>
+      </div>
+      <details class="mob-card"><summary style="font-weight:600;cursor:pointer">Stress Settings (11 editable inputs)</summary><p class="meta-line" style="margin:8px 0 0">All 11 settings collapse cleanly into this drawer above the scenario cards on phones.</p></details>
+      ${cards}
+    </div>`;
+  }
+
+  function paint() {
+    const R = compute();
+    document.querySelectorAll(".wf-tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === state.view)));
+    ["desktop", "engine", "mobile", "boards"].forEach(v => document.getElementById("view-" + v).classList.toggle("hidden", state.view !== v));
+    if (state.view === "desktop") document.getElementById("view-desktop").innerHTML = renderDesktop(R);
+    if (state.view === "engine") document.getElementById("view-engine").innerHTML = renderEngineTab(R);
+    if (state.view === "mobile") document.getElementById("view-mobile").innerHTML = renderMobile(R);
+  }
+
+  document.addEventListener("click", e => {
+    const tab = e.target.closest(".wf-tabs button");
+    if (tab) { state.view = tab.dataset.view; paint(); return; }
+    const rf = e.target.closest("[data-rf]");
+    if (rf) { state.rowFilter = rf.dataset.rf; paint(); return; }
+    const wf = e.target.closest("[data-wf]");
+    if (!wf) return;
+    const act = wf.dataset.wf;
+    if (act === "refresh") paint();
+    else if (act === "reset") { SAMPLE_CLIENTS[state.client].settings = ST.defaultSettings(); paint(); }
+    else if (act === "apply") {
+      const next = {};
+      document.querySelectorAll("[data-set]").forEach(i => {
+        const n = Number(String(i.value).replace(/[,₹\s]/g, ""));
+        if (Number.isFinite(n)) next[i.dataset.set] = i.dataset.fmt === "r" ? n : n / 100;
+      });
+      SAMPLE_CLIENTS[state.client].settings = ST.cleanSettings(next);
+      paint();
+    } else if (act === "export") {
+      const R = compute();
+      const rows = [["Scenario", "Survival", "Monthly Expense", "Return", "Inflation"]].concat(
+        R.rows.map(r => [r.name, r.survival.toFixed(2), r.monthly, r.roi, r.infl])
+      );
+      const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "stress-test-wireframe.csv"; a.click();
+    }
+  });
+
+  document.addEventListener("change", e => {
+    const t = e.target;
+    if (t.matches("[data-wf=client]")) { state.client = t.value; paint(); }
+    else if (t.matches("[data-wf=engFilter]")) { state.engFilter = t.value; paint(); }
+    else if (t.matches("[data-col]")) { state.cols[t.dataset.col] = t.checked; paint(); }
+  });
+
+  document.addEventListener("input", e => {
+    if (!e.target.matches("[data-set]")) return;
+    e.target.classList.add("dirty");
+    const applyBtn = document.querySelector("[data-wf=apply]");
+    if (applyBtn) applyBtn.disabled = false;
+  });
+
+  document.addEventListener("toggle", e => {
+    if (e.target.dataset && e.target.dataset.acc === "engine") state.openEngine = e.target.open;
+    if (e.target.dataset && e.target.dataset.acc === "notes") state.openNotes = e.target.open;
+  }, true);
+
+  paint();
+})();
+</script>
+</body>
+</html>

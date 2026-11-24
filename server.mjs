@@ -30,6 +30,20 @@ app.get('/.well-known/assetlinks.json', (_req, res) => {
   res.sendFile(path.join(staticDir, '.well-known', 'assetlinks.json'));
 });
 
+// Interactive Stress Test wireframe preview routes
+app.get(['/wireframes', '/wireframes/'], (_req, res) => {
+  res.sendFile(path.join(__dirname, 'wireframes', 'index.html'));
+});
+app.get('/wireframes/engine-rp.js', (_req, res) => {
+  res.type('application/javascript');
+  res.sendFile(path.join(staticDir, 'modules', 'retirement-planner', 'engine.js'));
+});
+app.get('/wireframes/engine-st.js', (_req, res) => {
+  res.type('application/javascript');
+  res.sendFile(path.join(staticDir, 'modules', 'stress-test', 'engine.js'));
+});
+app.use('/wireframes/assets', express.static(path.join(__dirname, 'src', 'assets', 'images')));
+
 app.use(
   express.static(staticDir, {
     index: 'index.html',

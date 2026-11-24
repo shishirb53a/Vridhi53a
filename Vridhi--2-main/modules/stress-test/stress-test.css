@@ -1,52 +1,103 @@
-/* Stress Test screen. Every colour is one of the app's theme variables (--card --tx --mu --bd --bg --ac --ac2 --ok --er --hl),
-   so the screen follows Light, Dark and the chosen accent colour. The fallbacks only apply outside the app. */
+/* Stress Test screen — Desktop Executive layout. Every colour is derived from the app's theme variables
+   (--card --tx --mu --bd --bg --ac --ac2 --ok --er --hl), so it follows Light, Dark and the chosen accent colour. */
 .st-root{--c-card:var(--card,#fff);--c-tx:var(--tx,#1b2939);--c-mu:var(--mu,#536273);--c-bd:var(--bd,#dce4ed);--c-bg:var(--bg,#f4f7fb);--c-ac:var(--ac,#14392b);--c-ac2:var(--ac2,#fff);--c-ok:var(--ok,#167d68);--c-er:var(--er,#c92a2a);
- --c-soft:color-mix(in srgb,var(--c-tx) 6%,var(--c-card));--c-lnk:color-mix(in srgb,var(--c-mu) 20%,var(--c-card));--c-ovr:color-mix(in srgb,#f08c3c 38%,var(--c-card));--c-edt:var(--hl,#f8f1df);
+ --c-warn:color-mix(in srgb,var(--c-er) 45%,var(--c-ok));
+ --c-soft:color-mix(in srgb,var(--c-tx) 6%,var(--c-card));--c-lnk:color-mix(in srgb,var(--c-mu) 18%,var(--c-card));--c-ovr:color-mix(in srgb,var(--c-warn) 26%,var(--c-card));--c-edt:var(--hl,#f8f1df);
  color:var(--c-tx);font:14px/1.5 var(--ff,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif)}
 .st-root button,.st-root select,.st-root input{font:inherit;color:inherit}
 .st-root :focus-visible{outline:2px solid var(--c-ac);outline-offset:2px}
-.st-btn{background:var(--c-card);border:1px solid var(--c-bd);border-radius:6px;padding:5px 11px;cursor:pointer}
+.st-btn{background:var(--c-card);border:1px solid var(--c-bd);border-radius:7px;padding:7px 12px;cursor:pointer;font-weight:600;white-space:nowrap}
+.st-btn:hover:not(:disabled){background:var(--c-soft)}
 .st-btn.p{background:var(--c-ac);color:var(--c-ac2);border-color:var(--c-ac)}.st-btn:disabled{opacity:.5;cursor:default}
-.st-link{background:none;border:0;color:var(--c-ac);text-decoration:underline;cursor:pointer;padding:4px}
-.st-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 14px}
-.st-bar h1{font-size:18px;margin:0}.st-sp{flex:1}.st-live{color:var(--c-ok);font-weight:600;font-size:13px}
-.st-bar select{background:var(--c-card);border:1px solid var(--c-bd);border-radius:6px;padding:4px 8px}
-.st-sum{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
-.st-tile{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 12px;min-width:0}
-.st-tile small{display:block;color:var(--c-mu)}.st-tile b{font-size:22px}.st-tile span{display:block;color:var(--c-mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.st-main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px;align-items:start}
-.st-card{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:12px;min-width:0}
-.st-card h2{font-size:15px;margin:0}.st-note{color:var(--c-mu);margin:4px 0}
-.st-tb{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0}
+.st-link{background:none;border:0;color:var(--c-ac);text-decoration:underline;cursor:pointer;padding:5px 6px;white-space:nowrap}
+.st-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:11px 16px;margin-bottom:14px}
+.st-bar h1{font-size:18px;margin:0}.st-sp{flex:1}.st-live{color:var(--c-ok);font-weight:600;font-size:13px;white-space:nowrap}
+.st-bar select{background:var(--c-card);border:1px solid var(--c-bd);border-radius:7px;padding:5px 9px}
+
+/* Executive Hero Strip: 70-Year Fan Chart + 5-KPI Summary */
+.st-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:14px;margin-bottom:14px;align-items:stretch}
+.st-card{background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:14px 16px;min-width:0}
+.st-card h2{font-size:15.5px;margin:0}.st-note{color:var(--c-mu);margin:3px 0 0;font-size:13px}
+.st-chead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 14px;margin-bottom:10px}
+.st-cleg{display:flex;flex-wrap:wrap;gap:10px 14px;font-size:12px;color:var(--c-mu);align-items:center}
+.st-cleg span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.st-cleg .sw{display:inline-block;width:14px;height:3px;border-radius:2px}
+.st-cleg .sw.best{background:var(--c-ok)}.st-cleg .sw.base{background:var(--c-ac)}.st-cleg .sw.bear{background:var(--c-warn)}.st-cleg .sw.worst{background:var(--c-er)}
+.st-fan{width:100%;height:210px;display:block}
+.st-fan .st-grid{stroke:var(--c-soft);stroke-width:1}
+.st-fan .st-ax{font-size:11px;fill:var(--c-mu);font-variant-numeric:tabular-nums}
+.st-fan .st-band{fill:var(--c-ac);opacity:.09}
+.st-fan .st-zero{stroke:var(--c-er);stroke-width:1.2;stroke-dasharray:4 4;opacity:.65}
+.st-fan .st-plan-line{stroke:var(--c-ac);stroke-width:1.3;stroke-dasharray:4 4}
+.st-fan .st-plan-lbl{font-size:11px;font-weight:600;fill:var(--c-ac)}
+.st-fan .st-cv{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.st-fan .st-cv-best{stroke:var(--c-ok);stroke-width:2}
+.st-fan .st-cv-base{stroke:var(--c-ac);stroke-width:2.6}
+.st-fan .st-cv-bear{stroke:var(--c-warn);stroke-width:1.8;stroke-dasharray:5 3}
+.st-fan .st-cv-worst{stroke:var(--c-er);stroke-width:2}
+
+.st-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.st-tile{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 12px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.st-tile-wide{grid-column:1 / -1;flex-direction:row;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.st-tile small{display:block;color:var(--c-mu);font-size:12px}.st-tile b{font-size:20px;font-variant-numeric:tabular-nums;margin:2px 0}.st-tile span{display:block;color:var(--c-mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Segmented Row Filter */
+.st-seg{display:inline-flex;background:var(--c-soft);border:1px solid var(--c-bd);border-radius:8px;padding:3px;gap:2px}
+.st-seg button{border:0;background:transparent;padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--c-mu);cursor:pointer;white-space:nowrap}
+.st-seg button[aria-pressed="true"]{background:var(--c-ac);color:var(--c-ac2)}
+
+/* Main Workspace */
+.st-main{display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:14px;align-items:start}
+.st-tb{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:10px 0}
 .st-chips b{font-size:12px;margin-right:6px}
-.st-chips label{display:inline-flex;gap:5px;align-items:center;border:1px solid var(--c-bd);border-radius:99px;padding:2px 10px;margin-right:6px;cursor:pointer;font-size:12px}
-.st-key{display:flex;gap:10px;flex-wrap:wrap;font-size:12px}
+.st-chips label{display:inline-flex;gap:5px;align-items:center;border:1px solid var(--c-bd);border-radius:7px;padding:4px 10px;margin-right:6px;cursor:pointer;font-size:12.5px;background:var(--c-card)}
+.st-key{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--c-mu)}
 .st-key i{display:inline-block;width:12px;height:12px;border:1px solid var(--c-bd);border-radius:3px;vertical-align:-2px;margin-right:4px}
 .st-key .l{background:var(--c-lnk)}.st-key .o{background:var(--c-ovr)}.st-key .e{background:var(--c-edt)}
-.st-wrap{overflow:auto;border:1px solid var(--c-bd);border-radius:8px;max-height:560px}.st-short{max-height:320px}
+.st-wrap{overflow:auto;border:1px solid var(--c-bd);border-radius:9px;max-height:580px}.st-short{max-height:340px}
 .st-t{border-collapse:separate;border-spacing:0;font-size:13px;width:100%}
-.st-t th,.st-t td{padding:7px 9px;border-bottom:1px solid var(--c-soft);white-space:nowrap;text-align:right}
+.st-t th,.st-t td{padding:8px 10px;border-bottom:1px solid var(--c-soft);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
 .st-t th{position:sticky;top:0;background:var(--c-soft);z-index:2;font-weight:600}
 .st-t th.g{background:var(--c-ac);color:var(--c-ac2);text-align:center}
-.st-t thead tr:nth-child(2) th{top:31px}
-.st-t td:first-child,.st-t th:first-child{text-align:left;position:sticky;left:0;z-index:1;background:var(--c-card);min-width:230px}
+.st-t thead tr:nth-child(2) th{top:33px}
+.st-t td:first-child,.st-t th:first-child{text-align:left;position:sticky;left:0;z-index:1;background:var(--c-card);min-width:235px;border-right:1px solid var(--c-bd)}
 .st-t th:first-child{background:var(--c-soft);z-index:3}
 .st-t tbody tr:hover td{background:var(--c-soft)}
 .st-t td.l{background:var(--c-lnk)}.st-t td.o{background:var(--c-ovr)}.st-t td.neg{color:var(--c-er)}
-.st-ch{display:inline-block;border-radius:99px;padding:1px 9px;font-size:12px;font-weight:700}
-.st-ch.ok{background:color-mix(in srgb,var(--c-ok) 18%,var(--c-card));color:var(--c-ok)}
-.st-ch.bad{background:color-mix(in srgb,var(--c-er) 16%,var(--c-card));color:var(--c-er)}
-.st-sv{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:210px}
-.st-mb{position:relative;width:70px;height:8px;background:var(--c-soft);border-radius:4px;flex:none}
+.st-empty{text-align:center!important;color:var(--c-mu);padding:18px!important}
+.st-ch{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}
+.st-ch.ok{background:color-mix(in srgb,var(--c-ok) 16%,var(--c-card));color:var(--c-ok)}
+.st-ch.bad{background:color-mix(in srgb,var(--c-er) 14%,var(--c-card));color:var(--c-er)}
+.st-sv{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:220px}
+.st-mb{position:relative;width:72px;height:7px;background:var(--c-soft);border-radius:4px;flex:none}
 .st-mb i{display:block;height:100%;border-radius:4px}.st-mb u{position:absolute;top:-3px;bottom:-3px;border-left:2px dashed var(--c-ac)}
-.st-set{position:sticky;top:8px}
-.st-sg h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--c-mu);margin:14px 0 4px}
-.st-f{display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:center;margin:5px 0}
+
+/* Sticky Settings Rail */
+.st-set{position:sticky;top:12px}
+.st-sg h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-mu);margin:14px 0 5px}
+.st-f{display:grid;grid-template-columns:1fr 94px;gap:8px;align-items:center;margin:6px 0}
 .st-f small{display:block;color:var(--c-mu);font-size:11px}
-.st-f input{width:100%;text-align:right;background:var(--c-edt);border:1px solid var(--c-bd);border-radius:5px;padding:4px 6px;box-sizing:border-box}
-.st-f input.chg{outline:2px solid var(--c-ac)}
-.st-acts{margin-top:14px;display:flex;gap:8px}
-.st-d{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 14px;margin-top:12px}
-.st-d summary{cursor:pointer;font-weight:600}.st-d ul{padding-left:18px}.st-d li{margin:4px 0}
-.st-problem{border:1px solid var(--c-bd);border-radius:10px;padding:14px 18px;background:var(--c-card);margin-top:12px}
-@media (max-width:980px){.st-main{grid-template-columns:1fr}.st-set{position:static;order:-1}.st-sum{grid-template-columns:repeat(2,1fr)}}
+.st-f input{width:100%;text-align:right;background:var(--c-edt);border:1px solid var(--c-bd);border-radius:6px;padding:5px 7px;box-sizing:border-box;font-variant-numeric:tabular-nums}
+.st-f input.chg,.st-f input.dirty{outline:2px solid var(--c-ac)}
+.st-acts{margin-top:14px;display:flex;gap:8px}.st-acts .st-btn{flex:1;text-align:center}
+
+/* Expandable Engine & Notes */
+.st-d{background:var(--c-card);border:1px solid var(--c-bd);border-radius:12px;padding:12px 16px;margin-top:14px}
+.st-d summary{cursor:pointer;font-weight:700}.st-d ul{padding-left:18px}.st-d li{margin:5px 0;color:var(--c-mu)}
+.st-problem{border:1px solid var(--c-bd);border-radius:12px;padding:16px 18px;background:var(--c-card);margin-top:12px}
+
+/* Mobile Scenario Cards (hidden on desktop) */
+.st-mcards{display:none}
+.st-mcard{border:1px solid var(--c-bd);border-radius:10px;padding:11px 12px;margin-top:10px;background:var(--c-card)}
+.st-mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.st-msurv{display:flex;align-items:center;gap:10px;margin:8px 0}
+.st-msurv .st-mb{flex:1;width:auto}
+.st-mkv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:12.5px;border-top:1px solid var(--c-soft);padding-top:8px}
+.st-mkv span{color:var(--c-mu)}.st-mkv b{font-variant-numeric:tabular-nums}
+
+@media (max-width:1040px){.st-hero,.st-main{grid-template-columns:1fr}.st-set{position:static;order:-1}}
+@media (max-width:720px){
+  .st-sum{grid-template-columns:1fr 1fr}
+  .st-main .st-wrap{display:none}
+  .st-mcards{display:block}
+}
