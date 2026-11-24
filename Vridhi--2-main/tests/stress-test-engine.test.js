@@ -35,6 +35,8 @@ const s2 = Object.assign(ST.defaultSettings(), { conservative: 0.05, optimistic:
 const r2 = ST.run(base, s2);
 assert.ok(r2.rows[7].survival < res.rows[7].survival && r2.rows[8].survival > res.rows[8].survival, 'scenario 8 and 9 follow the stress settings');
 assert.strictEqual(ST.cleanSettings({ lean: 7 }).lean, 0.25, 'out-of-range settings fall back to defaults');
+assert.deepStrictEqual(ST.cleanSettings(null), ST.defaultSettings(), 'no saved settings means the defaults');
+assert.strictEqual(ST.cleanSettings({ lean: '' }).lean, 0.25, 'a blank setting means the default');
 /* Incomplete plans are reported, not guessed. */
 assert.strictEqual(ST.fromPlanner(Object.assign({}, inp, { corpus: '' })).ok, false);
 assert.deepStrictEqual(ST.runsOutOn(1.5, new Date(2026, 10, 24)), { y: 2028, m: 5 });

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-/* Renders the screen in jsdom and checks the grid keeps the Excel layout. Prints SKIP when jsdom is not installed. */
+/* Renders the screen in jsdom and checks every function of the simplified layout. Prints SKIP when jsdom is not installed. */
 const path = require('path'), fs = require('fs'), assert = require('assert');
 let JSDOM; try { ({ JSDOM } = require('jsdom')); } catch (e) { console.log('stress-test-ui: SKIP (jsdom not installed)'); process.exit(0); }
 const root = path.join(__dirname, '..');
@@ -13,20 +13,38 @@ let saved = null;
 const provider = { clients: () => [{ id: 'a', name: 'Shishir' }], activeId: () => 'a', inputs: () => inp, settings: () => saved, saveSettings: (id, s) => { saved = s; } };
 const h = w.document.getElementById('h');
 w.StressTestUI.mount(h, provider);
-const rows = h.querySelectorAll('tr'), rn = Array.from(rows).map(r => (r.querySelector('.st-rn') || {}).textContent);
-assert.strictEqual(rn[1], '1'); assert.ok(rn.includes('123') && rn.includes('115') && rn.includes('45'), 'rows keep the Excel numbering');
-assert.strictEqual(h.querySelectorAll('tr')[0].querySelectorAll('th').length, 20, 'columns A-S plus the row-number column');
-const row6 = Array.from(rows).find(r => (r.querySelector('.st-rn') || {}).textContent === '6');
-assert.ok(row6.textContent.includes('1. Base Case') && row6.textContent.includes('51.39 yrs'), 'base case row shows the survival');
-assert.strictEqual(h.querySelectorAll('[data-set]').length, 11, 'nine settings plus the two return settings are editable');
-const inpEl = h.querySelector('[data-set=conservative]'); inpEl.value = '5'; inpEl.dispatchEvent(new w.Event('change', { bubbles: true }));
-assert.ok(Math.abs(saved.conservative - 0.05) < 1e-9, 'edited setting is saved for the client');
-/* navigation buttons go to Retirement Planner > Reports */
+const txt = () => h.textContent;
+assert.strictEqual(h.querySelectorAll('.st-tile').length, 5, 'five summary tiles');
+assert.ok(txt().includes('14.10 yrs') && txt().includes('11 of 14') && txt().includes('8 of 14'), 'summary values');
+assert.strictEqual(h.querySelectorAll('.st-main .st-t tbody tr').length, 14, 'all 14 scenarios');
+const row1 = h.querySelector('.st-main .st-t tbody tr').textContent;
+assert.ok(row1.includes('1. Base Case') && row1.includes('51.39 yrs') && row1.includes('Covers plan'), 'base case row');
+assert.ok(txt().includes('Falls short') && txt().includes('Never runs out'), 'status labels');
+for (const g of ['What changes', 'Result']) assert.ok(h.querySelector('.st-main .st-t').textContent.includes(g), g + ' group shown');
+assert.ok(!h.querySelector('.st-main .st-t').textContent.includes('Emergency buffer'), 'Starting position hidden by default');
+const chip = h.querySelector('[data-g=st]'); chip.checked = true; chip.dispatchEvent(new w.Event('change', { bubbles: true }));
+assert.ok(h.querySelector('.st-main .st-t').textContent.includes('Emergency buffer') && h.querySelector('.st-main .st-t').textContent.includes('Investable'), 'Starting position columns can be shown');
+assert.strictEqual(h.querySelectorAll('[data-set]').length, 11, 'eleven editable settings');
+assert.ok(h.querySelector('[data-st=apply]').disabled, 'Apply waits for a change');
+const c1 = h.querySelector('[data-set=conservative]'); c1.value = '5'; c1.dispatchEvent(new w.Event('input', { bubbles: true }));
+assert.ok(!h.querySelector('[data-st=apply]').disabled, 'Apply enabled after an edit');
+h.querySelector('[data-st=apply]').click();
+assert.ok(Math.abs(saved.conservative - 0.05) < 1e-9, 'Apply saves the settings for the client');
+const sh = h.querySelector('[data-set=shock]'); assert.ok(sh.value.includes(','), 'shock shown with Indian digit grouping');
+h.querySelector('[data-st=reset]').click(); assert.ok(Math.abs(saved.conservative - 0.06) < 1e-9, 'Reset restores defaults');
+assert.strictEqual(h.querySelectorAll('.st-d').length, 2, 'engine and notes sections');
+assert.strictEqual(h.querySelectorAll('.st-d .st-t tbody tr').length, 70, 'engine table has 70 years');
+const f = h.querySelector('[data-st=filter]'); f.value = 'base'; f.dispatchEvent(new w.Event('change', { bubbles: true }));
+assert.strictEqual(h.querySelectorAll('.st-d .st-t thead th').length, 6, 'filter shows base case only');
+assert.ok(txt().includes('Export CSV') && txt().includes('Refresh from planner'), 'toolbar buttons');
+/* navigation goes to Retirement Planner > Reports */
 w.UI = { tab: 'Goal Planner' }; w.RPUI = { tab: 'status', rv: 'clients' }; let rendered = 0; w.render = () => { rendered++; };
 const nav = w.StressTestUI.appProvider();
-nav.onYearByYear(); assert.ok(w.RPUI.tab === 'report' && w.RPUI.rv === 'yy' && w.UI.tab === 'Retirement planner' && rendered === 1, 'Year-by-Year opens Retirement Planner > Reports > Year by Year');
-nav.onBack(); assert.ok(w.RPUI.tab === 'status' && w.UI.tab === 'Retirement planner', 'Back returns to the planner');
-/* the planner page edit */
+nav.onYearByYear(); assert.ok(w.RPUI.tab === 'report' && w.RPUI.rv === 'yy' && w.UI.tab === 'Retirement planner' && rendered === 1, 'Year-by-Year link');
+nav.onBack(); assert.ok(w.RPUI.tab === 'status' && w.UI.tab === 'Retirement planner', 'Back link');
+const css = fs.readFileSync(path.join(root, 'modules', 'stress-test', 'stress-test.css'), 'utf8');
+assert.ok(!/#[0-9a-fA-F]{3,6}/.test(css.replace(/var\([^)]*\)/g, '')) || /var\(--card/.test(css), 'colours come from app theme variables');
+for (const v of ['--card', '--tx', '--mu', '--bd', '--ac', '--ok', '--er']) assert.ok(css.includes('var(' + v), 'uses theme variable ' + v);
 const pu = fs.readFileSync(path.join(root, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
 assert.ok(pu.includes('data-rp="rv:stress"') && pu.includes('view === "stress"') && pu.includes('data-st-host'), 'planner Reports tab has the Stress Test button and host');
 console.log('stress-test-ui: all checks passed');
