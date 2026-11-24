@@ -1,12 +1,15 @@
 # Stress Test module
 
 A separate screen that stress-tests one Retirement Planner client under 14 conditions and shows how long the
-money lasts. The grid keeps the Excel "Stress Test" tab cell for cell: rows 1-123, columns A-S, same labels and order.
+money lasts. Layout: summary tiles, the 14 scenarios (columns grouped as What changes, Result and Starting position),
+stress settings beside them, then the 70-year calculation engine and the notes (both collapsed).
+Every column, setting and summary figure of the Excel "Stress Test" tab is kept.
 
 - `engine.js` is pure maths (no DOM, storage or network). It reads a client's saved planner inputs through the
   planner's own `FreedomHorizon.simulate`, so Scenario 1 (Base Case) equals the Year-by-Year report. It then
   runs each scenario for up to 70 years, with costs continuing after the plan ends.
-- `ui.js` draws the grid and the client bar. `stress-test.css` holds the styles (Excel colour guide, light and dark).
+- `ui.js` draws the screen. `stress-test.css` uses only the app's theme variables (`--card --tx --mu --bd --bg --ac --ac2 --ok --er --hl`),
+  so it follows Light, Dark and the chosen accent colour. Red and green always come with a word or a bar.
 - Nothing else in the app is changed. The module only reads `S.fhp` (client plans) and writes `S.stress`
   (the Stress Settings per client) through the app's `save()`.
 

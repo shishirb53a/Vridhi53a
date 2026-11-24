@@ -1,24 +1,52 @@
-/* Stress Test screen. Colours follow the Excel colour guide; light/dark follow the app theme. */
-.st-root{--st-line:#c9d0db;--st-bg:#f6f7f9;--st-card:#fff;--st-fg:#1b2330;--st-mut:#5b6678;--st-navy:#1f3864;--st-lnk:#e7e6e6;--st-ovr:#f8cbad;--st-edt:#fff2cc;--st-edtfg:#0000ff;--st-eng:#595959;color:var(--st-fg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .st-root{--st-line:#39414f;--st-bg:#12161d;--st-card:#1a202a;--st-fg:#e6eaf0;--st-mut:#9aa6b8;--st-navy:#2c4a86;--st-lnk:#3a3f48;--st-ovr:#7a4a2c;--st-edt:#5c4d16;--st-edtfg:#9db8ff;--st-eng:#4a4f58}}
-:root[data-theme="dark"] .st-root{--st-line:#39414f;--st-bg:#12161d;--st-card:#1a202a;--st-fg:#e6eaf0;--st-mut:#9aa6b8;--st-navy:#2c4a86;--st-lnk:#3a3f48;--st-ovr:#7a4a2c;--st-edt:#5c4d16;--st-edtfg:#9db8ff;--st-eng:#4a4f58}
-.st-bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--st-card);border:1px solid var(--st-line);border-radius:6px;padding:10px 14px;margin-bottom:10px}
-.st-sp{flex:1}.st-live{color:#1f7a4d;font-weight:600}
-.st-bar select,.st-bar button{font:inherit;color:inherit;background:var(--st-card);border:1px solid var(--st-line);border-radius:4px;padding:3px 10px}
-.st-wrap{overflow:auto;max-height:80vh;border:1px solid var(--st-line);background:var(--st-card)}
-.st-grid{border-collapse:collapse;font-size:12.5px;min-width:1700px}
-.st-grid td,.st-grid th{border:1px solid var(--st-line);padding:4px 7px;height:24px;white-space:nowrap;vertical-align:middle}
-.st-rn,.st-cl{background:var(--st-bg);color:var(--st-mut);font-weight:500;text-align:center;font-size:11px}
-.st-rn{width:34px;position:sticky;left:0;z-index:2}
-.st-cl{position:sticky;top:0;z-index:3}
-td.st-a{position:sticky;left:34px;background:var(--st-card);z-index:1;min-width:270px;max-width:270px;overflow:hidden;text-overflow:ellipsis}
-.st-num{text-align:right}.st-hd{background:var(--st-navy);color:#fff;font-weight:600;white-space:normal;text-align:center;min-width:104px}
-td.st-hd.st-a{background:var(--st-navy)}
-.st-ttl{font-size:16px;font-weight:700;color:var(--st-navy)}.st-key,.st-surv{font-weight:700}
-.st-lnk{background:var(--st-lnk)}.st-ovr{background:var(--st-ovr)}.st-edt{background:var(--st-edt);color:var(--st-edtfg)}
-td.st-sec{background:var(--st-navy);color:#fff;font-weight:700}td.st-eng{background:var(--st-eng);color:#fff;font-weight:600}
-.st-note{white-space:normal;color:var(--st-mut);font-size:12px}.st-neg{color:#c0392b}
-.st-in{width:92px;text-align:right;font:inherit;color:inherit;background:transparent;border:0;border-bottom:1px solid var(--st-mut)}
-.st-in:focus-visible,.st-bar button:focus-visible,.st-nav:focus-visible{outline:2px solid #4a7bd0;outline-offset:1px}
-.st-nav{font:inherit;color:var(--st-edtfg);background:none;border:0;text-decoration:underline;cursor:pointer}
-.st-problem{border:1px solid var(--st-line);border-radius:6px;padding:14px 18px;background:var(--st-card)}
+/* Stress Test screen. Every colour is one of the app's theme variables (--card --tx --mu --bd --bg --ac --ac2 --ok --er --hl),
+   so the screen follows Light, Dark and the chosen accent colour. The fallbacks only apply outside the app. */
+.st-root{--c-card:var(--card,#fff);--c-tx:var(--tx,#1b2939);--c-mu:var(--mu,#536273);--c-bd:var(--bd,#dce4ed);--c-bg:var(--bg,#f4f7fb);--c-ac:var(--ac,#14392b);--c-ac2:var(--ac2,#fff);--c-ok:var(--ok,#167d68);--c-er:var(--er,#c92a2a);
+ --c-soft:color-mix(in srgb,var(--c-tx) 6%,var(--c-card));--c-lnk:color-mix(in srgb,var(--c-mu) 20%,var(--c-card));--c-ovr:color-mix(in srgb,#f08c3c 38%,var(--c-card));--c-edt:var(--hl,#f8f1df);
+ color:var(--c-tx);font:14px/1.5 var(--ff,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif)}
+.st-root button,.st-root select,.st-root input{font:inherit;color:inherit}
+.st-root :focus-visible{outline:2px solid var(--c-ac);outline-offset:2px}
+.st-btn{background:var(--c-card);border:1px solid var(--c-bd);border-radius:6px;padding:5px 11px;cursor:pointer}
+.st-btn.p{background:var(--c-ac);color:var(--c-ac2);border-color:var(--c-ac)}.st-btn:disabled{opacity:.5;cursor:default}
+.st-link{background:none;border:0;color:var(--c-ac);text-decoration:underline;cursor:pointer;padding:4px}
+.st-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 14px}
+.st-bar h1{font-size:18px;margin:0}.st-sp{flex:1}.st-live{color:var(--c-ok);font-weight:600;font-size:13px}
+.st-bar select{background:var(--c-card);border:1px solid var(--c-bd);border-radius:6px;padding:4px 8px}
+.st-sum{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
+.st-tile{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 12px;min-width:0}
+.st-tile small{display:block;color:var(--c-mu)}.st-tile b{font-size:22px}.st-tile span{display:block;color:var(--c-mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px;align-items:start}
+.st-card{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:12px;min-width:0}
+.st-card h2{font-size:15px;margin:0}.st-note{color:var(--c-mu);margin:4px 0}
+.st-tb{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0}
+.st-chips b{font-size:12px;margin-right:6px}
+.st-chips label{display:inline-flex;gap:5px;align-items:center;border:1px solid var(--c-bd);border-radius:99px;padding:2px 10px;margin-right:6px;cursor:pointer;font-size:12px}
+.st-key{display:flex;gap:10px;flex-wrap:wrap;font-size:12px}
+.st-key i{display:inline-block;width:12px;height:12px;border:1px solid var(--c-bd);border-radius:3px;vertical-align:-2px;margin-right:4px}
+.st-key .l{background:var(--c-lnk)}.st-key .o{background:var(--c-ovr)}.st-key .e{background:var(--c-edt)}
+.st-wrap{overflow:auto;border:1px solid var(--c-bd);border-radius:8px;max-height:560px}.st-short{max-height:320px}
+.st-t{border-collapse:separate;border-spacing:0;font-size:13px;width:100%}
+.st-t th,.st-t td{padding:7px 9px;border-bottom:1px solid var(--c-soft);white-space:nowrap;text-align:right}
+.st-t th{position:sticky;top:0;background:var(--c-soft);z-index:2;font-weight:600}
+.st-t th.g{background:var(--c-ac);color:var(--c-ac2);text-align:center}
+.st-t thead tr:nth-child(2) th{top:31px}
+.st-t td:first-child,.st-t th:first-child{text-align:left;position:sticky;left:0;z-index:1;background:var(--c-card);min-width:230px}
+.st-t th:first-child{background:var(--c-soft);z-index:3}
+.st-t tbody tr:hover td{background:var(--c-soft)}
+.st-t td.l{background:var(--c-lnk)}.st-t td.o{background:var(--c-ovr)}.st-t td.neg{color:var(--c-er)}
+.st-ch{display:inline-block;border-radius:99px;padding:1px 9px;font-size:12px;font-weight:700}
+.st-ch.ok{background:color-mix(in srgb,var(--c-ok) 18%,var(--c-card));color:var(--c-ok)}
+.st-ch.bad{background:color-mix(in srgb,var(--c-er) 16%,var(--c-card));color:var(--c-er)}
+.st-sv{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:210px}
+.st-mb{position:relative;width:70px;height:8px;background:var(--c-soft);border-radius:4px;flex:none}
+.st-mb i{display:block;height:100%;border-radius:4px}.st-mb u{position:absolute;top:-3px;bottom:-3px;border-left:2px dashed var(--c-ac)}
+.st-set{position:sticky;top:8px}
+.st-sg h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--c-mu);margin:14px 0 4px}
+.st-f{display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:center;margin:5px 0}
+.st-f small{display:block;color:var(--c-mu);font-size:11px}
+.st-f input{width:100%;text-align:right;background:var(--c-edt);border:1px solid var(--c-bd);border-radius:5px;padding:4px 6px;box-sizing:border-box}
+.st-f input.chg{outline:2px solid var(--c-ac)}
+.st-acts{margin-top:14px;display:flex;gap:8px}
+.st-d{background:var(--c-card);border:1px solid var(--c-bd);border-radius:10px;padding:10px 14px;margin-top:12px}
+.st-d summary{cursor:pointer;font-weight:600}.st-d ul{padding-left:18px}.st-d li{margin:4px 0}
+.st-problem{border:1px solid var(--c-bd);border-radius:10px;padding:14px 18px;background:var(--c-card);margin-top:12px}
+@media (max-width:980px){.st-main{grid-template-columns:1fr}.st-set{position:static;order:-1}.st-sum{grid-template-columns:repeat(2,1fr)}}

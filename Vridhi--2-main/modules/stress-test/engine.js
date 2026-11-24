@@ -15,7 +15,7 @@
   function cleanSettings(s) {
     const d = defaultSettings(), o = {};
     for (const k of Object.keys(d)) {
-      const n = Number(s && s[k]), [lo, hi] = SETTING_RANGES[k];
+      const raw = s && s[k], n = raw === null || raw === undefined || raw === "" ? NaN : Number(raw), [lo, hi] = SETTING_RANGES[k];
       o[k] = Number.isFinite(n) && n >= lo && n <= hi ? n : d[k];
     }
     return o;
