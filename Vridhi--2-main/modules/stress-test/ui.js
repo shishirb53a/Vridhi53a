@@ -276,6 +276,18 @@
       host.querySelectorAll("[data-st-tab]").forEach(b => b.setAttribute("aria-selected", String(b.getAttribute("data-st-tab") === id)));
       host.querySelectorAll("[data-st-panel]").forEach(p => { p.hidden = p.getAttribute("data-st-panel") !== id; });
     }
+    function fitMaxTable() {
+      if (!st.max) return;
+      const wrap = host.querySelector(".st-scen-card.st-max .st-wrap");
+      const tbl = wrap && wrap.querySelector("table.st-t");
+      if (!wrap || !tbl) return;
+      tbl.style.zoom = "";
+      const avail = wrap.clientWidth, need = tbl.scrollWidth;
+      if (avail > 700 && need > avail) {
+        const z = Math.max(0.65, Math.floor((avail / need) * 1000) / 1000);
+        tbl.style.zoom = String(z);
+      }
+    }
     function toggleMax(next) {
       st.max = typeof next === "boolean" ? next : !st.max;
       render();
@@ -292,6 +304,10 @@
           panel("engine", engine(R) + notes())
         : problem();
       host.innerHTML = `<section class="st-root" aria-label="Stress Test">${bar()}${body}</section>`;
+      if (st.max) {
+        fitMaxTable();
+        if (typeof requestAnimationFrame === "function") requestAnimationFrame(fitMaxTable);
+      }
     }
     function csv() {
       const R = st.result; if (!R) return;
@@ -348,9 +364,12 @@
         if (e.key === "Escape" && st.max && host.isConnected) { e.preventDefault(); toggleMax(false); }
       });
     }
+    if (typeof window !== "undefined" && window.addEventListener) {
+      window.addEventListener("resize", () => { if (st.max && host.isConnected) fitMaxTable(); });
+    }
     host.addEventListener("toggle", e => { const d = e.target; if (d.dataset && d.dataset.open) st.open[d.dataset.open] = d.open; }, true);
     render();
-    return { refresh: render, state: st, switchTab, toggleMax };
+    return { refresh: render, state: st, switchTab, toggleMax, fitMaxTable };
   }
 
   /* Retirement Planner > Reports > Stress Test: fhPage() (retirement-planner/ui.js) renders a host element; mount the screen as soon as it is in the page. */

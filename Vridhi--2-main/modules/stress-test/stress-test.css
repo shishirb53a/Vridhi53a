@@ -95,22 +95,25 @@ html body .st-root .st-t th.st-sep,html body .st-root .st-t td.st-sep{border-lef
 .st-mb{position:relative;width:64px;height:6px;background:var(--c-soft);border-radius:4px;flex:none}
 .st-mb i{display:block;height:100%;border-radius:4px}.st-mb u{position:absolute;top:-3px;bottom:-3px;border-left:2px dashed var(--c-ac)}
 
-/* Full-Window Maximize Mode: fits all 11 primary columns cleanly without horizontal scroll */
-.st-scen-card.st-max{position:fixed;inset:0;z-index:120;margin:0;border-radius:0;border:0;padding:18px 24px 20px;display:flex;flex-direction:column;background:var(--c-bg);box-shadow:none}
-.st-scen-card.st-max .st-scen-head{margin-bottom:10px}
-.st-scen-card.st-max .st-scen-tb{border-top:0;padding-top:0;margin-bottom:10px}
-.st-scen-card.st-max .st-wrap{flex:1;max-height:none;box-shadow:0 4px 24px color-mix(in srgb,var(--c-tx) 8%,transparent)}
-.st-scen-card.st-max .st-t{font-size:12.5px}
-html body .st-root .st-scen-card.st-max .st-t thead th{white-space:normal;line-height:1.25;vertical-align:bottom;padding:9px 8px}
-.st-scen-card.st-max .st-t td{padding:8px 8px}
-html body .st-root .st-scen-card.st-max .st-t td:first-child,html body .st-root .st-scen-card.st-max .st-t th:first-child{min-width:176px;position:static;border-right:1px solid var(--c-soft)}
-.st-scen-card.st-max .st-sv{min-width:166px;gap:6px}
-.st-scen-card.st-max .st-mb{width:46px}
-.st-scen-card.st-max.st-wide-cols .st-t{font-size:11.5px}
-html body .st-root .st-scen-card.st-max.st-wide-cols .st-t th,.st-scen-card.st-max.st-wide-cols .st-t td{padding:7px 6px}
-html body .st-root .st-scen-card.st-max.st-wide-cols .st-t td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-t th:first-child{min-width:148px}
-.st-scen-card.st-max.st-wide-cols .st-sv{min-width:144px}
-.st-scen-card.st-max.st-wide-cols .st-mb{width:34px}
+/* Full-Window Maximize Mode: fits all columns (11 default or all 16 with Starting position) on one screen without horizontal scroll */
+.st-scen-card.st-max{position:fixed;inset:0;z-index:120;margin:0;border-radius:0;border:0;padding:14px 18px 16px;display:flex;flex-direction:column;background:var(--c-bg);box-shadow:none}
+.st-scen-card.st-max .st-scen-head{margin-bottom:8px}
+.st-scen-card.st-max .st-scen-tb{border-top:0;padding-top:0;margin-bottom:8px}
+.st-scen-card.st-max .st-wrap{flex:1;max-height:none;overflow-x:auto;overflow-y:auto;box-shadow:0 4px 24px color-mix(in srgb,var(--c-tx) 8%,transparent)}
+.st-scen-card.st-max .st-t{font-size:12px;width:100%}
+html body .st-root .st-scen-card.st-max .st-t thead th{white-space:normal;line-height:1.2;vertical-align:bottom;padding:8px 6px;font-size:11px}
+.st-scen-card.st-max .st-t td{padding:7px 6px}
+html body .st-root .st-scen-card.st-max .st-t td:first-child,html body .st-root .st-scen-card.st-max .st-t th:first-child{min-width:138px;max-width:210px;white-space:normal;line-height:1.25;position:static;border-right:1px solid var(--c-soft)}
+.st-scen-card.st-max .st-sv{display:grid;grid-template-columns:auto 1fr;gap:3px 6px;align-items:center;justify-items:end;min-width:112px}
+.st-scen-card.st-max .st-sv b{grid-column:1 / -1;font-size:12px}
+.st-scen-card.st-max .st-sv .st-ch{padding:1px 6px;font-size:10.5px}
+.st-scen-card.st-max .st-sv .st-mb{width:38px;height:5px}
+.st-scen-card.st-max.st-wide-cols .st-t{font-size:11px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-t thead th{font-size:10.5px;padding:7px 4px}
+.st-scen-card.st-max.st-wide-cols .st-t td{padding:6px 4px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-t td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-t th:first-child{min-width:124px;max-width:160px}
+.st-scen-card.st-max.st-wide-cols .st-sv{min-width:104px}
+.st-scen-card.st-max.st-wide-cols .st-mb{width:30px}
 
 /* Tab 3: Stress Settings Grid */
 .st-sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:8px}
