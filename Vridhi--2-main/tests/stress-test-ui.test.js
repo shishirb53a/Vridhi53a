@@ -21,4 +21,9 @@ assert.ok(row6.textContent.includes('1. Base Case') && row6.textContent.includes
 assert.strictEqual(h.querySelectorAll('[data-set]').length, 11, 'nine settings plus the two return settings are editable');
 const inpEl = h.querySelector('[data-set=conservative]'); inpEl.value = '5'; inpEl.dispatchEvent(new w.Event('change', { bubbles: true }));
 assert.ok(Math.abs(saved.conservative - 0.05) < 1e-9, 'edited setting is saved for the client');
+w.UI = { tab: 'RP Reports', rps: 'stress' }; w.fhReportTab = () => '<div id="rptv">summary</div>';
+let page = w.rpReportsPage();
+assert.ok(page.includes('data-rps="summary"') && page.includes('data-rps="stress"') && page.includes('data-st-host') && !page.includes('id="rptv"'), 'Stress Test section shows the host');
+w.UI.rps = 'summary'; page = w.rpReportsPage();
+assert.ok(page.includes('id="rptv"') && !page.includes('data-st-host'), 'Summary section keeps the planner report');
 console.log('stress-test-ui: all checks passed');
