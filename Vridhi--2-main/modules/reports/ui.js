@@ -280,7 +280,7 @@
     disclosure("How this estimate works", HOW) + "</div>";
 
   function markup() {
-    return `<form id="fh" novalidate><h2><span id="fh-title">Vriddhi</span><span class="fh-pill" id="fh-pill" hidden></span><span class="fh-hact"><button type="button" id="fh-sx-dl" hidden>Download Report</button><button type="button" id="fh-sx-add" hidden>Add to Planner</button><button type="button" id="fh-hedit">\u270f\ufe0f Edit Plan</button><button type="button" id="fh-hx" aria-label="Close">\u2715</button></span></h2>
+    return `<form id="fh" novalidate><h2><span id="fh-title">Vriddhi</span><span class="fh-pill" id="fh-pill" hidden></span><span class="fh-hact"><button type="button" id="fh-sx-dl" hidden>Download Report</button><button type="button" id="fh-sx-add" hidden>Add to Planner</button><button type="button" id="fh-hedit">\u270f\ufe0f Edit Plan</button><button type="button" id="fh-hx" class="vr-ib vr-ib-close" title="Close" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></span></h2>
 
 <div id="fh-s-status" role="tabpanel" aria-label="Plan inputs">
 <div id="fh-wizard">
@@ -326,7 +326,7 @@ ${panel("weddings", `<div class="fh-plan fh-cw"><div class="fh-hrow">${childPill
 <button type="button" data-fh-edit="1"><span aria-hidden="true">\ud83d\udcdd</span><span>Plan Inputs</span></button>
 <button type="button" data-fh-top="milestones"><span aria-hidden="true">\ud83c\udfaf</span><span>Milestones</span></button></div>
 
-<div class="tb"><button type="button" id="fh-close">Close</button><button type="button" id="fh-back">Back</button><button type="button" id="fh-edit" hidden>Edit inputs</button><button type="button" class="p" id="fh-next">Continue</button><button type="button" class="p" id="fh-finish" hidden>Finish</button><button type="button" class="p" id="fh-report" hidden>Done</button><button type="button" class="p" id="fh-dl" hidden>Download Report</button></div>
+<div class="tb"><button type="button" id="fh-close" class="vr-ib vr-ib-close" title="Close" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button><button type="button" id="fh-back">Back</button><button type="button" id="fh-edit" hidden>Edit inputs</button><button type="button" class="p" id="fh-next">Continue</button><button type="button" class="p" id="fh-finish" hidden>Finish</button><button type="button" class="p" id="fh-report" hidden>Done</button><button type="button" class="p" id="fh-dl" hidden>Download Report</button></div>
 </form>`;
   }
 
@@ -1141,7 +1141,7 @@ ${msMarkup(v, r)}</main></body></html>`;
       document.body.appendChild(dg);
       dg.addEventListener("click", e => { if (e.target === dg || (e.target.closest && e.target.closest("[data-hw-x]"))) dg.close(); });
     }
-    dg.innerHTML = `<div class="hw-w"><header class="hw-h"><h3 id="fh-how-t">How is "Required" worked out?</h3><button type="button" class="hw-x" data-hw-x aria-label="Close">\u2715</button></header>` +
+    dg.innerHTML = `<div class="hw-w"><header class="hw-h"><h3 id="fh-how-t">How is "Required" worked out?</h3><button type="button" class="hw-x vr-ib vr-ib-close" data-hw-x title="Close" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></header>` +
       `<div class="hw-b" tabindex="0">${T(howHTML(v))}</div><footer class="hw-f"><button type="button" class="hw-cl" data-hw-x>Got it</button></footer></div>`;
     if (typeof window.fhLogoBadge === "function") window.fhLogoBadge(dg);
     if (!dg.open) dg.showModal();

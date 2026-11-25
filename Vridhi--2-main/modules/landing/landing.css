@@ -100,23 +100,24 @@ html body .vr-savpg .msd[data-msd="cols"]{display:none}
 html body dialog#dg.hf.fh.fh-full:not(#nx){width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;inset:0}
 html body dialog#dg.hf.fh.fh-full:not(#nx) form{display:flex;flex-direction:column;min-height:100dvh}
 html body dialog#dg.hf.fh.fh-full:not(#nx) #fh-bn{margin-top:auto}
-html body #fh-max{display:inline-flex;align-items:center;gap:6px}
+html body #fh-max{display:inline-flex;align-items:center;justify-content:center;width:34px;min-width:34px;height:34px;min-height:34px;padding:0!important;flex:none}
 html body #fh-max[hidden]{display:none!important}
-@media (max-width:640px){html body #fh-max span{display:none}}
 /* Goal Planner > Reports: full size with Maximize / Restore */
-html body .rp-max,html body .hy-max{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+html body .rp-max,html body .hy-max{display:inline-flex;align-items:center;justify-content:center;width:34px;min-width:34px;height:34px;min-height:34px;padding:0!important;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);cursor:pointer;flex:none}
 html body .rp-max:hover,html body .hy-max:hover{border-color:var(--ac)}
 html body .rp-max:focus-visible,html body .hy-max:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 html body #rp-max{width:34px;min-width:34px;height:34px;min-height:34px;padding:0!important;justify-content:center;flex:none}
 html body main#m.vr-rmax{position:fixed;inset:0;z-index:60;width:auto;max-width:none!important;margin:0!important;padding:0 24px 92px!important;overflow:auto;border-radius:0;background:var(--vr-bg,#f1f5f9)}
 html body main#m.vr-rmax .rph2[data-rpx]{position:sticky;top:0;z-index:5;margin:0 0 4px;padding:8px 0;background:var(--card)}
 html body main#m.vr-rmax #rr.mw{max-height:calc(100dvh - 300px)}
-@media (max-width:720px){html body main#m.vr-rmax{padding:0 12px 92px!important}html body .rp-max span,html body .hy-max span{display:none}html body .rp-max,html body .hy-max{padding:0 10px}}
+@media (max-width:720px){html body main#m.vr-rmax{padding:0 12px 92px!important}}
 html body dialog#hydlg.hy-full[open]{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;inset:0;display:flex;flex-direction:column}
 html body dialog#hydlg.hy-full[open] .hyh{flex:none}
 html body dialog#hydlg.hy-full[open] .hyb{flex:1 1 auto;min-height:0;max-height:none!important}
-html body .hyh:has(#hy-max){display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+html body .hyh:has(#hy-max){display:flex;align-items:center;justify-content:space-between;gap:8px}
 html body #hy-max{margin-left:auto}
+html body .hyh:has(#hy-pdf) #hy-pdf{margin-left:auto}
+html body .hyh:has(#hy-pdf) #hy-max{margin-left:0}
 html body dialog.hf.fh .fh-fam .fh-crow select{width:100%;min-width:0}
 html body dialog.hf.fh .fh-fam .fh-crow input:disabled{opacity:.55;cursor:not-allowed}
 html body dialog.hf.fh .fh-fam .fh-stg-note{margin:8px 0 0}

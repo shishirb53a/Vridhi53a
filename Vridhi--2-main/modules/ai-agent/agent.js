@@ -55,7 +55,7 @@
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-label', 'Ask Vriddhi AI');
     panel.hidden = true;
-    panel.innerHTML = '<div class="vr-ai-head"><h2>Ask Vriddhi AI</h2><button type="button" aria-label="Close chat">&times;</button></div>' +
+    panel.innerHTML = '<div class="vr-ai-head"><h2>Ask Vriddhi AI</h2><button type="button" class="vr-ib vr-ib-close" title="Close chat" aria-label="Close chat"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>' +
       '<p class="vr-ai-intro">Ask about this plan. Your read-only plan details are sent securely to Google Gemini for an answer. Forecasts are estimates, not financial advice.</p>' +
       '<div class="vr-ai-messages" role="log" aria-live="polite"><div class="vr-ai-message">I can explain your plan and run read-only projections. What would you like to know?</div></div>' +
       '<form class="vr-ai-form"><textarea rows="2" maxlength="1000" aria-label="Your question" placeholder="Ask about your plan…" required></textarea><button type="submit" class="p">Send</button></form>';

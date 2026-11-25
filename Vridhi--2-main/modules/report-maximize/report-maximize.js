@@ -14,7 +14,7 @@ var IC={
  pdf:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>'
 };
 function icon(k){return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+IC[k]+'</svg>'}
-function paint(btn,full){var st=full?'1':'0';if(btn.dataset.s===st)return;btn.dataset.s=st;btn.setAttribute('aria-pressed',full?'true':'false');var t=full?'Restore':'Maximize';btn.title=t+' report';btn.setAttribute('aria-label',t+' report');btn.innerHTML=icon(full?'min':'max')+(btn.id==='rp-max'?'':'<span>'+t+'</span>')}
+function paint(btn,full){var st=full?'1':'0';if(btn.dataset.s===st)return;btn.dataset.s=st;btn.setAttribute('aria-pressed',full?'true':'false');var t=full?'Restore':'Maximize';btn.title=t+' report';btn.setAttribute('aria-label',t+' report');btn.innerHTML=icon(full?'min':'max')}
 function paintPdf(btn){if(btn.dataset&&btn.dataset.p==='1')return;if(btn.dataset)btn.dataset.p='1';btn.title='Export to PDF';btn.setAttribute('aria-label','Export to PDF');btn.innerHTML=icon('pdf')}
 function mk(id,cls){var b=document.createElement('button');b.type='button';b.id=id;b.className=cls;return b}
 function removeEl(el){if(el&&typeof el.remove==='function')el.remove();else if(el&&el.parentNode&&typeof el.parentNode.removeChild==='function')el.parentNode.removeChild(el)}
@@ -444,7 +444,7 @@ function syncRetirement(){
  rep=!!(d&&sum&&ms&&(!sum.hidden||!ms.hidden)),btn=document.getElementById('fh-max');
  if(d){d.classList.toggle('fh-full',rep&&pref);fitContainer(d,rep&&pref)}
  if(!add){syncPdfBtn('fh-pdf','',null,null,false);return}
- if(!btn){var ed=document.getElementById('fh-hedit');btn=mk('fh-max',(ed&&ed.className)||add.className);var hx=document.getElementById('fh-hx');if(hx&&hx.parentNode)hx.parentNode.insertBefore(btn,hx);else add.insertAdjacentElement('afterend',btn)}
+ if(!btn){var ed=document.getElementById('fh-hedit');btn=mk('fh-max',((ed&&ed.className)||add.className||'').trim()+' vr-ib vr-ib-max');var hx=document.getElementById('fh-hx');if(hx&&hx.parentNode)hx.parentNode.insertBefore(btn,hx);else add.insertAdjacentElement('afterend',btn)}
  btn.hidden=!rep;paint(btn,rep&&pref);
  syncPdfBtn('fh-pdf','vr-ib vr-ib-pdf fh-pdf',btn.parentNode,btn,rep&&pref)}
 function syncPage(){
@@ -452,7 +452,7 @@ function syncPage(){
  if(!m)return;
  if(!host){m.classList.remove('vr-rmax');clearContainer(m);syncPdfBtn('rp-pdf','',null,null,false);return}
  if(btn&&!host.contains(btn)){btn.remove();btn=null}
- if(!btn){btn=mk('rp-max','rp-max');host.appendChild(btn)}
+ if(!btn){btn=mk('rp-max','vr-ib vr-ib-max rp-max');host.appendChild(btn)}
  m.classList.toggle('vr-rmax',pref);
  var bg=getComputedStyle(document.body).backgroundColor;if(m.style.getPropertyValue('--vr-bg')!==bg)m.style.setProperty('--vr-bg',bg);
  paint(btn,pref);
@@ -462,7 +462,7 @@ function syncPopup(){
  var d=document.getElementById('hydlg');if(!d)return;
  d.classList.toggle('hy-full',d.open&&pref);if(!d.open){clearContainer(d);syncPdfBtn('hy-pdf','',null,null,false);return}
  var x=d.querySelector('[data-hyx]'),btn=document.getElementById('hy-max');if(!x)return;
- if(!btn||!d.contains(btn)){if(btn)btn.remove();btn=mk('hy-max','hy-max');x.insertAdjacentElement('beforebegin',btn)}
+ if(!btn||!d.contains(btn)){if(btn)btn.remove();btn=mk('hy-max','vr-ib vr-ib-max hy-max');x.insertAdjacentElement('beforebegin',btn)}
  paint(btn,pref);
  syncPdfBtn('hy-pdf','vr-ib vr-ib-pdf hy-pdf',btn.parentNode,btn,pref);
  fitContainer(d,pref)}

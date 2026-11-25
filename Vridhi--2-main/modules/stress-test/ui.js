@@ -546,7 +546,7 @@
       const hasCustomW = Object.keys(wMap("scen")).length > 0;
       const wResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-wreset${hasCustomW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
       const pdfBtn = st.max ? `<button type="button" class="st-btn st-pdf-btn vr-ib vr-ib-pdf" data-st-pdf="scen" title="Export to PDF" aria-label="Export to PDF">${IC_PDF}</button>` : "";
-      const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-max aria-pressed="${st.max}" title="${st.max ? "Exit full window (Esc)" : "Open full window"}">${st.max ? IC_MIN : IC_MAX}<span>${st.max ? "Restore" : "Maximize"}</span></button>`;
+      const maxBtn = `<button type="button" class="st-btn st-max-btn vr-ib vr-ib-max" data-st-max aria-pressed="${st.max}" title="${st.max ? "Restore (Esc)" : "Maximize"}" aria-label="${st.max ? "Restore report" : "Maximize report"}">${st.max ? IC_MIN : IC_MAX}</button>`;
       const aboutTip = `Each scenario runs up to 70 years. Base Case matches the live Retirement Planner · Click a row to highlight it · Drag column header edges to resize (double-click to auto-fit) · Use Outcome, Scenarios, and Columns dropdowns to filter or customize columns.`;
       const sortOpts = SORT_OPTS.map(([k, lbl]) => `<option value="${k}"${st.sortKey === k ? " selected" : ""}>Sort: ${esc(lbl)}</option>`).join("");
       return `<div class="st-main"><div class="st-card st-scen-card${extraClass}">` +
@@ -708,7 +708,7 @@
       const hasEngW = Object.keys(wMap("eng")).length > 0;
       const engWResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-eng-wreset${hasEngW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
       const engPdfBtn = st.engMax ? `<button type="button" class="st-btn st-pdf-btn vr-ib vr-ib-pdf" data-st-pdf="eng" title="Export to PDF" aria-label="Export to PDF">${IC_PDF}</button>` : "";
-      const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-eng-max aria-pressed="${st.engMax}" title="${st.engMax ? "Exit full window (Esc)" : "Open full window"}">${st.engMax ? IC_MIN : IC_MAX}<span>${st.engMax ? "Restore" : "Maximize"}</span></button>`;
+      const maxBtn = `<button type="button" class="st-btn st-max-btn vr-ib vr-ib-max" data-st-eng-max aria-pressed="${st.engMax}" title="${st.engMax ? "Restore (Esc)" : "Maximize"}" aria-label="${st.engMax ? "Restore report" : "Maximize report"}">${st.engMax ? IC_MIN : IC_MAX}</button>`;
       const aboutTip = "Year-by-year closing balances for all 14 scenarios over 70 years. Use Outcome, Scenarios, and Columns dropdowns to pick columns, drag column edges to resize (double-click to auto-fit), click any header to sort, or click a row to highlight that year.";
       const sortOpts = [
         ["year", "Year"],

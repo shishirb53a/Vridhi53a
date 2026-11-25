@@ -603,19 +603,24 @@ html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:n
   border-color: var(--ds-err) !important;
 }
 
-/* Export & Utility Report Icon Buttons (Copy as CSV, Export to PDF, Maximize icon) */
+/* Export & Utility Icon Buttons (Copy as CSV, Export to PDF, Maximize/Restore, Close) */
 html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
-  .vr-ib, #rp-max, #csv, #hzcsv, #savcsv, #entcsv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf-btn
+  .vr-ib, .vr-ib-close, .vr-ib-restore, .vr-ib-max,
+  #rp-max, #hy-max, #fh-max, .st-max-btn,
+  #csv, #hzcsv, #savcsv, #entcsv,
+  .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf-btn,
+  [data-hyx], #fh-hx, #fh-close
 ) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  min-height: 34px;
-  padding: 0;
+  gap: 0 !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  flex: none !important;
   font-size: 13px;
   font-weight: 600;
   border-radius: var(--ds-r-ctl) !important;
@@ -626,11 +631,57 @@ html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:n
 }
 
 html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
-  .vr-ib, #rp-max, #csv, #hzcsv, #savcsv, #entcsv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf-btn
+  .vr-ib, .vr-ib-close, .vr-ib-restore, .vr-ib-max,
+  #rp-max, #hy-max, #fh-max, .st-max-btn
+)::before {
+  content: none !important;
+  display: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .vr-ib, .vr-ib-close, .vr-ib-restore, .vr-ib-max,
+  #rp-max, #hy-max, #fh-max, .st-max-btn
+) svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: none;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .vr-ib, .vr-ib-close, .vr-ib-restore, .vr-ib-max,
+  #rp-max, #hy-max, #fh-max, .st-max-btn,
+  #csv, #hzcsv, #savcsv, #entcsv,
+  .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf-btn,
+  [data-hyx], #fh-hx, #fh-close
 ):hover:not(:disabled) {
   border-color: var(--ds-accent-border) !important;
   background: var(--ds-accent-soft) !important;
   color: var(--ds-accent) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button.vr-ib.d {
+  background: color-mix(in srgb, var(--ds-err) 10%, var(--card)) !important;
+  color: var(--ds-err) !important;
+  border-color: color-mix(in srgb, var(--ds-err) 30%, var(--card)) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button.vr-ib.d:hover:not(:disabled) {
+  background: var(--ds-err) !important;
+  color: #ffffff !important;
+  border-color: var(--ds-err) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button.vr-ib.p {
+  border-color: var(--ds-accent-border) !important;
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button.vr-ib.p:hover:not(:disabled) {
+  background: var(--ds-accent) !important;
+  border-color: var(--ds-accent) !important;
+  color: var(--ds-accent-on) !important;
 }
 
 /* Segmented Controls & Tab Bars */

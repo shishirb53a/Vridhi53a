@@ -85,10 +85,13 @@ html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])){column-gap:6px}
 html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact{display:contents}
 html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-hx{order:1;margin-left:auto}
 html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden]))::after{content:"";order:2;flex-basis:100%;height:0;margin-top:-6px}
-html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact button:not(#fh-hx):not(#fh-max){order:3}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact button:not(#fh-hx):not(#fh-max):not(#fh-pdf){order:3}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-pdf,
 html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-max{order:1;margin-left:auto}
-html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-max+#fh-hx,html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-hx{margin-left:0}
-@media (max-width:640px){html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact button:not(#fh-hx):not(#fh-max){padding:0 8px}}
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-pdf+#fh-max,
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-max+#fh-hx,
+html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact #fh-hx{margin-left:0}
+@media (max-width:640px){html body dialog.hf.fh h2:has(#fh-sx-dl:not([hidden])) .fh-hact button:not(#fh-hx):not(#fh-max):not(#fh-pdf){padding:0 8px}}
 }
 html body dialog.hf.fh .tb[hidden]{display:none !important}
 /* build 97: Summary on wide screens is one page, no vertical scrollbar: wider pop-up, two columns, tighter spacing */

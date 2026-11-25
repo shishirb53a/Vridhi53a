@@ -750,16 +750,22 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   cursor: pointer;
 }
 
-/* Consistent square icon-only buttons across ALL reports & dialogs (Copy as CSV, Export to PDF, Maximize icon) */
+/* Consistent square icon-only buttons across ALL reports & dialogs (Copy as CSV, Export to PDF, Maximize/Restore, Close) */
 html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   button.vr-ib,
   button.vr-ib-csv,
   button.vr-ib-pdf,
+  button.vr-ib-max,
+  button.vr-ib-close,
+  button.vr-ib-restore,
   button#csv,
   button#hzcsv,
   button#savcsv,
   button#entcsv,
   button#rp-max,
+  button#hy-max,
+  button#fh-max,
+  button.st-max-btn,
   button#rp-pdf,
   button#hy-pdf,
   button#fh-pdf,
@@ -767,10 +773,18 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   button.hy-pdf,
   button.fh-pdf,
   button.st-pdf-btn,
+  button[data-hyx],
+  button#fh-hx,
+  button#fh-close,
   #vp-pg .vp-h[data-rpx] button.vr-ib,
   .st-root .st-scen-actions button.st-pdf-btn,
+  .st-root .st-scen-actions button.st-max-btn,
   .hyd .hyh button.hy-pdf,
-  .fh-hact button.fh-pdf
+  .hyd .hyh button#hy-max,
+  .hyd .hyh button[data-hyx],
+  .fh-hact button.fh-pdf,
+  .fh-hact button#fh-max,
+  .fh-hact button#fh-hx
 ) {
   width: 34px !important;
   min-width: 34px !important;
@@ -785,14 +799,24 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   button.vr-ib,
   button.vr-ib-csv,
   button.vr-ib-pdf,
+  button.vr-ib-max,
+  button.vr-ib-close,
+  button.vr-ib-restore,
   button#csv,
   button#hzcsv,
   button#savcsv,
   button#entcsv,
+  button#rp-max,
+  button#hy-max,
+  button#fh-max,
+  button.st-max-btn,
   button.rp-pdf,
   button.hy-pdf,
   button.fh-pdf,
-  button.st-pdf-btn
+  button.st-pdf-btn,
+  button[data-hyx],
+  button#fh-hx,
+  button#fh-close
 )::before {
   content: none !important;
   display: none !important;
@@ -803,10 +827,20 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   button.vr-ib,
   button.vr-ib-csv,
   button.vr-ib-pdf,
+  button.vr-ib-max,
+  button.vr-ib-close,
+  button.vr-ib-restore,
+  button#rp-max,
+  button#hy-max,
+  button#fh-max,
+  button.st-max-btn,
   button.rp-pdf,
   button.hy-pdf,
   button.fh-pdf,
-  button.st-pdf-btn
+  button.st-pdf-btn,
+  button[data-hyx],
+  button#fh-hx,
+  button#fh-close
 ) svg {
   width: 16px !important;
   height: 16px !important;
@@ -935,11 +969,20 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
     button.vr-ib,
     button.vr-ib-csv,
     button.vr-ib-pdf,
+    button.vr-ib-max,
+    button.vr-ib-close,
+    button.vr-ib-restore,
     button#rp-max,
+    button#hy-max,
+    button#fh-max,
+    button.st-max-btn,
     button.rp-pdf,
     button.hy-pdf,
     button.fh-pdf,
-    button.st-pdf-btn
+    button.st-pdf-btn,
+    button[data-hyx],
+    button#fh-hx,
+    button#fh-close
   ) {
     width: 36px !important;
     min-width: 36px !important;

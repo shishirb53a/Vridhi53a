@@ -21,7 +21,7 @@ b.innerHTML='<div class="hyr">'+tg+(window.rptInfo?window.rptInfo(T(HINT[cur.v])
 try{window.RCOLS&&RCOLS.apply(document.getElementById('hyrr'),cur.v)}catch(e){}}
 function build(){
 dlg=document.createElement('dialog');dlg.id='hydlg';dlg.className='hyd';dlg.setAttribute('aria-labelledby','hyt');
-dlg.innerHTML='<div class="hyh"><div><h2 id="hyt"></h2><div class="hyc"></div></div><button type="button" data-hyx="1" aria-label="Close">'+esc(T('Close'))+'</button></div><div class="hyb"></div>';
+dlg.innerHTML='<div class="hyh"><div><h2 id="hyt"></h2><div class="hyc"></div></div><button type="button" class="vr-ib vr-ib-close" data-hyx="1" title="'+esc(T('Close'))+'" aria-label="'+esc(T('Close'))+'"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="hyb"></div>';
 document.body.appendChild(dlg);
 dlg.addEventListener('click',function(e){
 if(e.target===dlg){dlg.close();return}
