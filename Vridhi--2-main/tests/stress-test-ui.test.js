@@ -75,6 +75,17 @@ assert.strictEqual(h.querySelectorAll('.st-eng-card .st-t tbody tr').length, 1, 
 eq.value = ''; eq.dispatchEvent(new w.Event('input', { bubbles: true }));
 h.querySelector('[data-st-eng-rk="year"]').click();
 assert.strictEqual(h.querySelector('.st-eng-card .st-t tbody tr td').textContent, '70', 'Clicking Year header sorts descending');
+assert.strictEqual(h.querySelectorAll('.st-scen-card .st-t thead th [data-st-resize]').length, h.querySelectorAll('.st-scen-card .st-t thead th').length, 'Every Scenarios column header has a resize handle');
+assert.strictEqual(h.querySelectorAll('.st-eng-card .st-t thead th [data-st-resize]').length, h.querySelectorAll('.st-eng-card .st-t thead th').length, 'Every Engine column header has a resize handle');
+const nameResizer = h.querySelector('[data-st-resize="scen:name"]');
+nameResizer.dispatchEvent(new w.MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 200 }));
+w.document.dispatchEvent(new w.MouseEvent('mousemove', { bubbles: true, clientX: 280 }));
+w.document.dispatchEvent(new w.MouseEvent('mouseup', { bubbles: true, clientX: 280 }));
+const scenTbl = h.querySelector('#st-rr table.st-t');
+assert.ok(scenTbl.classList.contains('st-resized') && parseInt(scenTbl.querySelector('col[data-st-colk="name"]').style.width, 10) > 225, 'Dragging Scenarios header resizes column width');
+assert.ok(!h.querySelector('[data-st-wreset]').hidden, 'Reset widths button appears after resizing');
+h.querySelector('[data-st-wreset]').click();
+assert.ok(!h.querySelector('#st-rr table.st-t').classList.contains('st-resized') && h.querySelector('[data-st-wreset]').hidden, 'Reset widths restores default table sizing');
 for (const removed of ['Live from Retirement Planner', 'Back to Planner', 'Year-by-Year (base case)', 'Refresh from planner', 'Export CSV']) {
   assert.ok(!txt().includes(removed), removed + ' is removed');
 }

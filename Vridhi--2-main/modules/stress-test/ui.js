@@ -203,6 +203,34 @@
     ["need", "Net need p.a."],
     ["bufRoi", "Buffer return"]
   ];
+  const MIN_COL_W = 44, MAX_COL_W = 680;
+  const DEFAULT_SCEN_W = { no: 56, name: 225, surv: 215, on: 125, left: 155, monthly: 135, roi: 135, infl: 110, shock: 135, other: 145, age: 130, funded: 135, corpus: 135, buffer: 145, invest: 135, need: 135, bufRoi: 125 };
+  const DEFAULT_ENG_W = { year: 68, age: 88, kids: 165, lumpInc: 140, lumpPrin: 170 };
+  const SCEN_W_KEY = "vr-st-scen-w" + (typeof window !== "undefined" && window.__UK ? "-" + window.__UK : "");
+  const ENG_W_KEY = "vr-st-eng-w" + (typeof window !== "undefined" && window.__UK ? "-" + window.__UK : "");
+  function loadWidths(key) {
+    const out = {};
+    try {
+      const raw = typeof localStorage !== "undefined" && localStorage.getItem(key);
+      if (!raw) return out;
+      const saved = JSON.parse(raw);
+      if (saved && typeof saved === "object") {
+        Object.keys(saved).forEach(k => {
+          const v = Number(saved[k]);
+          if (Number.isFinite(v) && v >= MIN_COL_W && v <= MAX_COL_W) out[k] = Math.round(v);
+        });
+      }
+    } catch (e) { /* ignore */ }
+    return out;
+  }
+  function saveWidths(key, map) {
+    try {
+      if (typeof localStorage === "undefined") return;
+      if (map && Object.keys(map).length) localStorage.setItem(key, JSON.stringify(map));
+      else localStorage.removeItem(key);
+    } catch (e) { /* ignore */ }
+  }
+
   let lastTab = "overview";
 
   function mount(host, provider) {
@@ -220,6 +248,7 @@
       sortKey: "no",
       sortDir: 1,
       selRow: null,         /* highlighted scenario number */
+      scenWidths: loadWidths(SCEN_W_KEY),
       engCols: loadEngCols(),
       engOutcomes: { ok: true, short: true },
       engScens: null,       /* null = all 14 scenario columns shown; or map 1..14 */
@@ -227,6 +256,7 @@
       engSortKey: "year",
       engSortDir: 1,
       engSelRow: null,      /* highlighted year in engine */
+      engWidths: loadWidths(ENG_W_KEY),
       dirty: false,
       max: false,
       engMax: false
@@ -423,13 +453,14 @@
       }
       return `<td${cls}${tip}>${t}</td>`;
     }
+    const colResizer = (mode, k, label) => `<span class="st-col-resizer" data-st-resize="${mode}:${esc(k)}" role="separator" aria-orientation="vertical" aria-label="Resize ${esc(label)} column" title="Drag to resize · Double-click to auto-fit"></span>`;
     function thBtn(k, label, extraCls) {
       const on = st.sortKey === k;
       const ariaSort = on ? (st.sortDir > 0 ? "ascending" : "descending") : "none";
       const arrow = on ? (st.sortDir > 0 ? " ▲" : " ▼") : "";
       const tip = COL_TIPS[k] || "";
       const tipEl = tip ? infoBtn(tip, `How ${label} is calculated`) : "";
-      return `<th${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><div class="st-thw"><button type="button" data-st-rk="${k}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(label)}${arrow}</button>${tipEl}</div></th>`;
+      return `<th data-st-colk="${k}"${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><div class="st-thw"><button type="button" data-st-rk="${k}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(label)}${arrow}</button>${tipEl}</div>${colResizer("scen", k, label)}</th>`;
     }
     function scenRowsHTML(R) {
       const cols = activeCols();
@@ -442,6 +473,8 @@
       if (!rows.length) {
         return `<div class="em st-empty-box">No scenarios match your search.</div>`;
       }
+      const colKeys = (showSno ? ["no"] : []).concat(["name"], cols.list.map(c => c[0]));
+      const colgroup = `<colgroup>${colKeys.map(k => `<col data-st-colk="${k}">`).join("")}</colgroup>`;
       const head = `<thead><tr>${showSno ? thBtn("no", "S.No", "st-sno-col") : ""}${thBtn("name", "Scenario", "st-sc-col")}${cols.list.map((c, idx) => thBtn(c[0], c[1], idx === cols.splitAt ? "st-sep" : "")).join("")}</tr></thead>`;
       const body = rows.map(r => {
         const cls = [r.no === 1 ? "st-base" : "", st.selRow === r.no ? "st-sel" : ""].filter(Boolean).join(" ");
@@ -458,7 +491,7 @@
           (kvHTML ? `<div class="st-mkv">${kvHTML}</div>` : "") +
           `</article>`;
       }).join("");
-      return `<div class="st-wrap"><table class="st-t st-ts${showSno ? " has-sno" : ""}">${head}<tbody>${body}</tbody></table></div><div class="st-mcards">${mobCards}</div>`;
+      return `<div class="st-wrap"><table class="st-t st-ts${showSno ? " has-sno" : ""}">${colgroup}${head}<tbody>${body}</tbody></table></div><div class="st-mcards">${mobCards}</div>`;
     }
     function msdBox(key, title, summaryText, actionsHTML, bodyHTML) {
       const open = st.msd === key;
@@ -504,11 +537,13 @@
       const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
       const cols = activeCols();
       const extraClass = (st.max ? " st-max" : "") + (cols.hasStart ? " st-wide-cols" : "");
+      const hasCustomW = Object.keys(st.scenWidths).length > 0;
+      const wResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-wreset${hasCustomW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
       const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-max aria-pressed="${st.max}" title="${st.max ? "Exit full window (Esc)" : "Open full window"}">${st.max ? IC_MIN : IC_MAX}<span>${st.max ? "Restore" : "Maximize"}</span></button>`;
-      const aboutTip = `Each scenario runs up to 70 years. Base Case matches the live Retirement Planner · Click a row to highlight it · Use Outcome, Scenarios, and Columns dropdowns to filter or customize columns · Hover linked Base Case values for details.`;
+      const aboutTip = `Each scenario runs up to 70 years. Base Case matches the live Retirement Planner · Click a row to highlight it · Drag column header edges to resize (double-click to auto-fit) · Use Outcome, Scenarios, and Columns dropdowns to filter or customize columns.`;
       const sortOpts = SORT_OPTS.map(([k, lbl]) => `<option value="${k}"${st.sortKey === k ? " selected" : ""}>Sort: ${esc(lbl)}</option>`).join("");
       return `<div class="st-main"><div class="st-card st-scen-card${extraClass}">` +
-        `<div class="rph2 st-scen-head"><div class="rpt"><h2>How long does the corpus last under each condition?</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${maxBtn}</div></div>` +
+        `<div class="rph2 st-scen-head"><div class="rpt"><h2>How long does the corpus last under each condition?</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${wResetBtn}${maxBtn}</div></div>` +
         `<p class="st-note st-scen-sub" id="st-scen-sub">${esc(clientName)} · <span data-st-count>${rows.length} of 14 scenarios shown</span> · ${R.summary.fullPlan} of 14 cover the ${R.base.planYears}-year plan.</p>` +
         scenDrops(R) +
         `<div class="tb st-tb-bar"><input id="st-rq" type="search" placeholder="Search scenario, survival, age, amount…" aria-label="Search scenarios" value="${esc(st.rq)}"><select id="st-rsf" aria-label="Sort by">${sortOpts}</select><button type="button" id="st-rsd" aria-label="Toggle sort direction" title="Toggle sort direction">${st.sortDir > 0 ? "▲" : "▼"}</button></div>` +
@@ -584,7 +619,7 @@
       const ariaSort = on ? (st.engSortDir > 0 ? "ascending" : "descending") : "none";
       const arrow = on ? (st.engSortDir > 0 ? " ▲" : " ▼") : "";
       const tipEl = tip ? infoBtn(tip, `How ${label} is calculated`) : "";
-      return `<th${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><div class="st-thw"><button type="button" data-st-eng-rk="${k}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(label)}${arrow}</button>${tipEl}</div></th>`;
+      return `<th data-st-colk="${k}"${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><div class="st-thw"><button type="button" data-st-eng-rk="${k}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(label)}${arrow}</button>${tipEl}</div>${colResizer("eng", k, label)}</th>`;
     }
     function engineTableHTML(R) {
       const idx = engActiveScenIdx(R);
@@ -598,6 +633,8 @@
       }
       const showAge = !!st.engCols.age;
       const detailCols = ENG_DETAIL_COLS.filter(c => !!st.engCols[c[0]]);
+      const colKeys = ["year"].concat(detailCols.map(c => c[0]), idx.map(i => `s${i + 1}`));
+      const colgroup = `<colgroup>${colKeys.map(k => `<col data-st-colk="${k}">`).join("")}</colgroup>`;
       const head = `<thead><tr>${engThBtn("year", "Year", ENG_TIPS.year, "st-ey-col")}${detailCols.map(c => engThBtn(c[0], c[1], ENG_TIPS[c[0]], c[0] === "age" ? "st-ea-col" : "")).join("")}${idx.map((i, pos) => engThBtn(`s${i + 1}`, `S${i + 1}`, engScenTip(R.rows[i], i), pos === 0 ? "st-sep" : "")).join("")}</tr></thead>`;
       const body = engRows.map(e => {
         const cls = [e.year === R.base.planYears ? "st-base" : "", st.engSelRow === e.year ? "st-sel" : ""].filter(Boolean).join(" ");
@@ -627,7 +664,7 @@
         }).join("");
         return `<article class="st-mcard${selCls}" data-st-er="${e.year}"><div class="st-mhead"><strong>Year ${e.year}${showAge ? ` · Age ${e.age}` : ""}</strong><span class="st-ch ${isPlanEnd ? "ok" : ""}">${isPlanEnd ? "Plan end" : `Year ${e.year}`}</span></div><div class="st-mkv">${detKV}${scKV}</div></article>`;
       }).join("");
-      return `<div class="st-wrap st-short"><table class="st-t st-te${showAge ? " has-age" : ""}">${head}<tbody>${body}</tbody></table></div><div class="st-mcards">${mobCards}</div>`;
+      return `<div class="st-wrap st-short"><table class="st-t st-te${showAge ? " has-age" : ""}">${colgroup}${head}<tbody>${body}</tbody></table></div><div class="st-mcards">${mobCards}</div>`;
     }
     function engDrops(R) {
       const allRows = R.rows.map((r, i) => { r.no = i + 1; return r; });
@@ -661,8 +698,10 @@
       const idx = engActiveScenIdx(R);
       const rows = idx.length ? engFilteredRows(R, idx) : [];
       const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
+      const hasEngW = Object.keys(st.engWidths).length > 0;
+      const engWResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-eng-wreset${hasEngW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
       const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-eng-max aria-pressed="${st.engMax}" title="${st.engMax ? "Exit full window (Esc)" : "Open full window"}">${st.engMax ? IC_MIN : IC_MAX}<span>${st.engMax ? "Restore" : "Maximize"}</span></button>`;
-      const aboutTip = "Year-by-year closing balances for all 14 scenarios over 70 years. Use Outcome, Scenarios, and Columns dropdowns to pick columns, click any header to sort, or click a row to highlight that year. Negative balance means money has run out.";
+      const aboutTip = "Year-by-year closing balances for all 14 scenarios over 70 years. Use Outcome, Scenarios, and Columns dropdowns to pick columns, drag column edges to resize (double-click to auto-fit), click any header to sort, or click a row to highlight that year.";
       const sortOpts = [
         ["year", "Year"],
         ["age", "Your age"],
@@ -673,7 +712,7 @@
       const activeSortKey = sortOpts.some(o => o[0] === st.engSortKey) ? st.engSortKey : "year";
       const sortOptHTML = sortOpts.map(([k, lbl]) => `<option value="${k}"${activeSortKey === k ? " selected" : ""}>Sort: ${esc(lbl)}</option>`).join("");
       return `<div class="st-main"><div class="st-card st-eng-card${st.engMax ? " st-max st-wide-cols" : ""}">` +
-        `<div class="rph2 st-scen-head"><div class="rpt"><h2>Year-by-year money balance for each scenario</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${maxBtn}</div></div>` +
+        `<div class="rph2 st-scen-head"><div class="rpt"><h2>Year-by-year money balance for each scenario</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${engWResetBtn}${maxBtn}</div></div>` +
         `<p class="st-note st-scen-sub">${esc(clientName)} · <span data-st-eng-count>${rows.length} of ${R.engine.length} years shown</span> · Plan horizon: ${R.base.planYears} yrs (age ${R.base.age + R.base.planYears}) · Negative balance = money has run out.</p>` +
         engDrops(R) +
         `<div class="tb st-tb-bar"><input id="st-eng-q" type="search" placeholder="Search year, age, amount…" aria-label="Search calculation engine" value="${esc(st.engQ)}"><select id="st-eng-rsf" aria-label="Sort by">${sortOptHTML}</select><button type="button" id="st-eng-rsd" aria-label="Toggle sort direction" title="Toggle sort direction">${st.engSortDir > 0 ? "▲" : "▼"}</button></div>` +
@@ -693,12 +732,47 @@
         if (b) b.setAttribute("aria-expanded", String(o));
       });
     }
+    function applyColWidths(tbl, widths, defs, fallbackW) {
+      if (!tbl || !tbl.querySelectorAll) return;
+      const cols = tbl.querySelectorAll("colgroup col[data-st-colk]");
+      if (!cols.length) return;
+      const hasCustom = widths && Object.keys(widths).length > 0;
+      if (!hasCustom) {
+        tbl.classList.remove("st-resized");
+        tbl.style.width = "";
+        if (tbl.style.removeProperty) tbl.style.removeProperty("--st-col1-w");
+        cols.forEach(c => { c.style.width = ""; });
+        return;
+      }
+      tbl.classList.add("st-resized");
+      let total = 0;
+      cols.forEach((c, idx) => {
+        const k = c.getAttribute("data-st-colk");
+        const w = widths[k] || defs[k] || fallbackW;
+        c.style.width = w + "px";
+        total += w;
+        if (idx === 0 && tbl.style.setProperty) tbl.style.setProperty("--st-col1-w", w + "px");
+      });
+      tbl.style.width = total + "px";
+    }
+    function applyAllTableWidths() {
+      applyColWidths(host.querySelector("#st-rr table.st-t"), st.scenWidths, DEFAULT_SCEN_W, 135);
+      applyColWidths(host.querySelector("#st-eng-rr table.st-t"), st.engWidths, DEFAULT_ENG_W, 120);
+      syncResetBtns();
+    }
+    function syncResetBtns() {
+      const b1 = host.querySelector("[data-st-wreset]");
+      if (b1) b1.hidden = Object.keys(st.scenWidths).length === 0;
+      const b2 = host.querySelector("[data-st-eng-wreset]");
+      if (b2) b2.hidden = Object.keys(st.engWidths).length === 0;
+    }
     function updateScenBody() {
       const R = st.result; if (!R) return;
       const rr = host.querySelector("#st-rr");
       if (rr) rr.innerHTML = scenRowsHTML(R);
       const cnt = host.querySelector("[data-st-count]");
       if (cnt) cnt.textContent = `${filteredRows(R).length} of 14 scenarios shown`;
+      applyAllTableWidths();
       if (st.max) fitMaxTable();
     }
     function updateEngBody() {
@@ -711,6 +785,7 @@
         const shown = idx.length ? engFilteredRows(R, idx).length : 0;
         cnt.textContent = `${shown} of ${R.engine.length} years shown`;
       }
+      applyAllTableWidths();
       if (st.engMax) fitMaxTable();
     }
     function switchTab(id) {
@@ -764,6 +839,7 @@
           bottomNav()
         : problem();
       host.innerHTML = `<section class="st-root" aria-label="Stress Test">${bar()}${body}</section>`;
+      applyAllTableWidths();
       if (st.max || st.engMax) {
         fitMaxTable();
         if (typeof requestAnimationFrame === "function") requestAnimationFrame(fitMaxTable);
@@ -799,7 +875,98 @@
       });
     }
 
+    let resizeDrag = null, justResizedUntil = 0;
+    const clampW = w => Math.max(MIN_COL_W, Math.min(MAX_COL_W, Math.round(w)));
+    function seedVisibleWidths(tbl, widths, defs, fb) {
+      const zoom = parseFloat(tbl.style.zoom) || 1;
+      tbl.querySelectorAll("thead th[data-st-colk]").forEach(th => {
+        const k = th.getAttribute("data-st-colk");
+        if (widths[k]) return;
+        const rectW = th.getBoundingClientRect ? th.getBoundingClientRect().width / zoom : 0;
+        widths[k] = clampW(rectW > 0 ? rectW : (defs[k] || fb));
+      });
+    }
+    function startResize(e) {
+      const resizer = e.target.closest && e.target.closest("[data-st-resize]");
+      if (!resizer) return;
+      if (typeof e.button === "number" && e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const [mode, colKey] = resizer.getAttribute("data-st-resize").split(":");
+      const tbl = resizer.closest("table.st-t");
+      if (!tbl || !colKey) return;
+      const widths = mode === "scen" ? st.scenWidths : st.engWidths;
+      const defs = mode === "scen" ? DEFAULT_SCEN_W : DEFAULT_ENG_W;
+      const fb = mode === "scen" ? 135 : 120;
+      seedVisibleWidths(tbl, widths, defs, fb);
+      applyColWidths(tbl, widths, defs, fb);
+      resizer.classList.add("is-active");
+      if (document.body && document.body.classList) document.body.classList.add("st-col-resizing");
+      resizeDrag = {
+        mode, colKey, tbl, resizer, widths, defs, fb,
+        zoom: parseFloat(tbl.style.zoom) || 1,
+        startX: e.clientX || 0,
+        startW: widths[colKey],
+        moved: false
+      };
+    }
+    function moveResize(e) {
+      if (!resizeDrag) return;
+      const dx = ((e.clientX || 0) - resizeDrag.startX) / resizeDrag.zoom;
+      if (Math.abs(dx) > 2) resizeDrag.moved = true;
+      resizeDrag.widths[resizeDrag.colKey] = clampW(resizeDrag.startW + dx);
+      applyColWidths(resizeDrag.tbl, resizeDrag.widths, resizeDrag.defs, resizeDrag.fb);
+    }
+    function endResize() {
+      if (!resizeDrag) return;
+      const d = resizeDrag;
+      resizeDrag = null;
+      d.resizer.classList.remove("is-active");
+      if (document.body && document.body.classList) document.body.classList.remove("st-col-resizing");
+      saveWidths(d.mode === "scen" ? SCEN_W_KEY : ENG_W_KEY, d.widths);
+      syncResetBtns();
+      if ((d.mode === "scen" && st.max) || (d.mode === "eng" && st.engMax)) fitMaxTable();
+      if (d.moved) justResizedUntil = Date.now() + 250;
+    }
+
+    const downEvt = typeof window !== "undefined" && window.PointerEvent ? "pointerdown" : "mousedown";
+    const moveEvt = typeof window !== "undefined" && window.PointerEvent ? "pointermove" : "mousemove";
+    const upEvt = typeof window !== "undefined" && window.PointerEvent ? "pointerup" : "mouseup";
+    host.addEventListener(downEvt, startResize);
+    host.addEventListener("dblclick", e => {
+      const resizer = e.target.closest && e.target.closest("[data-st-resize]");
+      if (!resizer) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const [mode, colKey] = resizer.getAttribute("data-st-resize").split(":");
+      const tbl = resizer.closest("table.st-t");
+      const th = resizer.closest("th[data-st-colk]");
+      if (!tbl || !th || !colKey) return;
+      const widths = mode === "scen" ? st.scenWidths : st.engWidths;
+      const defs = mode === "scen" ? DEFAULT_SCEN_W : DEFAULT_ENG_W;
+      const fb = mode === "scen" ? 135 : 120;
+      const zoom = parseFloat(tbl.style.zoom) || 1;
+      seedVisibleWidths(tbl, widths, defs, fb);
+      const colEl = tbl.querySelector(`colgroup col[data-st-colk="${colKey}"]`);
+      tbl.classList.remove("st-resized");
+      tbl.style.width = "";
+      if (colEl) colEl.style.width = "";
+      const natW = th.getBoundingClientRect ? th.getBoundingClientRect().width / zoom : 0;
+      widths[colKey] = clampW(natW > 0 ? natW : (defs[colKey] || fb));
+      applyColWidths(tbl, widths, defs, fb);
+      saveWidths(mode === "scen" ? SCEN_W_KEY : ENG_W_KEY, widths);
+      syncResetBtns();
+      if ((mode === "scen" && st.max) || (mode === "eng" && st.engMax)) fitMaxTable();
+      justResizedUntil = Date.now() + 250;
+    });
+
     host.addEventListener("click", e => {
+      if (e.target.closest("[data-st-resize]")) return;
+      const wResetBtn = e.target.closest("[data-st-wreset]");
+      if (wResetBtn) { st.scenWidths = {}; saveWidths(SCEN_W_KEY, st.scenWidths); updateScenBody(); return; }
+      const engWResetBtn = e.target.closest("[data-st-eng-wreset]");
+      if (engWResetBtn) { st.engWidths = {}; saveWidths(ENG_W_KEY, st.engWidths); updateEngBody(); return; }
+      if (Date.now() < justResizedUntil && e.target.closest("th")) return;
       const maxBtn = e.target.closest("[data-st-max]");
       if (maxBtn) { st.msd = null; toggleMax(); return; }
       const engMaxBtn = e.target.closest("[data-st-eng-max]");
@@ -1014,6 +1181,9 @@
       }
     });
     if (document.addEventListener) {
+      document.addEventListener(moveEvt, moveResize);
+      document.addEventListener(upEvt, endResize);
+      if (upEvt === "pointerup") document.addEventListener("pointercancel", endResize);
       document.addEventListener("click", e => {
         if (st.msd && host.isConnected && !e.target.closest("[data-st-msd]")) {
           st.msd = null;
@@ -1032,7 +1202,7 @@
       window.addEventListener("resize", () => { if ((st.max || st.engMax) && host.isConnected) fitMaxTable(); });
     }
     render();
-    return { refresh: render, state: st, switchTab, toggleMax, toggleEngMax, fitMaxTable };
+    return { refresh: render, state: st, switchTab, toggleMax, toggleEngMax, fitMaxTable, applyAllTableWidths };
   }
 
   /* Register Stress Test as a top-level module (Modules dropdown > Stress Test) and mount into [data-st-host]. */
