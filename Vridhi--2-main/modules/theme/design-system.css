@@ -1,0 +1,1348 @@
+/* ==========================================================================
+   Vriddhi Enterprise Fintech Design System (design-system.css)
+   Centralized tokens & unified UI/UX modernisation layer across:
+   Dashboard, Holdings, Investments, Retirement Planner, Income, Policies,
+   Stress Test, Settings, Reports, Dialogs, Navigation & Sign-in.
+
+   Architecture & Non-Regression Guarantees:
+   - Pure presentation layer: zero changes to JS business logic, formulas,
+     APIs, schemas, navigation workflows, filters, or exports.
+   - Loaded immediately before report-maximize.css and minimal.css.
+   - Every enterprise override is guarded with :not([data-minimal-theme="true"])
+     so the Minimal monochrome theme remains 100% intact.
+   - Default table surface/header/border rules are guarded with
+     :not([data-utcol="custom"]) so Settings -> Appearance -> Advanced ->
+     Table Colour (appearance-pro.css) stays sovereign.
+   - Honors all Settings -> Appearance controls (Light/Dark, Themes, Accent,
+     Density, Text Size, Font, Text Colour, Text Weight, Corners, Button Style,
+     Input Style, Table Header, Striped Rows, Row Lines, Column Lines, Icons)
+     consistently across the entire application including all Reports.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS (Light, Dark, Corner Shape, Font, Text Size, Density)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Typography */
+  --ds-font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ds-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --ds-font-serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --ds-font-humanist: 'Optima', 'Candara', 'Segoe UI', -apple-system, sans-serif;
+
+  /* Spacing & Layout Rhythm */
+  --ds-sp-1: 4px;
+  --ds-sp-2: 8px;
+  --ds-sp-3: 12px;
+  --ds-sp-4: 16px;
+  --ds-sp-5: 20px;
+  --ds-sp-6: 24px;
+  --ds-sp-8: 32px;
+
+  /* Radii (default: round) */
+  --ds-r-card: 12px;
+  --ds-r-box: 10px;
+  --ds-r-ctl: 8px;
+  --ds-r-sm: 6px;
+  --ds-r-pill: 999px;
+
+  /* Motion */
+  --ds-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-dur: 160ms;
+
+  /* Semantic Surface & Hairline Palette (derived from active theme vars) */
+  --ds-surface: var(--card, #ffffff);
+  --ds-surface-2: color-mix(in srgb, var(--tx, #0f172a) 2.6%, var(--card, #ffffff));
+  --ds-surface-3: color-mix(in srgb, var(--tx, #0f172a) 5.2%, var(--card, #ffffff));
+  --ds-surface-hover: color-mix(in srgb, var(--ac, #205b43) 5.5%, var(--card, #ffffff));
+  --ds-border: color-mix(in srgb, var(--tx, #0f172a) 10.5%, var(--card, #ffffff));
+  --ds-border-strong: color-mix(in srgb, var(--tx, #0f172a) 19%, var(--card, #ffffff));
+  --ds-border-subtle: color-mix(in srgb, var(--tx, #0f172a) 6.5%, var(--card, #ffffff));
+
+  /* Brand & Financial Accents */
+  --ds-accent: var(--ac, #205b43);
+  --ds-accent-on: var(--on, #ffffff);
+  --ds-accent-soft: color-mix(in srgb, var(--ac, #205b43) 9.5%, var(--card, #ffffff));
+  --ds-accent-mid: color-mix(in srgb, var(--ac, #205b43) 17%, var(--card, #ffffff));
+  --ds-accent-border: color-mix(in srgb, var(--ac, #205b43) 34%, var(--card, #ffffff));
+  --ds-ring: color-mix(in srgb, var(--ac, #205b43) 26%, transparent);
+
+  /* Semantic Financial Indicators */
+  --ds-ok: var(--ok, #15803d);
+  --ds-ok-soft: color-mix(in srgb, var(--ok, #15803d) 10%, var(--card, #ffffff));
+  --ds-warn: #b45309;
+  --ds-warn-soft: color-mix(in srgb, #d97706 11%, var(--card, #ffffff));
+  --ds-err: var(--er, #b91c1c);
+  --ds-err-soft: color-mix(in srgb, var(--er, #b91c1c) 10%, var(--card, #ffffff));
+
+  /* Single-Elevation Depth (Light) */
+  --ds-sh-xs: 0 1px 2px rgba(15, 23, 42, .04);
+  --ds-sh-card: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 12px -2px rgba(15, 23, 42, .045);
+  --ds-sh-card-hover: 0 2px 4px rgba(15, 23, 42, .05), 0 8px 20px -4px rgba(15, 23, 42, .07);
+  --ds-sh-pop: 0 14px 34px -6px rgba(15, 23, 42, .15), 0 2px 6px rgba(15, 23, 42, .06);
+  --ds-sh-dlg: 0 24px 60px -12px rgba(15, 23, 42, .26), 0 4px 14px rgba(15, 23, 42, .08);
+
+  /* Table Defaults (yields to data-utcol="custom") */
+  --ds-tbl-hd-bg: color-mix(in srgb, var(--tx, #0f172a) 3.4%, var(--card, #ffffff));
+  --ds-tbl-hd-tx: color-mix(in srgb, var(--tx, #0f172a) 74%, var(--card, #ffffff));
+  --ds-tbl-stripe: color-mix(in srgb, var(--tx, #0f172a) 2.1%, var(--card, #ffffff));
+  --ds-tbl-hover: color-mix(in srgb, var(--ac, #205b43) 5.5%, var(--card, #ffffff));
+  --ds-tbl-tot-bg: color-mix(in srgb, var(--ac, #205b43) 6.5%, var(--card, #ffffff));
+  --ds-tbl-pad-y: 9px;
+  --ds-tbl-pad-x: 12px;
+  --ds-ctl-h: 38px;
+}
+
+/* Dark Mode Optical Calibration */
+html[data-theme="dark"]:not([data-minimal-theme="true"]),
+html[data-theme="dark"]:not([data-minimal-theme="true"]) body {
+  --ds-surface-2: color-mix(in srgb, var(--tx, #f1f5f9) 4.5%, var(--card, #111827));
+  --ds-surface-3: color-mix(in srgb, var(--tx, #f1f5f9) 8.5%, var(--card, #111827));
+  --ds-surface-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
+  --ds-border: color-mix(in srgb, var(--tx, #f1f5f9) 12.5%, var(--card, #111827));
+  --ds-border-strong: color-mix(in srgb, var(--tx, #f1f5f9) 22%, var(--card, #111827));
+  --ds-border-subtle: color-mix(in srgb, var(--tx, #f1f5f9) 7.5%, var(--card, #111827));
+  --ds-accent-soft: color-mix(in srgb, var(--ac, #34d399) 14%, var(--card, #111827));
+  --ds-accent-mid: color-mix(in srgb, var(--ac, #34d399) 22%, var(--card, #111827));
+  --ds-accent-border: color-mix(in srgb, var(--ac, #34d399) 42%, var(--card, #111827));
+  --ds-warn: #f59e0b;
+  --ds-sh-xs: 0 1px 2px rgba(0, 0, 0, .28);
+  --ds-sh-card: 0 1px 2px rgba(0, 0, 0, .32), 0 6px 16px -4px rgba(0, 0, 0, .26);
+  --ds-sh-card-hover: 0 2px 6px rgba(0, 0, 0, .36), 0 10px 24px -6px rgba(0, 0, 0, .34);
+  --ds-sh-pop: 0 16px 38px -6px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .35);
+  --ds-sh-dlg: 0 28px 64px -12px rgba(0, 0, 0, .68), 0 4px 16px rgba(0, 0, 0, .42);
+  --ds-tbl-hd-bg: color-mix(in srgb, var(--tx, #f1f5f9) 5.5%, var(--card, #111827));
+  --ds-tbl-hd-tx: color-mix(in srgb, var(--tx, #f1f5f9) 82%, var(--card, #111827));
+  --ds-tbl-stripe: color-mix(in srgb, var(--tx, #f1f5f9) 3.2%, var(--card, #111827));
+  --ds-tbl-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
+  --ds-tbl-tot-bg: color-mix(in srgb, var(--ac, #34d399) 11%, var(--card, #111827));
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]):not([data-minimal-theme="true"]),
+  html:not([data-theme="light"]):not([data-minimal-theme="true"]) body {
+    --ds-surface-2: color-mix(in srgb, var(--tx, #f1f5f9) 4.5%, var(--card, #111827));
+    --ds-surface-3: color-mix(in srgb, var(--tx, #f1f5f9) 8.5%, var(--card, #111827));
+    --ds-surface-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
+    --ds-border: color-mix(in srgb, var(--tx, #f1f5f9) 12.5%, var(--card, #111827));
+    --ds-border-strong: color-mix(in srgb, var(--tx, #f1f5f9) 22%, var(--card, #111827));
+    --ds-border-subtle: color-mix(in srgb, var(--tx, #f1f5f9) 7.5%, var(--card, #111827));
+    --ds-accent-soft: color-mix(in srgb, var(--ac, #34d399) 14%, var(--card, #111827));
+    --ds-accent-mid: color-mix(in srgb, var(--ac, #34d399) 22%, var(--card, #111827));
+    --ds-accent-border: color-mix(in srgb, var(--ac, #34d399) 42%, var(--card, #111827));
+    --ds-warn: #f59e0b;
+    --ds-sh-xs: 0 1px 2px rgba(0, 0, 0, .28);
+    --ds-sh-card: 0 1px 2px rgba(0, 0, 0, .32), 0 6px 16px -4px rgba(0, 0, 0, .26);
+    --ds-sh-card-hover: 0 2px 6px rgba(0, 0, 0, .36), 0 10px 24px -6px rgba(0, 0, 0, .34);
+    --ds-sh-pop: 0 16px 38px -6px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .35);
+    --ds-sh-dlg: 0 28px 64px -12px rgba(0, 0, 0, .68), 0 4px 16px rgba(0, 0, 0, .42);
+    --ds-tbl-hd-bg: color-mix(in srgb, var(--tx, #f1f5f9) 5.5%, var(--card, #111827));
+    --ds-tbl-hd-tx: color-mix(in srgb, var(--tx, #f1f5f9) 82%, var(--card, #111827));
+    --ds-tbl-stripe: color-mix(in srgb, var(--tx, #f1f5f9) 3.2%, var(--card, #111827));
+    --ds-tbl-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
+    --ds-tbl-tot-bg: color-mix(in srgb, var(--ac, #34d399) 11%, var(--card, #111827));
+  }
+}
+
+/* Corner Shape Preferences (Settings -> Appearance -> Advanced -> Corner shape) */
+html[data-ush="sharp"]:not([data-minimal-theme="true"]),
+html[data-rad="sharp"]:not([data-minimal-theme="true"]) {
+  --ds-r-card: 4px;
+  --ds-r-box: 3px;
+  --ds-r-ctl: 3px;
+  --ds-r-sm: 2px;
+  --r: 4px;
+  --r-card: 4px;
+}
+
+html[data-ush="pill"]:not([data-minimal-theme="true"]) {
+  --ds-r-card: 16px;
+  --ds-r-box: 12px;
+  --ds-r-ctl: 999px;
+  --ds-r-sm: 999px;
+  --r: 16px;
+  --r-card: 16px;
+}
+
+/* Density Preferences (Settings -> Appearance -> Density & Table Density) */
+html[data-dens="compact"]:not([data-minimal-theme="true"]),
+html[data-utd="compact"]:not([data-minimal-theme="true"]) {
+  --ds-tbl-pad-y: 6px;
+  --ds-tbl-pad-x: 9px;
+  --ds-ctl-h: 34px;
+}
+
+html[data-dens="roomy"]:not([data-minimal-theme="true"]),
+html[data-utd="relaxed"]:not([data-minimal-theme="true"]) {
+  --ds-tbl-pad-y: 12px;
+  --ds-tbl-pad-x: 14px;
+  --ds-ctl-h: 42px;
+}
+
+/* Font Preferences (Settings -> Appearance -> Advanced -> Font) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) {
+  --ff: var(--ds-font-sans);
+  --r-card: var(--ds-r-card);
+  --sh: var(--ds-sh-card);
+}
+
+html:not([data-minimal-theme="true"])[data-ufn="inter"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) {
+  --ff: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html:not([data-minimal-theme="true"])[data-ufn="serif"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) {
+  --ff: var(--ds-font-serif);
+}
+
+html:not([data-minimal-theme="true"])[data-ufn="humanist"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) {
+  --ff: var(--ds-font-humanist);
+}
+
+html:not([data-minimal-theme="true"])[data-ufn="mono"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) {
+  --ff: var(--ds-font-mono);
+}
+
+/* Text Colour Preferences (Settings -> Appearance -> Advanced -> Text colour) */
+html:not([data-minimal-theme="true"])[data-utx="charcoal"]:not([data-theme="dark"]) {
+  --tx: #1f2937;
+  --mu: #4b5563;
+}
+
+html:not([data-minimal-theme="true"])[data-utx="forest"]:not([data-theme="dark"]) {
+  --tx: #102a20;
+  --mu: #3d5c50;
+}
+
+/* Text Weight Preferences (Settings -> Appearance -> Advanced -> Text weight) */
+html:not([data-minimal-theme="true"])[data-uwt="medium"] body { font-weight: 500; }
+html:not([data-minimal-theme="true"])[data-uwt="semibold"] body { font-weight: 600; }
+html:not([data-minimal-theme="true"])[data-uwt="bold"] body { font-weight: 700; }
+
+/* Icons Visibility Preference (Settings -> Appearance -> Advanced -> Icons) */
+html:not([data-minimal-theme="true"])[data-uic="off"] body :is(
+  nav#nav button svg,
+  .rp2-nav button svg,
+  .vrs-tabs button svg,
+  h1[data-hic]::before,
+  h2[data-hic]::before
+) {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. GLOBAL TYPOGRAPHY, TABULAR NUMERALS & MICRO-INTERACTIONS
+   -------------------------------------------------------------------------- */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body {
+  font-family: var(--ff, var(--ds-font-sans)) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+  color: var(--tx);
+  background: var(--bg);
+}
+
+/* Restore crisp transitions on interactive controls (countering base.css blanket disable) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button, a, input, select, textarea,
+  .ap-c, .ap-s, .uip-tc-sw, .dz-kpi, .rpk-c, .hp-kpi, .st-tile, .vp-pc, .hcard,
+  table tbody tr td
+) {
+  transition:
+    background-color var(--ds-dur) var(--ds-ease),
+    border-color var(--ds-dur) var(--ds-ease),
+    color var(--ds-dur) var(--ds-ease),
+    box-shadow var(--ds-dur) var(--ds-ease),
+    transform var(--ds-dur) var(--ds-ease),
+    opacity var(--ds-dur) var(--ds-ease) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body *,
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body *::before,
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Refined Typographic Hierarchy */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body h1 {
+  font-weight: 750 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.18 !important;
+  text-wrap: balance;
+  color: var(--tx);
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body h2 {
+  font-weight: 700 !important;
+  letter-spacing: -0.018em !important;
+  line-height: 1.25 !important;
+  text-wrap: balance;
+  color: var(--tx);
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body h3 {
+  font-weight: 650 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.3 !important;
+  color: var(--tx);
+}
+
+/* Monospace & Tabular Numerals for Financial Precision */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table, th, td,
+  .n, .num, .amt, .v, .val, .kpi, .kv,
+  .dz-v, .dz-kpi strong, .dz-kpi b, .dz-kpi .dz-n,
+  .rpk-c b, .rpk-c strong, .rpk-v,
+  .hp-kpi b, .hp-kpi strong,
+  .vp-stat b, .vp-stat strong, .vp-amt,
+  .st-tile b, .st-tile strong, .st-v,
+  .sx-v, .sx-big, .rp2-v, .rdy-v,
+  input[type="number"], input[inputmode="numeric"], input[inputmode="decimal"]
+) {
+  font-variant-numeric: tabular-nums lining-nums !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(code, kbd, pre) {
+  font-family: var(--ds-font-mono) !important;
+}
+
+/* Focus-Visible Accessibility Ring Everywhere */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :focus-visible {
+  outline: 2px solid var(--ds-accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. APPLICATION SHELL, TOP HEADER, NAVIGATION, POPOVERS & FOOTER
+   -------------------------------------------------------------------------- */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body header.hd {
+  background: color-mix(in srgb, var(--hd, var(--card)) 94%, transparent) !important;
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--ds-border) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body header.hd .hdi {
+  gap: 10px;
+}
+
+/* Brand Mark & Wordmark */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .brand {
+  gap: 10px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .logo {
+  border-radius: var(--ds-r-box) !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--ds-accent) 28%, transparent) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .wm {
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .tg {
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+  opacity: 0.78;
+}
+
+/* Top Navigation Tabs */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav {
+  gap: 4px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav > button,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav .nav-modules > button {
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: var(--ds-r-ctl) !important;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  border: 1px solid transparent;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav > button:hover,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav .nav-modules > button:hover {
+  background: color-mix(in srgb, currentColor 9%, transparent) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav > button[aria-current="page"],
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav > button.on,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav .nav-modules > button[aria-current="page"],
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body nav#nav .nav-modules > button.on {
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+  border-color: var(--ds-accent-border) !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+/* Header Account Controls (Client Switcher, User Chip, Mode Toggle, Settings, Sign Out) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body header.hd :is(.ap-mode, #settings-menu-wrap > button, #so) {
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: transparent !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body header.hd :is(.ap-mode, #settings-menu-wrap > button, #so):hover {
+  background: color-mix(in srgb, currentColor 8%, transparent) !important;
+  border-color: var(--ds-border-strong) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body header.hd .fhp button,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body header.hd .fhp select {
+  border-radius: var(--ds-r-ctl) !important;
+  border-color: var(--ds-border) !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body header.hd .who {
+  border-radius: var(--ds-r-ctl) !important;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* Dropdown Menus & Popovers */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .module-menu, .settings-menu, .client-popup, .rpm-m, .msd-p, .vod-popover, .vp-menu
+) {
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+  box-shadow: var(--ds-sh-pop) !important;
+  padding: 6px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .module-menu, .settings-menu, .client-popup, .rpm-m, .vp-menu
+) button {
+  border-radius: var(--ds-r-sm) !important;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--tx);
+  border: 1px solid transparent;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .module-menu, .settings-menu, .client-popup, .rpm-m, .vp-menu
+) button:hover {
+  background: var(--ds-surface-hover) !important;
+  color: var(--ds-accent) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .module-menu, .settings-menu, .rpm-m
+) button:is(.on, [aria-current="page"], [aria-pressed="true"]) {
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+  font-weight: 700 !important;
+}
+
+/* Footer */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body footer.ft {
+  border-top: 1px solid var(--ds-border-subtle);
+  color: var(--mu);
+  font-size: 12px;
+  letter-spacing: 0.005em;
+  padding-top: 16px;
+  margin-top: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   4. UNIFIED CARDS, SURFACES & ANTI-CLICHÉ DISCIPLINE
+   -------------------------------------------------------------------------- */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .card, .dz-card, .vp-card, .vp-pc, .st-card, .st-tile, .rpk-c, .hp-kpi, .hcard, .hd-panel, .gpp-best-banner
+) {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-card) !important;
+}
+
+/* Remove thick left accent border clichés in favor of clean all-around hairlines */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .card h2, .rph2 h2, .vp-card .vp-h h2
+) {
+  border-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .hp-kpi, .hcard
+) {
+  border-left: 1px solid var(--ds-border) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rp-head p {
+  padding-left: 0 !important;
+}
+
+/* Subtle interactive elevation on KPI & metric cards */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .dz-kpi, .rpk-c, .hp-kpi, .st-tile, .vp-pc
+):hover {
+  border-color: var(--ds-border-strong) !important;
+  box-shadow: var(--ds-sh-card-hover) !important;
+}
+
+/* Single-elevation rule: nested inner cards stay flat with subtle surface contrast */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .card :is(
+  .card, .rpk-c, .st-tile, .vp-pc
+) {
+  box-shadow: none !important;
+  background: var(--ds-surface-2) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. STANDARDIZED BUTTONS, SEGMENTED CONTROLS, FORMS & INPUTS
+   -------------------------------------------------------------------------- */
+/* Base Button Hierarchy */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:not(
+  .ap-c
+):not(.ap-s):not(.uip-tc-sw):not(.fb):not(.swatch):not([data-hc]):not([data-cc]):not(.rpi):not(.dz-tab) {
+  border-radius: var(--ds-r-ctl) !important;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+/* Secondary / Default Action Buttons */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .tb button, .acts button, .hp-tools button, .vp-acts button, .rph-acts button,
+  .st-bar button, .vod-toolbar button, .ap-ft button, dialog button
+):not(.p):not(.go):not(.hp-add):not(#padd):not(.d):not(.del):not(.tbs):not(.ap-c):not(.ap-s):not(.uip-tc-sw):not([aria-pressed="true"]):not([aria-selected="true"]) {
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  border: 1px solid var(--ds-border) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+  min-height: var(--ds-ctl-h);
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .tb button, .acts button, .hp-tools button, .vp-acts button, .rph-acts button,
+  .st-bar button, .vod-toolbar button, .ap-ft button, dialog button
+):not(.p):not(.go):not(.hp-add):not(#padd):not(.d):not(.del):not(.tbs):not(.ap-c):not(.ap-s):not(.uip-tc-sw):not([aria-pressed="true"]):not([aria-selected="true"]):hover:not(:disabled) {
+  background: var(--ds-surface-2) !important;
+  border-color: var(--ds-border-strong) !important;
+  color: var(--tx) !important;
+}
+
+/* Primary Buttons (default: Filled) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .p, .go, .hp-add, #padd, .rp-check
+) {
+  background: var(--ds-accent) !important;
+  color: var(--ds-accent-on) !important;
+  border: 1px solid var(--ds-accent) !important;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ds-accent) 30%, transparent) !important;
+  font-weight: 650 !important;
+  min-height: var(--ds-ctl-h);
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .p, .go, .hp-add, #padd, .rp-check
+):hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ds-accent) 88%, #000000) !important;
+  border-color: color-mix(in srgb, var(--ds-accent) 88%, #000000) !important;
+  box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--ds-accent) 36%, transparent) !important;
+}
+
+/* Button Style Preferences (Settings -> Appearance -> Advanced -> Button style) */
+html:not([data-minimal-theme="true"])[data-ubt="soft"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .p, .go, .hp-add, #padd, .rp-check
+) {
+  background: var(--ds-accent-mid) !important;
+  color: var(--ds-accent) !important;
+  border: 1px solid var(--ds-accent-border) !important;
+  box-shadow: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-ubt="soft"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .p, .go, .hp-add, #padd, .rp-check
+):hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ds-accent) 24%, var(--card)) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-ubt="outline"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .p, .go, .hp-add, #padd, .rp-check
+) {
+  background: transparent !important;
+  color: var(--ds-accent) !important;
+  border: 1.5px solid var(--ds-accent) !important;
+  box-shadow: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-ubt="outline"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  .p, .go, .hp-add, #padd, .rp-check
+):hover:not(:disabled) {
+  background: var(--ds-accent-soft) !important;
+}
+
+/* Destructive Buttons */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(.d, .del) {
+  background: var(--ds-err-soft) !important;
+  color: var(--ds-err) !important;
+  border: 1px solid color-mix(in srgb, var(--ds-err) 30%, var(--card)) !important;
+  box-shadow: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(.d, .del):hover:not(:disabled) {
+  background: var(--ds-err) !important;
+  color: #ffffff !important;
+  border-color: var(--ds-err) !important;
+}
+
+/* Export & Utility Report Action Buttons */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  #rp-max, #csv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf
+) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
+  #rp-max, #csv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf
+):hover:not(:disabled) {
+  border-color: var(--ds-accent-border) !important;
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+}
+
+/* Segmented Controls & Tab Bars */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .seg, .vr-seg, .st-seg, .ap-seg
+) {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px !important;
+  background: var(--ds-surface-3) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .seg, .vr-seg, .st-seg, .ap-seg
+) button {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  color: var(--mu) !important;
+  border-radius: calc(var(--ds-r-ctl) - 1px) !important;
+  font-weight: 600;
+  min-height: 32px;
+  padding: 5px 12px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .seg, .vr-seg, .st-seg, .ap-seg
+) button:hover {
+  color: var(--tx) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .seg, .vr-seg, .st-seg, .ap-seg
+) button:is([aria-pressed="true"], [aria-selected="true"], .on) {
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  border-color: var(--ds-border) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+  font-weight: 700 !important;
+}
+
+/* Section Tab Strips (Settings, Goal Planner, Holdings Detail, Reports) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .vrs-tabs, .gpb, .mtabs, .hd-tabs
+) {
+  gap: 4px;
+  border-bottom: 1px solid var(--ds-border) !important;
+  padding-bottom: 6px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .vrs-tabs, .gpb, .mtabs, .hd-tabs
+) button {
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--mu) !important;
+  font-weight: 600;
+  padding: 7px 14px;
+  min-height: 36px;
+  box-shadow: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .vrs-tabs, .gpb, .mtabs, .hd-tabs
+) button:hover {
+  background: var(--ds-surface-2) !important;
+  color: var(--tx) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .vrs-tabs, .gpb, .mtabs, .hd-tabs
+) button:is(.on, [aria-selected="true"], [aria-current="page"], [aria-pressed="true"]) {
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+  border-color: var(--ds-accent-border) !important;
+  font-weight: 700 !important;
+}
+
+/* Form Controls: Inputs, Selects & Textareas */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+) {
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-ctl) !important;
+  min-height: var(--ds-ctl-h);
+  padding: 7px 11px;
+  font-size: 13.5px;
+  box-shadow: var(--ds-sh-xs);
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+):hover:not(:disabled) {
+  border-color: var(--ds-border-strong) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+):focus {
+  border-color: var(--ds-accent) !important;
+  box-shadow: 0 0 0 3px var(--ds-ring) !important;
+  outline: none !important;
+}
+
+/* Input Style Preferences (Settings -> Appearance -> Advanced -> Input style) */
+html:not([data-minimal-theme="true"])[data-uin="filled"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+) {
+  background: var(--ds-surface-2) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-uin="filled"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+):focus {
+  background: var(--ds-surface) !important;
+  border-color: var(--ds-accent) !important;
+  box-shadow: 0 0 0 3px var(--ds-ring) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-uin="underline"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+) {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1.5px solid var(--ds-border-strong) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+html:not([data-minimal-theme="true"])[data-uin="underline"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea
+):focus {
+  border-bottom-color: var(--ds-accent) !important;
+  box-shadow: 0 2px 0 0 var(--ds-ring) !important;
+}
+
+/* Labels & Field Help Text */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tx);
+}
+
+/* --------------------------------------------------------------------------
+   6. UNIFIED FINANCIAL-STATEMENT TABLES (All Modules & All Reports)
+      Explicitly yields to [data-utcol="custom"] in appearance-pro.css
+   -------------------------------------------------------------------------- */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .tw, .st-wrap, .vp-tw, .gpp-table-wrap
+) {
+  border-radius: var(--ds-r-box) !important;
+  border: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+/* Cell Padding & Institutional Alignment */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) :is(th, td) {
+  padding: var(--ds-tbl-pad-y) var(--ds-tbl-pad-x);
+  line-height: 1.38;
+  vertical-align: middle;
+}
+
+/* Institutional Column Header Typography */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) :is(thead th, tbody > tr:first-child > th:not([scope="row"])) {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Default Table Colours (only when custom Table Colour is NOT active) */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) :is(thead th, tbody > tr:first-child > th:not([scope="row"])) {
+  background: var(--ds-tbl-hd-bg) !important;
+  color: var(--ds-tbl-hd-tx) !important;
+  border-bottom: 1.5px solid var(--ds-border-strong) !important;
+}
+
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table
+) thead th button {
+  color: var(--ds-tbl-hd-tx) !important;
+  font-size: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+/* Table Header Mode: Tinted (uhd=tint) across ALL tables & reports */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-uhd="tint"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) :is(thead th, tbody > tr:first-child > th:not([scope="row"])) {
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+  border-bottom: 1.5px solid var(--ds-accent-border) !important;
+}
+
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-uhd="tint"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body table thead th button {
+  color: var(--ds-accent) !important;
+}
+
+/* Table Header Mode: Underlined (uhd=line) across ALL tables & reports */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-uhd="line"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) :is(thead th, tbody > tr:first-child > th:not([scope="row"])) {
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  border-bottom: 2px solid var(--ds-accent) !important;
+}
+
+/* Row Lines (utl=on / utl=off) across ALL tables & reports */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"]):not([data-utl="off"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) tbody td {
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-utl="off"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) tbody td {
+  border-bottom-color: transparent !important;
+}
+
+/* Column Lines (utc=on / utc=off) across ALL tables & reports */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-utc="on"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) :is(th, td):not(:last-child) {
+  border-right: 1px solid var(--ds-border-subtle);
+}
+
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-utc="off"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) :is(th, td) {
+  border-right-color: transparent !important;
+}
+
+/* Striped Rows (utz=on) across ALL tables & reports */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-utz="on"][data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) tbody tr:nth-child(even):not(.a):not(.ret):not(.vr-ret):not(.sel):not(.agsel):not(.st-sel):not(.gh):not(.t):not(.itot):not(.vr-tot) > td:not(.o) {
+  background-color: var(--ds-tbl-stripe) !important;
+}
+
+/* Refined Row Hover State */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table, table.gpp-cmp-table, table.vw-tb
+) tbody tr:not(.gh):not(.t):not(.itot):not(.vr-tot):not(.sel):not(.agsel):not(.st-sel):hover > td:not(.o) {
+  background-color: var(--ds-tbl-hover) !important;
+}
+
+/* Financial Statement Total & Group Header Rows */
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.ht, table.vp-t, table.st-t, table.hz-t, table.sx-t,
+  table.ut, table.ent-t, table.vod-table
+) :is(tr.t, tr.itot, tr.vr-tot, tfoot tr) > :is(td, th) {
+  background-color: var(--ds-tbl-tot-bg) !important;
+  color: var(--tx) !important;
+  font-weight: 700 !important;
+  border-top: 1.5px solid var(--ds-border-strong) !important;
+  border-bottom: 1.5px solid var(--ds-border-strong) !important;
+}
+
+html:not([data-minimal-theme="true"]):not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body table tr.gh > :is(td, th) {
+  background-color: var(--ds-surface-2) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.015em;
+  color: var(--tx) !important;
+  border-top: 1px solid var(--ds-border) !important;
+  border-bottom: 1px solid var(--ds-border) !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. DASHBOARD MODERNISATION (#dsh)
+      Preserves desktop dashboard-fit.css grid & mobile 4-tab layout
+   -------------------------------------------------------------------------- */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-hero {
+  background: linear-gradient(135deg, var(--ds-surface) 0%, var(--ds-accent-soft) 100%) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-card) !important;
+  color: var(--tx) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-hero::before,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-hero::after {
+  display: none !important;
+}
+
+/* Remove decorative pulsing/static status dot on static dashboard live metadata */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-live {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-ctl) !important;
+  color: var(--mu) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 5px 10px !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-live i {
+  display: none !important;
+}
+
+/* Clean Dashboard KPI Cards (remove blurred decorative blobs) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-kpi {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-card) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-kpi::after {
+  display: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-kpi .dz-kl,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-kpi small {
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--mu);
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-kpi .dz-kv,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-kpi b,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-kpi strong {
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--tx);
+}
+
+/* Dashboard Readiness Progress & Presets */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-bar,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .rbar {
+  background: var(--ds-surface-3) !important;
+  border-radius: 999px !important;
+  overflow: hidden;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-pr button {
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  font-weight: 600;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #dsh .dz-pr button[aria-pressed="true"] {
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+  border-color: var(--ds-accent-border) !important;
+  font-weight: 700 !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. REPORTS FINANCIAL-STATEMENT SUITE
+      Standardized headers, selectors, filters, KPI strips, charts & toolbars
+   -------------------------------------------------------------------------- */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph, .rph2, .vr-aph, .st-hero, .st-scen-head
+) {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-card) !important;
+  padding: 16px 20px;
+}
+
+/* Report Selector & Filter Toolbar */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rsel, .vod-toolbar, .st-bar
+) {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .msds button,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lgb {
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .msds button:hover,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lgb:hover {
+  border-color: var(--ds-accent-border) !important;
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+}
+
+/* Report KPI Summary Cards (.rpk-c, .st-tile) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.rpk-c, .st-tile) {
+  padding: 14px 16px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpk-c .kbar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ds-surface-3) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpk-c .kbar i {
+  border-radius: 999px;
+  background: var(--ds-accent) !important;
+}
+
+/* Status & Retired Row Badges (Subtle, restrained, non-cluttered) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rtg {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  padding: 2px 8px !important;
+  border-radius: var(--ds-r-sm) !important;
+  background: var(--ds-ok-soft) !important;
+  color: var(--ds-ok) !important;
+  border: 1px solid color-mix(in srgb, var(--ds-ok) 32%, var(--card)) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ut .pill {
+  font-size: 11.5px !important;
+  font-weight: 650 !important;
+  padding: 2px 9px !important;
+  border-radius: var(--ds-r-sm) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ut .pill.on {
+  background: var(--ds-ok-soft) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ut .pill.off {
+  background: var(--ds-err-soft) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ut .pill.ad {
+  background: var(--ds-accent-soft) !important;
+  border-color: var(--ds-accent-border) !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. HOLDINGS, POLICIES, RETIREMENT PLANNER, STRESS TEST & SETTINGS POLISH
+   -------------------------------------------------------------------------- */
+/* Holdings Page Header & Search Input */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .hp-head {
+  gap: 12px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .hp-tools input[type="search"],
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .hp-tools input[type="text"] {
+  border-radius: var(--ds-r-ctl) !important;
+}
+
+/* Policies Module (#vp-pg) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #vp-pg .vp-stat {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-card) !important;
+}
+
+/* Retirement Planner Summary & Age Bar */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .sx :is(
+  .sx-hero, .sx-r, .sx-pill, .sx-as
+) {
+  border-radius: var(--ds-r-card) !important;
+  border-color: var(--ds-border) !important;
+  box-shadow: var(--ds-sh-card) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .agebar button {
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  font-weight: 600;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .agebar button:is(.on, [aria-pressed="true"]) {
+  background: var(--ds-accent) !important;
+  color: var(--ds-accent-on) !important;
+  border-color: var(--ds-accent) !important;
+}
+
+/* Settings & Appearance Controls */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ap .ap-rows,
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ap .ap-adv {
+  border-color: var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ap .ap-row + .ap-row {
+  border-top-color: var(--ds-border-subtle) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ap button.ap-c {
+  border-radius: var(--ds-r-card) !important;
+  border-color: var(--ds-border) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .ap button.ap-c[aria-checked="true"] {
+  border-color: var(--ds-accent) !important;
+  box-shadow: 0 0 0 2px var(--ds-ring) !important;
+}
+
+/* Pagination Controls */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .pgb button {
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  min-height: 34px;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .pgb button:is(.on, [aria-current="page"]) {
+  background: var(--ds-accent) !important;
+  color: var(--ds-accent-on) !important;
+  border-color: var(--ds-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   10. DIALOGS, MODALS, WIZARDS, TOASTS & SIGN-IN SCREEN
+   -------------------------------------------------------------------------- */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body dialog {
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: calc(var(--ds-r-card) + 2px) !important;
+  box-shadow: var(--ds-sh-dlg) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body dialog::backdrop {
+  background: rgba(15, 23, 42, .48) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Wizard Step Tabs (Holding Form & Policy Dialog) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.wzt, .vp-tabs) {
+  background: var(--ds-surface-2) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+  padding: 4px !important;
+  gap: 4px !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.wzt, .vp-tabs) button {
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--mu) !important;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.wzt, .vp-tabs) button:is(.on, [aria-selected="true"]) {
+  background: var(--ds-surface) !important;
+  color: var(--ds-accent) !important;
+  border-color: var(--ds-border) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+  font-weight: 700 !important;
+}
+
+/* Toast Notification */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #toast {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, .12) !important;
+  border-radius: var(--ds-r-box) !important;
+  box-shadow: var(--ds-sh-pop) !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.005em;
+  padding: 11px 18px !important;
+}
+
+html[data-theme="dark"]:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #toast {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, .14) !important;
+}
+
+/* Sign-In Screen (#lg) */
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #lg .lc {
+  border-radius: calc(var(--ds-r-card) + 4px) !important;
+  border: 1px solid var(--ds-border) !important;
+  box-shadow: var(--ds-sh-dlg) !important;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #lg .login-security span {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   11. RESPONSIVE HARDENING (Tablet <= 900px, Mobile <= 720px & <= 560px)
+       Preserves mobile header layout, bottom nav dock & card-transformed tables
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    .rph, .rph2, .vr-aph, .st-hero, .st-scen-head
+  ) {
+    padding: 14px 16px;
+  }
+
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    .tw, .st-wrap, .vp-tw
+  ) {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  /* Mobile Bottom Navigation Dock */
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rp2-nav {
+    background: color-mix(in srgb, var(--ds-surface) 95%, transparent) !important;
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    border-top: 1px solid var(--ds-border) !important;
+    box-shadow: 0 -4px 18px rgba(15, 23, 42, .08) !important;
+  }
+
+  /* Comfortable >= 44px mobile touch targets for primary interactive controls */
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    button.p, button.go, button.hp-add, button#padd, button.rp-check,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+    select
+  ) {
+    min-height: 44px;
+  }
+
+  /* Tighter table padding on mobile so financial columns stay scannable */
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    table.rt, table.ht, table.vp-t, table.st-t, table.ent-t, table.vod-table
+  ) :is(th, td) {
+    padding: 7px 9px;
+    font-size: 12.5px;
+  }
+
+  /* Prevent report action toolbars from clipping horizontally */
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    .rph, .rph2, .vr-aph, .tb, .vod-toolbar, .st-bar
+  ) {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  /* Preserve mobile card-transformed Policy summary table */
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .vp-tw.vp-fit table.vp-sumt td {
+    border-right: 0 !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    .card, .dz-card, .rph, .rph2, .vr-aph, .st-hero
+  ) {
+    border-radius: var(--ds-r-box) !important;
+  }
+
+  html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body dialog {
+    max-width: calc(100vw - 16px) !important;
+    border-radius: var(--ds-r-card) !important;
+  }
+}
