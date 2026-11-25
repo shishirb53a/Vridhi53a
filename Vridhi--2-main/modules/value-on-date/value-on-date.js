@@ -7,10 +7,13 @@ DATE_KEY='vr-value-on-date';
 function escape(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function parseDate(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');if(!m)return null;var y=+m[1],mo=+m[2],d=+m[3];return new Date(Date.UTC(y,mo-1,d)).getUTCMonth()===mo-1?{year:y,month:mo,day:d}:null}
 function daysInMonth(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate()}
+function utcDay(s){var p=parseDate(s);return p?Math.floor(Date.UTC(p.year,p.month-1,p.day)/86400000):NaN}
+function dayDiff(a,b){var x=utcDay(a),y=utcDay(b);return isFinite(x)&&isFinite(y)?y-x:0}
 function addDays(s,n){var p=parseDate(s);if(!p)return'';var d=new Date(Date.UTC(p.year,p.month-1,p.day+n));return isoDate(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate())}
 function isoDate(y,m,d){return String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
 function today(){var d=new Date();return isoDate(d.getFullYear(),d.getMonth()+1,d.getDate())}
 function displayDate(s){if(typeof fdd==='function')return fdd(s+'T12:00:00');var p=parseDate(s);return p?MONTHS[p.month-1]+' '+p.day+', '+p.year:s}
+function shortMonthYear(s){var p=parseDate(s);return p?SHORT[p.month-1]+' '+p.year:s}
 function dateValue(rows,index,date,assets){
  var p=parseDate(date);if(!p)return null;
  var at=rows.findIndex(function(r){return r.calYear===p.year&&r.calMonth===p.month});
@@ -181,22 +184,53 @@ function calendarMarkup(plans){
  var quickToday=today(),fyYear=parseDate(quickToday).year-(parseDate(quickToday).month<4?1:0),quick=[['today','Today',quickToday],['fy-start','FY start',isoDate(fyYear,4,1)],['fy-end','FY end',isoDate(fyYear+1,3,31)],['retirement','Retirement date',isoDate((+plan.state.start)+Math.max(0,(+plan.state.ret)-(+((plan.state.members||[])[0]||{}).age)),4,1)]];
  return'<div class="vod-popover" id="vod-calendar" role="dialog" aria-label="Choose report date"'+(ST.open?'':' hidden')+'><div class="vod-cal-top"><button type="button" data-vod="prev" aria-label="Previous month"'+(prev<range.min.slice(0,7)+'-01'?' disabled':'')+'>‹</button><label><span class="sr-only">Month</span><select id="vod-month" aria-label="Month">'+months+'</select></label><label><span class="sr-only">Year</span><select id="vod-year" aria-label="Year">'+years+'</select></label><button type="button" data-vod="next" aria-label="Next month"'+(next>range.max.slice(0,7)+'-01'?' disabled':'')+'>›</button></div><div class="vod-week" aria-hidden="true">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(x){return'<span>'+x+'</span>'}).join('')+'</div><div class="vod-days">'+cells.join('')+'</div><div class="vod-quick">'+quick.map(function(q){return'<button type="button" data-vod="quick" data-date="'+q[2]+'"'+(q[2]<range.min||q[2]>range.max?' disabled':'')+'>'+q[1]+'</button>'}).join('')+'</div></div>'
 }
+function sliderMeta(plan,date){
+ var state=(plan&&plan.state)||{start:0,end:0},range=bounds(state),max=Math.max(0,dayDiff(range.min,range.max)),
+ val=Math.max(0,Math.min(max,dayDiff(range.min,date))),pct=max>0?(val/max*100):0;
+ return{minDate:range.min,maxDate:range.max,max:max,val:val,pct:pct.toFixed(3)+'%'}
+}
+function sliderMarkup(plan){
+ var m=sliderMeta(plan,ST.date);
+ return'<div class="vod-slider-wrap"><div class="vod-slider-head"><label class="vod-select-label" for="vod-date-slider">Date slider</label><span class="vod-slider-val" id="vod-slider-val">'+escape(displayDate(ST.date))+'</span></div><input type="range" id="vod-date-slider" class="vod-slider" data-filter="1" min="0" max="'+m.max+'" step="1" value="'+m.val+'" style="--vod-pct:'+m.pct+'" aria-label="Slide to change report date" aria-valuetext="'+escape(displayDate(ST.date))+'"><div class="vod-slider-bounds"><span id="vod-slider-min">'+escape(shortMonthYear(m.minDate))+'</span><span id="vod-slider-max">'+escape(shortMonthYear(m.maxDate))+'</span></div></div>'
+}
+function syncSlider(){
+ var slider=document.getElementById('vod-date-slider');if(!slider)return;
+ var plan=rangePlan(selectedPlans());if(!plan)return;
+ var m=sliderMeta(plan,ST.date);
+ slider.min='0';slider.max=String(m.max);slider.value=String(m.val);
+ if(slider.style&&slider.style.setProperty)slider.style.setProperty('--vod-pct',m.pct);
+ slider.setAttribute('aria-valuetext',displayDate(ST.date));
+ var valEl=document.getElementById('vod-slider-val');if(valEl)valEl.textContent=displayDate(ST.date);
+ var minEl=document.getElementById('vod-slider-min');if(minEl)minEl.textContent=shortMonthYear(m.minDate);
+ var maxEl=document.getElementById('vod-slider-max');if(maxEl)maxEl.textContent=shortMonthYear(m.maxDate)
+}
 function reportMarkup(plans){
  var selected=rangePlan(plans),
  clientOpts='<option value="all"'+(ST.client==='all'?' selected':'')+'>All clients</option>'+planList().map(function(p){return'<option value="'+escape(p.id)+'"'+(ST.client===p.id?' selected':'')+'>'+escape(p.name)+(p.active?' (current)':'')+'</option>'}).join('');
  setTimeout(function(){drawBody()},0);
- return'<div class="card vod-page"><div class="rph2" data-rpx><div class="rpt"><h2>Value on Date</h2>'+(window.rptInfo?window.rptInfo('Portfolio value on a selected date. Future dates use the Monthly Portfolio Projection engine. On or before today, the nearest saved holding snapshot on or before that date is used when available; otherwise the projection engine is used. A holding added after the date is excluded. Daily values between monthly projection rows are accrued from the engine values; the first of each month matches the Monthly Portfolio Projection report.','About this report'):'')+'</div>'+(window.rptCsv?window.rptCsv('csv'):'<button type="button" id="csv" class="vr-ib vr-ib-csv" title="Copy as CSV" aria-label="Copy as CSV"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>')+'</div><div class="tb vod-toolbar"><label class="vod-select-label" for="vod-client">Client</label><select id="vod-client" aria-label="Client">'+clientOpts+'</select><div class="vod-date-wrap"><span class="vod-select-label">Date</span><button type="button" class="vod-date" data-vod="toggle" aria-haspopup="dialog" aria-label="Choose report date, '+escape(displayDate(ST.date))+'" aria-expanded="'+ST.open+'">'+escape(displayDate(ST.date))+' <span aria-hidden="true">▾</span></button>'+calendarMarkup(plans)+'</div></div>'+window.rsDrops()+'<div class="tb vod-tools"><input id="vod-q" type="search" aria-label="Search holdings" placeholder="Search holding, category, basis…" value="'+escape(ST.query)+'"></div><div id="rr"><div id="vod-body">'+bodyHTML(plans)+'</div></div></div>'
+ return'<div class="card vod-page"><div class="rph2" data-rpx><div class="rpt"><h2>Value on Date</h2>'+(window.rptInfo?window.rptInfo('Portfolio value on a selected date. Future dates use the Monthly Portfolio Projection engine. On or before today, the nearest saved holding snapshot on or before that date is used when available; otherwise the projection engine is used. A holding added after the date is excluded. Daily values between monthly projection rows are accrued from the engine values; the first of each month matches the Monthly Portfolio Projection report.','About this report'):'')+'</div>'+(window.rptCsv?window.rptCsv('csv'):'<button type="button" id="csv" class="vr-ib vr-ib-csv" title="Copy as CSV" aria-label="Copy as CSV"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>')+'</div><div class="tb vod-toolbar"><div class="vod-client-wrap"><label class="vod-select-label" for="vod-client">Client</label><select id="vod-client" aria-label="Client">'+clientOpts+'</select></div>'+sliderMarkup(selected)+'<div class="vod-date-wrap"><span class="vod-select-label">Date</span><button type="button" class="vod-date" data-vod="toggle" aria-haspopup="dialog" aria-label="Choose report date, '+escape(displayDate(ST.date))+'" aria-expanded="'+ST.open+'">'+escape(displayDate(ST.date))+' <span aria-hidden="true">▾</span></button>'+calendarMarkup(plans)+'</div></div>'+window.rsDrops()+'<div class="tb vod-tools"><input id="vod-q" type="search" aria-label="Search holdings" placeholder="Search holding, category, basis…" value="'+escape(ST.query)+'"></div><div id="rr"><div id="vod-body">'+bodyHTML(plans)+'</div></div></div>'
 }
-function drawBody(){
+function drawBody(skipSnapshots){
  var p=document.getElementById('vod-body');if(!p)return;
- var plans=selectedPlans();if(!window.repSel().none)ensureSnapshots(plans,ST.date);p.innerHTML=bodyHTML(plans);
+ var plans=selectedPlans();if(!skipSnapshots&&!window.repSel().none)ensureSnapshots(plans,ST.date);p.innerHTML=bodyHTML(plans);
  if(window.RCOLS&&document.getElementById('rr'))window.RCOLS.apply(document.getElementById('rr'),'vdate')
 }
-function setDate(date){
+function setDate(date,opts){
+ opts=opts||{};
  var parsed=parseDate(date),plan=rangePlan(selectedPlans());if(!parsed||!plan||!inRange(date,plan.state))return false;
- ST.date=date;ST.focusDate=date;ST.viewYear=parsed.year;ST.viewMonth=parsed.month;ST.open=false;
- try{sessionStorage.setItem(DATE_KEY,date)}catch(e){}
- drawBody();paintCalendar(false);var button=document.querySelector('.vod-date');if(button)button.focus();
+ ST.date=date;ST.focusDate=date;ST.viewYear=parsed.year;ST.viewMonth=parsed.month;
+ if(!opts.keepOpen)ST.open=false;
+ if(!opts.skipPersist){try{sessionStorage.setItem(DATE_KEY,date)}catch(e){}}
+ drawBody(!!opts.live);
+ if(opts.live){
+  updateDateButton();
+  syncSlider();
+  var cal=document.getElementById('vod-calendar');if(cal&&!ST.open)cal.hidden=true;
+ }else{
+  paintCalendar(false);
+  syncSlider();
+  if(!opts.keepFocus){var button=document.querySelector('.vod-date');if(button)button.focus()}
+ }
  return true
 }
 function updateDateButton(){
@@ -226,18 +260,30 @@ function csvForRows(rows,total){
 }
 function reportRowsCsv(){var data=compute(ST.date,selectedPlans(),ST.date<=today(),ST.date,selectedIds());return csvForRows(filtered(data),data.total)}
 window.valueOnDateCSV=reportRowsCsv;
-window.VRValueDate={parseDate:parseDate,daysInMonth:daysInMonth,addDays:addDays,dateValue:dateValue,nearestSnapshot:nearestSnapshot,snapshotBasis:snapshotBasis,csvForRows:csvForRows,compute:compute,csvCell:csvCell};
+window.VRValueDate={parseDate:parseDate,daysInMonth:daysInMonth,dayDiff:dayDiff,addDays:addDays,dateValue:dateValue,nearestSnapshot:nearestSnapshot,snapshotBasis:snapshotBasis,csvForRows:csvForRows,compute:compute,csvCell:csvCell,sliderMeta:sliderMeta};
 window.repValueOnDate=function(){ensureState();var plans=selectedPlans();if(!window.repSel().none)ensureSnapshots(plans,ST.date);return reportMarkup(plans)};
+function sliderDateFromInput(el){
+ var plan=rangePlan(selectedPlans());if(!plan)return'';
+ var b=bounds(plan.state),offset=Math.max(0,Math.round(Number(el.value)||0));
+ return clamp(addDays(b.min,offset),plan.state)
+}
 document.addEventListener('change',function(e){
  var t=e.target;if(!t||!t.id)return;
  if(t.id==='vod-client'){
   ST.client=t.value;var selected=rangePlan(selectedPlans()),date=selected?clamp(ST.date,selected.state):ST.date;ST.date=date;
+  var p=parseDate(date);if(p){ST.focusDate=date;ST.viewYear=p.year;ST.viewMonth=p.month}
   try{sessionStorage.setItem(DATE_KEY,date)}catch(x){}
-  drawBody();paintCalendar(false)
+  drawBody();paintCalendar(false);syncSlider()
+ }else if(t.id==='vod-date-slider'){
+  var d=sliderDateFromInput(t);if(d)setDate(d,{keepFocus:true})
  }else if(t.id==='vod-month'){setMonth(ST.viewYear,+t.value,false);var month=document.getElementById('vod-month');if(month)month.focus()}
  else if(t.id==='vod-year'){setMonth(+t.value,ST.viewMonth,false);var year=document.getElementById('vod-year');if(year)year.focus()}
 });
-document.addEventListener('input',function(e){if(e.target&&e.target.id==='vod-q'){ST.query=e.target.value;drawBody()}});
+document.addEventListener('input',function(e){
+ var t=e.target;if(!t||!t.id)return;
+ if(t.id==='vod-q'){ST.query=t.value;drawBody()}
+ else if(t.id==='vod-date-slider'){var d=sliderDateFromInput(t);if(d)setDate(d,{live:true,skipPersist:true,keepFocus:true})}
+});
 document.addEventListener('click',function(e){
  var csv=e.target.closest&&e.target.closest('#csv');
  if(csv&&typeof UI!=='undefined'&&UI.rv==='vdate'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(window.repSel().none){toast('Please select at least one investment.');return}text('Value on Date CSV',reportRowsCsv())}
