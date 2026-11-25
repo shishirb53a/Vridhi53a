@@ -183,7 +183,7 @@
     if (!V.count()) return top + empty();
     var search = ST.rep === 'payout' ? '<div class="vp-tools"><input id="vp-rq" type="search" placeholder="Search year or policy\u2026" aria-label="Search policy payout report" value="' + esc(ST.rq) + '"></div>' : '';
     return top + '<div class="vp-pills" role="group" aria-label="Report type">' + REPS.map(function (k) { return '<button type="button" data-vp="rtype" data-t="' + k[0] + '" aria-pressed="' + (ST.rep === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>'
-      + '<div class="vp-card"><div class="vp-h"><h2>' + esc(REPS.filter(function (k) { return k[0] === ST.rep; })[0][1]) + '</h2></div>' + search + '<div id="vpr">' + repHtml() + '</div></div>';
+      + '<div class="vp-card"><div class="rph2 vp-h" data-rpx><div class="rpt"><h2>' + esc(REPS.filter(function (k) { return k[0] === ST.rep; })[0][1]) + '</h2></div></div>' + search + '<div id="vpr">' + repHtml() + '</div></div>';
   }
   function repHtml() {
     var t = today();

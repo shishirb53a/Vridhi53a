@@ -1,11 +1,14 @@
-# Report maximize module
+# Report Maximize
 
-`report-maximize.js` owns the shared Maximize / Restore behavior for Goal Planner reports,
-the holding report pop-up, and the Retirement Planner summary and milestones. It inserts the
-existing controls, remembers the preference in local storage, and handles Escape to restore
-the Goal Planner report view.
+Shared Maximize / Restore control for every report in the application:
+- Goal Planner → Reports (Annual Portfolio Projection, Monthly Portfolio Projection, Interest & Income Statement, Annual Savings Schedule, Holdings Entry Register, Value on Date)
+- Goal Planner → Holding report pop-up (`#hydlg`)
+- Retirement Planner → Year-by-year plan and Summary / Milestones pop-up (`#dg`)
+- Policies → Reports (Policy Payout Details, Premiums & Payouts by Year, Maturity Report, Policy Summary)
 
-The script loads synchronously at its original position after the report and planner markup
-hooks are defined. The layout styles remain in `index.html` to preserve their cascade.
+When maximized, `report-maximize.css` and `report-maximize.js` automatically fit all visible columns into a single-page width without horizontal scrolling (using progressive compact table tiers and proportional scaling for very wide tables), while Restore cleanly returns tables to their original scrollable layout and frozen-column settings.
 
-Run `node tests/report-maximize.test.js` after changing this module.
+## Files
+
+- `report-maximize.js` — inserts `#rp-max`, `#hy-max`, and `#fh-max`, persists the shared `vr-rep-max` preference, handles Escape-to-restore, and fits/restores report tables across resize and filter/column changes.
+- `report-maximize.css` — full-viewport layout and 1-page column-fitting rules for maximized reports.

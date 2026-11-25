@@ -810,11 +810,19 @@
       const wrap = host.querySelector(".st-scen-card.st-max .st-wrap, .st-eng-card.st-max .st-wrap");
       const tbl = wrap && wrap.querySelector("table.st-t");
       if (!wrap || !tbl) return;
+      if (wrap.scrollLeft) wrap.scrollLeft = 0;
       tbl.style.zoom = "";
-      const avail = wrap.clientWidth, need = tbl.scrollWidth;
-      if (avail > 700 && need > avail) {
-        const z = Math.max(0.65, Math.floor((avail / need) * 1000) / 1000);
+      const avail = wrap.clientWidth, need = Math.max(tbl.scrollWidth || 0, tbl.offsetWidth || 0);
+      if (avail > 0 && need > avail + 1) {
+        let z = Math.max(0.35, Math.min(1, Math.floor(((avail - 2) / need) * 1000) / 1000));
         tbl.style.zoom = String(z);
+        if (typeof tbl.getBoundingClientRect === "function") {
+          const rect = tbl.getBoundingClientRect(), availNow = wrap.clientWidth || avail;
+          if (rect && rect.width > availNow + 1 && availNow > 0) {
+            z = Math.max(0.35, Math.min(z, Math.floor(((availNow - 2) / rect.width) * z * 1000) / 1000));
+            tbl.style.zoom = String(z);
+          }
+        }
       }
     }
     function toggleMax(next) {

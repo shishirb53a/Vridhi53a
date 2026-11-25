@@ -157,34 +157,34 @@ html body .st-root .st-t th.st-sep,html body .st-root .st-t td.st-sep{border-lef
 .st-scen-card.st-max .st-scen-sub,.st-eng-card.st-max .st-scen-sub{margin-bottom:8px}
 .st-scen-card.st-max .msds,.st-eng-card.st-max .msds{margin:0 0 8px}
 .st-scen-card.st-max .st-tb-bar,.st-eng-card.st-max .st-tb-bar{margin-bottom:8px}
-.st-scen-card.st-max .st-wrap,.st-eng-card.st-max .st-wrap{flex:1;max-height:none;overflow-x:auto;overflow-y:auto;box-shadow:0 4px 24px color-mix(in srgb,var(--c-tx) 8%,transparent)}
+.st-scen-card.st-max .st-wrap,.st-eng-card.st-max .st-wrap{flex:1;max-height:none;overflow-x:hidden;overflow-y:auto;box-shadow:0 4px 24px color-mix(in srgb,var(--c-tx) 8%,transparent)}
 .st-scen-card.st-max .st-t,.st-eng-card.st-max .st-t{font-size:12px;width:100%}
-html body .st-root .st-scen-card.st-max .st-t thead th,html body .st-root .st-eng-card.st-max .st-t thead th{white-space:normal;line-height:1.2;vertical-align:bottom;padding:8px 12px 8px 6px;font-size:11px;left:auto;z-index:2}
+html body .st-root .st-scen-card.st-max .st-t thead th,html body .st-root .st-eng-card.st-max .st-t thead th{white-space:normal;line-height:1.2;vertical-align:bottom;padding:7px 8px 7px 5px;font-size:11px;left:auto;z-index:2}
 html body .st-root .st-scen-card.st-max .st-t thead th .rpi,html body .st-root .st-eng-card.st-max .st-t thead th .rpi{width:13px;height:13px;flex:none}
 html body .st-root .st-scen-card.st-max .st-t thead th .rpi-i,html body .st-root .st-eng-card.st-max .st-t thead th .rpi-i{font-size:9px}
-.st-scen-card.st-max .st-t td,.st-eng-card.st-max .st-t td{padding:7px 6px}
-html body .st-root .st-scen-card.st-max .st-t td:first-child{min-width:138px;max-width:210px;white-space:normal;line-height:1.25;position:static;border-right:1px solid var(--c-soft)}
-html body .st-root .st-scen-card.st-max .st-t th:first-child{min-width:138px;max-width:210px;white-space:normal;line-height:1.25;border-right:1px solid var(--c-soft)}
-html body .st-root .st-scen-card.st-max .st-ts.has-sno td:first-child{min-width:44px;width:44px;max-width:52px;position:static;text-align:center}
-html body .st-root .st-scen-card.st-max .st-ts.has-sno th:first-child{min-width:44px;width:44px;max-width:52px;text-align:center}
-html body .st-root .st-scen-card.st-max .st-ts.has-sno td:nth-child(2){min-width:132px;max-width:195px;white-space:normal;line-height:1.25;position:static;border-right:1px solid var(--c-soft)}
-html body .st-root .st-scen-card.st-max .st-ts.has-sno th:nth-child(2){min-width:132px;max-width:195px;white-space:normal;line-height:1.25;border-right:1px solid var(--c-soft)}
-html body .st-root .st-eng-card.st-max .st-te td:first-child{min-width:48px;width:48px;max-width:56px;position:static;text-align:center;border-right:1px solid var(--c-soft)}
-html body .st-root .st-eng-card.st-max .st-te th:first-child{min-width:48px;width:48px;max-width:56px;text-align:center;border-right:1px solid var(--c-soft)}
-html body .st-root .st-eng-card.st-max .st-te.has-age td:nth-child(2){min-width:60px;position:static;border-right:1px solid var(--c-soft)}
-html body .st-root .st-eng-card.st-max .st-te.has-age th:nth-child(2){min-width:60px;border-right:1px solid var(--c-soft)}
-.st-scen-card.st-max .st-sv{display:grid;grid-template-columns:auto 1fr;gap:3px 6px;align-items:center;justify-items:end;min-width:112px}
+.st-scen-card.st-max .st-t td,.st-eng-card.st-max .st-t td{padding:6px 5px}
+html body .st-root .st-scen-card.st-max .st-t td:first-child{min-width:118px;max-width:185px;white-space:normal;line-height:1.25;position:static;border-right:1px solid var(--c-soft)}
+html body .st-root .st-scen-card.st-max .st-t th:first-child{min-width:118px;max-width:185px;white-space:normal;line-height:1.25;border-right:1px solid var(--c-soft)}
+html body .st-root .st-scen-card.st-max .st-ts.has-sno td:first-child{min-width:38px;width:38px;max-width:46px;position:static;text-align:center}
+html body .st-root .st-scen-card.st-max .st-ts.has-sno th:first-child{min-width:38px;width:38px;max-width:46px;text-align:center}
+html body .st-root .st-scen-card.st-max .st-ts.has-sno td:nth-child(2){min-width:114px;max-width:175px;white-space:normal;line-height:1.25;position:static;border-right:1px solid var(--c-soft)}
+html body .st-root .st-scen-card.st-max .st-ts.has-sno th:nth-child(2){min-width:114px;max-width:175px;white-space:normal;line-height:1.25;border-right:1px solid var(--c-soft)}
+html body .st-root .st-eng-card.st-max .st-te td:first-child{min-width:42px;width:42px;max-width:50px;position:static;text-align:center;border-right:1px solid var(--c-soft)}
+html body .st-root .st-eng-card.st-max .st-te th:first-child{min-width:42px;width:42px;max-width:50px;text-align:center;border-right:1px solid var(--c-soft)}
+html body .st-root .st-eng-card.st-max .st-te.has-age td:nth-child(2){min-width:52px;position:static;border-right:1px solid var(--c-soft)}
+html body .st-root .st-eng-card.st-max .st-te.has-age th:nth-child(2){min-width:52px;border-right:1px solid var(--c-soft)}
+.st-scen-card.st-max .st-sv{display:grid;grid-template-columns:auto 1fr;gap:3px 6px;align-items:center;justify-items:end;min-width:104px}
 .st-scen-card.st-max .st-sv b{grid-column:1 / -1;font-size:12px}
 .st-scen-card.st-max .st-sv .st-ch{padding:1px 6px;font-size:10.5px}
-.st-scen-card.st-max .st-sv .st-mb{width:38px;height:5px}
+.st-scen-card.st-max .st-sv .st-mb{width:36px;height:5px}
 .st-scen-card.st-max.st-wide-cols .st-t,.st-eng-card.st-max.st-wide-cols .st-t{font-size:11px}
-html body .st-root .st-scen-card.st-max.st-wide-cols .st-t thead th,html body .st-root .st-eng-card.st-max.st-wide-cols .st-t thead th{font-size:10.5px;padding:7px 4px}
-.st-scen-card.st-max.st-wide-cols .st-t td,.st-eng-card.st-max.st-wide-cols .st-t td{padding:6px 4px}
-html body .st-root .st-scen-card.st-max.st-wide-cols .st-t td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-t th:first-child{min-width:124px;max-width:160px}
-html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno th:first-child{min-width:40px;width:40px;max-width:46px}
-html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno td:nth-child(2),html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno th:nth-child(2){min-width:118px;max-width:155px}
-.st-scen-card.st-max.st-wide-cols .st-sv{min-width:104px}
-.st-scen-card.st-max.st-wide-cols .st-mb{width:30px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-t thead th,html body .st-root .st-eng-card.st-max.st-wide-cols .st-t thead th{font-size:10px;padding:6px 4px}
+.st-scen-card.st-max.st-wide-cols .st-t td,.st-eng-card.st-max.st-wide-cols .st-t td{padding:5px 4px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-t td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-t th:first-child{min-width:106px;max-width:148px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno td:first-child,html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno th:first-child{min-width:34px;width:34px;max-width:42px}
+html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno td:nth-child(2),html body .st-root .st-scen-card.st-max.st-wide-cols .st-ts.has-sno th:nth-child(2){min-width:104px;max-width:144px}
+.st-scen-card.st-max.st-wide-cols .st-sv{min-width:96px}
+.st-scen-card.st-max.st-wide-cols .st-mb{width:28px}
 
 /* Tab 3: Stress Settings Grid */
 .st-sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:8px}

@@ -1,0 +1,166 @@
+/* Report Maximize: 1-page all-columns view across every report in Vriddhi
+   (Goal Planner Reports, Retirement Planner Year-by-year & Summary popup, Policies Reports, Holding Report popup).
+   Loaded after table and module stylesheets so maximized mode cleanly fits all visible columns without horizontal scroll,
+   while Restore returns every table to its original scrollable / frozen-column layout. */
+
+/* Full-viewport maximized container spacing */
+html body main#m.vr-rmax{padding:8px 14px 80px!important}
+html body main#m.vr-rmax .card,
+html body main#m.vr-rmax .vp-card{padding:12px 14px!important}
+@media (max-width:720px){
+  html body main#m.vr-rmax{padding:6px 8px 80px!important}
+  html body main#m.vr-rmax .card,
+  html body main#m.vr-rmax .vp-card{padding:10px 8px!important}
+}
+
+/* Always display the full multi-column table (instead of stacked mobile cards) when maximized */
+html body main#m.vr-rmax table.rt,
+html body main#m.vr-rmax table.rs,
+html body main#m.vr-rmax table.hz-t,
+html body main#m.vr-rmax table.vp-t,
+html body main#m.vr-rmax table.ent-t,
+html body main#m.vr-rmax table.vod-table{display:table!important}
+html body main#m.vr-rmax .hz-wrap,
+html body main#m.vr-rmax .vod-mw,
+html body main#m.vr-rmax .vp-tw{display:block!important}
+html body main#m.vr-rmax :is(.rc,.hz-cards,.vr-sc,.ent-cards,.vod-cards){display:none!important}
+
+/* Policies Reports: full-height maximized card and always-visible maximize header */
+html body main#m.vr-rmax #vp-pg.vpf.vpr{height:calc(100dvh - 18px)!important;max-height:none!important}
+html body main#m.vr-rmax #vp-pg.vpf.vpr .vp-h[data-rpx]{display:flex!important}
+html body #vp-pg.vpf.vpr .vp-h[data-rpx]{display:flex;align-items:center;justify-content:space-between;gap:8px}
+@media (max-width:900px){
+  html body #vp-pg.vpf.vpr .vp-h[data-rpx]{display:flex!important}
+}
+
+/* Table wrappers in maximized mode: fit full width with no horizontal scroll or sideways grab cursor */
+html body main#m.vr-rmax :is(#rr,#rr.mw,.hz-wrap,.vp-tw,.mw,.vod-mw),
+html body dialog#hydlg.hy-full .hy-sc,
+html body dialog#dg.fh-full .sx-tw{
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:hidden!important;
+  cursor:default!important;
+}
+html body main#m.vr-rmax #rr.mw{max-height:calc(100dvh - 220px)!important;overflow-y:auto!important}
+html body main#m.vr-rmax #hz-rows .hz-wrap{max-height:calc(100dvh - 230px)!important;overflow-y:auto!important}
+html body main#m.vr-rmax #vpr .vp-tw{overflow-y:auto!important}
+
+/* Maximized tables: remove min-width:max-content so all columns share the single-page width */
+html body main#m.vr-rmax :is(table.rt,table.vp-t,table.sx-t),
+html body dialog#hydlg.hy-full table.rt,
+html body dialog#dg.fh-full :is(table.sx-t,table.rt){
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  table-layout:auto!important;
+  font-size:11.5px!important;
+}
+
+/* Unfreeze horizontal sticky columns in maximized 1-page view (no horizontal scroll needed),
+   while keeping vertical sticky headers and selected-row highlights intact */
+html body[data-fz] main#m.vr-rmax :is(table.rt,table.rt.nsn) :is(th,td),
+html body main#m.vr-rmax :is(table.rt,table.rt.nsn,table.vp-t,table.sx-t) :is(th,td),
+html body[data-fz] dialog#hydlg.hy-full table.rt :is(th,td),
+html body dialog#hydlg.hy-full table.rt :is(th,td),
+html body dialog#dg.fh-full :is(table.sx-t,table.rt) :is(th,td){
+  left:auto!important;
+  right:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+html body[data-fz] main#m.vr-rmax :is(table.rt,table.rt.nsn) td,
+html body main#m.vr-rmax :is(table.vp-t,table.sx-t) td,
+html body[data-fz] dialog#hydlg.hy-full table.rt td{
+  position:static!important;
+}
+html body[data-fz="2"] main#m.vr-rmax .rt tr:not(.sel) :is(th,td):nth-child(2),
+html body[data-fz="3"] main#m.vr-rmax .rt tr:not(.sel) :is(th,td):nth-child(3),
+html body main#m.vr-rmax .vp-t :is(th,td):last-child{
+  box-shadow:none!important;
+}
+
+/* Compact, readable headers and cells when maximized */
+html body main#m.vr-rmax :is(table.rt,table.vp-t,table.sx-t) th,
+html body dialog#hydlg.hy-full table.rt th,
+html body dialog#dg.fh-full :is(table.sx-t,table.rt) th{
+  white-space:normal!important;
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+  line-height:1.18!important;
+  vertical-align:bottom!important;
+  padding:6px 5px!important;
+  font-size:11px!important;
+}
+html body main#m.vr-rmax :is(table.rt,table.vp-t,table.sx-t) th button,
+html body dialog#hydlg.hy-full table.rt th button{
+  white-space:normal!important;
+  line-height:1.18!important;
+}
+html body main#m.vr-rmax :is(table.rt,table.vp-t,table.sx-t) td,
+html body dialog#hydlg.hy-full table.rt td,
+html body dialog#dg.fh-full :is(table.sx-t,table.rt) td{
+  padding:5px 5px!important;
+  font-size:11.5px!important;
+  line-height:1.25!important;
+}
+
+/* Relax wide text/description columns so they wrap cleanly instead of crowding numeric columns */
+html body main#m.vr-rmax table.rt :is(td.l,td:last-child,th:last-child),
+html body main#m.vr-rmax table.hz-t :is(th.hz-w,td.hz-w),
+html body main#m.vr-rmax table.vp-t.vp-sumt td,
+html body dialog#hydlg.hy-full table.rt :is(td.l,td:last-child,th:last-child){
+  white-space:normal!important;
+  overflow-wrap:break-word!important;
+  min-width:0!important;
+}
+html body main#m.vr-rmax table.rt td.l:last-child,
+html body main#m.vr-rmax table.hz-t td.hz-w{
+  max-width:155px!important;
+}
+html body main#m.vr-rmax table.rt .rt-sub,
+html body dialog#hydlg.hy-full table.rt .rt-sub{
+  font-size:9.5px!important;
+  line-height:1.15!important;
+  white-space:normal!important;
+}
+html body main#m.vr-rmax table.rt td>.rtg,
+html body main#m.vr-rmax table.rt .vr-tdy{
+  font-size:9.5px!important;
+  padding:0 5px!important;
+  margin-top:2px!important;
+}
+
+/* Progressive compact density tiers (applied automatically by report-maximize.js for wide tables before zoom) */
+html body main#m.vr-rmax table.vr-fit-tight th,
+html body dialog#hydlg.hy-full table.vr-fit-tight th,
+html body dialog#dg.fh-full table.vr-fit-tight th{
+  padding:5px 3.5px!important;
+  font-size:10px!important;
+  letter-spacing:0!important;
+}
+html body main#m.vr-rmax table.vr-fit-tight td,
+html body dialog#hydlg.hy-full table.vr-fit-tight td,
+html body dialog#dg.fh-full table.vr-fit-tight td{
+  padding:4px 3.5px!important;
+  font-size:10.5px!important;
+}
+html body main#m.vr-rmax table.vr-fit-ultra th,
+html body dialog#hydlg.hy-full table.vr-fit-ultra th,
+html body dialog#dg.fh-full table.vr-fit-ultra th{
+  padding:4px 2.5px!important;
+  font-size:9.5px!important;
+  letter-spacing:0!important;
+  line-height:1.12!important;
+}
+html body main#m.vr-rmax table.vr-fit-ultra td,
+html body dialog#hydlg.hy-full table.vr-fit-ultra td,
+html body dialog#dg.fh-full table.vr-fit-ultra td{
+  padding:3.5px 2.5px!important;
+  font-size:9.5px!important;
+  line-height:1.2!important;
+}
+html body main#m.vr-rmax table.vr-fit-ultra td.l:last-child,
+html body main#m.vr-rmax table.vr-fit-ultra td.hz-w{
+  max-width:125px!important;
+}
