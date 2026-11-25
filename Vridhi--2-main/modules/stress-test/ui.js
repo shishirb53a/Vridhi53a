@@ -209,6 +209,9 @@
   const DEFAULT_ENG_W = { year: 68, age: 88, kids: 165, lumpInc: 140, lumpPrin: 170 };
   const SCEN_W_KEY = "vr-st-scen-w" + (typeof window !== "undefined" && window.__UK ? "-" + window.__UK : "");
   const ENG_W_KEY = "vr-st-eng-w" + (typeof window !== "undefined" && window.__UK ? "-" + window.__UK : "");
+  /* The maximized (fit-to-page) view lays columns out at a smaller scale, so it keeps its own widths. */
+  const SCEN_WM_KEY = SCEN_W_KEY + "-max";
+  const ENG_WM_KEY = ENG_W_KEY + "-max";
   function loadWidths(key) {
     const out = {};
     try {
@@ -250,6 +253,7 @@
       sortDir: 1,
       selRow: null,         /* highlighted scenario number */
       scenWidths: loadWidths(SCEN_W_KEY),
+      scenWidthsMax: loadWidths(SCEN_WM_KEY),
       engCols: loadEngCols(),
       engOutcomes: { ok: true, short: true },
       engScens: null,       /* null = all 14 scenario columns shown; or map 1..14 */
@@ -258,6 +262,7 @@
       engSortDir: 1,
       engSelRow: null,      /* highlighted year in engine */
       engWidths: loadWidths(ENG_W_KEY),
+      engWidthsMax: loadWidths(ENG_WM_KEY),
       dirty: false,
       max: false,
       engMax: false
@@ -538,7 +543,7 @@
       const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
       const cols = activeCols();
       const extraClass = (st.max ? " st-max" : "") + (cols.hasStart ? " st-wide-cols" : "");
-      const hasCustomW = Object.keys(st.scenWidths).length > 0;
+      const hasCustomW = Object.keys(wMap("scen")).length > 0;
       const wResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-wreset${hasCustomW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
       const pdfBtn = st.max ? `<button type="button" class="st-btn st-pdf-btn" data-st-pdf="scen" title="Export report to PDF" aria-label="Export to PDF">${IC_PDF}<span>Export to PDF</span></button>` : "";
       const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-max aria-pressed="${st.max}" title="${st.max ? "Exit full window (Esc)" : "Open full window"}">${st.max ? IC_MIN : IC_MAX}<span>${st.max ? "Restore" : "Maximize"}</span></button>`;
@@ -700,7 +705,7 @@
       const idx = engActiveScenIdx(R);
       const rows = idx.length ? engFilteredRows(R, idx) : [];
       const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
-      const hasEngW = Object.keys(st.engWidths).length > 0;
+      const hasEngW = Object.keys(wMap("eng")).length > 0;
       const engWResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-eng-wreset${hasEngW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
       const engPdfBtn = st.engMax ? `<button type="button" class="st-btn st-pdf-btn" data-st-pdf="eng" title="Export report to PDF" aria-label="Export to PDF">${IC_PDF}<span>Export to PDF</span></button>` : "";
       const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-eng-max aria-pressed="${st.engMax}" title="${st.engMax ? "Exit full window (Esc)" : "Open full window"}">${st.engMax ? IC_MIN : IC_MAX}<span>${st.engMax ? "Restore" : "Maximize"}</span></button>`;
@@ -735,6 +740,8 @@
         if (b) b.setAttribute("aria-expanded", String(o));
       });
     }
+    function wMap(mode) { return mode === "scen" ? (st.max ? st.scenWidthsMax : st.scenWidths) : (st.engMax ? st.engWidthsMax : st.engWidths); }
+    function wKey(mode) { return mode === "scen" ? (st.max ? SCEN_WM_KEY : SCEN_W_KEY) : (st.engMax ? ENG_WM_KEY : ENG_W_KEY); }
     function applyColWidths(tbl, widths, defs, fallbackW) {
       if (!tbl || !tbl.querySelectorAll) return;
       const cols = tbl.querySelectorAll("colgroup col[data-st-colk]");
@@ -759,15 +766,15 @@
       tbl.style.width = total + "px";
     }
     function applyAllTableWidths() {
-      applyColWidths(host.querySelector("#st-rr table.st-t"), st.scenWidths, DEFAULT_SCEN_W, 135);
-      applyColWidths(host.querySelector("#st-eng-rr table.st-t"), st.engWidths, DEFAULT_ENG_W, 120);
+      applyColWidths(host.querySelector("#st-rr table.st-t"), wMap("scen"), DEFAULT_SCEN_W, 135);
+      applyColWidths(host.querySelector("#st-eng-rr table.st-t"), wMap("eng"), DEFAULT_ENG_W, 120);
       syncResetBtns();
     }
     function syncResetBtns() {
       const b1 = host.querySelector("[data-st-wreset]");
-      if (b1) b1.hidden = Object.keys(st.scenWidths).length === 0;
+      if (b1) b1.hidden = Object.keys(wMap("scen")).length === 0;
       const b2 = host.querySelector("[data-st-eng-wreset]");
-      if (b2) b2.hidden = Object.keys(st.engWidths).length === 0;
+      if (b2) b2.hidden = Object.keys(wMap("eng")).length === 0;
     }
     function updateScenBody() {
       const R = st.result; if (!R) return;
@@ -906,15 +913,16 @@
       const [mode, colKey] = resizer.getAttribute("data-st-resize").split(":");
       const tbl = resizer.closest("table.st-t");
       if (!tbl || !colKey) return;
-      const widths = mode === "scen" ? st.scenWidths : st.engWidths;
+      const widths = wMap(mode);
       const defs = mode === "scen" ? DEFAULT_SCEN_W : DEFAULT_ENG_W;
       const fb = mode === "scen" ? 135 : 120;
       seedVisibleWidths(tbl, widths, defs, fb);
       applyColWidths(tbl, widths, defs, fb);
       resizer.classList.add("is-active");
       if (document.body && document.body.classList) document.body.classList.add("st-col-resizing");
+      try { if (resizer.setPointerCapture && typeof e.pointerId === "number") resizer.setPointerCapture(e.pointerId); } catch (err) { /* capture is optional */ }
       resizeDrag = {
-        mode, colKey, tbl, resizer, widths, defs, fb,
+        mode, colKey, tbl, resizer, widths, defs, fb, key: wKey(mode), pid: e.pointerId,
         zoom: parseFloat(tbl.style.zoom) || 1,
         startX: e.clientX || 0,
         startW: widths[colKey],
@@ -933,8 +941,9 @@
       const d = resizeDrag;
       resizeDrag = null;
       d.resizer.classList.remove("is-active");
+      try { if (d.resizer.releasePointerCapture && typeof d.pid === "number") d.resizer.releasePointerCapture(d.pid); } catch (err) { /* already released */ }
       if (document.body && document.body.classList) document.body.classList.remove("st-col-resizing");
-      saveWidths(d.mode === "scen" ? SCEN_W_KEY : ENG_W_KEY, d.widths);
+      saveWidths(d.key, d.widths);
       syncResetBtns();
       if ((d.mode === "scen" && st.max) || (d.mode === "eng" && st.engMax)) fitMaxTable();
       if (d.moved) justResizedUntil = Date.now() + 250;
@@ -953,7 +962,7 @@
       const tbl = resizer.closest("table.st-t");
       const th = resizer.closest("th[data-st-colk]");
       if (!tbl || !th || !colKey) return;
-      const widths = mode === "scen" ? st.scenWidths : st.engWidths;
+      const widths = wMap(mode);
       const defs = mode === "scen" ? DEFAULT_SCEN_W : DEFAULT_ENG_W;
       const fb = mode === "scen" ? 135 : 120;
       const zoom = parseFloat(tbl.style.zoom) || 1;
@@ -965,7 +974,7 @@
       const natW = th.getBoundingClientRect ? th.getBoundingClientRect().width / zoom : 0;
       widths[colKey] = clampW(natW > 0 ? natW : (defs[colKey] || fb));
       applyColWidths(tbl, widths, defs, fb);
-      saveWidths(mode === "scen" ? SCEN_W_KEY : ENG_W_KEY, widths);
+      saveWidths(wKey(mode), widths);
       syncResetBtns();
       if ((mode === "scen" && st.max) || (mode === "eng" && st.engMax)) fitMaxTable();
       justResizedUntil = Date.now() + 250;
@@ -974,9 +983,9 @@
     host.addEventListener("click", e => {
       if (e.target.closest("[data-st-resize]")) return;
       const wResetBtn = e.target.closest("[data-st-wreset]");
-      if (wResetBtn) { st.scenWidths = {}; saveWidths(SCEN_W_KEY, st.scenWidths); updateScenBody(); return; }
+      if (wResetBtn) { if (st.max) st.scenWidthsMax = {}; else st.scenWidths = {}; saveWidths(wKey("scen"), wMap("scen")); updateScenBody(); return; }
       const engWResetBtn = e.target.closest("[data-st-eng-wreset]");
-      if (engWResetBtn) { st.engWidths = {}; saveWidths(ENG_W_KEY, st.engWidths); updateEngBody(); return; }
+      if (engWResetBtn) { if (st.engMax) st.engWidthsMax = {}; else st.engWidths = {}; saveWidths(wKey("eng"), wMap("eng")); updateEngBody(); return; }
       if (Date.now() < justResizedUntil && e.target.closest("th")) return;
       const pdfBtn = e.target.closest("[data-st-pdf]");
       if (pdfBtn) {
