@@ -133,7 +133,7 @@ test('design-system.css covers all core views and responsive breakpoints', () =>
     '.sx',
     '.ap',
     'dialog',
-    '#toast',
+    '#toast > div',
     '#lg .lc',
     '.rp2-nav',
     '@media (max-width: 900px)',
@@ -143,6 +143,7 @@ test('design-system.css covers all core views and responsive breakpoints', () =>
   for (const sel of selectors) {
     assert.ok(css.includes(sel), `Missing styling coverage for ${sel}`);
   }
+  assert.ok(css.includes('body #toast {\n  background: transparent !important;'), 'Empty #toast wrapper must stay transparent');
 });
 
 test('design-system.css has balanced braces', () => {

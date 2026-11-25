@@ -1247,8 +1247,16 @@ html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:n
   font-weight: 700 !important;
 }
 
-/* Toast Notification */
+/* Toast Notification (keep persistent #toast wrapper invisible; style only active child #toast > div) */
 html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #toast {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #toast > div {
   background: #0f172a !important;
   color: #f8fafc !important;
   border: 1px solid rgba(255, 255, 255, .12) !important;
@@ -1258,9 +1266,10 @@ html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:n
   font-weight: 600 !important;
   letter-spacing: -0.005em;
   padding: 11px 18px !important;
+  pointer-events: auto;
 }
 
-html[data-theme="dark"]:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #toast {
+html[data-theme="dark"]:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #toast > div {
   background: #f8fafc !important;
   color: #0f172a !important;
   border-color: rgba(15, 23, 42, .14) !important;
