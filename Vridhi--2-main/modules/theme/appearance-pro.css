@@ -77,3 +77,82 @@ html body :is(.card,.sx,.rp2) :is(td,th,.n,.num,.v,.amt){font-variant-numeric:ta
  html:not(#vrx) body header.hd .hdi{grid-template-columns:minmax(0,1fr) auto auto auto auto!important;grid-template-areas:"brand who mode settings so" "nav nav nav nav nav" "client client client client client"!important}
  html:not(#vrx) body header.hd .ap-mode{grid-area:mode;width:38px;height:38px;min-width:38px!important;min-height:38px!important;padding:0!important;margin:0!important;border-radius:10px!important;color:inherit!important;background:color-mix(in srgb,currentColor 10%,transparent)!important;border:1px solid color-mix(in srgb,currentColor 35%,transparent)!important;box-shadow:none!important}
 }
+
+/* ===== Table Colour customisation (Settings -> Appearance -> Advanced) ===== */
+html body .uip .uip-tc{grid-column:1 / -1;display:grid;gap:10px;margin-top:6px;padding-top:14px;border-top:1px solid var(--bd)}
+html body .uip .uip-tc-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+html body .uip .uip-tc-hd label{margin:0;font-size:13px;font-weight:600;color:var(--tx)}
+html body .uip button.uip-tc-reset{min-height:30px!important;height:auto!important;padding:4px 11px!important;font-size:12px!important;font-weight:600;border-radius:8px!important;border:1px solid var(--bd)!important;background:var(--card)!important;color:var(--tx)!important;cursor:pointer}
+html body .uip button.uip-tc-reset:hover:not(:disabled){border-color:var(--ac)!important;color:var(--ac)!important}
+html body .uip button.uip-tc-reset:disabled{opacity:.45;cursor:not-allowed}
+html body .uip .uip-tc-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+html body .uip button.uip-tc-sw{display:inline-flex!important;align-items:center;justify-content:center;width:30px;height:30px;min-width:30px!important;min-height:30px!important;padding:0!important;border-radius:50%!important;background:var(--sw)!important;color:#fff!important;border:2px solid var(--card)!important;box-shadow:0 0 0 1px var(--bd)!important;cursor:pointer;transition:transform .12s,box-shadow .12s}
+html body .uip button.uip-tc-sw:hover{transform:scale(1.1)}
+html body .uip button.uip-tc-sw:focus-visible{outline:2px solid var(--tx)!important;outline-offset:3px}
+html body .uip button.uip-tc-sw svg{display:none}
+html body .uip button.uip-tc-sw[aria-checked="true"]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--sw)!important}
+html body .uip button.uip-tc-sw[aria-checked="true"] svg{display:block}
+html body .uip .uip-tc-pick{display:inline-flex;align-items:center;gap:8px;min-height:36px;margin:0;padding:0 12px 0 4px;border:1px dashed var(--bd);border-radius:99px;background:var(--card);color:var(--mu);font-size:12.5px;font-weight:600;cursor:pointer}
+html body .uip .uip-tc-pick:hover,html body .uip .uip-tc-pick.on{border-style:solid;border-color:var(--ac);color:var(--tx)}
+html body .uip .uip-tc-pick input[type="color"]{width:28px!important;height:28px!important;min-width:28px!important;min-height:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;box-shadow:none!important;cursor:pointer}
+html body .uip .uip-tc-pick code{padding:2px 6px;border-radius:6px;background:color-mix(in srgb,var(--tx) 6%,var(--card));color:var(--tx);font-size:11.5px;font-weight:500}
+html body .uip .uip-tc-prev{max-width:460px;border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--card)}
+html body .uip .uip-tc-tbl{width:100%;min-width:0!important;border-collapse:collapse;font-size:12px}
+html body .uip .uip-tc-tbl th,html body .uip .uip-tc-tbl td{padding:6px 10px!important;height:auto!important;font-size:12px!important}
+html body .uip .uip-tc-tbl th:not(:first-child),html body .uip .uip-tc-tbl td:not(:first-child){text-align:right}
+html body .uip .uip-tc-tbl th:first-child,html body .uip .uip-tc-tbl td:first-child{text-align:left}
+html body .uip .uip-tc-note{margin:0;font-size:12px;color:var(--mu)}
+
+/* Global custom Table Colour application across all app tables (Light + Dark, WCAG contrast-safe, respects Minimal theme & independent table settings) */
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body :is(.tw,.st-wrap,.gpp-table-wrap,.uip-tc-prev){border-color:var(--tbl-bd)!important;background-color:var(--tbl-bg)!important}
+
+/* Headers: default (plain) uses contrast-verified custom table colour (handles both explicit <thead> and implicit-<tbody> header rows) */
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,thead td,tbody > tr:first-child > th:not([scope="row"])){background:var(--tbl-hd-bg)!important;color:var(--tbl-hd-tx)!important;border-bottom-color:var(--tbl-bd-strong)!important}
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,tbody > tr:first-child > th:not([scope="row"])) button{color:var(--tbl-hd-tx)!important}
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,tbody > tr:first-child > th:not([scope="row"])) .rt-sub{color:var(--tbl-hd-mu)!important}
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,tbody > tr:first-child > th:not([scope="row"])) .gpp-cmp-name{color:var(--tbl-hd-tx)!important}
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table thead th .rpi{color:var(--tbl-hd-tx)!important;border-color:color-mix(in srgb,var(--tbl-hd-tx) 48%,transparent)!important;background:transparent!important}
+
+/* Headers: Tinted mode (uhd=tint) uses a softer tinted header in the chosen colour */
+html[data-utcol="custom"][data-uhd="tint"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,thead td,tbody > tr:first-child > th:not([scope="row"])){background:var(--tbl-hd-tint-bg)!important;color:var(--tbl-hd-tint-tx)!important;border-bottom:1px solid var(--tbl-bd-strong)!important}
+html[data-utcol="custom"][data-uhd="tint"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,tbody > tr:first-child > th:not([scope="row"])) :is(button,.rt-sub,.gpp-cmp-name,.rpi){color:var(--tbl-hd-tint-tx)!important}
+
+/* Headers: Underlined mode (uhd=line) uses clean table surface with contrast-verified coloured underline */
+html[data-utcol="custom"][data-uhd="line"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,thead td,tbody > tr:first-child > th:not([scope="row"])){background:var(--tbl-bg)!important;color:var(--tx)!important;border-bottom:2px solid var(--tbl-hd-line)!important}
+html[data-utcol="custom"][data-uhd="line"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,tbody > tr:first-child > th:not([scope="row"])) :is(button,.gpp-cmp-name,.rpi){color:var(--tx)!important}
+html[data-utcol="custom"][data-uhd="line"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(thead th,tbody > tr:first-child > th:not([scope="row"])) .rt-sub{color:var(--mu)!important}
+
+/* Row headers inside tbody (e.g. scope="row" in Retirement Planner or Client Compare metric column) stay on table body surface */
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table tbody th[scope="row"],
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table.gpp-cmp-table tbody th,
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table.vw-tb tbody th{background:var(--tbl-bg)!important;color:var(--tx)!important}
+
+/* Body cells (opaque tinted surface so sticky/frozen columns never bleed through; preserves retirement/selected/override rows) */
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table tbody tr:not(.a):not(.ret):not(.vr-ret):not(.sel):not(.agsel):not(.st-sel):not(.gh):not(.t):not(.itot):not(.vr-tot) > td:not(.o){background-color:var(--tbl-bg)!important}
+
+/* Striped rows (when Striped rows = On, and Stress Test table zebra rows) */
+html[data-utcol="custom"][data-utz="on"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table tbody tr:nth-child(even):not(.a):not(.ret):not(.vr-ret):not(.sel):not(.agsel):not(.st-sel):not(.gh):not(.t):not(.itot):not(.vr-tot) > td:not(.o){background-color:var(--tbl-stripe)!important}
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body .st-root .st-t tbody tr:nth-child(even):not(.st-sel):not(.st-base) > td:not(.o){background-color:var(--tbl-stripe)!important}
+
+/* Hover rows */
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table tbody tr:not(.gh):not(.t):not(.itot):not(.vr-tot):not(.a):not(.ret):not(.vr-ret):not(.sel):not(.agsel):not(.st-sel):hover > td:not(.o){background-color:var(--tbl-hover)!important}
+
+/* Group headers & Total rows */
+html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(tr.gh,tr.t,tr.itot,tr.vr-tot,tfoot tr) > :is(td,th){background-color:var(--tbl-tot-bg)!important;color:var(--tx)!important;border-top-color:var(--tbl-bd-strong)!important}
+
+/* Row lines & Column lines respect independent Advanced Appearance settings */
+html[data-utcol="custom"]:not([data-utl="off"]):not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table td{border-bottom-color:var(--tbl-bd)!important}
+html[data-utcol="custom"][data-utl="off"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table td{border-bottom-color:transparent!important}
+html[data-utcol="custom"][data-utl="off"]:not([data-uhd="line"]):not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table th{border-bottom-color:transparent!important}
+html[data-utcol="custom"][data-utc="on"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(th,td){border-right:1px solid var(--tbl-bd)!important}
+html[data-utcol="custom"][data-utc="off"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body table :is(th,td){border-right-color:transparent!important}
+
+/* Preserve mobile card-transformed table layouts */
+@media (max-width:900px){
+ html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body .gpp-table-wrap:has(.gpp-table){background-color:transparent!important;border-color:transparent!important}
+ html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body .gpp-drawer .gpp-table tr.gpp-row > td{background-color:transparent!important;border:0!important}
+}
+@media (max-width:720px){
+ html[data-utcol="custom"]:not([data-minimal-theme="true"]):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x):not(.x) body .vp-tw.vp-fit table.vp-sumt td{background-color:transparent!important;border-right:0!important}
+}
+

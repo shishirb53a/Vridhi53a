@@ -49,7 +49,7 @@
         '<div class="ap-rows">' + seg('Mode', 'data-ap-mode', MODES, mode, 'Light, dark, or follow your device') +
         seg('Density', 'data-ap-dens', DENS, dens, 'Compact tightens table rows to show more data per screen') +
         seg('Text size', 'data-ap-size', SIZES, size, 'Scales text across the app') + '</div>') +
-      '<details class="ap-adv"><summary>Advanced: font, corners, table lines, stripes, icons</summary>' + (OLD ? OLD() : '') + '</details>' +
+      '<details class="ap-adv"><summary>Advanced: font, corners, table colour, table lines, stripes, icons</summary>' + (OLD ? OLD() : '') + '</details>' +
       '<div class="ap-ft"><span class="mu">Changes apply instantly.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
   };
   function setCC(hex, final) {
@@ -66,11 +66,11 @@
   d.addEventListener('toggle', function (e) { if (e.target.classList && e.target.classList.contains('ap-adv')) window.__apOpen = e.target.open; }, true);
   function reopen() { var a = d.querySelector('.ap-adv'); if (a && window.__apOpen) a.open = true; }
 
-  function commit(msg) { try { save(); theme(); render(); } catch (e) { } reopen(); if (msg && window.toast) toast(msg); }
+  function commit(msg) { try { save(); theme(); if (window.vrTableColor) window.vrTableColor.apply(); render(); } catch (e) { } reopen(); if (msg && window.toast) toast(msg); }
   d.addEventListener('click', function (e) {
     var t = e.target.closest && e.target.closest('[data-ap-theme],[data-ap-mode],[data-ap-dens],[data-ap-size],[data-ap-reset],#ap-mode');
     if (!t) return;
-    if (t.id === 'ap-mode') { S.theme = dark() ? 'light' : 'dark'; try { save(); theme(); } catch (x) { } paint(); return; }
+    if (t.id === 'ap-mode') { S.theme = dark() ? 'light' : 'dark'; try { save(); theme(); if (window.vrTableColor) window.vrTableColor.apply(); } catch (x) { } paint(); return; }
     if (t.dataset.apTheme) {
       var p = PRE.filter(function (x) { return x.k === t.dataset.apTheme; })[0];
       if (!p) return; window.vrPro.set(p.k); S.cc = p.cc; commit(p.n + ' theme applied'); return;
