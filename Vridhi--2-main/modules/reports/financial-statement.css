@@ -714,8 +714,13 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   .rph2[data-rpx] > button,
   #vp-pg .vp-h[data-rpx] button,
   .st-root .st-scen-actions button,
-  .hyd .hyh .hyr button,
+  .hyd .hyh button,
+  .fh-hact button.vr-ib,
+  button.vr-ib,
   button#csv,
+  button#hzcsv,
+  button#savcsv,
+  button#entcsv,
   button#rp-max,
   button#rp-pdf,
   button#hy-max,
@@ -745,20 +750,80 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   cursor: pointer;
 }
 
-/* Preserve compact square icon buttons (.vr-ib) in report headers */
-html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph2 button.vr-ib,
-html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #m .rph2 button.vr-ib {
+/* Consistent square icon-only buttons across ALL reports & dialogs (Copy as CSV, Export to PDF, Maximize icon) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button.vr-ib,
+  button.vr-ib-csv,
+  button.vr-ib-pdf,
+  button#csv,
+  button#hzcsv,
+  button#savcsv,
+  button#entcsv,
+  button#rp-max,
+  button#rp-pdf,
+  button#hy-pdf,
+  button#fh-pdf,
+  button.rp-pdf,
+  button.hy-pdf,
+  button.fh-pdf,
+  button.st-pdf-btn,
+  #vp-pg .vp-h[data-rpx] button.vr-ib,
+  .st-root .st-scen-actions button.st-pdf-btn,
+  .hyd .hyh button.hy-pdf,
+  .fh-hact button.fh-pdf
+) {
   width: 34px !important;
   min-width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
   padding: 0 !important;
+  gap: 0 !important;
+  flex: none !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button.vr-ib,
+  button.vr-ib-csv,
+  button.vr-ib-pdf,
+  button#csv,
+  button#hzcsv,
+  button#savcsv,
+  button#entcsv,
+  button.rp-pdf,
+  button.hy-pdf,
+  button.fh-pdf,
+  button.st-pdf-btn
+)::before {
+  content: none !important;
+  display: none !important;
+  margin: 0 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button.vr-ib,
+  button.vr-ib-csv,
+  button.vr-ib-pdf,
+  button.rp-pdf,
+  button.hy-pdf,
+  button.fh-pdf,
+  button.st-pdf-btn
+) svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: block;
+  flex: none;
 }
 
 html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   .rph2[data-rpx] > button,
   #vp-pg .vp-h[data-rpx] button,
   .st-root .st-scen-actions button,
-  .hyd .hyh .hyr button,
+  .hyd .hyh button,
+  button.vr-ib-csv,
   button#csv,
+  button#hzcsv,
+  button#savcsv,
+  button#entcsv,
   button#rp-max,
   button#hy-max,
   button#fh-max,
@@ -770,8 +835,9 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   color: var(--ds-accent) !important;
 }
 
-/* Standardized Export to PDF Action Emphasis */
+/* Standardized Export to PDF Icon Emphasis (consistent across all reports & popups) */
 html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button.vr-ib-pdf,
   button.rp-pdf,
   button.hy-pdf,
   button.fh-pdf,
@@ -780,10 +846,10 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   border-color: var(--ds-accent-border) !important;
   background: var(--ds-accent-soft) !important;
   color: var(--ds-accent) !important;
-  font-weight: 650 !important;
 }
 
 html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button.vr-ib-pdf,
   button.rp-pdf,
   button.hy-pdf,
   button.fh-pdf,
@@ -859,9 +925,26 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
     .rph2[data-rpx] > button,
     #vp-pg .vp-h[data-rpx] button,
     .st-root .st-scen-actions button,
-    .hyd .hyh .hyr button
+    .hyd .hyh button
   ) {
     min-height: 36px !important;
     height: 36px !important;
+  }
+
+  html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    button.vr-ib,
+    button.vr-ib-csv,
+    button.vr-ib-pdf,
+    button#rp-max,
+    button.rp-pdf,
+    button.hy-pdf,
+    button.fh-pdf,
+    button.st-pdf-btn
+  ) {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
   }
 }

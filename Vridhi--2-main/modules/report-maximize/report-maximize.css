@@ -165,27 +165,40 @@ html body main#m.vr-rmax table.vr-fit-ultra td.hz-w{
   max-width:125px!important;
 }
 
-/* Export to PDF button in maximized report views */
+/* Export to PDF icon-only button in maximized report views (consistent with Copy as CSV .vr-ib) */
 html body .rp-pdf,
 html body .hy-pdf,
 html body .fh-pdf{
   display:inline-flex;
   align-items:center;
-  gap:6px;
-  min-height:34px;
+  justify-content:center;
+  width:34px;
+  min-width:34px;
   height:34px;
-  padding:0 12px;
+  min-height:34px;
+  padding:0;
+  gap:0;
   border:1px solid var(--bd);
   border-radius:8px;
   background:var(--card);
   color:var(--tx);
-  font-size:12.5px;
-  font-weight:600;
   cursor:pointer;
-  white-space:nowrap;
   flex:none;
 }
-html body .hy-pdf{min-height:36px;height:36px}
+html body .rp-pdf::before,
+html body .hy-pdf::before,
+html body .fh-pdf::before{
+  content:none!important;
+  display:none!important;
+}
+html body .rp-pdf svg,
+html body .hy-pdf svg,
+html body .fh-pdf svg{
+  width:16px;
+  height:16px;
+  display:block;
+  flex:none;
+}
 html body .rp-pdf:hover,
 html body .hy-pdf:hover,
 html body .fh-pdf:hover{
@@ -202,9 +215,7 @@ html body .fh-pdf:focus-visible{
 @media (max-width:560px){
   html body .rp-pdf,
   html body .hy-pdf,
-  html body .fh-pdf{padding:0 9px;font-size:12px}
-  html body .hy-pdf span,
-  html body .fh-pdf span{display:none}
+  html body .fh-pdf{width:36px;min-width:36px;height:36px;min-height:36px;padding:0}
 }
 
 /* Clean landscape print styling if user prints directly via browser Ctrl+P / Cmd+P */

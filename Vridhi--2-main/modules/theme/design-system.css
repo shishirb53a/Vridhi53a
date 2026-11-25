@@ -603,16 +603,19 @@ html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:n
   border-color: var(--ds-err) !important;
 }
 
-/* Export & Utility Report Action Buttons */
+/* Export & Utility Report Icon Buttons (Copy as CSV, Export to PDF, Maximize icon) */
 html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
-  #rp-max, #csv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf
+  .vr-ib, #rp-max, #csv, #hzcsv, #savcsv, #entcsv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf-btn
 ) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 6px 13px;
+  gap: 0;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
   font-size: 13px;
   font-weight: 600;
   border-radius: var(--ds-r-ctl) !important;
@@ -623,7 +626,7 @@ html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:n
 }
 
 html:not([data-minimal-theme="true"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body button:is(
-  #rp-max, #csv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf
+  .vr-ib, #rp-max, #csv, #hzcsv, #savcsv, #entcsv, .rp-pdf, .hy-pdf, .fh-pdf, .st-pdf-btn
 ):hover:not(:disabled) {
   border-color: var(--ds-accent-border) !important;
   background: var(--ds-accent-soft) !important;

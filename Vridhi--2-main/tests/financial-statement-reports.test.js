@@ -61,6 +61,29 @@ test('PDF print document applies institutional financial-statement styling and a
   assert.ok(maxJs.includes('border-bottom:3px double var(--ac)'), 'PDF print stylesheet applies accounting double-rule totals');
 });
 
+test('Copy as CSV and Export to PDF are consistent icon-only buttons across all reports', () => {
+  const appJs = fs.readFileSync(path.join(ROOT, 'modules', 'app-core', 'app.js'), 'utf8');
+  const rpUiJs = fs.readFileSync(path.join(ROOT, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
+  const repUiJs = fs.readFileSync(path.join(ROOT, 'modules', 'reports', 'ui.js'), 'utf8');
+  const policyUiJs = fs.readFileSync(path.join(ROOT, 'modules', 'policy', 'policy-ui.js'), 'utf8');
+  const stressUiJs = fs.readFileSync(path.join(ROOT, 'modules', 'stress-test', 'ui.js'), 'utf8');
+  const savJs = fs.readFileSync(path.join(ROOT, 'modules', 'annual-savings', 'annual-savings.js'), 'utf8');
+  const entJs = fs.readFileSync(path.join(ROOT, 'modules', 'holding-entry-register', 'entry-register.js'), 'utf8');
+  const vodJs = fs.readFileSync(path.join(ROOT, 'modules', 'value-on-date', 'value-on-date.js'), 'utf8');
+  const iconsCss = fs.readFileSync(path.join(ROOT, 'modules', 'app-shell', 'icons.css'), 'utf8');
+
+  assert.ok(appJs.includes('class="vr-ib vr-ib-csv"') && appJs.includes('class="vr-ib vr-ib-pdf"'), 'app.js defines consistent vr-ib-csv and vr-ib-pdf icon button helpers');
+  assert.ok(rpUiJs.includes('window.rptCsv("hzcsv")') && !rpUiJs.includes('>Copy as CSV</button>'), 'Retirement Planner Year-by-year uses consistent icon-only Copy as CSV button');
+  assert.ok(repUiJs.includes('window.rptCsv("hzcsv")') && !repUiJs.includes('>Copy as CSV</button>'), 'reports/ui.js Year-by-year uses consistent icon-only Copy as CSV button');
+  assert.ok(policyUiJs.includes("window.rptCsv('csv', 'data-vp=\"csv\"')") && !policyUiJs.includes('>Export CSV</button>'), 'Policies Reports uses consistent icon-only Copy as CSV button');
+  assert.ok(!savJs.includes('>Copy as CSV</button>') && !entJs.includes('>Copy as CSV</button>') && !vodJs.includes('>Copy as CSV</button>'), 'Annual Savings, Entry Register, and Value on Date fallbacks are icon-only');
+  assert.ok(!savJs.includes("b.textContent='Copied'") && !entJs.includes("t.textContent='Copied'"), 'CSV copy feedback preserves SVG icon instead of overwriting button textContent');
+  assert.ok(!maxJs.includes('<span>Export to PDF</span>') && maxJs.includes('vr-ib vr-ib-pdf rp-pdf') && maxJs.includes('vr-ib vr-ib-pdf hy-pdf') && maxJs.includes('vr-ib vr-ib-pdf fh-pdf'), 'report-maximize.js renders all Export to PDF buttons as icon-only vr-ib buttons');
+  assert.ok(!stressUiJs.includes('<span>Export to PDF</span>') && stressUiJs.includes('st-pdf-btn vr-ib vr-ib-pdf'), 'Stress Test renders Export to PDF buttons as icon-only vr-ib buttons');
+  assert.ok(!iconsCss.includes('#hzcsv::before'), 'icons.css no longer attaches duplicate ::before icon to #hzcsv');
+  assert.ok(css.includes('button.vr-ib-csv') && css.includes('button.vr-ib-pdf') && css.includes('width: 34px !important'), 'financial-statement.css enforces uniform 34x34 square icon sizing for CSV and PDF buttons');
+});
+
 test('financial-statement.css has balanced braces', () => {
   const opens = (css.match(/\{/g) || []).length;
   const closes = (css.match(/\}/g) || []).length;

@@ -63,6 +63,8 @@ html body .st-root .st-seg button[aria-pressed="true"]{background:var(--c-ac)!im
 .st-scen-head{align-items:center;margin-bottom:4px}
 .st-scen-sub{margin:0 0 12px}
 .st-scen-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+html body .st-root .st-pdf-btn{width:34px;min-width:34px;height:34px;min-height:34px;padding:0;gap:0;justify-content:center;border-color:color-mix(in srgb,var(--c-ac) 35%,var(--c-bd))!important;color:var(--c-ac);background:color-mix(in srgb,var(--c-ac) 8%,var(--c-card))}
+html body .st-root .st-pdf-btn:hover:not(:disabled){background:var(--c-ac);border-color:var(--c-ac)!important;color:var(--c-ac2)}
 html body .st-root .st-max-btn{border-color:color-mix(in srgb,var(--c-ac) 35%,var(--c-bd))!important;color:var(--c-ac)}
 html body .st-root .st-max-btn[aria-pressed="true"]{background:var(--c-ac)!important;color:var(--c-ac2)!important;border-color:var(--c-ac)!important}
 

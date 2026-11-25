@@ -178,12 +178,14 @@
   /* ---------- REPORTS ---------- */
   var REPS = [['payout', 'Policy Payout Details'], ['fy', 'Premiums & Payouts by Year'], ['mat', 'Maturity Report'], ['sum', 'Policy Summary']];
   function pRep() {
-    var csvBtn = '<button type="button" class="p hp-add" id="csv" data-vp="csv">Export CSV</button>';
-    var top = head('Policy reports', 'Reports built from your policy data. Export any of them as CSV.', V.count() ? csvBtn : '');
+    var csvBtn = window.rptCsv
+      ? window.rptCsv('csv', 'data-vp="csv"')
+      : '<button type="button" id="csv" class="vr-ib vr-ib-csv" data-vp="csv" title="Copy as CSV" aria-label="Copy as CSV"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>';
+    var top = head('Policy reports', 'Reports built from your policy data.', '');
     if (!V.count()) return top + empty();
     var search = ST.rep === 'payout' ? '<div class="vp-tools"><input id="vp-rq" type="search" placeholder="Search year or policy\u2026" aria-label="Search policy payout report" value="' + esc(ST.rq) + '"></div>' : '';
     return top + '<div class="vp-pills" role="group" aria-label="Report type">' + REPS.map(function (k) { return '<button type="button" data-vp="rtype" data-t="' + k[0] + '" aria-pressed="' + (ST.rep === k[0]) + '">' + k[1] + '</button>'; }).join('') + '</div>'
-      + '<div class="vp-card"><div class="rph2 vp-h" data-rpx><div class="rpt"><h2>' + esc(REPS.filter(function (k) { return k[0] === ST.rep; })[0][1]) + '</h2></div></div>' + search + '<div id="vpr">' + repHtml() + '</div></div>';
+      + '<div class="vp-card"><div class="rph2 vp-h" data-rpx><div class="rpt"><h2>' + esc(REPS.filter(function (k) { return k[0] === ST.rep; })[0][1]) + '</h2></div>' + csvBtn + '</div>' + search + '<div id="vpr">' + repHtml() + '</div></div>';
   }
   function repHtml() {
     var t = today();

@@ -266,6 +266,10 @@ function runPdfHarness() {
         if (existing) existing.value = String(v);
         else this.attributes.push({ name: k, value: String(v) });
       },
+      getAttribute(k) {
+        const existing = this.attributes.find(a => a.name === k);
+        return existing ? existing.value : null;
+      },
       removeAttribute(k) {
         this.attributes = this.attributes.filter(a => a.name !== k);
       },
@@ -497,7 +501,12 @@ const pdfH = runPdfHarness();
 // Button appears before #rp-max when maximized
 assert.deepStrictEqual(pdfH.rpr.children.map(c => c.id), ['rp-pdf', 'rp-max'],
   'Maximized report renders Export to PDF button immediately before Restore button');
-assert.ok(pdfH.rpr.children[0].innerHTML.includes('Export to PDF'), 'Export to PDF button has visible label');
+assert.ok(pdfH.rpr.children[0].innerHTML.includes('<svg') && !pdfH.rpr.children[0].innerHTML.includes('<span>'),
+  'Export to PDF button renders consistently as an icon-only button');
+assert.strictEqual(pdfH.rpr.children[0].getAttribute('aria-label'), 'Export to PDF', 'Export to PDF icon button exposes accessible aria-label');
+assert.strictEqual(pdfH.rpr.children[0].title, 'Export to PDF', 'Export to PDF icon button exposes tooltip title');
+assert.ok(pdfH.rpr.children[0].className.includes('vr-ib') && pdfH.rpr.children[0].className.includes('vr-ib-pdf'),
+  'Export to PDF button uses consistent vr-ib icon button classes');
 
 // Clicking Export to PDF builds a sanitized landscape A4 document and prints via hidden iframe
 pdfH.click('rp-pdf');
