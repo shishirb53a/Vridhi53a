@@ -4,10 +4,14 @@
 (function(){
 window.VR_PROD=true;
 var C=window.VR_CFG||{},URL0=String(C.supabaseUrl||'').replace(/\/+$/,''),KEY=String(C.anonKey||''),SK='vr-sb';
+function isSecureEndpoint(u){return /^https:\/\/[^\s\/]+(?:\/[^\s]*)?$/i.test(u)||/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(?:\/[^\s]*)?$/i.test(u)}
 var cfgOk=/^https:\/\/[^\s\/]+$/i.test(URL0)&&KEY.length>20&&!/YOUR-PROJECT/i.test(URL0)||/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(URL0)&&KEY.length>5;
-function ses(){try{return JSON.parse(sessionStorage.getItem(SK))}catch(e){return null}}
-function put(o){try{sessionStorage.setItem(SK,JSON.stringify(o));if(localStorage.getItem('vr-rm')==='1')localStorage.setItem('vr-sb-remember',JSON.stringify(o))}catch(e){}}
-function wipeAuth(){try{sessionStorage.removeItem('fs-auth');sessionStorage.removeItem('fs-user');sessionStorage.removeItem(SK);sessionStorage.removeItem('vr-idle-until');localStorage.removeItem('vr-rm');localStorage.removeItem('vr-sb-remember')}catch(e){}}
+var memSess=null;
+/* Immediately scrub any legacy persistent tokens previously stored in localStorage */
+try{localStorage.removeItem('vr-rm');localStorage.removeItem('vr-sb-remember')}catch(e){}
+function ses(){if(memSess)return memSess;try{var raw=sessionStorage.getItem(SK);memSess=raw?JSON.parse(raw):null;return memSess}catch(e){return null}}
+function put(o){memSess=o||null;try{if(o)sessionStorage.setItem(SK,JSON.stringify(o));else sessionStorage.removeItem(SK);localStorage.removeItem('vr-rm');localStorage.removeItem('vr-sb-remember')}catch(e){}}
+function wipeAuth(){memSess=null;window.VR_ACCESS=null;window.VR_ADV=null;try{sessionStorage.removeItem('fs-auth');sessionStorage.removeItem('fs-user');sessionStorage.removeItem(SK);sessionStorage.removeItem('vr-idle-until');localStorage.removeItem('vr-rm');localStorage.removeItem('vr-sb-remember')}catch(e){}}
 function forceLock(){wipeAuth();location.reload()}
 /* the local copy of plans belongs to ONE login: a different login on this browser never sees it, and it is never uploaded under another login */
 function wipeLocal(){try{Object.keys(localStorage).filter(function(k){return /^(fwt|fs-users)/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}}
@@ -16,10 +20,8 @@ try{var s0=ses();if(cfgOk&&s0&&s0.uid&&localStorage.getItem('vr-owner')!==s0.uid
 try{if(sessionStorage.getItem('fs-auth')==='1'&&!(ses()&&ses().rt)){wipeAuth();document.documentElement.classList.add('lk')}}catch(e){}
 function fromTok(j){return{at:j.access_token,rt:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000,uid:j.user&&j.user.id,email:j.user&&j.user.email}}
 var refreshing=null;
-/* Remember me with several tabs: Supabase refresh tokens work once, so a tab must adopt a newer token saved by another tab instead of refreshing with its own stale copy */
-function fresher(s){try{if(localStorage.getItem('vr-rm')!=='1')return null;var r=JSON.parse(localStorage.getItem('vr-sb-remember'));return r&&r.rt&&s&&r.uid===s.uid&&r.rt!==s.rt&&r.exp>s.exp?r:null}catch(e){return null}}
-async function token(){var s=ses();if(!s)throw{code:'unauthenticated'};var fr=fresher(s);if(fr){put(fr);s=fr}if(s.exp-60000>Date.now())return s;
- if(!refreshing)refreshing=(async function(){try{var r=await fetch(URL0+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.rt})});var j=await r.json();if(!r.ok||!j.access_token)throw{code:'unauthenticated'};var n=fromTok(j);if(!n.uid)n.uid=s.uid;if(!n.email)n.email=s.email;put(n);return n}catch(e){var g=fresher(s);if(g){put(g);return g}forceLock();throw{code:'unauthenticated'}}finally{refreshing=null}})();
+async function token(){var s=ses();if(!s)throw{code:'unauthenticated'};if(s.exp-60000>Date.now())return s;
+ if(!refreshing)refreshing=(async function(){try{var r=await fetch(URL0+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.rt})});var j=await r.json();if(!r.ok||!j.access_token)throw{code:'unauthenticated'};var n=fromTok(j);if(!n.uid)n.uid=s.uid;if(!n.email)n.email=s.email;put(n);return n}catch(e){forceLock();throw{code:'unauthenticated'}}finally{refreshing=null}})();
  return refreshing}
 async function rest(path,opt){opt=opt||{};var s=await token(),r=await fetch(URL0+'/rest/v1/'+path,{method:opt.method||'GET',headers:Object.assign({apikey:KEY,Authorization:'Bearer '+s.at,'Content-Type':'application/json'},opt.headers||{}),body:opt.body});
  if(!r.ok){var e=new Error('http '+r.status);e.code=(r.status===401||r.status===403)?'permission_denied':'unavailable';throw e}return r}
@@ -47,7 +49,7 @@ async function usersCall(body){var s=await token(),r=await fetch(URL0+'/function
  if(!r.ok){var e=new Error(j&&j.error||('Request failed ('+r.status+')'));e.status=r.status;throw e}return j}
 async function agentCall(question,plan){var s=await token(),r=await fetch(URL0+'/functions/v1/'+(C.aiFunction||'vriddhi-agent'),{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+s.at,'Content-Type':'application/json'},body:JSON.stringify({question:question,plan:plan})}),j={};try{j=await r.json()}catch(e){}
  if(!r.ok){var e=new Error(j&&j.error||('AI request failed ('+r.status+')'));e.status=r.status;throw e}return j}
-async function databaseBackupCall(path,options){var base=String(C.databaseBackupUrl||'').replace(/\/+$/,'');if(!base)throw new Error('The database backup service is not configured.');var s=await token(),opt=options||{},headers={apikey:KEY,Authorization:'Bearer '+s.at};if(opt.body&&typeof opt.body==='string'){headers['Content-Type']='application/json'}else if(opt.body&&!(opt.body instanceof Blob)){headers['Content-Type']='application/json'}Object.assign(headers,opt.headers||{});
+async function databaseBackupCall(path,options){var base=String(C.databaseBackupUrl||'').replace(/\/+$/,'');if(!base)throw new Error('The database backup service is not configured.');if(!isSecureEndpoint(base))throw new Error('The database backup service URL must use HTTPS.');var s=await token(),opt=options||{},headers={apikey:KEY,Authorization:'Bearer '+s.at};if(opt.body&&typeof opt.body==='string'){headers['Content-Type']='application/json'}else if(opt.body&&!(opt.body instanceof Blob)){headers['Content-Type']='application/json'}Object.assign(headers,opt.headers||{});
  var r=await fetch(base+path,{method:opt.method||'GET',headers:headers,body:opt.body});if(!r.ok){var j={};try{j=await r.json()}catch(e){}var x=new Error(j&&j.error||('Backup service request failed ('+r.status+')'));x.status=r.status;throw x}if(opt.download){var cd=r.headers.get('Content-Disposition')||'',m=/filename="?([^";]+)"?/i.exec(cd);return{blob:await r.blob(),filename:m&&m[1]||'database-backup.tar.gz'}}return r.status===204?null:r.json()}
 var databaseBackups={list:function(){return databaseBackupCall('/api/backups')},create:function(){return databaseBackupCall('/api/backups',{method:'POST'})},upload:function(file){return databaseBackupCall('/api/backups/upload?filename='+encodeURIComponent(file.name),{method:'PUT',body:file,headers:{'Content-Type':'application/gzip'}})},download:function(id){return databaseBackupCall('/api/backups/'+encodeURIComponent(id)+'/download',{download:true})},restore:function(id){return databaseBackupCall('/api/backups/'+encodeURIComponent(id)+'/restore',{method:'POST'})}};
 var accessRequest=null;
@@ -80,7 +82,7 @@ async function snapRemove(id){if(!SNID.test(String(id||'')))throw new Error('Bad
 /* The Pages workflow generates build-info.js from its monotonically increasing run number. */
 window.VR_VERSION='2.8.0.'+window.VR_BUILD_NO;
 window.VR_BUILD_TXT='Version '+window.VR_VERSION+' \u00b7 '+window.VR_BUILD_DATE;
-document.addEventListener('DOMContentLoaded',function(){var v=window.VR_VERSION,w=document.querySelector('.wm');if(w&&!w.querySelector('.vr-ver'))w.insertAdjacentHTML('beforeend',' <span class="vr-ver" title="'+window.VR_BUILD_TXT+'">v'+v+'</span>');var f=document.getElementById('lgf');if(f&&!document.querySelector('.vr-ver-lg')){var host=f.querySelector('.lform')||f;host.insertAdjacentHTML('beforeend','<p class="vr-ver-lg">'+window.VR_BUILD_TXT+'</p>')}});
+document.addEventListener('DOMContentLoaded',function(){var v=String(window.VR_VERSION||''),bt=String(window.VR_BUILD_TXT||''),w=document.querySelector('.wm');if(w&&!w.querySelector('.vr-ver')){w.appendChild(document.createTextNode(' '));var sp=document.createElement('span');sp.className='vr-ver';sp.setAttribute('title',bt);sp.textContent='v'+v;w.appendChild(sp)}var f=document.getElementById('lgf');if(f&&!document.querySelector('.vr-ver-lg')){var host=f.querySelector('.lform')||f,p=document.createElement('p');p.className='vr-ver-lg';p.textContent=bt;host.appendChild(p)}});
 window.VRSB=cfgOk?{signIn:signIn,signOut:signOut,configured:true,access:access,isAdviser:isAdviser,users:usersCall,askAgent:agentCall,databaseBackups:databaseBackups,changePassword:changePassword,snap:{list:snapList,get:snapGet,values:snapValues,create:snapCreate,remove:snapRemove},email:function(){var s=ses();return s&&s.email||''}}:null;
 /* Resolve permissions before the app enables account-specific actions. */
 if(cfgOk&&ses()&&ses().rt)access().catch(function(){});

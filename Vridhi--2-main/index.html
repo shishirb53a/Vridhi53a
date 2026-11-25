@@ -1,10 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-skin="enterprise">
 <head>
-<script>document.documentElement.setAttribute("data-skin","enterprise")</script>
-<script>/* Remember me: a ticked sign-in keeps its session in localStorage; a new tab or a restarted browser picks it up here, before the lock screen decides */
-try{if(sessionStorage.getItem('fs-auth')!=='1'&&localStorage.getItem('vr-rm')==='1'){var rmS=localStorage.getItem('vr-sb-remember'),rmO=rmS&&JSON.parse(rmS);if(rmO&&rmO.rt&&rmO.uid){sessionStorage.setItem('vr-sb',rmS);sessionStorage.setItem('fs-auth','1')}}}catch(e){}
-try{if(sessionStorage.getItem('fs-auth')!=='1')document.documentElement.classList.add('lk')}catch(e){document.documentElement.classList.add('lk')}</script>
+<script src="modules/app-shell/boot-init.js?v=1"></script>
 <link rel="stylesheet" href="modules/policy/policy.css?v=129">
 <link rel="stylesheet" href="modules/policy/policy-fit.css?v=1">
 <script src="config.js"></script>
@@ -31,7 +28,7 @@ try{if(sessionStorage.getItem('fs-auth')!=='1')document.documentElement.classLis
 <link rel="stylesheet" href="modules/app-shell/dialog-overrides.css?v=147">
 <link rel="stylesheet" href="modules/holding-form-wizard/form.css?v=147">
 <link rel="stylesheet" href="modules/retirement-planner/age-bar.css?v=147">
-<script>window.fdt=function(t){if(!t)return'—';var d=new Date(t);return isNaN(d)?'—':d.toLocaleString(LANG()==='hi'?'hi-IN':'en-IN',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'})};window.fdd=function(t){if(!t)return'';var d=new Date(t);return isNaN(d)?'':d.toLocaleDateString(LANG()==='hi'?'hi-IN':'en-IN',{day:'numeric',month:'short',year:'numeric'})};window.ymdLoc=function(t){var d=new Date(t);if(isNaN(d))return'';var p=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())};window.stampTxt=function(x){return(x.ca?'Added '+fdt(x.ca):'Entry date not set')+(x.ma?' · Last edited '+fdt(x.ma):'')};</script>
+<script src="modules/app-shell/date-helpers.js?v=1"></script>
 <style>.tsx{font-size:12px;margin-top:3px;line-height:1.35}</style>
 <style>.ht td:not(:first-child){white-space:nowrap}.ht td:nth-child(3) .mu{white-space:normal}.ht tr.t td{font-variant-numeric:tabular-nums}</style>
 <style>/* theme everywhere */body *,body *::before,body *::after{font-family:inherit}svg text{font-family:var(--ff)}::selection{background:color-mix(in srgb,var(--ac) 28%,transparent)}input,select,textarea,progress{accent-color:var(--ac)}a{color:var(--ac)}:focus-visible{outline-color:var(--ac)}</style>
@@ -87,7 +84,7 @@ html body #lg .lw{font-size:28px;font-weight:800;letter-spacing:-.03em;color:var
     <label for="lp">Password</label>
     <button type="button" id="lt" aria-label="Show password" aria-controls="lp">Show</button>
   </div>
-  <label class="lgsv" title="Stay signed in on this device. Use only on your own device."><input type="checkbox" id="lsv"> <span>Remember me</span></label>
+  <label class="lgsv" title="Remember your email address on this device."><input type="checkbox" id="lsv"> <span>Remember me</span></label>
   <div id="le" class="er" role="alert" aria-live="polite"></div>
   <button class="p go" type="submit">Sign in</button>
   <p class="login-security"><span aria-hidden="true">●</span> Your account and financial data stay private.</p>
@@ -110,32 +107,12 @@ html[lang=hi] body,html[lang=hi] button,html[lang=hi] input,html[lang=hi] select
 <script src="modules/database-backups/backups.js?v=1"></script>
 <script src="modules/settings/settings.js?v=147"></script>
 <script src="modules/theme/theme.js?v=147"></script>
-<script>window.VRTheme.configure({getState:()=>S,save:save,render:render,toast:toast});</script>
+<script src="modules/app-shell/theme-init.js?v=1"></script>
 <script src="modules/dashboard-preferences/dashboard-preferences.js?v=145"></script>
 <script src="modules/holding-form-wizard/wizard.js?v=140"></script>
 
 
-<script>/* usability: numeric keypad on mobile, select-all on focus */
-(function(){const fix=r=>r.querySelectorAll&&r.querySelectorAll('input[type=number]').forEach(i=>{if(!i.inputMode)i.inputMode=(i.step&&i.step!=='1'&&i.step!=='any')||i.step==='any'?'decimal':'numeric'});
-document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.matches&&t.matches('input[type=number],input[type=text]')&&!t.closest('.tb'))setTimeout(()=>{try{if(document.activeElement===t)t.select()}catch(_){}},0)});     // select-all on focus, only while the box still has focus (it used to pull focus back from the next box)
-new MutationObserver(()=>fix(document)).observe(document.documentElement,{childList:true,subtree:true});fix(document)})();
-</script>
-
-
-
-
-
-
-<script>(function(){let w=null,x0=0,s0=0,mv=0;
-document.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button)return;const c=e.target.closest&&e.target.closest('table.rt');if(!c||e.target.closest('button,input,select,a'))return;w=c.parentElement;x0=e.clientX;s0=w.scrollLeft;mv=0});
-document.addEventListener('pointermove',e=>{if(!w)return;const d=e.clientX-x0;if(Math.abs(d)>5)mv=1;if(mv){w.scrollLeft=s0-d;w.style.cursor='grabbing'}});
-const up=()=>{if(w)w.style.cursor='';w=null};document.addEventListener('pointerup',up);document.addEventListener('pointercancel',up);
-document.addEventListener('click',e=>{if(mv){e.stopPropagation();e.preventDefault();mv=0}},true);})();</script>
-<script>(function(){let w=null,x=0,y=0,sl=0,st=0,mv=false;
-document.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;const t=e.target.closest&&e.target.closest('table.rt');if(!t||e.target.closest('button,a,input,select'))return;w=t.parentElement;x=e.clientX;y=e.clientY;sl=w.scrollLeft;st=w.scrollTop;mv=false});
-document.addEventListener('pointermove',e=>{if(!w)return;const dx=e.clientX-x,dy=e.clientY-y;if(!mv&&Math.abs(dx)+Math.abs(dy)>5){mv=true;w.classList.add('drag')}if(mv){w.scrollLeft=sl-dx;w.scrollTop=st-dy}});
-const end=()=>{if(w)w.classList.remove('drag');w=null};document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
-document.addEventListener('click',e=>{if(mv){e.stopPropagation();e.preventDefault();mv=false}},true);})();</script>
+<script src="modules/app-shell/input-drag-init.js?v=1"></script>
 
 <link rel="stylesheet" href="modules/app-shell/control-panel.css?v=147">
 <link rel="stylesheet" href="modules/settings/settings.css?v=2">
@@ -171,14 +148,7 @@ body[data-fz="3"] #rr .rt :is(th,td):nth-child(3){left:138px}
 
 <link rel="stylesheet" href="modules/categories/categories.css?v=140">
 
-<script>(function(){
-document.addEventListener('input',function(e){if(e.target.id!=='goalcr')return;const v=parseFloat(e.target.value);if(!(v>0)||!isFinite(v))return;
-S.goal=Math.max(1,Math.min(1e12,Math.round(v*1e7)));save();dupd()});
-document.addEventListener('change',function(e){if(e.target.id!=='goalcr')return;const v=parseFloat(e.target.value);if(!(v>0)||!isFinite(v))e.target.value=+(S.goal/1e7).toFixed(4)});
-document.addEventListener('click',function(e){const b=e.target.closest&&e.target.closest('[data-gp]');if(!b)return;
-S.goal=Math.round(parseFloat(b.dataset.gp)*1e7);save();const i=document.getElementById('goalcr');if(i)i.value=+b.dataset.gp;dupd()});
-const o=window.render;window.render=function(){const r=o.apply(this,arguments);if(window.dzFill)dzFill();return r};
-})();</script>
+<script src="modules/app-shell/goal-sync-init.js?v=1"></script>
 <link rel="stylesheet" href="modules/dashboard-preferences/dashboard.css?v=141">
 <style>#fm .ck{margin:6px 0}#fm .ck label{display:flex;align-items:center;gap:8px;font-weight:600}#fm .ck input{width:auto;margin:0}</style><link rel="stylesheet" href="modules/reports/report-redesign.css?v=149">
 <script src="modules/reports/interest-income.js?v=138"></script>
@@ -218,12 +188,7 @@ html body #rr td>.rtg{display:block;width:max-content;margin:3px 0 0}   /* wrap 
 html body #m [data-rv]{white-space:nowrap}   /* report names stay on one line; the tab bar scrolls sideways on a phone */
 </style>
 <script src="modules/reports/retired-row-tags.js?v=147"></script>
-<script>(function(){const sel='.er,.ue,#le,#fe,#se,#cerr';const ob=new MutationObserver(ms=>{if(LANG()==='en')return;ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType!==3||!n.parentElement||!n.parentElement.matches(sel))return;const t=n.nodeValue,r=tr(t,1);if(r!==t)n.nodeValue=r}))});ob.observe(document.body,{childList:true,subtree:true})})();</script>
-<script>holdRows=trw(holdRows);window.VRHelp.body=trw(window.VRHelp.body);pageBar=trw(pageBar);window.repRows=trw(window.repRows);window.ageTiles=trw(window.ageTiles);</script>
-<script>/* BUILD INFO: bump BUILD_NO (and date) on every build */
-(function(){var txt=window.VR_BUILD_TXT||'';window.FS_BUILD=txt;
-function set(){['bv','lgv'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=txt})}
-set();document.addEventListener('DOMContentLoaded',set)})();</script>
+<script src="modules/app-shell/i18n-build-init.js?v=1"></script>
 <style>/* retirement-year row: no automatic yellow highlight (the Retired tag stays) */
 html body .rt tr.a:not(.sel){--tn:transparent}
 html body .rt tr.a:not(.sel) td{background-color:transparent}
@@ -272,10 +237,7 @@ html body .rp-top .rp-check{min-height:42px;padding:0 20px;margin-left:auto}
 </style>
 <link rel="stylesheet" href="modules/retirement-planner/year-by-year.css?v=147">
 <link rel="stylesheet" href="modules/app-shell/icons.css?v=142">
-<script>(function(){var M={'family':'users','general assumptions':'sliders','appearance & backup':'palette','users':'users','year-by-year plan':'table','year by year status':'cal'};
-function tag(){document.querySelectorAll('h1,h2').forEach(function(h){if(h.closest('dialog'))return;var k=M[h.textContent.trim().toLowerCase()];if(k){if(h.dataset.hic!==k)h.dataset.hic=k}else if(h.dataset.hic)delete h.dataset.hic})}
-var t=0;function q(){clearTimeout(t);t=setTimeout(tag,60)}
-new MutationObserver(q).observe(document.body,{childList:true,subtree:true});tag()})();</script>
+<script src="modules/app-shell/heading-icons-init.js?v=1"></script>
 <script src="modules/app-shell/dashboard-tabs.js?v=147"></script>
 <link rel="stylesheet" href="modules/retirement-planner/planner-page.css?v=142">
 <link rel="stylesheet" href="modules/holdings/notes-history.css?v=147">
@@ -302,11 +264,7 @@ new MutationObserver(q).observe(document.body,{childList:true,subtree:true});tag
 <script src="modules/user-management/password-change.js?v=140"></script>
 <link rel="stylesheet" href="modules/holdings/snapshots.css?v=147">
 <script src="modules/holdings/snapshot-ui.js?v=147"></script>
-<script>/* build 152: the header Client switcher is first drawn once every script has loaded, so it is never empty on the first screen */window.addEventListener("load",function(){try{if(window.fhpBar)window.fhpBar()}catch(e){}})</script>
-<script>/* initial letter shown in the round account badge on phones (the full email stays in the tooltip) */
-(function(){var w=document.getElementById('who');if(!w)return;function ini(){var t=(w.textContent||'').replace(/[^\p{L}\p{N}@._-]+/gu,' ').trim();w.dataset.ini=(t.charAt(0)||'?').toUpperCase();w.title=t?'Signed in as '+t:'Signed in'}ini();try{new MutationObserver(ini).observe(w,{childList:true,characterData:true,subtree:true})}catch(e){}})();
-(function(){var so=document.getElementById('so');if(so){so.title='Sign out';so.setAttribute('aria-label','Sign out')}})();
-</script>
+<script src="modules/app-shell/account-badge-init.js?v=1"></script>
 <style>@import url("modules/holding-entry-register/entry-register.css?v=132");</style>
 <script src="modules/holding-entry-register/entry-register.js?v=134"></script>
 <style>@import url("modules/value-on-date/value-on-date.css?v=1");</style>

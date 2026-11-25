@@ -306,7 +306,6 @@ function buildPrintDocument(opts){
  var when=escHtml(opts.generatedOn||formatToday());
  var accent=/^#[0-9a-f]{3,8}$/i.test(String(opts.accent||''))?opts.accent:'#0f2a4a';
  var docTitle='Vriddhi - '+title+(client?' - '+client:'');
- var fitScript=opts.isTable?('<script>(function(){function fit(){var w=document.getElementById("vr-pdf-wrap");var t=w&&w.querySelector("table");if(!w||!t)return;t.style.zoom="";t.classList.remove("pdf-tight","pdf-ultra");var avail=w.clientWidth||980;var need=Math.max(t.scrollWidth||0,t.offsetWidth||0);if(need>avail+1){t.classList.add("pdf-tight");need=Math.max(t.scrollWidth||0,t.offsetWidth||0)}if(need>avail+1){t.classList.add("pdf-ultra");need=Math.max(t.scrollWidth||0,t.offsetWidth||0)}if(need>avail+1){var z=Math.max(0.35,Math.min(1,Math.floor(((avail-2)/need)*1000)/1000));t.style.zoom=String(z)}}window.__vrPdfFit=fit;fit()})();</'+'script>'):'';
  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+docTitle+'</title><style>'
   +':root{--ac:'+accent+';--tx:#0c1524;--mu:#4b586e;--bd:#cbd5e1;--soft:#f4f6f9;--card:#ffffff;--ok:#0f766e;--er:#b91c1c}'
   +'@page{size:A4 landscape;margin:9mm}'
@@ -348,9 +347,25 @@ function buildPrintDocument(opts){
   +(opts.summaryHtml||'')
   +'<div id="vr-pdf-wrap">'+(opts.bodyHtml||'')+'</div>'
   +'<footer class="vr-pdf-foot"><span>Vriddhi · Private Financial Report</span><span>Estimates only, not financial advice · Amounts in ₹</span></footer>'
-  +'</div>'+fitScript+'</body></html>';
+  +'</div></body></html>';
 }
-function printHtmlInIframe(htmlDoc){
+function fitPrintIframeDoc(doc){
+ if(!doc||typeof doc.getElementById!=='function')return;
+ var w=doc.getElementById('vr-pdf-wrap');
+ var t=w&&typeof w.querySelector==='function'&&w.querySelector('table');
+ if(!w||!t)return;
+ if(t.style)t.style.zoom='';
+ if(t.classList)t.classList.remove('pdf-tight','pdf-ultra');
+ var avail=w.clientWidth||980;
+ var need=Math.max(t.scrollWidth||0,t.offsetWidth||0);
+ if(need>avail+1&&t.classList){t.classList.add('pdf-tight');need=Math.max(t.scrollWidth||0,t.offsetWidth||0)}
+ if(need>avail+1&&t.classList){t.classList.add('pdf-ultra');need=Math.max(t.scrollWidth||0,t.offsetWidth||0)}
+ if(need>avail+1&&t.style){
+  var z=Math.max(0.35,Math.min(1,Math.floor(((avail-2)/need)*1000)/1000));
+  t.style.zoom=String(z);
+ }
+}
+function printHtmlInIframe(htmlDoc,isTable){
  if(!document.body||typeof document.body.appendChild!=='function')return false;
  var prev=document.getElementById('vr-pdf-frame');
  if(prev)removeEl(prev);
@@ -370,7 +385,7 @@ function printHtmlInIframe(htmlDoc){
   doc.close();
   var trigger=function(){
    try{
-    if(typeof win.__vrPdfFit==='function')win.__vrPdfFit();
+    if(isTable)fitPrintIframeDoc(doc);
     if(typeof win.addEventListener==='function')win.addEventListener('afterprint',cleanup,{once:true});
     if(typeof win.focus==='function')win.focus();
     win.print();
@@ -421,7 +436,7 @@ function exportReportPDF(root,meta){
   accent:pickAccent(),
   isTable:isTable
  });
- return printHtmlInIframe(htmlDoc);
+ return printHtmlInIframe(htmlDoc,isTable);
 }
 
 function syncRetirement(){

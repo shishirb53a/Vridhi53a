@@ -103,8 +103,12 @@
     ['#5b21b6', 'Amethyst'],
     ['#9a3412', 'Terracotta']
   ];
+  function safeHex(v, fb) {
+    var s = String(v || '').trim().toLowerCase();
+    return /^#[0-9a-f]{6}$/.test(s) ? s : (fb || '#0f2a4a');
+  }
   function accent() {
-    var cur = (window.brandOf ? window.brandOf() : '#0f2a4a').toLowerCase(), pre = SW.some(function (s) { return s[0] === cur; });
+    var cur = safeHex(window.brandOf ? window.brandOf() : '#0f2a4a', '#0f2a4a'), pre = SW.some(function (s) { return s[0] === cur; });
     return '<div class="ap-sw" role="radiogroup" aria-label="Accent colour">' + SW.map(function (s) {
       return '<button type="button" class="ap-s" role="radio" aria-checked="' + (s[0] === cur) + '" aria-label="' + s[1] + '" title="' + s[1] + '" data-ap-cc="' + s[0] + '" style="--sw:' + s[0] + '">' + CHK + '</button>';
     }).join('') + '<label class="ap-cu' + (pre ? '' : ' on') + '" title="Pick any colour"><input type="color" id="ap-cc" value="' + cur + '" aria-label="Custom accent colour"><span>Custom</span><code id="ap-cc-v">' + cur + '</code></label></div>' +
@@ -123,7 +127,9 @@
       '<div class="ap-ft"><span class="mu">Changes apply instantly across all modules and reports.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
   };
   function setCC(hex, final) {
-    S.cc = String(hex).toLowerCase();
+    var valid = safeHex(hex, '');
+    if (!valid) return;
+    S.cc = valid;
     if (final) commit('Accent colour applied'); else { try { theme(); } catch (x) { } }
   }
   d.addEventListener('input', function (e) {

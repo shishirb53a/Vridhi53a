@@ -4,9 +4,10 @@ var FIT={pg:{},sp:'family',hg:null,fo:false},M=document.getElementById('m'),busy
 function tab(){var b=document.querySelector('nav button[aria-current=page]'),t=b?b.textContent.trim():'';return t==='Settings'&&typeof UI!=='undefined'&&SET.includes(UI.tab)?UI.tab:t}   /* Help and Users now sit under the Settings nav item, so report the real page */
 function over(){return document.documentElement.scrollHeight-innerHeight}
 function hts(e){var c=getComputedStyle(e);return e.getBoundingClientRect().height+(parseFloat(c.marginTop)||0)+(parseFloat(c.marginBottom)||0)}
+function escHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function rm(sel){M.querySelectorAll(sel).forEach(function(e){e.remove()})}
-function pager(key,cont,cur,np,label){rm('.vpg[data-k="'+key+'"]');var d=document.createElement('div');d.className='vpg';d.dataset.k=key;
-d.innerHTML='<button type="button" data-pg="-1" aria-label="Previous"'+(cur<=0?' disabled':'')+'>&#8249;</button><span>'+(label||('Page '+(cur+1)+' of '+np))+'</span><button type="button" data-pg="1" aria-label="Next"'+(cur>=np-1?' disabled':'')+'>&#8250;</button>'+(key.indexOf('help')===0?'':'<label class="vps">Rows <select data-pgs aria-label="Rows per page">'+PGO.map(function(o){return'<option value="'+o[0]+'"'+(o[0]===PGS?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>');
+function pager(key,cont,cur,np,label){var safeKey=String(key||'').replace(/[^a-zA-Z0-9_-]/g,'');rm('.vpg[data-k="'+safeKey+'"]');var d=document.createElement('div');d.className='vpg';d.dataset.k=safeKey;
+d.innerHTML='<button type="button" data-pg="-1" aria-label="Previous"'+(cur<=0?' disabled':'')+'>&#8249;</button><span>'+escHtml(label||('Page '+(cur+1)+' of '+np))+'</span><button type="button" data-pg="1" aria-label="Next"'+(cur>=np-1?' disabled':'')+'>&#8250;</button>'+(safeKey.indexOf('help')===0?'':'<label class="vps">Rows <select data-pgs aria-label="Rows per page">'+PGO.map(function(o){return'<option value="'+o[0]+'"'+(o[0]===PGS?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>');
 cont.insertAdjacentElement('afterend',d)}
 function fitList(key,cont,items){if(!cont||!items.length)return;
 if(PGS!=='auto'){var n=PGS==='all'?items.length:+PGS,np=Math.max(1,Math.ceil(items.length/n)),c=Math.min(FIT.pg[key]||0,np-1);FIT.pg[key]=c;items.forEach(function(e,i){e.classList.toggle('vh',i<c*n||i>=(c+1)*n)});pager(key,cont,c,np,(PGS==='all'?'':'Page '+(c+1)+' of '+np+' \u00b7 ')+items.length+' items');return}
@@ -23,8 +24,8 @@ if(tb&&tb.offsetParent!==null)return[].filter.call(tb.querySelectorAll('tr'),fun
 var fam=!!c.closest('#m>.card:not(.hp-card)')&&tab()==='Settings';return[].filter.call(c.querySelectorAll('.hcard,.yc'),function(e){return e.offsetParent!==null&&(fam||e.classList.contains('yc')||e.querySelector('.kv'))})}
 function modeOf(c){var tb=c&&c.querySelector('table');return tb&&tb.offsetParent!==null?'t':'c'}
 function lst(key,c){fitList(key+modeOf(c),c,rowsOf(c))}
-function subbar(before,items,cur,attr){var d=document.createElement('div');d.className='vsub';d.setAttribute('role','group');
-d.innerHTML=items.map(function(t,i){return'<button type="button" '+attr+'="'+i+'" aria-pressed="'+(i===cur)+'">'+t.replace(/&/g,'&amp;')+'</button>'}).join('');before.parentNode.insertBefore(d,before)}
+function subbar(before,items,cur,attr){var safeAttr=String(attr||'data-v').replace(/[^a-zA-Z0-9_-]/g,'');var d=document.createElement('div');d.className='vsub';d.setAttribute('role','group');
+d.innerHTML=items.map(function(t,i){return'<button type="button" '+safeAttr+'="'+i+'" aria-pressed="'+(i===cur)+'">'+escHtml(t)+'</button>'}).join('');before.parentNode.insertBefore(d,before)}
 var SP=[['family','Family'],['general','General'],['columns','Columns'],['look','Look'],['font','Fonts'],['backup','Backup']];
 function settingsFit(){var all0=[].slice.call(M.querySelectorAll(':scope>.card')),cards=all0.filter(function(c){return c.id!=='rcset'&&c.id!=='vr-snc'});all0.forEach(function(c){if(c.id==='rcset')c.dataset.fp='columns';else if(c.id==='vr-snc')c.dataset.fp='backup'});
 cards.forEach(function(c,ci){var all=c.dataset.fp;if(ci===0)c.dataset.fp='family';else if(ci===1)c.dataset.fp='general';else if(ci===2){c.dataset.fp='look font backup';var n=-1;

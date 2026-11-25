@@ -37,39 +37,74 @@ function config() {
   return { supabaseUrl, anonKey, backupDir, pgEnv };
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SECURITY_HEADERS = {
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+  'Cache-Control': 'no-store',
+};
+
 function response(status, body, headers = {}) {
   return new Response(body == null ? null : JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers },
+    headers: { ...SECURITY_HEADERS, 'Content-Type': 'application/json; charset=utf-8', ...headers },
   });
 }
 
 function corsHeaders(request) {
-  const origins = String(process.env.ALLOWED_ORIGINS || '*').split(',').map((item) => item.trim()).filter(Boolean);
+  const configured = String(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item && item !== '*');
   const origin = request.headers.get('origin') || '';
-  const allowed = origins.includes('*') ? '*' : origins.includes(origin) ? origin : 'null';
-  return {
-    'Access-Control-Allow-Origin': allowed,
+  const base = {
+    ...SECURITY_HEADERS,
     'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
     'Access-Control-Expose-Headers': 'Content-Disposition',
     'Vary': 'Origin',
   };
+  if (!origin) return { headers: base, forbidden: false };
+  if (configured.includes(origin)) {
+    return { headers: { ...base, 'Access-Control-Allow-Origin': origin }, forbidden: false };
+  }
+  return { headers: base, forbidden: true };
+}
+
+function safeBackupPath(backupDir, filename) {
+  const baseDir = path.resolve(backupDir);
+  const target = path.resolve(baseDir, filename);
+  if (!target.startsWith(baseDir + path.sep)) {
+    throw new Error('Invalid backup path.');
+  }
+  return target;
+}
+
+function safeDownloadFilename(name) {
+  return String(name || 'database-backup.tar.gz')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/^\.+/, '') || 'database-backup.tar.gz';
 }
 
 async function authorize(request, cfg) {
-  const match = /^Bearer\s+(.+)$/i.exec(request.headers.get('authorization') || '');
-  if (!match) return response(401, { error: 'Sign in is required.' });
+  const match = /^Bearer\s+([^\s]+)$/i.exec(request.headers.get('authorization') || '');
+  if (!match || match[1].length > 4096) return { denied: response(401, { error: 'Sign in is required.' }), user: null };
   const headers = { apikey: cfg.anonKey, Authorization: `Bearer ${match[1]}` };
   const userResponse = await fetch(`${cfg.supabaseUrl}/auth/v1/user`, { headers });
-  if (!userResponse.ok) return response(401, { error: 'Your sign-in is no longer valid. Sign in again.' });
+  if (!userResponse.ok) return { denied: response(401, { error: 'Your sign-in is no longer valid. Sign in again.' }), user: null };
+  const user = await userResponse.json().catch(() => null);
+  if (!user || typeof user.id !== 'string' || !user.id.trim()) {
+    return { denied: response(401, { error: 'Your sign-in is no longer valid. Sign in again.' }), user: null };
+  }
   const permissionResponse = await fetch(`${cfg.supabaseUrl}/rest/v1/rpc/has_app_permission`, {
     method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
     body: JSON.stringify({ required_permission: 'manage_database_backups' }),
   });
-  if (!permissionResponse.ok) return response(503, { error: 'Could not verify database-backup permission. Run the latest database schema.' });
-  if (await permissionResponse.json() !== true) return response(403, { error: 'You do not have permission to manage database backups.' });
-  return null;
+  if (!permissionResponse.ok) return { denied: response(503, { error: 'Could not verify database-backup permission. Run the latest database schema.' }), user: null };
+  if (await permissionResponse.json() !== true) return { denied: response(403, { error: 'You do not have permission to manage database backups.' }), user: null };
+  return { denied: null, user };
 }
 
 function run(command, args, options = {}) {
@@ -101,12 +136,13 @@ async function withOperation(fn) {
 async function listBackups(backupDir) {
   await mkdir(backupDir, { recursive: true, mode: 0o700 });
   const names = await readdir(backupDir);
-  const entries = await Promise.all(names.filter((name) => /^[0-9a-f-]{36}\.json$/.test(name)).map(async (name) => {
+  const entries = await Promise.all(names.filter((name) => /^[0-9a-f-]{36}\.json$/i.test(name)).map(async (name) => {
     try {
-      const metadata = JSON.parse(await readFile(path.join(backupDir, name), 'utf8'));
-      const archive = path.join(backupDir, `${metadata.id}.tar.gz`);
+      const metadata = JSON.parse(await readFile(safeBackupPath(backupDir, name), 'utf8'));
+      if (!metadata || !UUID_RE.test(String(metadata.id || ''))) return null;
+      const archive = safeBackupPath(backupDir, `${metadata.id}.tar.gz`);
       const info = await stat(archive);
-      return { id: metadata.id, filename: metadata.filename, createdAt: metadata.createdAt, createdBy: metadata.createdBy,
+      return { id: metadata.id, filename: safeDownloadFilename(metadata.filename), createdAt: metadata.createdAt, createdBy: metadata.createdBy,
         source: metadata.source, size: info.size };
     } catch { return null; }
   }));
@@ -114,10 +150,11 @@ async function listBackups(backupDir) {
 }
 
 async function readMetadata(backupDir, id) {
-  if (!/^[0-9a-f-]{36}$/.test(id)) return null;
+  if (!UUID_RE.test(String(id || ''))) return null;
   try {
-    const metadata = JSON.parse(await readFile(path.join(backupDir, `${id}.json`), 'utf8'));
-    await access(path.join(backupDir, `${id}.tar.gz`));
+    const metadata = JSON.parse(await readFile(safeBackupPath(backupDir, `${id}.json`), 'utf8'));
+    if (!metadata || metadata.id !== id) return null;
+    await access(safeBackupPath(backupDir, `${id}.tar.gz`));
     return metadata;
   } catch { return null; }
 }
@@ -162,7 +199,8 @@ async function saveUpload(request, cfg, user, filename) {
     await pipeline(Readable.fromWeb(request.body), limiter, createWriteStream(uploaded, { mode: 0o600, flags: 'wx' }));
     const members = (await run('tar', ['-tzf', uploaded])).split('\n').filter(Boolean);
     const expected = ['database.dump', 'globals.sql', 'metadata.json'];
-    if (members.length !== expected.length || expected.some((name) => members.filter((item) => item === name).length !== 1)) {
+    if (members.some((item) => item.startsWith('/') || item.includes('..') || item.includes('\\')) ||
+      members.length !== expected.length || expected.some((name) => members.filter((item) => item === name).length !== 1)) {
       return { status: 400, body: { error: 'The archive is not a valid complete database backup bundle.' } };
     }
     const listing = (await run('tar', ['-tvzf', uploaded])).split('\n');
@@ -233,13 +271,18 @@ async function restoreBackup(cfg, id) {
 }
 
 export async function handleRequest(request) {
-  const headers = corsHeaders(request);
-  if (headers['Access-Control-Allow-Origin'] === 'null') return response(403, { error: 'This site is not allowed to use the backup service.' }, headers);
+  const cors = corsHeaders(request);
+  const headers = cors.headers;
+  const forwardedProto = String(request.headers.get('x-forwarded-proto') || '').split(',')[0].trim().toLowerCase();
+  if (forwardedProto === 'http') {
+    return response(403, { error: 'HTTPS is required.' }, headers);
+  }
+  if (cors.forbidden) return response(403, { error: 'This site is not allowed to use the backup service.' }, headers);
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
   let cfg;
   try { cfg = config(); } catch (error) { console.error(error.message); return response(503, { error: 'The backup service is not configured.' }, headers); }
-  const denied = await authorize(request, cfg);
-  if (denied) return new Response(denied.body, { status: denied.status, headers: { ...Object.fromEntries(denied.headers), ...headers } });
+  const auth = await authorize(request, cfg);
+  if (auth.denied) return new Response(auth.denied.body, { status: auth.denied.status, headers: { ...Object.fromEntries(auth.denied.headers), ...headers } });
   const url = new URL(request.url);
   const parts = url.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
   if (parts[0] !== 'api' || parts[1] !== 'backups') return response(404, { error: 'Not found.' }, headers);
@@ -248,23 +291,20 @@ export async function handleRequest(request) {
       return response(200, { backups: await listBackups(cfg.backupDir) }, headers);
     }
     if (request.method === 'POST' && parts.length === 2) {
-      const user = await (await fetch(`${cfg.supabaseUrl}/auth/v1/user`, { headers: { apikey: cfg.anonKey, Authorization: request.headers.get('authorization') } })).json();
-      const result = await withOperation(() => createBackup(cfg, user));
+      const result = await withOperation(() => createBackup(cfg, auth.user));
       return response(result.status, result.body, headers);
     }
     if (request.method === 'PUT' && parts.length === 3 && parts[2] === 'upload') {
-      const userResponse = await fetch(`${cfg.supabaseUrl}/auth/v1/user`, { headers: { apikey: cfg.anonKey, Authorization: request.headers.get('authorization') } });
-      const user = await userResponse.json();
       const filename = url.searchParams.get('filename') || '';
-      const result = await withOperation(() => saveUpload(request, cfg, user, filename));
+      const result = await withOperation(() => saveUpload(request, cfg, auth.user, filename));
       return response(result.status, result.body, headers);
     }
     if (parts.length === 4 && parts[3] === 'download' && request.method === 'GET') {
       const metadata = await readMetadata(cfg.backupDir, parts[2]);
       if (!metadata) return response(404, { error: 'Backup not found.' }, headers);
-      const file = createReadStream(path.join(cfg.backupDir, `${metadata.id}.tar.gz`));
+      const file = createReadStream(safeBackupPath(cfg.backupDir, `${metadata.id}.tar.gz`));
       return new Response(Readable.toWeb(file), { status: 200, headers: { ...headers, 'Content-Type': 'application/gzip',
-        'Content-Disposition': `attachment; filename="${metadata.filename.replace(/["\\\r\n]/g, '_')}"` } });
+        'Content-Disposition': `attachment; filename="${safeDownloadFilename(metadata.filename)}"` } });
     }
     if (request.method === 'POST' && parts.length === 4 && parts[3] === 'restore') {
       const result = await withOperation(() => restoreBackup(cfg, parts[2]));

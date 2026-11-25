@@ -106,7 +106,8 @@ assert.strictEqual(theme.window.brandOf(), '#1d4ed8', 'Custom accent hex is pres
 assert.ok(!html.includes('modules/theme/minimal.css'), 'Legacy minimal.css link is removed from index.html');
 assert.ok(!fs.existsSync(path.join(root, 'modules', 'theme', 'minimal.css')), 'Legacy minimal.css file is deleted');
 assert.ok(!html.includes('id="lk-sw"') && !html.includes('skin-selector.js'), 'The floating Look menu stays removed');
-assert.ok(html.includes('data-skin","enterprise"'), 'Enterprise layout skin is always applied');
+const bootInit = read('modules/app-shell/boot-init.js');
+assert.ok(html.includes('data-skin="enterprise"') && /setAttribute\(['"]data-skin['"],\s*['"]enterprise['"]\)/.test(bootInit), 'Enterprise layout skin is always applied');
 assert.ok(html.indexOf('appearance-pro.js') > html.indexOf('dashboard-preferences.js') && html.indexOf('appearance-pro.js') > html.indexOf('professional-themes.js'),
   'appearance-pro.js loads after the modules whose controls it wraps');
 assert.ok(settings.includes('window.apUI?window.apUI()'), 'Settings uses the Appearance screen');

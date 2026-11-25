@@ -7,6 +7,14 @@
     Other: '#868e96'
   };
   var SORTS = [['role', 'Relationship'], ['name', 'Name'], ['age', 'Age'], ['college', 'College duration']];
+  function safeHtml(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function roleColor(role) {
+    return Object.prototype.hasOwnProperty.call(COLORS, role) ? COLORS[role] : '#868e96';
+  }
 
   function rows(ctx) {
     var state = ctx.state, ui = ctx.ui, escn = ctx.escapeName;
@@ -36,8 +44,8 @@
     }
     function name(item) {
       return '<div class="nm"><div><b>' + escn(item.member.name) +
-        '</b><div><span class="pill" style="--c:' + COLORS[item.member.role] + '">' +
-        item.member.role + '</span></div></div></div>';
+        '</b><div><span class="pill" style="--c:' + roleColor(item.member.role) + '">' +
+        safeHtml(item.member.role) + '</span></div></div></div>';
     }
     function actions(item) {
       return '<button class="tbs" data-me="' + item.index + '" aria-label="Edit ' +
@@ -47,7 +55,7 @@
     }
     function childInfo(member) {
       return member.role === 'Child'
-        ? '<td>' + member.cls + '</td><td>' + member.college + ' yrs</td><td class="l">' + ctx.stage(member, 1) + '</td>'
+        ? '<td>' + safeHtml(member.cls) + '</td><td>' + safeHtml(member.college) + ' yrs</td><td class="l">' + safeHtml(ctx.stage(member, 1)) + '</td>'
         : '<td>—</td><td>—</td><td class="l">—</td>';
     }
 
@@ -55,17 +63,17 @@
       '<th>Class today</th>' + header('college', 'College duration') +
       '<th>Education stage now</th><th>Actions</th></tr>' +
       members.map(function (item) {
-        return '<tr><td>' + name(item) + '</td><td>' + item.member.age + '</td>' +
+        return '<tr><td>' + name(item) + '</td><td>' + safeHtml(item.member.age) + '</td>' +
           childInfo(item.member) + '<td class="nw">' + actions(item) + '</td></tr>';
       }).join('') + '</table></div><div class="hc">' +
       members.map(function (item) {
         var member = item.member;
-        return '<div class="hcard" style="--c:' + COLORS[member.role] + '"><div class="hh">' +
-          name(item) + '<div class="vv"><b>' + member.age + '</b><div class="mu">years</div></div></div>' +
+        return '<div class="hcard" style="--c:' + roleColor(member.role) + '"><div class="hh">' +
+          name(item) + '<div class="vv"><b>' + safeHtml(member.age) + '</b><div class="mu">years</div></div></div>' +
           (member.role === 'Child'
-            ? '<div class="kv"><span>Class today</span><b>' + member.cls +
-              '</b><span>College duration</span><b>' + member.college +
-              ' yrs</b><span>Education stage</span><b>' + ctx.stage(member, 1) + '</b></div>'
+            ? '<div class="kv"><span>Class today</span><b>' + safeHtml(member.cls) +
+              '</b><span>College duration</span><b>' + safeHtml(member.college) +
+              ' yrs</b><span>Education stage</span><b>' + safeHtml(ctx.stage(member, 1)) + '</b></div>'
             : '') + '<div class="tb">' + actions(item) + '</div></div>';
       }).join('') + '</div>';
   }
@@ -79,7 +87,7 @@
       '<input id="fq" type="search" placeholder="Search family…" aria-label="Search family" value="' +
       ctx.escape(ui.fq) + '"><select id="frf" aria-label="Filter by relationship"><option>All</option>' +
       ctx.roles.map(function (role) {
-        return '<option' + (role === ui.frl ? ' selected' : '') + '>' + role + '</option>';
+        return '<option' + (role === ui.frl ? ' selected' : '') + '>' + safeHtml(role) + '</option>';
       }).join('') + '</select><select id="fsf" aria-label="Sort by">' +
       SORTS.map(function (sort) {
         return '<option value="' + sort[0] + '"' + (ui.fk === sort[0] ? ' selected' : '') +
@@ -102,7 +110,7 @@
       ' family member</h2>' + ctx.field('mn', 'Name', original.name, 'text', 'maxlength=30 required') +
       '<p><label for="mr">Relationship</label><select id="mr" ' + (self ? 'disabled' : '') + '>' +
       ctx.roles.filter(function (role) { return role !== 'Self' || self; }).map(function (role) {
-        return '<option' + (role === original.role ? ' selected' : '') + '>' + role + '</option>';
+        return '<option' + (role === original.role ? ' selected' : '') + '>' + safeHtml(role) + '</option>';
       }).join('') + '</select></p>' +
       ctx.field('ma', 'Age today', original.age, 'number', 'min=0 max=100') +
       '<div id="mk" ' + (original.role === 'Child' ? '' : 'hidden') + '>' +

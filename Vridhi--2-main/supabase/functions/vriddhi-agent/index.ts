@@ -1,12 +1,36 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") || "*";
-const CORS = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin",
+const SECURITY_HEADERS: Record<string, string> = {
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+  "Cache-Control": "no-store",
 };
+
+function allowedOrigins(): string[] {
+  const raw = (typeof Deno !== "undefined" && Deno.env)
+    ? (Deno.env.get("ALLOWED_ORIGINS") || Deno.env.get("ALLOWED_ORIGIN") || "")
+    : "";
+  return raw.split(",").map((item) => item.trim()).filter((item) => item && item !== "*");
+}
+
+function corsHeaders(req: Request): { headers: Record<string, string>; forbidden: boolean } {
+  const origin = req.headers.get("Origin") || "";
+  const base: Record<string, string> = {
+    ...SECURITY_HEADERS,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+  if (!origin) return { headers: base, forbidden: false };
+  const allowlist = allowedOrigins();
+  if (allowlist.includes(origin)) {
+    return { headers: { ...base, "Access-Control-Allow-Origin": origin }, forbidden: false };
+  }
+  return { headers: base, forbidden: true };
+}
+
 const MAX_BODY_BYTES = 100_000;
 const MAX_HOLDINGS = 60;
 const MAX_YEARS = 60;
@@ -32,10 +56,11 @@ type Plan = {
 type AdminClient = ReturnType<typeof createClient>;
 type ToolBlock = { type: string; id: string; name: string; input: Record<string, unknown> };
 
-function send(status: number, body: unknown) {
-  return new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
+function send(status: number, body: unknown, headers: Record<string, string> = SECURITY_HEADERS) {
+  return new Response(JSON.stringify(body), { status, headers: { ...headers, "Content-Type": "application/json" } });
 }
-const fail = (status: number, error: string) => send(status, { error });
+const fail = (status: number, error: string, headers: Record<string, string> = SECURITY_HEADERS) =>
+  send(status, { error }, headers);
 const finite = (value: unknown, min: number, max: number): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
 
@@ -355,52 +380,57 @@ async function runAgent(apiKey: string, model: string, question: string, plan: P
 }
 
 export async function handle(req: Request, admin: AdminClient, apiKey: string, model: string): Promise<Response> {
-  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
-  if (req.method !== "POST") return fail(405, "Method not allowed.");
+  const cors = corsHeaders(req);
+  const respond = (status: number, body: unknown) => send(status, body, cors.headers);
+  const reject = (status: number, error: string) => fail(status, error, cors.headers);
+
+  if (cors.forbidden) return reject(403, "Origin not allowed.");
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors.headers });
+  if (req.method !== "POST") return reject(405, "Method not allowed.");
   const contentLength = Number(req.headers.get("Content-Length") || 0);
-  if (contentLength > MAX_BODY_BYTES) return fail(413, "The request is too large.");
-  const bearer = /^Bearer\s+(.+)$/i.exec(req.headers.get("Authorization") || "");
-  if (!bearer) return fail(401, "Not signed in.");
+  if (contentLength > MAX_BODY_BYTES) return reject(413, "The request is too large.");
+  const bearer = /^Bearer\s+([^\s]+)$/i.exec(req.headers.get("Authorization") || "");
+  if (!bearer || bearer[1].length > 4096) return reject(401, "Not signed in.");
   const { data: who, error: whoError } = await admin.auth.getUser(bearer[1]);
-  if (whoError || !who?.user) return fail(401, "Not signed in.");
+  if (whoError || !who?.user) return reject(401, "Not signed in.");
 
   const { data: assignment, error: roleError } = await admin.from("app_user_roles")
     .select("role_id").eq("user_id", who.user.id).maybeSingle();
   if (roleError) {
     console.error("AI role lookup failed:", roleError);
-    return fail(500, "Could not verify account permissions.");
+    return reject(500, "Could not verify account permissions.");
   }
-  if (!assignment) return fail(403, "No role is assigned to this account.");
+  if (!assignment) return reject(403, "No role is assigned to this account.");
   const { data: permission, error: permissionError } = await admin.from("app_role_permissions")
     .select("permission_key").eq("role_id", assignment.role_id).eq("permission_key", "read_data").maybeSingle();
   if (permissionError) {
     console.error("AI permission lookup failed:", permissionError);
-    return fail(500, "Could not verify account permissions.");
+    return reject(500, "Could not verify account permissions.");
   }
-  if (!permission) return fail(403, "You do not have permission to read plan data.");
-  if (!apiKey) return fail(503, "The AI assistant is not configured. Set the GEMINI_API_KEY Edge Function secret.");
+  if (!permission) return reject(403, "You do not have permission to read plan data.");
+  if (!apiKey) return reject(503, "The AI assistant is not configured. Set the GEMINI_API_KEY Edge Function secret.");
 
   let payload: Record<string, unknown>;
   try {
     const text = await req.text();
-    if (new TextEncoder().encode(text).length > MAX_BODY_BYTES) return fail(413, "The request is too large.");
+    if (new TextEncoder().encode(text).length > MAX_BODY_BYTES) return reject(413, "The request is too large.");
     const parsed: unknown = JSON.parse(text);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return fail(400, "Bad request.");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return reject(400, "Bad request.");
     payload = parsed as Record<string, unknown>;
   } catch {
-    return fail(400, "Bad request.");
+    return reject(400, "Bad request.");
   }
   if (typeof payload.question !== "string" || !payload.question.trim() || payload.question.length > 1000) {
-    return fail(400, "Enter a question of 1 to 1000 characters.");
+    return reject(400, "Enter a question of 1 to 1000 characters.");
   }
   const plan = cleanPlan(payload.plan);
-  if (!plan) return fail(400, "The open plan data is invalid or too large.");
+  if (!plan) return reject(400, "The open plan data is invalid or too large.");
 
   try {
-    return send(200, { answer: await runAgent(apiKey, model, payload.question.trim(), plan) });
+    return respond(200, { answer: await runAgent(apiKey, model, payload.question.trim(), plan) });
   } catch (error) {
     console.error("Vriddhi AI request failed:", error);
-    return fail(502, error instanceof Error ? error.message : "The AI assistant could not answer.");
+    return reject(502, error instanceof Error ? error.message : "The AI assistant could not answer.");
   }
 }
 
