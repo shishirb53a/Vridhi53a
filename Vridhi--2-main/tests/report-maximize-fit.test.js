@@ -532,7 +532,7 @@ const safeDoc = pdfH.win.__vrPdfBuilder.buildPrintDocument({
   bodyHtml: '<table></table>',
   isTable: true
 });
-assert.ok(safeDoc.includes('--ac:#14392b'), 'Invalid CSS accent falls back to safe default hex color');
+assert.ok(safeDoc.includes('--ac:#0f2a4a'), 'Invalid CSS accent falls back to safe default hex color');
 
 // Restoring hides/removes the Export to PDF button; maximizing brings it back
 pdfH.click('rp-max');

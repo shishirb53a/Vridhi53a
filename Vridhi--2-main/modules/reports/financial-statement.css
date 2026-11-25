@@ -1,0 +1,867 @@
+/* ==========================================================================
+   Vriddhi Financial-Statement Reports Standardisation (financial-statement.css)
+   Applies a unified, institutional financial-statement design across ALL reports:
+   - Goal Planner Reports (Annual Portfolio Projection, Monthly Projection,
+     ROI Summary, Interest Income, Entry Register, Value on Date, Holding Popup)
+   - Retirement Planner Reports (Year-by-Year Plan, Summary & Milestones, Compare)
+   - Policies Reports (Schedule, Premiums, Payouts, Summary)
+   - Stress Test Reports (Scenarios Table, 70-Year Calculation Engine)
+
+   Cascade & Non-Regression Guarantees:
+   - Loaded immediately after design-system.css and BEFORE report-maximize.css,
+     so 1-page fit-all-columns Maximize & PDF print layout stays 100% sovereign.
+   - Default table surface/header/border rules are guarded with
+     :not([data-utcol="custom"]) so Settings -> Appearance -> Table Colour
+     (appearance-pro.css) stays 100% sovereign.
+   - Honors all 6 Enterprise Themes, Light/Dark mode, Accent Colour, Density,
+     Text Size, Corner Shape, Table Header, Striped Rows, Row/Column Lines.
+   - Zero changes to report navigation, calculations, filters, sorting, or exports.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. STANDARDIZED REPORT HEADERS (Page-level & Statement-level)
+   -------------------------------------------------------------------------- */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-card) !important;
+  padding: 16px 20px !important;
+  margin: 0 0 14px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph h1 {
+  font-size: 21px !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  color: var(--tx) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph .rpf {
+  color: var(--mu) !important;
+  font-size: 13px !important;
+  line-height: 1.45;
+  margin: 4px 0 0 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph .rpr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Institutional As-Of Date Stamp (replaces bulky pill capsule) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpd {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-ctl) !important;
+  background: var(--ds-surface-2) !important;
+  color: var(--tx) !important;
+  font-size: 12.5px !important;
+  font-weight: 650 !important;
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpd svg {
+  color: var(--ds-accent) !important;
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+/* Statement Section Header Bar (Goal Planner cards, RP Year-by-Year, Policies, Stress Test, Holding Popup) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph2,
+  #vp-pg .vp-card .vp-h,
+  .st-root .st-scen-head
+) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  padding: 0 0 12px !important;
+  margin: 0 0 14px !important;
+  border-bottom: 1px solid var(--ds-border) !important;
+  background: transparent !important;
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph2[data-rpx] {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph2 h2,
+  #vp-pg .vp-card .vp-h h2,
+  .st-root .st-scen-head h2,
+  .hyd .hyh h2
+) {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.018em !important;
+  line-height: 1.25 !important;
+  color: var(--tx) !important;
+  margin: 0 !important;
+  border-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .st-root .st-scen-sub,
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .hz-hint {
+  color: var(--mu) !important;
+  font-size: 12.5px !important;
+  line-height: 1.45;
+  margin: -6px 0 12px !important;
+}
+
+/* Holding Report Dialog Statement Header */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .hyd .hyh {
+  padding: 16px 20px 14px !important;
+  border-bottom: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  align-items: center;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .hyd .hyc {
+  font-size: 12.5px !important;
+  color: var(--mu) !important;
+  margin-top: 3px;
+}
+
+/* Info Tooltip Button (.rpi) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpi {
+  width: 20px;
+  height: 20px;
+  border-color: var(--ds-border-strong) !important;
+  background: var(--ds-surface-2) !important;
+  color: var(--mu) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpi:hover {
+  border-color: var(--ds-accent) !important;
+  color: var(--ds-accent) !important;
+  background: var(--ds-accent-soft) !important;
+}
+
+/* Standardized Report View Segmented Controls */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph .seg,
+  .vr-aph .vr-seg,
+  .st-root .st-seg,
+  .hyd .hyv
+) {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px !important;
+  background: var(--ds-surface-3) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph .seg,
+  .vr-aph .vr-seg,
+  .st-root .st-seg,
+  .hyd .hyv
+) button {
+  min-height: 31px !important;
+  padding: 4px 13px !important;
+  border-radius: calc(var(--ds-r-ctl) - 1px) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--mu) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  white-space: nowrap;
+  box-shadow: none !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph .seg,
+  .vr-aph .vr-seg,
+  .st-root .st-seg,
+  .hyd .hyv
+) button:hover {
+  color: var(--tx) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph .seg,
+  .vr-aph .vr-seg,
+  .st-root .st-seg,
+  .hyd .hyv
+) button:is([aria-pressed="true"], [aria-selected="true"], .on) {
+  background: var(--ds-surface) !important;
+  color: var(--ds-accent) !important;
+  border-color: var(--ds-border) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+  font-weight: 700 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. STANDARDIZED REPORT SUMMARY STRIPS & STATEMENT KPI CARDS
+   -------------------------------------------------------------------------- */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpk {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 0 0 14px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpk-c {
+  padding: 15px 18px !important;
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-card) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpk-l {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.055em !important;
+  text-transform: uppercase;
+  color: var(--mu) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpk-v {
+  font-size: 24px !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.18 !important;
+  margin: 7px 0 5px !important;
+  color: var(--tx) !important;
+  font-variant-numeric: tabular-nums lining-nums !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rpk-s {
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: var(--ds-accent) !important;
+}
+
+/* Compact Inline Statement Summary Strips (.rsum, .vr-aph .vr-sum, .vod-summary) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsum {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  gap: 10px;
+  margin: 0 0 14px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsum > div {
+  padding: 10px 14px !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+  background: var(--ds-surface-2) !important;
+  box-shadow: none !important;
+  gap: 3px;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsum .mu {
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mu) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsum b {
+  font-size: 16.5px !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.015em;
+  color: var(--tx) !important;
+  font-variant-numeric: tabular-nums lining-nums !important;
+}
+
+/* Annual Portfolio Projection Summary & Control Strip (.vr-aph) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #m .vr-aph {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 0 12px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #m .vr-aph .vr-sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 10px 14px !important;
+  margin: 0 0 10px !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+  background: var(--ds-surface-2) !important;
+  font-size: 12.5px !important;
+  color: var(--mu) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #m .vr-aph .vr-sum b {
+  font-size: 14.5px !important;
+  font-weight: 750 !important;
+  color: var(--tx) !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. STANDARDIZED REPORT FILTERS & CONTROL RIBBONS
+   -------------------------------------------------------------------------- */
+/* Holding / Category Report Selector Panel (.rsel) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-card) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+  padding: 14px 18px !important;
+  margin: 0 0 14px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .rsh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding-bottom: 10px;
+  margin-bottom: 10px !important;
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .rpft {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  color: var(--tx) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .rsa {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .rsa button {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--ds-accent) !important;
+  font-size: 12.5px !important;
+  font-weight: 650 !important;
+  padding: 2px 4px !important;
+  min-height: 0 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .rsa button:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Crisp Non-Pill Filter Toggle Chips (.rsel .lgb) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lgb {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px !important;
+  padding: 4px 10px !important;
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface-2) !important;
+  color: var(--mu) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lgb:hover {
+  border-color: var(--ds-border-strong) !important;
+  color: var(--tx) !important;
+  background: var(--ds-surface) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lgb .mu {
+  padding: 1px 6px !important;
+  border-radius: var(--ds-r-sm) !important;
+  font-size: 11px !important;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  background: var(--ds-surface-3) !important;
+  color: var(--mu) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lgb[aria-pressed="true"] {
+  background: var(--ds-accent-soft) !important;
+  border-color: var(--ds-accent-border) !important;
+  color: var(--ds-accent) !important;
+  font-weight: 650 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rsel .lgb[aria-pressed="true"] .mu {
+  background: var(--ds-accent-mid) !important;
+  color: var(--ds-accent) !important;
+}
+
+/* Unified Multi-Select Filter Row (.msds, .hz-fr, .st-root .msds) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.msds, .hz-fr, .st-root .msds) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px !important;
+  margin: 0 0 12px !important;
+  padding: 10px 12px;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-r-box);
+  background: var(--ds-surface-2);
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.msd-t, .st-root .msd-t, .vod-select-label) {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase;
+  color: var(--mu) !important;
+  margin-bottom: 4px;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .msd-b,
+  .st-root .msd-b,
+  .hz-fr select.hz-ph,
+  .vod-date
+) {
+  min-height: 36px !important;
+  height: 36px;
+  padding: 0 12px !important;
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: var(--ds-sh-xs) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .msd-b,
+  .st-root .msd-b,
+  .vod-date
+):hover {
+  border-color: var(--ds-border-strong) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .msd-b[aria-expanded="true"],
+  .st-root .msd-b[aria-expanded="true"]
+) {
+  border-color: var(--ds-accent) !important;
+  box-shadow: 0 0 0 3px var(--ds-ring) !important;
+}
+
+/* Filter Dropdown Popover Actions (non-pill, clean enterprise buttons) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.msd-a, .st-root .msd-a) {
+  padding: 2px 2px 8px;
+  border-bottom: 1px solid var(--ds-border-subtle);
+  margin-bottom: 6px;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.msd-a button, .st-root .msd-a button) {
+  min-height: 28px !important;
+  padding: 3px 10px !important;
+  border-radius: var(--ds-r-sm) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface-2) !important;
+  color: var(--tx) !important;
+  font-size: 11.5px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.msd-a button, .st-root .msd-a button):hover {
+  border-color: var(--ds-accent-border) !important;
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.msd-i, .st-root .msd-i) {
+  border-radius: var(--ds-r-sm) !important;
+  padding: 7px 8px !important;
+  font-size: 13px;
+}
+
+/* Search / Sort / Toolbar Row (.tb inside report cards, .hz-tb, .st-tb-bar, .vod-toolbar, .vod-tools) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .card .tb,
+  .fh-page .hz-tb,
+  .st-root .st-tb-bar,
+  .vod-toolbar,
+  .vod-tools,
+  #m .vr-aph .vr-ctl
+) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px !important;
+  margin: 0 0 12px !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .vod-toolbar {
+  padding: 10px 12px !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+  background: var(--ds-surface-2) !important;
+  box-shadow: none !important;
+  align-items: flex-end;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .card .tb,
+  .fh-page .hz-tb,
+  .st-root .st-tb-bar,
+  .vod-toolbar,
+  .vod-tools
+) :is(input[type="search"], input[type="text"], select) {
+  min-height: 36px !important;
+  height: 36px;
+  font-size: 13px !important;
+  border-radius: var(--ds-r-ctl) !important;
+}
+
+/* Active Column Indicators (.rcs-chip) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rcs-chip {
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-sm) !important;
+  padding: 2px 8px !important;
+  font-size: 11.5px !important;
+  font-weight: 600;
+  background: var(--ds-surface-2) !important;
+  color: var(--mu) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. INSTITUTIONAL FINANCIAL-STATEMENT TABLES (All Reports)
+      Explicitly yields to [data-utcol="custom"] & report-maximize.css
+   -------------------------------------------------------------------------- */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  #rr.mw,
+  .hz-wrap,
+  .vp-tw,
+  .st-root .st-wrap,
+  .vod-mw,
+  .hyd .hy-sc,
+  .sx-tw
+) {
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-r-box) !important;
+  background: var(--ds-surface);
+  scrollbar-width: thin;
+}
+
+/* Institutional Column Header Alignment & Subtitles */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.rs, table.hz-t, table.vp-t, table.st-t,
+  table.ent-t, table.vod-table, table.sx-t, table.gpp-cmp-table
+) thead th {
+  vertical-align: bottom;
+  line-height: 1.25;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.rs, table.hz-t, table.vp-t, table.st-t,
+  table.ent-t, table.vod-table, table.sx-t
+) thead th .rt-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.8;
+}
+
+/* Clean Sticky Column Right-Edge Separator Shadow (Normal scrollable view) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body[data-fz="2"] :is(#rr, .hz-wrap) table.rt :is(th, td):nth-child(2),
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body[data-fz="3"] :is(#rr, .hz-wrap) table.rt :is(th, td):nth-child(3),
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .st-root .st-ts.has-sno :is(th, td):nth-child(2),
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .st-root .st-te.has-age :is(th, td):nth-child(2) {
+  border-right: 1px solid var(--ds-border-strong);
+  box-shadow: 4px 0 8px -5px rgba(15, 23, 42, .12);
+}
+
+/* Accounting Double-Rule Total & Grand Total Rows (Signature Financial-Statement Treatment) */
+html:not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.rs, table.hz-t, table.vp-t, table.st-t,
+  table.ent-t, table.vod-table, table.sx-t
+) :is(tr.t, tr.itot, tr.vr-tot, tr.hz-tot, tfoot tr) > :is(td, th) {
+  background-color: var(--ds-tbl-tot-bg) !important;
+  color: var(--tx) !important;
+  font-weight: 700 !important;
+  border-top: 1.5px solid var(--ds-border-strong) !important;
+  border-bottom: 3px double var(--ds-border-strong) !important;
+}
+
+/* Preserve bold typography on totals even when custom Table Colour is active */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.rs, table.hz-t, table.vp-t, table.st-t,
+  table.ent-t, table.vod-table, table.sx-t
+) :is(tr.t, tr.itot, tr.vr-tot, tr.hz-tot, tfoot tr) > :is(td, th) {
+  font-weight: 700 !important;
+}
+
+/* Selected / Base-Case / Retirement Highlight Rows */
+html:not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.hz-t, table.vp-t
+) tbody tr:is(.sel, .agsel) > td {
+  background-color: var(--ds-accent-soft) !important;
+  font-weight: 600;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.rt, table.hz-t, table.vp-t
+) tbody tr:is(.sel, .agsel) > td:first-child {
+  box-shadow: inset 3px 0 0 var(--ds-accent);
+}
+
+/* Refined Column-Group Accent Bars (Annual Portfolio Projection) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #rr table.rt[data-aph] th.vr-g-y {
+  border-top: 2.5px solid var(--mu) !important;
+}
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #rr table.rt[data-aph] th.vr-g-h {
+  border-top: 2.5px solid var(--ds-accent) !important;
+}
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #rr table.rt[data-aph] th.vr-g-i {
+  border-top: 2.5px solid var(--ds-ok) !important;
+}
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #rr table.rt[data-aph] th.vr-g-b {
+  border-top: 2.5px solid var(--ds-warn) !important;
+}
+html:not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #rr table.rt[data-aph] .vr-gs,
+html:not([data-utcol="custom"])[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .st-root .st-t :is(th, td).st-sep {
+  border-left: 1.5px solid var(--ds-border-strong) !important;
+}
+
+/* Restrained Inline Accounting Tags (Today, Retired, Stress Outcome) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #rr table.rt[data-aph] .vr-tdy {
+  border-radius: var(--ds-r-sm) !important;
+  padding: 1px 6px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  background: var(--ds-surface-2) !important;
+  border-color: var(--ds-border-strong) !important;
+  color: var(--mu) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .st-root .st-ch {
+  border-radius: var(--ds-r-sm) !important;
+  padding: 2px 7px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.015em;
+}
+
+/* Semantic Positive / Negative Financial Figures (Light & Dark Contrast Safe) */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.hz-t, .hz-card
+) :is(.hz-income, .dz-o) {
+  color: var(--ds-ok) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.hz-t, .hz-card, table.st-t, .st-mcard
+) :is(.hz-expense, .dz-b, .neg) {
+  color: var(--ds-err) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  table.hz-t, .hz-card
+) .dz-w {
+  color: var(--ds-warn) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. STANDARDIZED EXPORT & VIEW ACTION CONTROLS (All Reports)
+   -------------------------------------------------------------------------- */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph2[data-rpx] > button,
+  #vp-pg .vp-h[data-rpx] button,
+  .st-root .st-scen-actions button,
+  .hyd .hyh .hyr button,
+  button#csv,
+  button#rp-max,
+  button#rp-pdf,
+  button#hy-max,
+  button#hy-pdf,
+  button#fh-max,
+  button#fh-pdf,
+  button.st-max-btn,
+  button.st-pdf-btn,
+  button.st-wreset-btn
+) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  border-radius: var(--ds-r-ctl) !important;
+  border: 1px solid var(--ds-border) !important;
+  background: var(--ds-surface) !important;
+  color: var(--tx) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+  cursor: pointer;
+}
+
+/* Preserve compact square icon buttons (.vr-ib) in report headers */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph2 button.vr-ib,
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body #m .rph2 button.vr-ib {
+  width: 34px !important;
+  min-width: 34px !important;
+  padding: 0 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .rph2[data-rpx] > button,
+  #vp-pg .vp-h[data-rpx] button,
+  .st-root .st-scen-actions button,
+  .hyd .hyh .hyr button,
+  button#csv,
+  button#rp-max,
+  button#hy-max,
+  button#fh-max,
+  button.st-max-btn,
+  button.st-wreset-btn
+):hover:not(:disabled) {
+  border-color: var(--ds-accent-border) !important;
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+}
+
+/* Standardized Export to PDF Action Emphasis */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button.rp-pdf,
+  button.hy-pdf,
+  button.fh-pdf,
+  button.st-pdf-btn
+) {
+  border-color: var(--ds-accent-border) !important;
+  background: var(--ds-accent-soft) !important;
+  color: var(--ds-accent) !important;
+  font-weight: 650 !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button.rp-pdf,
+  button.hy-pdf,
+  button.fh-pdf,
+  button.st-pdf-btn
+):hover:not(:disabled) {
+  background: var(--ds-accent) !important;
+  border-color: var(--ds-accent) !important;
+  color: var(--ds-accent-on) !important;
+}
+
+/* Active Maximized Toggle State */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  button#rp-max,
+  button#hy-max,
+  button#fh-max,
+  button.st-max-btn
+)[aria-pressed="true"] {
+  background: var(--ds-surface-3) !important;
+  border-color: var(--ds-border-strong) !important;
+  color: var(--tx) !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. MOBILE STATEMENT CARDS & RESPONSIVE REFINEMENTS
+   -------------------------------------------------------------------------- */
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .hz-card,
+  .st-mcard,
+  .ent-cards .vr-scd,
+  .vod-cards .vr-scd
+) {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-r-box) !important;
+  box-shadow: var(--ds-sh-xs) !important;
+}
+
+html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+  .hz-cr span:last-child,
+  .st-mkv b,
+  .vod-cards .vr-scd dd,
+  .vod-cards .vr-scd summary > em
+) {
+  font-variant-numeric: tabular-nums lining-nums !important;
+}
+
+@media (max-width: 720px) {
+  html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph {
+    padding: 13px 14px !important;
+  }
+
+  html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rph h1 {
+    font-size: 18px !important;
+  }
+
+  html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(.msds, .hz-fr, .st-root .msds) {
+    padding: 10px;
+  }
+
+  html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    .msd-b,
+    .st-root .msd-b,
+    .hz-fr select.hz-ph,
+    .vod-date,
+    .card .tb :is(input[type="search"], input[type="text"], select),
+    .st-root .st-tb-bar :is(input[type="search"], select)
+  ) {
+    min-height: 42px !important;
+    height: auto;
+  }
+
+  html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
+    .rph2[data-rpx] > button,
+    #vp-pg .vp-h[data-rpx] button,
+    .st-root .st-scen-actions button,
+    .hyd .hyh .hyr button
+  ) {
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+}
