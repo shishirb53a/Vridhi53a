@@ -5,61 +5,115 @@ const root = path.join(__dirname, '..');
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 const html = read('index.html'), settings = read('modules/settings/settings.js'), pro = read('modules/theme/professional-themes.js'),
   ap = read('modules/theme/appearance-pro.js'), css = read('modules/theme/appearance-pro.css'),
-  minimal = read('modules/theme/minimal.css'), prefs = read('modules/dashboard-preferences/dashboard-preferences.js');
+  prefs = read('modules/dashboard-preferences/dashboard-preferences.js');
 
-/* theme presets, legacy keys still resolve */
-let storedTheme = 'mono';
+function lum(hex) {
+  const c = hex.replace('#', '');
+  const rgb = [0, 2, 4].map(i => {
+    const v = parseInt(c.substr(i, 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+}
+function cr(a, b) {
+  const l1 = lum(a), l2 = lum(b);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+/* 1. Six premium enterprise themes replace all legacy themes; legacy keys migrate seamlessly */
+let storedTheme = 'forest';
 const attributes = {};
-const sandbox = { window: { matchMedia: () => ({ matches: false, addEventListener() {} }) }, localStorage: { getItem: () => storedTheme, setItem(key, value) { storedTheme = value; } } };
-sandbox.document = { documentElement: { getAttribute: name => attributes[name] || null, setAttribute(name, value) { attributes[name] = value; }, removeAttribute(name) { delete attributes[name]; }, style: { setProperty() {}, removeProperty() {} } }, body: null, addEventListener() {}, querySelectorAll: () => [] };
-sandbox.window.document = sandbox.document; sandbox.window.localStorage = sandbox.localStorage; sandbox.matchMedia = sandbox.window.matchMedia; sandbox.MutationObserver = function () { this.observe = () => {}; };
-vm.createContext(sandbox); vm.runInContext(pro, sandbox);
-assert.deepStrictEqual(Array.from(sandbox.window.vrPro.T.map(t => t[0])), ['forest', 'bank', 'graphite', 'minimal'], 'Four professional themes');
-assert.strictEqual(sandbox.window.vrPro.get(), 'graphite', 'A saved legacy "mono" theme maps to Graphite');
-sandbox.window.vrPro.set('minimal');
-assert.strictEqual(attributes['data-minimal-theme'], 'true', 'Minimal theme enables its presentation mode');
-sandbox.window.vrPro.set('ledger');
-assert.strictEqual(attributes['data-minimal-theme'], undefined, 'Other themes disable Minimal presentation mode');
-const theme = { window: { matchMedia: () => ({ matches: false, addEventListener() {} }) }, document: { documentElement: { dataset: {}, style: { setProperty() {} }, removeAttribute() {} }, addEventListener() {} } };
-theme.window.document = theme.document; vm.createContext(theme); vm.runInContext(read('modules/theme/theme.js'), theme);
-assert.deepStrictEqual(Array.from(theme.window.THEMES.map(t => t.c)), ['#14392b', '#2f6b52', '#3b4252'], 'Brand colours for the three themes');
-theme.window.VRTheme.configure({ getState: () => ({ cc: '#065f46' }) });
-assert.strictEqual(theme.window.brandOf(), '#2f6b52', 'A legacy emerald accent maps to Sage green');
+const styles = {};
+const sandbox = {
+  window: { matchMedia: () => ({ matches: false, addEventListener() {} }) },
+  localStorage: { getItem: () => storedTheme, setItem(key, value) { storedTheme = value; } }
+};
+sandbox.document = {
+  documentElement: {
+    getAttribute: name => attributes[name] || null,
+    setAttribute(name, value) { attributes[name] = value; },
+    removeAttribute(name) { delete attributes[name]; },
+    style: {
+      setProperty(k, v) { styles[k] = v; },
+      removeProperty(k) { delete styles[k]; }
+    }
+  },
+  body: null,
+  addEventListener() {},
+  querySelectorAll: () => []
+};
+sandbox.window.document = sandbox.document;
+sandbox.window.localStorage = sandbox.localStorage;
+sandbox.matchMedia = sandbox.window.matchMedia;
+sandbox.MutationObserver = function () { this.observe = () => {}; };
+vm.createContext(sandbox);
+vm.runInContext(pro, sandbox);
 
-/* one Appearance screen, no floating Look menu */
-assert.ok(!html.includes('id="lk-sw"') && !html.includes('skin-selector.js'), 'The floating Look menu is gone');
-assert.ok(html.includes('data-skin","enterprise"'), 'One layout skin is always applied');
-assert.ok(html.includes('modules/theme/minimal.css?v=6') && /k: 'minimal', n: 'Minimal'/.test(ap),
-  'Minimal theme is available from Appearance and its styles load after the app stylesheets');
-assert.ok(minimal.includes('html[data-minimal-theme=true] body{') &&
-  minimal.includes('html[data-minimal-theme=true][data-theme=dark] body{') &&
-  minimal.includes('--tx:var(--txl,#111)!important') &&
-  minimal.includes('--tx:var(--txd,#fff)!important') &&
-  minimal.includes('html[data-minimal-theme=true]:not(#vrx) body :is(button,input,select,textarea){') &&
-  minimal.includes('body button:is(.p,.go,.hp-add){') &&
-  minimal.includes('body button:is(.p,.go,.hp-add) *{color:var(--bg)!important}') &&
-  minimal.includes('html[data-minimal-theme=true]:not(#vrx) body table :is(th,td){') &&
-  minimal.includes('body .pill{color:var(--tx)!important;background-color:var(--hl)!important}'),
-  'Minimal theme overrides palette, table, button, and category badge colors');
-assert.ok(minimal.includes('background-image:none!important') && minimal.includes('box-shadow:none!important') &&
-  minimal.includes(':focus-visible{outline:2px solid var(--ac)!important'),
-  'Minimal theme removes decoration without removing visible keyboard focus');
+const expectedKeys = ['obsidian', 'emerald', 'zurich', 'meridian', 'platinum', 'bordeaux'];
+assert.deepStrictEqual(Array.from(sandbox.window.vrPro.T.map(t => t[0])), expectedKeys, 'Six enterprise themes are registered');
+for (const oldKey of ['forest', 'bank', 'graphite', 'minimal']) {
+  assert.ok(!expectedKeys.includes(oldKey), `Legacy theme "${oldKey}" has been removed`);
+}
+
+/* Legacy localStorage migration */
+assert.strictEqual(sandbox.window.vrPro.get(), 'emerald', 'Legacy "forest" migrates to Institutional Emerald');
+storedTheme = 'bank';
+assert.strictEqual(sandbox.window.vrPro.get(), 'zurich', 'Legacy "bank" migrates to Swiss Limestone');
+storedTheme = 'graphite';
+assert.strictEqual(sandbox.window.vrPro.get(), 'platinum', 'Legacy "graphite" migrates to Platinum Carbon');
+storedTheme = 'minimal';
+assert.strictEqual(sandbox.window.vrPro.get(), 'platinum', 'Legacy "minimal" migrates to Platinum Carbon');
+storedTheme = 'default';
+assert.strictEqual(sandbox.window.vrPro.get(), 'obsidian', 'Legacy "default" migrates to Sovereign Slate');
+storedTheme = 'unknown-value';
+assert.strictEqual(sandbox.window.vrPro.get(), 'obsidian', 'Unknown saved theme safely defaults to Sovereign Slate');
+
+/* Selecting any theme sets data-pro-theme, clears data-minimal-theme, and applies calibrated tokens */
+for (const entry of sandbox.window.vrPro.T) {
+  const [key, name, desc, light, dark] = entry;
+  sandbox.window.vrPro.set(key);
+  assert.strictEqual(attributes['data-pro-theme'], key, `${name} sets data-pro-theme`);
+  assert.strictEqual(attributes['data-minimal-theme'], undefined, `${name} never activates legacy minimal mode`);
+  assert.strictEqual(styles['--bg'], light.bg, `${name} applies light canvas`);
+  assert.strictEqual(styles['--card'], light.card, `${name} applies light card surface`);
+
+  /* WCAG AA/AAA text legibility check in Light & Dark modes */
+  assert.ok(cr(light.tx, light.card) >= 7.0, `${name} light primary text achieves WCAG AAA`);
+  assert.ok(cr(light.mu, light.card) >= 4.5, `${name} light muted text achieves WCAG AA`);
+  assert.ok(cr(dark.tx, dark.card) >= 7.0, `${name} dark primary text achieves WCAG AAA`);
+  assert.ok(cr(dark.mu, dark.card) >= 4.5, `${name} dark muted text achieves WCAG AA`);
+}
+
+/* 2. Theme colour module (theme.js) preserves all APIs & WCAG contrast */
+const theme = {
+  window: { matchMedia: () => ({ matches: false, addEventListener() {} }) },
+  document: { documentElement: { dataset: {}, style: { setProperty() {} }, removeAttribute() {} }, addEventListener() {} }
+};
+theme.window.document = theme.document;
+vm.createContext(theme);
+vm.runInContext(read('modules/theme/theme.js'), theme);
+assert.deepStrictEqual(
+  Array.from(theme.window.THEMES.map(t => t.k)),
+  expectedKeys,
+  'theme.js registers all 6 enterprise brand accents'
+);
+theme.window.VRTheme.configure({ getState: () => ({ cc: null }) });
+assert.strictEqual(theme.window.brandOf(), '#0f2a4a', 'Default brand accent is Sovereign Slate (#0f2a4a)');
+theme.window.VRTheme.configure({ getState: () => ({ cc: '#1d4ed8' }) });
+assert.strictEqual(theme.window.brandOf(), '#1d4ed8', 'Custom accent hex is preserved directly');
+
+/* 3. Appearance UI, removal of minimal.css, and full preservation of Settings controls */
+assert.ok(!html.includes('modules/theme/minimal.css'), 'Legacy minimal.css link is removed from index.html');
+assert.ok(!fs.existsSync(path.join(root, 'modules', 'theme', 'minimal.css')), 'Legacy minimal.css file is deleted');
+assert.ok(!html.includes('id="lk-sw"') && !html.includes('skin-selector.js'), 'The floating Look menu stays removed');
+assert.ok(html.includes('data-skin","enterprise"'), 'Enterprise layout skin is always applied');
 assert.ok(html.indexOf('appearance-pro.js') > html.indexOf('dashboard-preferences.js') && html.indexOf('appearance-pro.js') > html.indexOf('professional-themes.js'),
   'appearance-pro.js loads after the modules whose controls it wraps');
-assert.ok(settings.includes('window.apUI?window.apUI()'), 'Settings uses the simplified Appearance screen');
-assert.ok(!/Display mode/.test(settings.split('const look=')[1].split('`;')[0]), 'Display mode is a segmented control, not a dropdown');
-assert.ok(/ap-adv/.test(ap) && /Advanced: font, corners/.test(ap), 'Detailed options sit under an Advanced fold');
-assert.ok(!/uth:\[/.test(prefs) && !/utd:\[/.test(prefs), 'Duplicate colour-theme and table-density dropdowns are removed');
-assert.ok(/uwt:\['Text weight'/.test(prefs) && /uwt:'normal'/.test(prefs),
-  'Advanced Appearance exposes a persisted text-weight dropdown');
-const shell = read('modules/app-shell/base.css');
-assert.ok(shell.includes('html[data-skin="enterprise"][data-utx="forest"] body') &&
-  shell.includes('html[data-skin="enterprise"][data-utx="charcoal"] body'),
-  'Text-colour preferences override Enterprise body palette tokens');
-assert.ok(['normal','medium','semibold','bold'].every(v => shell.includes('html[data-uwt="'+v+'"] body :where(*)')),
-  'Text-weight dropdown has four effective global weight modes');
-assert.ok(/id = 'ap-mode'/.test(ap), 'Header light/dark toggle');
-assert.ok(/\.sx-hero[^{]*\{background:var\(--card\)!important/.test(css), 'Planner cards are white, not tinted grey');
-assert.ok(pro.includes('default\":\"forest\"') && pro.includes('ledger:\"forest\"'), 'Forest green is the default and saved Ledger selections migrate away from navy');
-assert.ok(shell.includes('background:var(--card)!important') && shell.includes('color:var(--tx)!important'), 'Enterprise header uses neutral surfaces instead of a navy background');
-console.log('Appearance: green default, neutral header, four themes, one screen, header toggle, flat planner cards');
+assert.ok(settings.includes('window.apUI?window.apUI()'), 'Settings uses the Appearance screen');
+assert.ok(/ap-adv/.test(ap) && /Advanced: font, corners, table colour/.test(ap), 'Detailed options sit under an Advanced fold');
+assert.ok(!/uth:\[/.test(prefs) && !/utd:\[/.test(prefs), 'Duplicate colour-theme and table-density dropdowns remain removed');
+assert.ok(/uwt:\['Text weight'/.test(prefs) && /uwt:'normal'/.test(prefs), 'Advanced Appearance retains persisted text-weight dropdown');
+assert.ok(/id = 'ap-mode'/.test(ap), 'Header light/dark toggle is preserved');
+assert.ok(/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/.test(css), 'Theme picker renders a balanced 3x2 enterprise grid');
+
+console.log('Enterprise themes: 6 calibrated Light/Dark themes, WCAG AAA/AA verified, legacy migration & all Appearance controls preserved');

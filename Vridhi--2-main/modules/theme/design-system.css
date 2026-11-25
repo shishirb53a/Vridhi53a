@@ -95,15 +95,16 @@
 /* Dark Mode Optical Calibration */
 html[data-theme="dark"]:not([data-minimal-theme="true"]),
 html[data-theme="dark"]:not([data-minimal-theme="true"]) body {
+  --ac: color-mix(in srgb, var(--acb, #0f2a4a) 52%, #ffffff);
   --ds-surface-2: color-mix(in srgb, var(--tx, #f1f5f9) 4.5%, var(--card, #111827));
   --ds-surface-3: color-mix(in srgb, var(--tx, #f1f5f9) 8.5%, var(--card, #111827));
-  --ds-surface-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
+  --ds-surface-hover: color-mix(in srgb, var(--ac, #60a5fa) 10%, var(--card, #111827));
   --ds-border: color-mix(in srgb, var(--tx, #f1f5f9) 12.5%, var(--card, #111827));
   --ds-border-strong: color-mix(in srgb, var(--tx, #f1f5f9) 22%, var(--card, #111827));
   --ds-border-subtle: color-mix(in srgb, var(--tx, #f1f5f9) 7.5%, var(--card, #111827));
-  --ds-accent-soft: color-mix(in srgb, var(--ac, #34d399) 14%, var(--card, #111827));
-  --ds-accent-mid: color-mix(in srgb, var(--ac, #34d399) 22%, var(--card, #111827));
-  --ds-accent-border: color-mix(in srgb, var(--ac, #34d399) 42%, var(--card, #111827));
+  --ds-accent-soft: color-mix(in srgb, var(--ac, #60a5fa) 14%, var(--card, #111827));
+  --ds-accent-mid: color-mix(in srgb, var(--ac, #60a5fa) 22%, var(--card, #111827));
+  --ds-accent-border: color-mix(in srgb, var(--ac, #60a5fa) 42%, var(--card, #111827));
   --ds-warn: #f59e0b;
   --ds-sh-xs: 0 1px 2px rgba(0, 0, 0, .28);
   --ds-sh-card: 0 1px 2px rgba(0, 0, 0, .32), 0 6px 16px -4px rgba(0, 0, 0, .26);
@@ -113,22 +114,23 @@ html[data-theme="dark"]:not([data-minimal-theme="true"]) body {
   --ds-tbl-hd-bg: color-mix(in srgb, var(--tx, #f1f5f9) 5.5%, var(--card, #111827));
   --ds-tbl-hd-tx: color-mix(in srgb, var(--tx, #f1f5f9) 82%, var(--card, #111827));
   --ds-tbl-stripe: color-mix(in srgb, var(--tx, #f1f5f9) 3.2%, var(--card, #111827));
-  --ds-tbl-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
-  --ds-tbl-tot-bg: color-mix(in srgb, var(--ac, #34d399) 11%, var(--card, #111827));
+  --ds-tbl-hover: color-mix(in srgb, var(--ac, #60a5fa) 10%, var(--card, #111827));
+  --ds-tbl-tot-bg: color-mix(in srgb, var(--ac, #60a5fa) 11%, var(--card, #111827));
 }
 
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]):not([data-minimal-theme="true"]),
   html:not([data-theme="light"]):not([data-minimal-theme="true"]) body {
+    --ac: color-mix(in srgb, var(--acb, #0f2a4a) 52%, #ffffff);
     --ds-surface-2: color-mix(in srgb, var(--tx, #f1f5f9) 4.5%, var(--card, #111827));
     --ds-surface-3: color-mix(in srgb, var(--tx, #f1f5f9) 8.5%, var(--card, #111827));
-    --ds-surface-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
+    --ds-surface-hover: color-mix(in srgb, var(--ac, #60a5fa) 10%, var(--card, #111827));
     --ds-border: color-mix(in srgb, var(--tx, #f1f5f9) 12.5%, var(--card, #111827));
     --ds-border-strong: color-mix(in srgb, var(--tx, #f1f5f9) 22%, var(--card, #111827));
     --ds-border-subtle: color-mix(in srgb, var(--tx, #f1f5f9) 7.5%, var(--card, #111827));
-    --ds-accent-soft: color-mix(in srgb, var(--ac, #34d399) 14%, var(--card, #111827));
-    --ds-accent-mid: color-mix(in srgb, var(--ac, #34d399) 22%, var(--card, #111827));
-    --ds-accent-border: color-mix(in srgb, var(--ac, #34d399) 42%, var(--card, #111827));
+    --ds-accent-soft: color-mix(in srgb, var(--ac, #60a5fa) 14%, var(--card, #111827));
+    --ds-accent-mid: color-mix(in srgb, var(--ac, #60a5fa) 22%, var(--card, #111827));
+    --ds-accent-border: color-mix(in srgb, var(--ac, #60a5fa) 42%, var(--card, #111827));
     --ds-warn: #f59e0b;
     --ds-sh-xs: 0 1px 2px rgba(0, 0, 0, .28);
     --ds-sh-card: 0 1px 2px rgba(0, 0, 0, .32), 0 6px 16px -4px rgba(0, 0, 0, .26);
@@ -138,8 +140,8 @@ html[data-theme="dark"]:not([data-minimal-theme="true"]) body {
     --ds-tbl-hd-bg: color-mix(in srgb, var(--tx, #f1f5f9) 5.5%, var(--card, #111827));
     --ds-tbl-hd-tx: color-mix(in srgb, var(--tx, #f1f5f9) 82%, var(--card, #111827));
     --ds-tbl-stripe: color-mix(in srgb, var(--tx, #f1f5f9) 3.2%, var(--card, #111827));
-    --ds-tbl-hover: color-mix(in srgb, var(--ac, #34d399) 10%, var(--card, #111827));
-    --ds-tbl-tot-bg: color-mix(in srgb, var(--ac, #34d399) 11%, var(--card, #111827));
+    --ds-tbl-hover: color-mix(in srgb, var(--ac, #60a5fa) 10%, var(--card, #111827));
+    --ds-tbl-tot-bg: color-mix(in srgb, var(--ac, #60a5fa) 11%, var(--card, #111827));
   }
 }
 

@@ -1,19 +1,66 @@
-/* Simplified Appearance: one place, four choices (Theme, Mode, Density, Text size); everything else sits under "Advanced".
-   Also adds a single light/dark toggle to the header. Depends on: professional-themes.js (vrPro), theme.js (THEMES, brandOf),
-   dashboard-preferences.js (vrLookSet / vrUISet) and the app globals S, save, theme, render, toast. */
+/* Enterprise Appearance Controls: Theme, Accent colour, Mode, Density, Text size, plus Advanced settings.
+   Maintains the header Light/Dark toggle and full compatibility with vrPro, VRTheme, dashboard-preferences,
+   Table Colour customisation, and app globals S, save, theme, render, toast. */
 (function () {
   var PRE = [
-    { k: 'forest', n: 'Forest green', d: 'Calm, premium green', cc: '#14392b', l: ['#f4f7f3', '#ffffff', '#dce7df', '#14392b'], x: ['#101b15', '#19271e', '#2c4033', '#8bc5a5'] },
-    { k: 'bank', n: 'Private bank', d: 'Warm ivory and green', cc: '#2f6b52', l: ['#f6f3ec', '#fffefb', '#e6dfd0', '#2f6b52'], x: ['#16130f', '#201c16', '#352f25', '#7fcfa8'] },
-    { k: 'graphite', n: 'Graphite', d: 'Charcoal with gold', cc: '#3b4252', l: ['#eef0f4', '#ffffff', '#dde1e8', '#3b4252'], x: ['#0f1319', '#171c24', '#2a313d', '#c9a24b'] },
-    { k: 'minimal', n: 'Minimal', d: 'Flat monochrome without shadows or gradients', cc: '#111111', l: ['#ffffff', '#ffffff', '#888888', '#111111'], x: ['#000000', '#000000', '#888888', '#ffffff'] }
+    {
+      k: 'obsidian',
+      n: 'Sovereign Slate',
+      d: 'Refined navy-slate clarity for institutional wealth',
+      cc: '#0f2a4a',
+      l: ['#f4f6f9', '#ffffff', '#dce3ec', '#0f2a4a', '#eef3fa'],
+      x: ['#090e18', '#111827', '#222e42', '#60a5fa', '#182338']
+    },
+    {
+      k: 'emerald',
+      n: 'Institutional Emerald',
+      d: 'Deep botanical emerald with calm mineral neutrals',
+      cc: '#0c543e',
+      l: ['#f3f7f5', '#ffffff', '#d7e3dd', '#0c543e', '#e9f4ef'],
+      x: ['#08120e', '#101d17', '#21362c', '#34d399', '#152920']
+    },
+    {
+      k: 'zurich',
+      n: 'Swiss Limestone',
+      d: 'Warm archival limestone with burnished bronze',
+      cc: '#7c4d12',
+      l: ['#f6f4f0', '#fdfcfa', '#e4dfd6', '#7c4d12', '#f4ece0'],
+      x: ['#12100e', '#1b1815', '#302a24', '#e0a952', '#262018']
+    },
+    {
+      k: 'meridian',
+      n: 'Meridian Cobalt',
+      d: 'Precision cool slate with crisp cobalt accents',
+      cc: '#1d4ed8',
+      l: ['#f5f7fb', '#ffffff', '#dfe6f2', '#1d4ed8', '#ebf1fe'],
+      x: ['#0a0f1c', '#121929', '#243047', '#60a5fa', '#192542']
+    },
+    {
+      k: 'platinum',
+      n: 'Platinum Carbon',
+      d: 'Architectural monochrome slate that lets numbers lead',
+      cc: '#1f2937',
+      l: ['#f3f4f6', '#ffffff', '#dfe2e8', '#1f2937', '#eceef2'],
+      x: ['#0c0e12', '#15181e', '#272c36', '#d1d5db', '#1e222b']
+    },
+    {
+      k: 'bordeaux',
+      n: 'Imperial Burgundy',
+      d: 'Heritage claret accent on soft alabaster surfaces',
+      cc: '#7f1d3a',
+      l: ['#f7f5f6', '#ffffff', '#e5dce0', '#7f1d3a', '#f6eaee'],
+      x: ['#130d10', '#1d1519', '#36262e', '#f47296', '#2b1b22']
+    }
   ];
   var MODES = [['light', 'Light'], ['system', 'System'], ['dark', 'Dark']];
   var DENS = [['cosy', 'Comfortable'], ['compact', 'Compact']];
   var SIZES = [['s', 'A\u2212'], ['m', 'A'], ['l', 'A+'], ['xl', 'A++']];
   var OLD = window.lookUI, d = document, root = d.documentElement;
 
-  function dark() { var a = root.getAttribute('data-theme'); return a === 'dark' || (!a && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); }
+  function dark() {
+    var a = root.getAttribute('data-theme');
+    return a === 'dark' || (!a && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  }
   var CHK = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>';
   function sec(title, desc, body) {
     return '<section class="ap-sec"><header class="ap-sh"><h3>' + title + '</h3>' + (desc ? '<p>' + desc + '</p>' : '') + '</header>' + body + '</section>';
@@ -23,34 +70,57 @@
       opts.map(function (o) { return '<button type="button" ' + attr + '="' + o[0] + '" aria-pressed="' + (o[0] === on) + '">' + o[1] + '</button>'; }).join('') + '</div></div>';
   }
   function cards() {
-    var cur = window.vrPro ? window.vrPro.get() : 'forest', dk = dark();
+    var cur = window.vrPro ? window.vrPro.get() : 'obsidian', dk = dark();
     return '<div class="ap-th" role="radiogroup" aria-label="Theme">' + PRE.map(function (p) {
       var c = dk ? p.x : p.l, on = p.k === cur;
-      return '<button type="button" class="ap-c" role="radio" aria-checked="' + on + '" data-ap-theme="' + p.k + '"><span class="ap-pv" style="background:' + c[0] + ';border-color:' + c[2] + '">' +
-        '<i class="ap-pb" style="background:' + c[3] + '"></i><span class="ap-pm"><b style="background:' + c[1] + ';border-color:' + c[2] + '"></b><b style="background:' + c[1] + ';border-color:' + c[2] + '"><u style="background:' + c[3] + '"></u></b></span></span>' +
-        '<span class="ap-nm">' + p.n + '</span><span class="ap-ds">' + p.d + '</span><span class="ap-ck" aria-hidden="true">' + CHK + '</span>' + (on ? '<span class="ap-sr">Selected</span>' : '') + '</button>';
+      return '<button type="button" class="ap-c" role="radio" aria-checked="' + on + '" data-ap-theme="' + p.k + '">' +
+        '<span class="ap-pv" style="background:' + c[0] + ';border-color:' + c[2] + '">' +
+          '<i class="ap-pb" style="background:' + c[1] + ';border-bottom:1px solid ' + c[2] + '">' +
+            '<em class="ap-pb-dot" style="background:' + c[3] + '"></em>' +
+            '<em class="ap-pb-line" style="background:' + c[2] + '"></em>' +
+          '</i>' +
+          '<span class="ap-pm">' +
+            '<b style="background:' + c[4] + ';border-color:' + c[2] + '"><s style="background:' + c[3] + '"></s></b>' +
+            '<b style="background:' + c[1] + ';border-color:' + c[2] + '"><u style="background:' + c[3] + '"></u><u class="ap-u2" style="background:' + c[2] + '"></u></b>' +
+          '</span>' +
+        '</span>' +
+        '<span class="ap-nm">' + p.n + '</span>' +
+        '<span class="ap-ds">' + p.d + '</span>' +
+        '<span class="ap-ck" aria-hidden="true">' + CHK + '</span>' +
+        (on ? '<span class="ap-sr">Selected</span>' : '') +
+      '</button>';
     }).join('') + '</div>';
   }
-  var SW = [['#14392b', 'Forest'], ['#2f6b52', 'Sage'], ['#1e3a5f', 'Navy'], ['#2563eb', 'Blue'], ['#4f46e5', 'Indigo'],
-    ['#7c3aed', 'Purple'], ['#be185d', 'Rose'], ['#c2410c', 'Orange'], ['#a16207', 'Amber'], ['#3b4252', 'Graphite']];
+  var SW = [
+    ['#0f2a4a', 'Sovereign Navy'],
+    ['#0c543e', 'Institutional Emerald'],
+    ['#7c4d12', 'Burnished Bronze'],
+    ['#1d4ed8', 'Meridian Cobalt'],
+    ['#1f2937', 'Platinum Carbon'],
+    ['#7f1d3a', 'Imperial Burgundy'],
+    ['#0f766e', 'Deep Teal'],
+    ['#4338ca', 'Royal Indigo'],
+    ['#5b21b6', 'Amethyst'],
+    ['#9a3412', 'Terracotta']
+  ];
   function accent() {
-    var cur = (window.brandOf ? window.brandOf() : '#14392b').toLowerCase(), pre = SW.some(function (s) { return s[0] === cur; });
+    var cur = (window.brandOf ? window.brandOf() : '#0f2a4a').toLowerCase(), pre = SW.some(function (s) { return s[0] === cur; });
     return '<div class="ap-sw" role="radiogroup" aria-label="Accent colour">' + SW.map(function (s) {
       return '<button type="button" class="ap-s" role="radio" aria-checked="' + (s[0] === cur) + '" aria-label="' + s[1] + '" title="' + s[1] + '" data-ap-cc="' + s[0] + '" style="--sw:' + s[0] + '">' + CHK + '</button>';
     }).join('') + '<label class="ap-cu' + (pre ? '' : ' on') + '" title="Pick any colour"><input type="color" id="ap-cc" value="' + cur + '" aria-label="Custom accent colour"><span>Custom</span><code id="ap-cc-v">' + cur + '</code></label></div>' +
-      '<p class="ap-note">Changes buttons, highlights and charts. Text colour is adjusted automatically so it stays readable.' + (root.hasAttribute('data-minimal-theme') ? ' The Minimal theme is monochrome, so pick another theme to see your colour.' : '') + '</p>';
+      '<p class="ap-note">Changes buttons, highlights and charts across every view and report. Text contrast adjusts automatically for light and dark modes.</p>';
   }
   window.apUI = function () {
     var ds = root.dataset, dens = ds.dens === 'compact' ? 'compact' : 'cosy', size = ds.size || 'm', mode = (window.S && S.theme) || 'system';
     return '<div class="ap">' +
-      sec('Theme', 'Surface colours for the whole app. Works with light, dark and your accent colour.', cards()) +
-      sec('Accent colour', 'Pick a preset or choose any colour.', accent()) +
-      sec('Display', 'How the app looks and how much fits on screen.',
+      sec('Enterprise Themes', 'Curated institutional palettes calibrated for light and dark modes. Pairs seamlessly with custom accent and table colours.', cards()) +
+      sec('Accent colour', 'Pick an institutional preset or choose any custom hex colour.', accent()) +
+      sec('Display', 'How the workspace looks and how much financial data fits on screen.',
         '<div class="ap-rows">' + seg('Mode', 'data-ap-mode', MODES, mode, 'Light, dark, or follow your device') +
         seg('Density', 'data-ap-dens', DENS, dens, 'Compact tightens table rows to show more data per screen') +
         seg('Text size', 'data-ap-size', SIZES, size, 'Scales text across the app') + '</div>') +
       '<details class="ap-adv"><summary>Advanced: font, corners, table colour, table lines, stripes, icons</summary>' + (OLD ? OLD() : '') + '</details>' +
-      '<div class="ap-ft"><span class="mu">Changes apply instantly.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
+      '<div class="ap-ft"><span class="mu">Changes apply instantly across all modules and reports.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
   };
   function setCC(hex, final) {
     S.cc = String(hex).toLowerCase();
@@ -79,13 +149,13 @@
     if (t.dataset.apDens) { var v = t.dataset.apDens; window.vrLookSet('dens', v); window.vrUISet('utd', v === 'compact' ? 'compact' : 'normal'); commit(); return; }
     if (t.dataset.apSize) { window.vrLookSet('size', t.dataset.apSize); commit(); return; }
     if (t.dataset.apReset) {
-      window.vrPro.set('forest'); S.cc = PRE[0].cc; S.theme = 'system';
+      window.vrPro.set('obsidian'); S.cc = PRE[0].cc; S.theme = 'system';
       if (window.vrLookReset) window.vrLookReset(); if (window.vrUIReset) window.vrUIReset();
       commit('Appearance reset'); return;
     }
   });
 
-  /* one light/dark toggle in the header (replaces the floating Look menu) */
+  /* one light/dark toggle in the header */
   var SUN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
   var MOON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
   function paint() {
@@ -100,6 +170,6 @@
   }
   mount();
   var r0 = window.render; if (typeof r0 === 'function') window.render = function () { var r = r0.apply(this, arguments); mount(); paint(); return r; };
-  try { new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) { }
-  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint); } catch (e) { }
+  try { new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint); } catch (e) {}
 })();

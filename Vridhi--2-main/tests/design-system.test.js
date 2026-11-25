@@ -22,20 +22,19 @@ test('index.html loads Plus Jakarta Sans and IBM Plex Mono Google Fonts', () => 
   assert.ok(html.includes('family=IBM+Plex+Mono'), 'IBM Plex Mono font link missing');
 });
 
-test('index.html loads design-system.css in the exact cascade slot (after reports-menu.css, before report-maximize.css & minimal.css)', () => {
+test('index.html loads design-system.css in the exact cascade slot (after reports-menu.css, before report-maximize.css) and removes legacy minimal.css', () => {
   const idxBase = html.indexOf('modules/app-shell/base.css');
   const idxAp = html.indexOf('modules/theme/appearance-pro.css');
   const idxRepMenu = html.indexOf('modules/app-shell/reports-menu.css');
   const idxDs = html.indexOf('modules/theme/design-system.css?v=1');
   const idxMax = html.indexOf('modules/report-maximize/report-maximize.css');
-  const idxMin = html.indexOf('modules/theme/minimal.css');
 
   assert.ok(idxDs > -1, 'design-system.css link missing in index.html');
   assert.ok(idxDs > idxBase, 'design-system.css must load after base.css');
   assert.ok(idxDs > idxAp, 'design-system.css must load after appearance-pro.css');
   assert.ok(idxDs > idxRepMenu, 'design-system.css must load after reports-menu.css');
   assert.ok(idxDs < idxMax, 'design-system.css must load before report-maximize.css');
-  assert.ok(idxDs < idxMin, 'design-system.css must load before minimal.css');
+  assert.strictEqual(html.indexOf('modules/theme/minimal.css'), -1, 'legacy minimal.css link must be removed');
 });
 
 test('design-system.css defines centralized tokens for typography, spacing, radii, shadows, motion, and dark mode', () => {

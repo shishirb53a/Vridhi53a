@@ -3,9 +3,12 @@
   var WHITE = '#ffffff';
   var BLACK = '#000000';
   var THEMES = [
-    { k: 'forest', n: 'Forest green', c: '#14392b', d: 'Calm forest green with a clean, premium finish.' },
-    { k: 'sage', n: 'Sage green', c: '#2f6b52', d: 'A softer green accent with a quiet, balanced feel.' },
-    { k: 'graphite', n: 'Graphite', c: '#3b4252', d: 'Charcoal with a gold accent. Lets the numbers lead.' }
+    { k: 'obsidian', n: 'Sovereign Slate', c: '#0f2a4a', d: 'Refined navy-slate clarity for institutional wealth.' },
+    { k: 'emerald', n: 'Institutional Emerald', c: '#0c543e', d: 'Deep botanical emerald with calm mineral neutrals.' },
+    { k: 'zurich', n: 'Swiss Limestone', c: '#7c4d12', d: 'Warm archival limestone with burnished bronze.' },
+    { k: 'meridian', n: 'Meridian Cobalt', c: '#1d4ed8', d: 'Precision cool slate with crisp cobalt accents.' },
+    { k: 'platinum', n: 'Platinum Carbon', c: '#1f2937', d: 'Architectural monochrome slate that lets numbers lead.' },
+    { k: 'bordeaux', n: 'Imperial Burgundy', c: '#7f1d3a', d: 'Heritage claret accent on soft alabaster surfaces.' }
   ];
 
   function channels(color) {
@@ -29,16 +32,6 @@
     return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   }
   function contrast(color) { return 1.05 / (luminance(color) + 0.05); }
-  function nearest(color) {
-    var rgb = channels(color), max = Math.max.apply(null, rgb), min = Math.min.apply(null, rgb);
-    var delta = max - min;
-    if (!/^#[0-9a-f]{6}$/i.test(color) || delta / 255 < 0.14) return THEMES[2].c;
-    var hue = max === rgb[0] ? ((rgb[1] - rgb[2]) / delta) % 6
-      : max === rgb[1] ? (rgb[2] - rgb[0]) / delta + 2
-        : (rgb[0] - rgb[1]) / delta + 4;
-    hue = (hue * 60 + 360) % 360;
-    return hue >= 75 && hue < 190 ? THEMES[1].c : THEMES[0].c;
-  }
   function state() { return app ? app.getState() : null; }
   function brand() {
     var current = state(), color = current && current.cc ? String(current.cc).toLowerCase() : null;
@@ -55,7 +48,7 @@
     var dark = root.dataset.theme === 'dark' ||
       (!root.dataset.theme && window.matchMedia &&
         window.matchMedia('(prefers-color-scheme: dark)').matches);
-    var color = dark ? mix(brand(), WHITE, 0.22) : brand();
+    var color = dark ? mix(brand(), WHITE, 0.28) : brand();
     var accessible = color, attempts = 0;
     while (contrast(accessible) < 4.5 && attempts++ < 30) accessible = mix(accessible, BLACK, 0.08);
     var on = (luminance(color) + 0.05) / 0.05 >= 1.05 / (luminance(color) + 0.05)
@@ -99,7 +92,7 @@
           '<i class="thf"><em></em></i></span><span class="thn">' + item.n +
           (active ? '<em class="tho">Selected</em>' : '') + '</span><span class="thd">' +
           item.d + '</span><span class="thr">Text contrast ' + contrast(item.c).toFixed(1) +
-          ':1 · AAA</span></button>';
+          ':1 · AA+</span></button>';
       }).join('') + '</div>';
   }
   function configure(api) {
