@@ -22,6 +22,7 @@
   const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const IC_MAX = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
   const IC_MIN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+  const IC_PDF = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>';
   const IC_CHEV = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
 
   const go = tab => { try { if (typeof UI !== "undefined" && typeof render === "function") { UI.tab = tab; render(); } } catch (e) { /* ignore */ } };
@@ -539,11 +540,12 @@
       const extraClass = (st.max ? " st-max" : "") + (cols.hasStart ? " st-wide-cols" : "");
       const hasCustomW = Object.keys(st.scenWidths).length > 0;
       const wResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-wreset${hasCustomW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
+      const pdfBtn = st.max ? `<button type="button" class="st-btn st-pdf-btn" data-st-pdf="scen" title="Export report to PDF" aria-label="Export to PDF">${IC_PDF}<span>Export to PDF</span></button>` : "";
       const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-max aria-pressed="${st.max}" title="${st.max ? "Exit full window (Esc)" : "Open full window"}">${st.max ? IC_MIN : IC_MAX}<span>${st.max ? "Restore" : "Maximize"}</span></button>`;
       const aboutTip = `Each scenario runs up to 70 years. Base Case matches the live Retirement Planner · Click a row to highlight it · Drag column header edges to resize (double-click to auto-fit) · Use Outcome, Scenarios, and Columns dropdowns to filter or customize columns.`;
       const sortOpts = SORT_OPTS.map(([k, lbl]) => `<option value="${k}"${st.sortKey === k ? " selected" : ""}>Sort: ${esc(lbl)}</option>`).join("");
       return `<div class="st-main"><div class="st-card st-scen-card${extraClass}">` +
-        `<div class="rph2 st-scen-head"><div class="rpt"><h2>How long does the corpus last under each condition?</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${wResetBtn}${maxBtn}</div></div>` +
+        `<div class="rph2 st-scen-head"><div class="rpt"><h2>How long does the corpus last under each condition?</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${wResetBtn}${pdfBtn}${maxBtn}</div></div>` +
         `<p class="st-note st-scen-sub" id="st-scen-sub">${esc(clientName)} · <span data-st-count>${rows.length} of 14 scenarios shown</span> · ${R.summary.fullPlan} of 14 cover the ${R.base.planYears}-year plan.</p>` +
         scenDrops(R) +
         `<div class="tb st-tb-bar"><input id="st-rq" type="search" placeholder="Search scenario, survival, age, amount…" aria-label="Search scenarios" value="${esc(st.rq)}"><select id="st-rsf" aria-label="Sort by">${sortOpts}</select><button type="button" id="st-rsd" aria-label="Toggle sort direction" title="Toggle sort direction">${st.sortDir > 0 ? "▲" : "▼"}</button></div>` +
@@ -700,6 +702,7 @@
       const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
       const hasEngW = Object.keys(st.engWidths).length > 0;
       const engWResetBtn = `<button type="button" class="st-btn st-wreset-btn" data-st-eng-wreset${hasEngW ? "" : " hidden"} title="Restore default column widths">Reset widths</button>`;
+      const engPdfBtn = st.engMax ? `<button type="button" class="st-btn st-pdf-btn" data-st-pdf="eng" title="Export report to PDF" aria-label="Export to PDF">${IC_PDF}<span>Export to PDF</span></button>` : "";
       const maxBtn = `<button type="button" class="st-btn st-max-btn" data-st-eng-max aria-pressed="${st.engMax}" title="${st.engMax ? "Exit full window (Esc)" : "Open full window"}">${st.engMax ? IC_MIN : IC_MAX}<span>${st.engMax ? "Restore" : "Maximize"}</span></button>`;
       const aboutTip = "Year-by-year closing balances for all 14 scenarios over 70 years. Use Outcome, Scenarios, and Columns dropdowns to pick columns, drag column edges to resize (double-click to auto-fit), click any header to sort, or click a row to highlight that year.";
       const sortOpts = [
@@ -712,7 +715,7 @@
       const activeSortKey = sortOpts.some(o => o[0] === st.engSortKey) ? st.engSortKey : "year";
       const sortOptHTML = sortOpts.map(([k, lbl]) => `<option value="${k}"${activeSortKey === k ? " selected" : ""}>Sort: ${esc(lbl)}</option>`).join("");
       return `<div class="st-main"><div class="st-card st-eng-card${st.engMax ? " st-max st-wide-cols" : ""}">` +
-        `<div class="rph2 st-scen-head"><div class="rpt"><h2>Year-by-year money balance for each scenario</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${engWResetBtn}${maxBtn}</div></div>` +
+        `<div class="rph2 st-scen-head"><div class="rpt"><h2>Year-by-year money balance for each scenario</h2>${infoBtn(aboutTip, "About this table")}</div><div class="st-scen-actions">${engWResetBtn}${engPdfBtn}${maxBtn}</div></div>` +
         `<p class="st-note st-scen-sub">${esc(clientName)} · <span data-st-eng-count>${rows.length} of ${R.engine.length} years shown</span> · Plan horizon: ${R.base.planYears} yrs (age ${R.base.age + R.base.planYears}) · Negative balance = money has run out.</p>` +
         engDrops(R) +
         `<div class="tb st-tb-bar"><input id="st-eng-q" type="search" placeholder="Search year, age, amount…" aria-label="Search calculation engine" value="${esc(st.engQ)}"><select id="st-eng-rsf" aria-label="Sort by">${sortOptHTML}</select><button type="button" id="st-eng-rsd" aria-label="Toggle sort direction" title="Toggle sort direction">${st.engSortDir > 0 ? "▲" : "▼"}</button></div>` +
@@ -975,6 +978,17 @@
       const engWResetBtn = e.target.closest("[data-st-eng-wreset]");
       if (engWResetBtn) { st.engWidths = {}; saveWidths(ENG_W_KEY, st.engWidths); updateEngBody(); return; }
       if (Date.now() < justResizedUntil && e.target.closest("th")) return;
+      const pdfBtn = e.target.closest("[data-st-pdf]");
+      if (pdfBtn) {
+        const mode = pdfBtn.getAttribute("data-st-pdf");
+        const card = pdfBtn.closest(".st-scen-card, .st-eng-card");
+        const clientName = (P.clients().find(c => c.id === st.client) || {}).name || "Active plan";
+        const title = mode === "eng" ? "Stress Test — Year-by-year money balance" : "Stress Test — Scenarios Report";
+        if (typeof window !== "undefined" && typeof window.vrExportReportPDF === "function") {
+          window.vrExportReportPDF(card, { title, client: clientName });
+        }
+        return;
+      }
       const maxBtn = e.target.closest("[data-st-max]");
       if (maxBtn) { st.msd = null; toggleMax(); return; }
       const engMaxBtn = e.target.closest("[data-st-eng-max]");

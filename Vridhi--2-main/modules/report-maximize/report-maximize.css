@@ -164,3 +164,74 @@ html body main#m.vr-rmax table.vr-fit-ultra td.l:last-child,
 html body main#m.vr-rmax table.vr-fit-ultra td.hz-w{
   max-width:125px!important;
 }
+
+/* Export to PDF button in maximized report views */
+html body .rp-pdf,
+html body .hy-pdf,
+html body .fh-pdf{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:34px;
+  height:34px;
+  padding:0 12px;
+  border:1px solid var(--bd);
+  border-radius:8px;
+  background:var(--card);
+  color:var(--tx);
+  font-size:12.5px;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+  flex:none;
+}
+html body .hy-pdf{min-height:36px;height:36px}
+html body .rp-pdf:hover,
+html body .hy-pdf:hover,
+html body .fh-pdf:hover{
+  border-color:var(--ac);
+  color:var(--ac);
+  background:color-mix(in srgb,var(--ac) 7%,var(--card));
+}
+html body .rp-pdf:focus-visible,
+html body .hy-pdf:focus-visible,
+html body .fh-pdf:focus-visible{
+  outline:2px solid var(--ac);
+  outline-offset:2px;
+}
+@media (max-width:560px){
+  html body .rp-pdf,
+  html body .hy-pdf,
+  html body .fh-pdf{padding:0 9px;font-size:12px}
+  html body .hy-pdf span,
+  html body .fh-pdf span{display:none}
+}
+
+/* Clean landscape print styling if user prints directly via browser Ctrl+P / Cmd+P */
+@media print{
+  @page{size:A4 landscape;margin:9mm}
+  html body header.hd,
+  html body footer.ft,
+  html body #bv,
+  html body .gpnav,
+  html body .rp2-nav,
+  html body #rp-max,
+  html body #rp-pdf,
+  html body #hy-max,
+  html body #hy-pdf,
+  html body #fh-max,
+  html body #fh-pdf,
+  html body .vr-ib,
+  html body .tb,
+  html body .msds,
+  html body .vr-aph .vr-ctl,
+  html body .st-scen-actions,
+  html body .st-tb-bar,
+  html body .st-bnav{display:none!important}
+  html body main#m.vr-rmax{position:static!important;inset:auto!important;padding:0!important;overflow:visible!important;background:#fff!important}
+  html body main#m.vr-rmax .card,
+  html body main#m.vr-rmax .vp-card{box-shadow:none!important;border:0!important;padding:0!important}
+  html body main#m.vr-rmax #rr.mw,
+  html body main#m.vr-rmax #hz-rows .hz-wrap,
+  html body main#m.vr-rmax #vpr .vp-tw{max-height:none!important;overflow:visible!important}
+}

@@ -220,4 +220,324 @@ hFallback.clickMax();
 assert.strictEqual(tf.tbl.style.transform, '', 'Restore clears fallback transform');
 assert.strictEqual(tf.wrap.style.height, '', 'Restore clears fallback wrapper height');
 
-console.log('  ok   report maximize fits all columns in 1-page view across all reports and restores cleanly');
+// 3. Export to PDF static wiring, security, and cross-report checks
+assert.ok(!/\bwindow\.open\s*\(|\bwindow\.alert\s*\(/.test(source), 'report-maximize.js avoids window.open and window.alert calls');
+assert.ok(css.includes('.rp-pdf') && css.includes('.hy-pdf') && css.includes('.fh-pdf') && css.includes('@media print'),
+  'report-maximize.css styles Export to PDF buttons and print layout');
+assert.ok(stressUI.includes('data-st-pdf="scen"') && stressUI.includes('data-st-pdf="eng"') && stressUI.includes('vrExportReportPDF'),
+  'Stress Test renders Export to PDF buttons in maximized views and delegates to vrExportReportPDF');
+assert.ok(appCore.includes('#rp-pdf') && appCore.includes('#hy-pdf') && appCore.includes('#fh-pdf') && appCore.includes('[data-st-pdf]'),
+  'app.js allowlists Export to PDF buttons for read-only users');
+
+// 4. Export to PDF behavioral harness: button lifecycle, sanitization, thead wrapping, and hidden iframe print
+function runPdfHarness() {
+  const listeners = {};
+  const stored = new Map([['vr-rep-max', '1']]);
+  const rafQueue = [];
+  const bodyChildren = [];
+  let windowOpenCalled = false;
+  let printCalled = 0;
+  let focusCalled = 0;
+  let writtenHtml = '';
+  let afterPrintCb = null;
+
+  function makeEl(tag) {
+    const el = {
+      tagName: String(tag || 'div').toUpperCase(),
+      id: '',
+      className: '',
+      type: '',
+      innerHTML: '',
+      textContent: '',
+      dataset: {},
+      style: makeStyle(),
+      classList: makeClassList(),
+      children: [],
+      attributes: [],
+      parentNode: null,
+      get firstChild() { return this.children[0] || null; },
+      get nextSibling() {
+        if (!this.parentNode) return null;
+        const idx = this.parentNode.children.indexOf(this);
+        return idx >= 0 ? this.parentNode.children[idx + 1] || null : null;
+      },
+      setAttribute(k, v) {
+        const existing = this.attributes.find(a => a.name === k);
+        if (existing) existing.value = String(v);
+        else this.attributes.push({ name: k, value: String(v) });
+      },
+      removeAttribute(k) {
+        this.attributes = this.attributes.filter(a => a.name !== k);
+      },
+      appendChild(child) {
+        if (child.parentNode && child.parentNode !== this) child.parentNode.removeChild(child);
+        child.parentNode = this;
+        this.children.push(child);
+        return child;
+      },
+      insertBefore(child, ref) {
+        if (child.parentNode) child.parentNode.removeChild(child);
+        child.parentNode = this;
+        const idx = ref ? this.children.indexOf(ref) : -1;
+        if (idx >= 0) this.children.splice(idx, 0, child);
+        else this.children.push(child);
+        return child;
+      },
+      removeChild(child) {
+        const idx = this.children.indexOf(child);
+        if (idx >= 0) this.children.splice(idx, 1);
+        child.parentNode = null;
+        return child;
+      },
+      remove() {
+        if (this.parentNode) this.parentNode.removeChild(this);
+      },
+      contains(node) {
+        return this === node || this.children.some(c => c.contains && c.contains(node));
+      }
+    };
+    return el;
+  }
+
+  const rpr = makeEl('div');
+  const titleEl = makeEl('h2');
+  titleEl.textContent = 'Annual Portfolio Projection <FY26>';
+
+  // Build a mock live table with a visible header row, a hidden .vr-skip row, a hidden cell, an onclick attr, and a script tag
+  function makeMockTable() {
+    let theadWrapped = false;
+    let removedRows = [];
+    let removedCells = [];
+    let removedTags = [];
+    let removedAttrs = [];
+
+    const hdrRow = {
+      tagName: 'TR',
+      classList: makeClassList(),
+      cells: [
+        { tagName: 'TH', classList: makeClassList(), style: makeStyle(), remove() { removedCells.push('h0'); } },
+        { tagName: 'TH', classList: makeClassList(), style: makeStyle(), hidden: true, remove() { removedCells.push('h1-hidden'); } }
+      ],
+      querySelector(s) { return s === 'th' ? this.cells[0] : null; },
+      remove() { removedRows.push('hdr'); }
+    };
+    const skipRow = {
+      tagName: 'TR',
+      classList: makeClassList(['vr-skip']),
+      cells: [],
+      remove() { removedRows.push('skip'); }
+    };
+    const dataRow = {
+      tagName: 'TR',
+      classList: makeClassList(),
+      cells: [
+        { tagName: 'TD', classList: makeClassList(), style: makeStyle(), remove() { removedCells.push('d0'); } },
+        { tagName: 'TD', classList: makeClassList(), style: makeStyle(), hidden: true, remove() { removedCells.push('d1-hidden'); } }
+      ],
+      remove() { removedRows.push('data'); }
+    };
+    const badScript = { remove() { removedTags.push('script'); } };
+    const clickableNode = {
+      attributes: [{ name: 'onclick', value: 'alert(1)' }, { name: 'class', value: 'ok' }],
+      removeAttribute(name) { removedAttrs.push(name); }
+    };
+
+    const cloneTbl = {
+      tagName: 'TABLE',
+      classList: makeClassList(['rt', 'vr-fit-tight']),
+      style: makeStyle(),
+      dataset: {},
+      children: [hdrRow, skipRow, dataRow],
+      get firstChild() { return this.children[0] || null; },
+      insertBefore(node) { if (node.tagName === 'THEAD') theadWrapped = true; this.children.unshift(node); },
+      appendChild(node) { if (node.tagName === 'THEAD') theadWrapped = true; this.children.push(node); },
+      querySelector(sel) {
+        if (sel === 'thead') return null;
+        if (sel === 'tr') return hdrRow;
+        return null;
+      },
+      querySelectorAll(sel) {
+        if (sel === 'tr') return [hdrRow, skipRow, dataRow];
+        if (sel.includes('script')) return [badScript];
+        if (sel === '*') return [clickableNode];
+        if (sel === 'th button') return [];
+        return [];
+      },
+      get outerHTML() {
+        return '<table class="rt">' + (theadWrapped ? '<thead><tr><th>Year</th></tr></thead>' : '') + '<tbody><tr><td>2026</td></tr></tbody></table>';
+      }
+    };
+
+    const liveTbl = {
+      tagName: 'TABLE',
+      parentElement: { clientWidth: 1200, scrollLeft: 0, style: makeStyle(), dataset: {} },
+      classList: makeClassList(['rt']),
+      style: makeStyle(),
+      dataset: {},
+      scrollWidth: 900,
+      offsetWidth: 900,
+      querySelectorAll(sel) { return sel === 'tr' ? [hdrRow, skipRow, dataRow] : []; },
+      cloneNode() { return cloneTbl; }
+    };
+
+    return {
+      liveTbl,
+      stats: () => ({ theadWrapped, removedRows, removedCells, removedTags, removedAttrs })
+    };
+  }
+
+  const mockTbl = makeMockTable();
+  const main = {
+    id: 'm',
+    classList: makeClassList(),
+    style: makeStyle(),
+    querySelector(sel) {
+      if (sel === '[data-rpx]') return rpr;
+      if (sel.includes('[data-rpx] h2')) return titleEl;
+      return null;
+    },
+    querySelectorAll(sel) {
+      if (sel.includes('table.rt')) return [mockTbl.liveTbl];
+      return [];
+    }
+  };
+
+  const doc = {
+    body: {
+      appendChild(child) {
+        child.parentNode = this;
+        bodyChildren.push(child);
+        return child;
+      },
+      removeChild(child) {
+        const idx = bodyChildren.indexOf(child);
+        if (idx >= 0) bodyChildren.splice(idx, 1);
+        child.parentNode = null;
+      }
+    },
+    addEventListener(name, cb) { listeners[name] = cb; },
+    createElement(tag) {
+      const el = makeEl(tag);
+      if (String(tag).toLowerCase() === 'iframe') {
+        const frameDoc = {
+          open() {},
+          write(s) { writtenHtml = s; },
+          close() {}
+        };
+        const frameWin = {
+          document: frameDoc,
+          addEventListener(ev, cb) { if (ev === 'afterprint') afterPrintCb = cb; },
+          focus() { focusCalled++; },
+          print() { printCalled++; }
+        };
+        el.contentWindow = frameWin;
+        el.contentDocument = frameDoc;
+      }
+      return el;
+    },
+    getElementById(id) {
+      if (id === 'm') return main;
+      const inRpr = rpr.children.find(c => c.id === id);
+      if (inRpr) return inRpr;
+      return bodyChildren.find(c => c.id === id) || null;
+    },
+    querySelector() { return null; }
+  };
+
+  const win = {
+    addEventListener() {},
+    gppActiveName() { return 'Asha & <script>alert(1)</script>'; },
+    open() { windowOpenCalled = true; }
+  };
+
+  const context = {
+    document: doc,
+    window: win,
+    CSS: { supports: () => true },
+    MutationObserver: class { observe() {} },
+    localStorage: {
+      getItem(k) { return stored.has(k) ? stored.get(k) : null; },
+      setItem(k, v) { stored.set(k, v); }
+    },
+    getComputedStyle() {
+      return {
+        backgroundColor: 'rgb(244, 247, 251)',
+        display: 'table',
+        getPropertyValue(prop) { return prop === '--acl' ? '#1b4d3e' : ''; }
+      };
+    },
+    requestAnimationFrame(cb) { rafQueue.push(cb); return rafQueue.length; },
+    setTimeout() { return 1; },
+    clearTimeout() {}
+  };
+
+  vm.createContext(context);
+  vm.runInContext(source, context);
+  while (rafQueue.length) rafQueue.shift()();
+
+  return {
+    rpr,
+    win,
+    bodyChildren,
+    mockTbl,
+    getState: () => ({ windowOpenCalled, printCalled, focusCalled, writtenHtml, afterPrintCb }),
+    flushRaf() { while (rafQueue.length) rafQueue.shift()(); },
+    click(id) {
+      const btn = { id };
+      listeners.click({
+        target: { closest: sel => sel.includes(id) ? btn : null },
+        preventDefault() {},
+        stopPropagation() {}
+      });
+    }
+  };
+}
+
+const pdfH = runPdfHarness();
+// Button appears before #rp-max when maximized
+assert.deepStrictEqual(pdfH.rpr.children.map(c => c.id), ['rp-pdf', 'rp-max'],
+  'Maximized report renders Export to PDF button immediately before Restore button');
+assert.ok(pdfH.rpr.children[0].innerHTML.includes('Export to PDF'), 'Export to PDF button has visible label');
+
+// Clicking Export to PDF builds a sanitized landscape A4 document and prints via hidden iframe
+pdfH.click('rp-pdf');
+pdfH.flushRaf();
+const pdfState = pdfH.getState();
+const tblStats = pdfH.mockTbl.stats();
+assert.strictEqual(pdfState.windowOpenCalled, false, 'PDF export never calls window.open');
+assert.strictEqual(pdfState.focusCalled, 1, 'PDF export focuses hidden print iframe');
+assert.strictEqual(pdfState.printCalled, 1, 'PDF export triggers iframe contentWindow.print()');
+assert.strictEqual(pdfH.bodyChildren.some(c => c.id === 'vr-pdf-frame'), true, 'Hidden print iframe #vr-pdf-frame is attached');
+assert.ok(pdfState.writtenHtml.includes('@page{size:A4 landscape;margin:9mm}'), 'Printable HTML specifies A4 landscape page size');
+assert.ok(pdfState.writtenHtml.includes('Annual Portfolio Projection &lt;FY26&gt;'), 'Report title is HTML-escaped');
+assert.ok(pdfState.writtenHtml.includes('Asha &amp; &lt;script&gt;alert(1)&lt;/script&gt;'), 'Client name is HTML-escaped');
+assert.ok(!pdfState.writtenHtml.includes('<script>alert(1)</script>'), 'Unescaped script injection never appears in print HTML');
+assert.ok(pdfState.writtenHtml.includes('--ac:#1b4d3e'), 'Validated theme accent color is applied');
+assert.ok(pdfState.writtenHtml.includes('<thead><tr><th>Year</th></tr></thead>'), 'Header row is wrapped in <thead> for page repetition');
+assert.strictEqual(tblStats.theadWrapped, true, 'clonePrintableTable promotes header row into <thead>');
+assert.deepStrictEqual(tblStats.removedRows, ['skip'], 'Hidden .vr-skip rows are omitted from PDF');
+assert.deepStrictEqual(tblStats.removedCells, ['d1-hidden', 'h1-hidden'], 'Hidden columns/cells are omitted from PDF');
+assert.deepStrictEqual(tblStats.removedTags, ['script'], 'Embedded script tags are stripped from cloned report');
+assert.deepStrictEqual(tblStats.removedAttrs, ['onclick'], 'Inline event handler attributes are stripped');
+
+// afterprint cleans up the hidden iframe
+assert.strictEqual(typeof pdfState.afterPrintCb, 'function', 'afterprint cleanup listener is registered');
+pdfState.afterPrintCb();
+assert.strictEqual(pdfH.bodyChildren.some(c => c.id === 'vr-pdf-frame'), false, 'Hidden print iframe is removed after printing');
+
+// buildPrintDocument rejects unsafe accent strings
+const safeDoc = pdfH.win.__vrPdfBuilder.buildPrintDocument({
+  title: 'Test',
+  accent: 'red;background:url(javascript:alert(1))',
+  bodyHtml: '<table></table>',
+  isTable: true
+});
+assert.ok(safeDoc.includes('--ac:#14392b'), 'Invalid CSS accent falls back to safe default hex color');
+
+// Restoring hides/removes the Export to PDF button; maximizing brings it back
+pdfH.click('rp-max');
+assert.deepStrictEqual(pdfH.rpr.children.map(c => c.id), ['rp-max'], 'Restoring report removes Export to PDF button');
+pdfH.click('rp-max');
+assert.deepStrictEqual(pdfH.rpr.children.map(c => c.id), ['rp-pdf', 'rp-max'], 'Re-maximizing restores Export to PDF button');
+
+console.log('  ok   report maximize fits all columns in 1-page view and exports clean A4 landscape PDFs across all reports');
