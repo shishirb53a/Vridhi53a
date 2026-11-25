@@ -32,21 +32,51 @@
     return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   }
   function contrast(color) { return 1.05 / (luminance(color) + 0.05); }
+  var MODE_KEY = 'vr-theme-mode';
+  var CC_KEY = 'vr-accent-cc';
+  function readStore(key) {
+    try { return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null; } catch (e) { return null; }
+  }
+  function writeStore(key, value) {
+    try {
+      if (typeof localStorage === 'undefined') return;
+      if (value == null || value === '') localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch (e) {}
+  }
+  function proAccent() {
+    var k = readStore('vr-pro');
+    if (window.vrPro && typeof window.vrPro.get === 'function') {
+      try { k = window.vrPro.get(); } catch (e) {}
+    }
+    if (k) {
+      var match = THEMES.filter(function (item) { return item.k === k; })[0];
+      if (match) return match.c;
+    }
+    return THEMES[0].c;
+  }
   function state() { return app ? app.getState() : null; }
   function brand() {
-    var current = state(), color = current && current.cc ? String(current.cc).toLowerCase() : null;
-    /* any valid #rrggbb is allowed (custom accent); applyColor() keeps text contrast accessible */
-    return color && /^#[0-9a-f]{6}$/.test(color) ? color : THEMES[0].c;
+    var current = state();
+    var color = current && current.cc ? String(current.cc).toLowerCase() : null;
+    if (color && /^#[0-9a-f]{6}$/.test(color)) return color;
+    var saved = readStore(CC_KEY);
+    if (saved && /^#[0-9a-f]{6}$/i.test(saved)) return saved.toLowerCase();
+    return proAccent();
   }
   function contrastAgainst(color) {
     return Math.max(contrast(color), (luminance(color) + 0.05) / 0.05);
   }
   function applyColor() {
-    var current = state();
-    if (!current) return;
     var root = document.documentElement;
-    var dark = root.dataset.theme === 'dark' ||
-      (!root.dataset.theme && window.matchMedia &&
+    if (!root || !root.style) return;
+    var current = state();
+    if (current && current.cc && /^#[0-9a-f]{6}$/i.test(String(current.cc))) {
+      writeStore(CC_KEY, String(current.cc).toLowerCase());
+    }
+    var modeAttr = root.dataset && root.dataset.theme;
+    var dark = modeAttr === 'dark' ||
+      (!modeAttr && window.matchMedia &&
         window.matchMedia('(prefers-color-scheme: dark)').matches);
     var color = dark ? mix(brand(), WHITE, 0.28) : brand();
     var accessible = color, attempts = 0;
@@ -72,12 +102,29 @@
     };
     Object.keys(values).forEach(function (key) { root.style.setProperty(key, values[key]); });
   }
+  function applyModeValue(mode) {
+    var root = document.documentElement;
+    if (!root) return;
+    if (mode === 'light' || mode === 'dark') {
+      root.dataset.theme = mode;
+      writeStore(MODE_KEY, mode);
+    } else {
+      root.removeAttribute('data-theme');
+      writeStore(MODE_KEY, 'system');
+    }
+  }
   function applyTheme() {
     var current = state();
-    if (!current) return;
+    if (!current) {
+      var savedMode = readStore(MODE_KEY);
+      if (savedMode === 'light' || savedMode === 'dark') document.documentElement.dataset.theme = savedMode;
+      else if (savedMode === 'system') document.documentElement.removeAttribute('data-theme');
+      applyColor();
+      return;
+    }
     document.documentElement.dataset.pal = current.palette || 'yellow';
-    if (current.theme === 'system') document.documentElement.removeAttribute('data-theme');
-    else document.documentElement.dataset.theme = current.theme;
+    applyModeValue(current.theme || 'system');
+    if (current.cc && /^#[0-9a-f]{6}$/i.test(String(current.cc))) writeStore(CC_KEY, String(current.cc).toLowerCase());
     applyColor();
   }
   function picker() {
@@ -97,7 +144,18 @@
   }
   function configure(api) {
     app = api;
-    applyColor();
+    var current = state();
+    if (current) {
+      var savedMode = readStore(MODE_KEY);
+      if ((!current.theme || current.theme === 'system') && (savedMode === 'light' || savedMode === 'dark')) {
+        current.theme = savedMode;
+      }
+      var savedCC = readStore(CC_KEY);
+      if (!current.cc && savedCC && /^#[0-9a-f]{6}$/i.test(savedCC)) {
+        current.cc = savedCC.toLowerCase();
+      }
+    }
+    applyTheme();
     if (window.matchMedia) {
       var query = window.matchMedia('(prefers-color-scheme: dark)');
       if (query && typeof query.addEventListener === 'function') {
@@ -111,6 +169,16 @@
   window.applyCC = applyColor;
   window.ccUI = picker;
   window.VRTheme = { configure: configure, apply: applyTheme };
+  /* Hydrate theme tokens immediately so the sign-in screen reflects the active theme before login */
+  applyTheme();
+  try {
+    if (typeof MutationObserver !== 'undefined') {
+      new MutationObserver(applyColor).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme', 'data-pro-theme']
+      });
+    }
+  } catch (e) {}
   document.addEventListener('click', function (event) {
     var button = event.target.closest && event.target.closest('[data-cc],[data-hc]');
     if (!button || button.disabled || !app) return;
@@ -121,6 +189,7 @@
     } else {
       var color = button.dataset.cc;
       current.cc = color === 'auto' ? null : color;
+      writeStore(CC_KEY, current.cc || '');
       var selected = THEMES.filter(function (item) { return item.c === color; })[0];
       if (selected) app.toast(selected.n + ' theme applied');
     }

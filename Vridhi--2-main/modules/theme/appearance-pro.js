@@ -126,11 +126,18 @@
       '<details class="ap-adv"><summary>Advanced: font, corners, table colour, table lines, stripes, icons</summary>' + (OLD ? OLD() : '') + '</details>' +
       '<div class="ap-ft"><span class="mu">Changes apply instantly across all modules and reports.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
   };
+  function savePref(k, v) {
+    try {
+      if (v == null || v === '') localStorage.removeItem(k);
+      else localStorage.setItem(k, v);
+    } catch (e) {}
+  }
   function setCC(hex, final) {
     var valid = safeHex(hex, '');
     if (!valid) return;
-    S.cc = valid;
-    if (final) commit('Accent colour applied'); else { try { theme(); } catch (x) { } }
+    if (window.S) S.cc = valid;
+    savePref('vr-accent-cc', valid);
+    if (final) commit('Accent colour applied'); else { try { theme(); } catch (x) { if (window.applyCC) window.applyCC(); } }
   }
   d.addEventListener('input', function (e) {
     if (e.target.id !== 'ap-cc') return;
@@ -142,20 +149,57 @@
   d.addEventListener('toggle', function (e) { if (e.target.classList && e.target.classList.contains('ap-adv')) window.__apOpen = e.target.open; }, true);
   function reopen() { var a = d.querySelector('.ap-adv'); if (a && window.__apOpen) a.open = true; }
 
-  function commit(msg) { try { save(); theme(); if (window.vrTableColor) window.vrTableColor.apply(); render(); } catch (e) { } reopen(); if (msg && window.toast) toast(msg); }
-  d.addEventListener('click', function (e) {
-    var t = e.target.closest && e.target.closest('[data-ap-theme],[data-ap-mode],[data-ap-dens],[data-ap-size],[data-ap-reset],#ap-mode');
-    if (!t) return;
-    if (t.id === 'ap-mode') { S.theme = dark() ? 'light' : 'dark'; try { save(); theme(); if (window.vrTableColor) window.vrTableColor.apply(); } catch (x) { } paint(); return; }
-    if (t.dataset.apTheme) {
-      var p = PRE.filter(function (x) { return x.k === t.dataset.apTheme; })[0];
-      if (!p) return; window.vrPro.set(p.k); S.cc = p.cc; commit(p.n + ' theme applied'); return;
+  function commit(msg) { try { save(); theme(); if (window.vrTableColor) window.vrTableColor.apply(); render(); } catch (e) { try { if (window.VRTheme) window.VRTheme.apply(); } catch (x) {} } reopen(); paintLoginBar(); if (msg && window.toast) toast(msg); }
+  function applyModeToggle() {
+    var next = dark() ? 'light' : 'dark';
+    savePref('vr-theme-mode', next);
+    if (window.S) S.theme = next;
+    root.setAttribute('data-theme', next);
+    try {
+      if (typeof save === 'function' && window.S && !root.classList.contains('lk')) save();
+      if (typeof theme === 'function') theme();
+      else if (window.VRTheme) window.VRTheme.apply();
+      if (window.vrTableColor) window.vrTableColor.apply();
+    } catch (x) {}
+    paint();
+    paintLoginBar();
+  }
+  function applyThemePick(key, quiet) {
+    var p = PRE.filter(function (x) { return x.k === key; })[0];
+    if (!p) return;
+    if (window.vrPro) window.vrPro.set(p.k);
+    savePref('vr-accent-cc', p.cc);
+    if (window.S) S.cc = p.cc;
+    if (quiet || root.classList.contains('lk')) {
+      try {
+        if (typeof theme === 'function') theme();
+        else if (window.VRTheme) window.VRTheme.apply();
+        if (window.vrTableColor) window.vrTableColor.apply();
+      } catch (x) {}
+      paintLoginBar();
+      return;
     }
-    if (t.dataset.apMode) { S.theme = t.dataset.apMode; commit(); return; }
+    commit(p.n + ' theme applied');
+  }
+  d.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-ap-theme],[data-ap-mode],[data-ap-dens],[data-ap-size],[data-ap-reset],#ap-mode,[data-lg-theme],#lg-thmode');
+    if (!t) return;
+    if (t.id === 'ap-mode' || t.id === 'lg-thmode') { applyModeToggle(); return; }
+    if (t.dataset.lgTheme) { applyThemePick(t.dataset.lgTheme, true); return; }
+    if (t.dataset.apTheme) { applyThemePick(t.dataset.apTheme, false); return; }
+    if (t.dataset.apMode) {
+      savePref('vr-theme-mode', t.dataset.apMode);
+      if (window.S) S.theme = t.dataset.apMode;
+      commit();
+      return;
+    }
     if (t.dataset.apDens) { var v = t.dataset.apDens; window.vrLookSet('dens', v); window.vrUISet('utd', v === 'compact' ? 'compact' : 'normal'); commit(); return; }
     if (t.dataset.apSize) { window.vrLookSet('size', t.dataset.apSize); commit(); return; }
     if (t.dataset.apReset) {
-      window.vrPro.set('obsidian'); S.cc = PRE[0].cc; S.theme = 'system';
+      window.vrPro.set('obsidian');
+      savePref('vr-accent-cc', PRE[0].cc);
+      savePref('vr-theme-mode', 'system');
+      if (window.S) { S.cc = PRE[0].cc; S.theme = 'system'; }
       if (window.vrLookReset) window.vrLookReset(); if (window.vrUIReset) window.vrUIReset();
       commit('Appearance reset'); return;
     }
@@ -169,13 +213,60 @@
     var dk = dark(); b.innerHTML = dk ? SUN : MOON;
     b.setAttribute('aria-label', dk ? 'Switch to light mode' : 'Switch to dark mode'); b.title = b.getAttribute('aria-label');
   }
+  function paintLoginBar() {
+    var bar = d.getElementById('lg-thbar'); if (!bar) return;
+    var cur = window.vrPro ? window.vrPro.get() : 'obsidian', dk = dark();
+    bar.querySelectorAll('[data-lg-theme]').forEach(function (btn) {
+      var p = PRE.filter(function (x) { return x.k === btn.dataset.lgTheme; })[0];
+      btn.setAttribute('aria-checked', String(btn.dataset.lgTheme === cur));
+      if (p) btn.style.setProperty('--sw', dk ? p.x[3] : p.l[3]);
+    });
+    var mb = d.getElementById('lg-thmode');
+    if (mb) {
+      mb.innerHTML = dk ? SUN : MOON;
+      var lbl = dk ? 'Switch to light mode' : 'Switch to dark mode';
+      mb.setAttribute('aria-label', lbl);
+      mb.title = lbl;
+    }
+  }
+  function mountLoginBar() {
+    var lg = d.getElementById('lg'); if (!lg || d.getElementById('lg-thbar')) return;
+    var bar = d.createElement('div');
+    bar.id = 'lg-thbar';
+    bar.className = 'lg-thbar';
+    var dots = d.createElement('div');
+    dots.className = 'lg-thdots';
+    dots.setAttribute('role', 'radiogroup');
+    dots.setAttribute('aria-label', 'Theme');
+    PRE.forEach(function (p) {
+      var b = d.createElement('button');
+      b.type = 'button';
+      b.className = 'lg-thdot';
+      b.setAttribute('role', 'radio');
+      b.dataset.lgTheme = p.k;
+      b.title = p.n;
+      b.setAttribute('aria-label', p.n + ' theme');
+      dots.appendChild(b);
+    });
+    var sep = d.createElement('span');
+    sep.className = 'lg-thsep';
+    sep.setAttribute('aria-hidden', 'true');
+    var mb = d.createElement('button');
+    mb.type = 'button';
+    mb.id = 'lg-thmode';
+    mb.className = 'lg-thmode';
+    bar.append(dots, sep, mb);
+    lg.insertBefore(bar, lg.firstChild);
+    paintLoginBar();
+  }
   function mount() {
     var so = d.getElementById('so'); if (!so || d.getElementById('ap-mode')) return;
     var b = d.createElement('button'); b.type = 'button'; b.id = 'ap-mode'; b.className = 'ap-mode';
     so.parentNode.insertBefore(b, so); paint();
   }
   mount();
-  var r0 = window.render; if (typeof r0 === 'function') window.render = function () { var r = r0.apply(this, arguments); mount(); paint(); return r; };
-  try { new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
-  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint); } catch (e) {}
+  mountLoginBar();
+  var r0 = window.render; if (typeof r0 === 'function') window.render = function () { var r = r0.apply(this, arguments); mount(); mountLoginBar(); paint(); paintLoginBar(); return r; };
+  try { new MutationObserver(function () { paint(); paintLoginBar(); }).observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-pro-theme'] }); } catch (e) {}
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { paint(); paintLoginBar(); }); } catch (e) {}
 })();
