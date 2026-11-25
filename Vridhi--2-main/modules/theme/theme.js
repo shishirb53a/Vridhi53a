@@ -119,12 +119,14 @@
       var savedMode = readStore(MODE_KEY);
       if (savedMode === 'light' || savedMode === 'dark') document.documentElement.dataset.theme = savedMode;
       else if (savedMode === 'system') document.documentElement.removeAttribute('data-theme');
+      if (window.vrPro && typeof window.vrPro.apply === 'function') window.vrPro.apply();
       applyColor();
       return;
     }
     document.documentElement.dataset.pal = current.palette || 'yellow';
     applyModeValue(current.theme || 'system');
     if (current.cc && /^#[0-9a-f]{6}$/i.test(String(current.cc))) writeStore(CC_KEY, String(current.cc).toLowerCase());
+    if (window.vrPro && typeof window.vrPro.apply === 'function') window.vrPro.apply();
     applyColor();
   }
   function picker() {
@@ -147,11 +149,11 @@
     var current = state();
     if (current) {
       var savedMode = readStore(MODE_KEY);
-      if ((!current.theme || current.theme === 'system') && (savedMode === 'light' || savedMode === 'dark')) {
+      if (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system') {
         current.theme = savedMode;
       }
       var savedCC = readStore(CC_KEY);
-      if (!current.cc && savedCC && /^#[0-9a-f]{6}$/i.test(savedCC)) {
+      if (savedCC && /^#[0-9a-f]{6}$/i.test(savedCC)) {
         current.cc = savedCC.toLowerCase();
       }
     }

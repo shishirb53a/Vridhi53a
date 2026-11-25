@@ -167,6 +167,7 @@
   window.vrPro = {
     T: T,
     get: get,
+    apply: apply,
     set: function (k) {
       var next = resolve(k);
       try { localStorage.setItem(K, next); } catch (e) {}

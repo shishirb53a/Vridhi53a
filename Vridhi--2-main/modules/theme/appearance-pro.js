@@ -114,8 +114,41 @@
     }).join('') + '<label class="ap-cu' + (pre ? '' : ' on') + '" title="Pick any colour"><input type="color" id="ap-cc" value="' + cur + '" aria-label="Custom accent colour"><span>Custom</span><code id="ap-cc-v">' + cur + '</code></label></div>' +
       '<p class="ap-note">Changes buttons, highlights and charts across every view and report. Text contrast adjusts automatically for light and dark modes.</p>';
   }
+  function appState() {
+    try { return typeof S !== 'undefined' && S ? S : null; } catch (e) { return null; }
+  }
+  function appUI() {
+    try { return typeof UI !== 'undefined' && UI ? UI : null; } catch (e) { return null; }
+  }
+  function readPref(k) {
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  }
+  function savePref(k, v) {
+    try {
+      if (v == null || v === '') localStorage.removeItem(k);
+      else localStorage.setItem(k, v);
+    } catch (e) {}
+  }
+  function canPersistState() {
+    if (root.classList.contains('lk') || !appState() || typeof save !== 'function') return false;
+    if (window.VR_PROD && window.VRSB) {
+      var a = window.VR_ACCESS;
+      if (!a || a.error || (a.permissions || []).indexOf('write_data') < 0) return false;
+    }
+    return true;
+  }
+  function applyAllThemeLayers() {
+    try {
+      if (typeof theme === 'function') theme();
+      else if (window.VRTheme) window.VRTheme.apply();
+      if (window.vrPro && typeof window.vrPro.apply === 'function') window.vrPro.apply();
+      if (window.vrTableColor) window.vrTableColor.apply();
+    } catch (x) {}
+  }
   window.apUI = function () {
-    var ds = root.dataset, dens = ds.dens === 'compact' ? 'compact' : 'cosy', size = ds.size || 'm', mode = (window.S && S.theme) || 'system';
+    var st = appState();
+    var ds = root.dataset, dens = ds.dens === 'compact' ? 'compact' : 'cosy', size = ds.size || 'm',
+      mode = (st && st.theme) || readPref('vr-theme-mode') || 'system';
     return '<div class="ap">' +
       sec('Enterprise Themes', 'Curated institutional palettes calibrated for light and dark modes. Pairs seamlessly with custom accent and table colours.', cards()) +
       sec('Accent colour', 'Pick an institutional preset or choose any custom hex colour.', accent()) +
@@ -126,18 +159,13 @@
       '<details class="ap-adv"><summary>Advanced: font, corners, table colour, table lines, stripes, icons</summary>' + (OLD ? OLD() : '') + '</details>' +
       '<div class="ap-ft"><span class="mu">Changes apply instantly across all modules and reports.</span><button type="button" data-ap-reset="1">Reset to default</button></div></div>';
   };
-  function savePref(k, v) {
-    try {
-      if (v == null || v === '') localStorage.removeItem(k);
-      else localStorage.setItem(k, v);
-    } catch (e) {}
-  }
   function setCC(hex, final) {
     var valid = safeHex(hex, '');
     if (!valid) return;
-    if (window.S) S.cc = valid;
+    var st = appState();
+    if (st) st.cc = valid;
     savePref('vr-accent-cc', valid);
-    if (final) commit('Accent colour applied'); else { try { theme(); } catch (x) { if (window.applyCC) window.applyCC(); } }
+    if (final) commit('Accent colour applied'); else { applyAllThemeLayers(); }
   }
   d.addEventListener('input', function (e) {
     if (e.target.id !== 'ap-cc') return;
@@ -149,18 +177,31 @@
   d.addEventListener('toggle', function (e) { if (e.target.classList && e.target.classList.contains('ap-adv')) window.__apOpen = e.target.open; }, true);
   function reopen() { var a = d.querySelector('.ap-adv'); if (a && window.__apOpen) a.open = true; }
 
-  function commit(msg) { try { save(); theme(); if (window.vrTableColor) window.vrTableColor.apply(); render(); } catch (e) { try { if (window.VRTheme) window.VRTheme.apply(); } catch (x) {} } reopen(); paintLoginBar(); if (msg && window.toast) toast(msg); }
+  function commit(msg) {
+    try {
+      if (canPersistState()) save();
+      applyAllThemeLayers();
+      if (typeof render === 'function' && appState() && !root.classList.contains('lk')) render();
+    } catch (e) {
+      applyAllThemeLayers();
+    }
+    reopen();
+    paint();
+    paintLoginBar();
+    if (msg && typeof toast === 'function') toast(msg);
+  }
   function applyModeToggle() {
     var next = dark() ? 'light' : 'dark';
+    var st = appState();
     savePref('vr-theme-mode', next);
-    if (window.S) S.theme = next;
+    if (st) st.theme = next;
     root.setAttribute('data-theme', next);
-    try {
-      if (typeof save === 'function' && window.S && !root.classList.contains('lk')) save();
-      if (typeof theme === 'function') theme();
-      else if (window.VRTheme) window.VRTheme.apply();
-      if (window.vrTableColor) window.vrTableColor.apply();
-    } catch (x) {}
+    if (canPersistState()) { try { save(); } catch (x) {} }
+    applyAllThemeLayers();
+    var ui = appUI();
+    if (typeof render === 'function' && st && !root.classList.contains('lk') && ui && ui.tab === 'Settings') {
+      try { render(); reopen(); } catch (x) {}
+    }
     paint();
     paintLoginBar();
   }
@@ -169,13 +210,11 @@
     if (!p) return;
     if (window.vrPro) window.vrPro.set(p.k);
     savePref('vr-accent-cc', p.cc);
-    if (window.S) S.cc = p.cc;
+    var st = appState();
+    if (st) st.cc = p.cc;
     if (quiet || root.classList.contains('lk')) {
-      try {
-        if (typeof theme === 'function') theme();
-        else if (window.VRTheme) window.VRTheme.apply();
-        if (window.vrTableColor) window.vrTableColor.apply();
-      } catch (x) {}
+      applyAllThemeLayers();
+      paint();
       paintLoginBar();
       return;
     }
@@ -188,18 +227,24 @@
     if (t.dataset.lgTheme) { applyThemePick(t.dataset.lgTheme, true); return; }
     if (t.dataset.apTheme) { applyThemePick(t.dataset.apTheme, false); return; }
     if (t.dataset.apMode) {
-      savePref('vr-theme-mode', t.dataset.apMode);
-      if (window.S) S.theme = t.dataset.apMode;
+      var nextMode = t.dataset.apMode;
+      var st = appState();
+      savePref('vr-theme-mode', nextMode);
+      if (st) st.theme = nextMode;
+      if (nextMode === 'light' || nextMode === 'dark') root.setAttribute('data-theme', nextMode);
+      else root.removeAttribute('data-theme');
       commit();
       return;
     }
     if (t.dataset.apDens) { var v = t.dataset.apDens; window.vrLookSet('dens', v); window.vrUISet('utd', v === 'compact' ? 'compact' : 'normal'); commit(); return; }
     if (t.dataset.apSize) { window.vrLookSet('size', t.dataset.apSize); commit(); return; }
     if (t.dataset.apReset) {
+      var stR = appState();
       window.vrPro.set('obsidian');
       savePref('vr-accent-cc', PRE[0].cc);
       savePref('vr-theme-mode', 'system');
-      if (window.S) { S.cc = PRE[0].cc; S.theme = 'system'; }
+      if (stR) { stR.cc = PRE[0].cc; stR.theme = 'system'; }
+      root.removeAttribute('data-theme');
       if (window.vrLookReset) window.vrLookReset(); if (window.vrUIReset) window.vrUIReset();
       commit('Appearance reset'); return;
     }
