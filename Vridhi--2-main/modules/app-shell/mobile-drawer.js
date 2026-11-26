@@ -572,7 +572,7 @@
           return;
         }
       }
-    } catch (e) {}
+    } catch (e) { if (window.console && console.error) console.error('[Vriddhi navigation]', e); }
   }
 
   function showSupportModal(kind) {
@@ -806,6 +806,18 @@
     syncHeaderChrome();
     upgradeBottomNavIcons();
   }
+
+  /* Capture drawer route clicks before report/table handlers. A report may install
+     document-level delegated click listeners; routing the drawer action in capture
+     phase keeps navigation reliable on touch and desktop-sized mobile browsers. */
+  document.addEventListener("click", function (e) {
+    var tgt = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
+    var item = tgt && tgt.closest && tgt.closest("#vr-drawer [data-vr-nav]");
+    if (!item || item.disabled) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    navigateTo(item.getAttribute("data-vr-nav"));
+  }, true);
 
   document.addEventListener("click", function (e) {
     var tgt = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
