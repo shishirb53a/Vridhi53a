@@ -893,8 +893,17 @@
       });
     }
 
-    let resizeDrag = null, justResizedUntil = 0;
+    let resizeDrag = null, justResizedUntil = 0, lastPointerDownTs = 0;
     const clampW = w => Math.max(MIN_COL_W, Math.min(MAX_COL_W, Math.round(w)));
+    const eventClientX = e => {
+      if (typeof e.clientX === "number" && !Number.isNaN(e.clientX)) return e.clientX;
+      const t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
+      return t && typeof t.clientX === "number" ? t.clientX : 0;
+    };
+    const closestEl = (target, sel) => {
+      const el = target && target.nodeType === 3 ? target.parentElement : target;
+      return el && el.closest ? el.closest(sel) : null;
+    };
     function seedVisibleWidths(tbl, widths, defs, fb) {
       const zoom = parseFloat(tbl.style.zoom) || 1;
       tbl.querySelectorAll("thead th[data-st-colk]").forEach(th => {
@@ -905,9 +914,12 @@
       });
     }
     function startResize(e) {
-      const resizer = e.target.closest && e.target.closest("[data-st-resize]");
+      const resizer = closestEl(e.target, "[data-st-resize]");
       if (!resizer) return;
+      if (e.type === "mousedown" && (resizeDrag || Date.now() - lastPointerDownTs < 80)) return;
+      if (resizeDrag) return;
       if (typeof e.button === "number" && e.button !== 0) return;
+      if (e.type === "pointerdown") lastPointerDownTs = Date.now();
       e.preventDefault();
       e.stopPropagation();
       const [mode, colKey] = resizer.getAttribute("data-st-resize").split(":");
@@ -922,39 +934,40 @@
       if (document.body && document.body.classList) document.body.classList.add("st-col-resizing");
       try { if (resizer.setPointerCapture && typeof e.pointerId === "number") resizer.setPointerCapture(e.pointerId); } catch (err) { /* capture is optional */ }
       resizeDrag = {
-        mode, colKey, tbl, resizer, widths, defs, fb, key: wKey(mode), pid: e.pointerId,
+        mode, colKey, tbl, resizer, widths, defs, fb,
+        pid: typeof e.pointerId === "number" ? e.pointerId : null,
         zoom: parseFloat(tbl.style.zoom) || 1,
-        startX: e.clientX || 0,
+        startX: eventClientX(e),
         startW: widths[colKey],
         moved: false
       };
     }
     function moveResize(e) {
       if (!resizeDrag) return;
-      const dx = ((e.clientX || 0) - resizeDrag.startX) / resizeDrag.zoom;
+      if (e.type === "pointermove" && typeof e.pointerId === "number" && resizeDrag.pid !== null && e.pointerId !== resizeDrag.pid) return;
+      const dx = (eventClientX(e) - resizeDrag.startX) / resizeDrag.zoom;
       if (Math.abs(dx) > 2) resizeDrag.moved = true;
       resizeDrag.widths[resizeDrag.colKey] = clampW(resizeDrag.startW + dx);
       applyColWidths(resizeDrag.tbl, resizeDrag.widths, resizeDrag.defs, resizeDrag.fb);
     }
-    function endResize() {
+    function endResize(e) {
       if (!resizeDrag) return;
+      if (e && (e.type === "pointerup" || e.type === "pointercancel") && typeof e.pointerId === "number" && resizeDrag.pid !== null && e.pointerId !== resizeDrag.pid) return;
       const d = resizeDrag;
       resizeDrag = null;
       d.resizer.classList.remove("is-active");
       try { if (d.resizer.releasePointerCapture && typeof d.pid === "number") d.resizer.releasePointerCapture(d.pid); } catch (err) { /* already released */ }
       if (document.body && document.body.classList) document.body.classList.remove("st-col-resizing");
-      saveWidths(d.key, d.widths);
+      saveWidths(d.key || wKey(d.mode), d.widths);
       syncResetBtns();
       if ((d.mode === "scen" && st.max) || (d.mode === "eng" && st.engMax)) fitMaxTable();
       if (d.moved) justResizedUntil = Date.now() + 250;
     }
 
-    const downEvt = typeof window !== "undefined" && window.PointerEvent ? "pointerdown" : "mousedown";
-    const moveEvt = typeof window !== "undefined" && window.PointerEvent ? "pointermove" : "mousemove";
-    const upEvt = typeof window !== "undefined" && window.PointerEvent ? "pointerup" : "mouseup";
-    host.addEventListener(downEvt, startResize);
+    host.addEventListener("pointerdown", startResize);
+    host.addEventListener("mousedown", startResize);
     host.addEventListener("dblclick", e => {
-      const resizer = e.target.closest && e.target.closest("[data-st-resize]");
+      const resizer = closestEl(e.target, "[data-st-resize]");
       if (!resizer) return;
       e.preventDefault();
       e.stopPropagation();
@@ -1212,9 +1225,11 @@
       }
     });
     if (document.addEventListener) {
-      document.addEventListener(moveEvt, moveResize);
-      document.addEventListener(upEvt, endResize);
-      if (upEvt === "pointerup") document.addEventListener("pointercancel", endResize);
+      document.addEventListener("pointermove", moveResize);
+      document.addEventListener("mousemove", moveResize);
+      document.addEventListener("pointerup", endResize);
+      document.addEventListener("pointercancel", endResize);
+      document.addEventListener("mouseup", endResize);
       document.addEventListener("click", e => {
         if (st.msd && host.isConnected && !e.target.closest("[data-st-msd]")) {
           st.msd = null;
@@ -1230,6 +1245,7 @@
       });
     }
     if (typeof window !== "undefined" && window.addEventListener) {
+      window.addEventListener("blur", endResize);
       window.addEventListener("resize", () => { if ((st.max || st.engMax) && host.isConnected) fitMaxTable(); });
     }
     render();

@@ -1,0 +1,720 @@
+/* Modern Mobile FinTech UI: Slide-out Modal Navigation Drawer, Accordion Hierarchy,
+   Card-based Dashboard polish, and Fixed Bottom Actions (<= 720px).
+   Preserves desktop navigation & honours Light/Dark/Accent/Appearance settings. */
+
+#vr-mob-menu-btn,
+#vr-mob-theme-btn,
+.vr-mob-sub,
+#vr-drawer-backdrop,
+#vr-drawer {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  html.vr-drawer-open,
+  html.vr-drawer-open body {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
+  /* Compact single-row Mobile FinTech Top Bar */
+  html:not(#vrx) body header.hd {
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: color-mix(in srgb, var(--ds-surface, var(--card)) 94%, transparent) !important;
+    backdrop-filter: saturate(150%) blur(12px);
+    -webkit-backdrop-filter: saturate(150%) blur(12px);
+    border-bottom: 1px solid var(--ds-border, var(--bd)) !important;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, .05) !important;
+  }
+
+  html:not(#vrx) body header.hd .hdi {
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-height: 54px;
+    padding: 6px 12px !important;
+  }
+
+  /* Hide desktop top nav, desktop settings 3-dot, desktop sign-out on mobile (accessible inside Drawer) */
+  html:not(#vrx) body header.hd nav#nav,
+  html:not(#vrx) body header.hd #settings-menu-wrap,
+  html:not(#vrx) body header.hd #so {
+    display: none !important;
+  }
+
+  /* Hamburger Drawer Trigger Button (>= 44x44px touch target) */
+  html:not(#vrx) body #vr-mob-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 !important;
+    border-radius: 11px !important;
+    border: 1px solid var(--ds-border, var(--bd)) !important;
+    background: var(--ds-surface-2, var(--card)) !important;
+    color: var(--tx) !important;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background .16s ease, border-color .16s ease, transform .14s ease !important;
+  }
+
+  html:not(#vrx) body #vr-mob-menu-btn[hidden] {
+    display: none !important;
+  }
+
+  html:not(#vrx) body #vr-mob-menu-btn:active {
+    transform: scale(0.95);
+  }
+
+  html:not(#vrx) body #vr-mob-menu-btn svg,
+  html:not(#vrx) body #vr-mob-theme-btn svg {
+    display: block;
+    flex: none;
+  }
+
+  /* Compact Brand + Active Section Subtitle */
+  html:not(#vrx) body header.hd .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  html:not(#vrx) body header.hd .logo {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px;
+    border-radius: 9px !important;
+    flex: none;
+  }
+
+  html:not(#vrx) body header.hd .logo svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  html:not(#vrx) body header.hd .wm {
+    font-size: 15.5px !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  html:not(#vrx) body header.hd .tg {
+    display: none !important;
+  }
+
+  html:not(#vrx) body header.hd .vr-mob-sub {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mu);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+
+  html:not(#vrx) body header.hd .vr-ver {
+    display: none !important;
+  }
+
+  /* Right-side Header Actions: Client Switcher + Quick Theme Toggle */
+  html:not(#vrx) body header.hd #fhp {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 148px;
+    margin: 0 !important;
+  }
+
+  html:not(#vrx) body header.hd #fhp[hidden] {
+    display: none !important;
+  }
+
+  html:not(#vrx) body header.hd #fhp button {
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    max-width: 100%;
+  }
+
+  html:not(#vrx) body header.hd #who {
+    display: none !important;
+  }
+
+  html:not(#vrx) body #vr-mob-theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--ds-border, var(--bd)) !important;
+    background: var(--ds-surface-2, var(--card)) !important;
+    color: var(--tx) !important;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background .16s ease, border-color .16s ease !important;
+  }
+
+  html:not(#vrx) body #vr-mob-theme-btn[hidden] {
+    display: none !important;
+  }
+
+  /* Slide-out Modal Backdrop */
+  html:not(#vrx) body #vr-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1990;
+    background: rgba(15, 23, 42, .52);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .26s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .26s !important;
+  }
+
+  html.vr-drawer-open:not(#vrx) body #vr-drawer-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity .26s cubic-bezier(.22, 1, .36, 1), visibility 0s linear 0s !important;
+  }
+
+  /* Slide-out Modal Navigation Drawer */
+  html:not(#vrx) body #vr-drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 2000;
+    width: min(332px, 86vw);
+    max-width: 100vw;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    background: var(--ds-surface, var(--card)) !important;
+    color: var(--tx);
+    border-right: 1px solid var(--ds-border, var(--bd));
+    box-shadow: 0 22px 54px rgba(15, 23, 42, .28);
+    transform: translate3d(-104%, 0, 0);
+    visibility: hidden;
+    will-change: transform;
+    transition: transform .28s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .28s !important;
+  }
+
+  html.vr-drawer-open:not(#vrx) body #vr-drawer {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+    transition: transform .28s cubic-bezier(.22, 1, .36, 1), visibility 0s linear 0s !important;
+  }
+
+  /* Drawer Top Brand & Account Header */
+  html:not(#vrx) body .vr-drawer-hd {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid var(--ds-border, var(--bd));
+  }
+
+  html:not(#vrx) body .vr-drawer-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  html:not(#vrx) body .vr-drawer-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ac);
+    display: grid;
+    place-items: center;
+    flex: none;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--ac) 28%, transparent);
+  }
+
+  html:not(#vrx) body .vr-drawer-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  html:not(#vrx) body .vr-drawer-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--tx);
+  }
+
+  html:not(#vrx) body .vr-drawer-user {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mu);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+
+  html:not(#vrx) body #vr-drawer-close {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 !important;
+    border-radius: 11px !important;
+    border: 1px solid var(--ds-border, var(--bd)) !important;
+    background: var(--ds-surface-2, var(--card)) !important;
+    color: var(--tx) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .15s ease !important;
+  }
+
+  html:not(#vrx) body #vr-drawer-close:hover {
+    background: var(--hv) !important;
+  }
+
+  /* Scrollable Accordion Navigation Area */
+  html:not(#vrx) body .vr-drawer-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  html:not(#vrx) body .vr-acc-group {
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--tx) 2.5%, var(--ds-surface, var(--card)));
+    border: 1px solid var(--ds-border-subtle, var(--bd));
+    padding: 4px;
+  }
+
+  html:not(#vrx) body .vr-acc-group.has-active {
+    border-color: color-mix(in srgb, var(--ac) 28%, var(--ds-border, var(--bd)));
+    background: color-mix(in srgb, var(--ac) 3.5%, var(--ds-surface, var(--card)));
+  }
+
+  /* Accordion Parent Button */
+  html:not(#vrx) body .vr-acc-trigger {
+    width: 100%;
+    min-height: 46px;
+    padding: 8px 10px !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    color: var(--tx) !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background .16s ease, color .16s ease !important;
+  }
+
+  html:not(#vrx) body .vr-acc-trigger:hover {
+    background: color-mix(in srgb, var(--tx) 5%, transparent) !important;
+  }
+
+  html:not(#vrx) body .vr-acc-group.has-active .vr-acc-trigger {
+    color: var(--ac) !important;
+  }
+
+  html:not(#vrx) body .vr-acc-lead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  html:not(#vrx) body .vr-acc-ic {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--tx) 6%, transparent);
+    color: var(--mu);
+    transition: background .16s ease, color .16s ease !important;
+  }
+
+  html:not(#vrx) body .vr-acc-group.has-active .vr-acc-ic {
+    background: color-mix(in srgb, var(--ac) 14%, transparent);
+    color: var(--ac);
+  }
+
+  html:not(#vrx) body .vr-acc-lbl {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  html:not(#vrx) body .vr-acc-trail {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex: none;
+    color: var(--mu);
+  }
+
+  html:not(#vrx) body .vr-acc-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--ac);
+    display: none;
+  }
+
+  html:not(#vrx) body .vr-acc-group.has-active .vr-acc-trigger[aria-expanded="false"] .vr-acc-dot {
+    display: inline-block;
+  }
+
+  html:not(#vrx) body .vr-acc-chev {
+    display: block;
+    transition: transform .22s cubic-bezier(.22, 1, .36, 1) !important;
+  }
+
+  html:not(#vrx) body .vr-acc-trigger[aria-expanded="true"] .vr-acc-chev {
+    transform: rotate(180deg);
+  }
+
+  /* Smooth Accordion Expand/Collapse Grid Wrapper */
+  html:not(#vrx) body .vr-acc-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows .24s cubic-bezier(.22, 1, .36, 1), opacity .2s ease !important;
+  }
+
+  html:not(#vrx) body .vr-acc-panel.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  html:not(#vrx) body .vr-acc-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* Clear Indented Child Hierarchy Rail */
+  html:not(#vrx) body .vr-acc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 2px 4px 6px 25px;
+    padding-left: 12px;
+    border-left: 1.5px solid var(--ds-border, var(--bd));
+  }
+
+  html:not(#vrx) body .vr-nav-item {
+    position: relative;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 11px !important;
+    border-radius: 9px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: var(--mu) !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background .15s ease, color .15s ease, border-color .15s ease !important;
+  }
+
+  html:not(#vrx) body .vr-nav-item:hover {
+    background: color-mix(in srgb, var(--tx) 5%, transparent) !important;
+    color: var(--tx) !important;
+  }
+
+  html:not(#vrx) body .vr-nav-item-lead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  html:not(#vrx) body .vr-nav-ic {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    color: currentColor;
+    opacity: .85;
+  }
+
+  html:not(#vrx) body .vr-nav-lbl {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* High-Contrast Selected Child State */
+  html:not(#vrx) body .vr-nav-item[aria-current="page"] {
+    background: color-mix(in srgb, var(--ac) 13%, var(--ds-surface, var(--card))) !important;
+    border-color: color-mix(in srgb, var(--ac) 30%, transparent) !important;
+    color: var(--ac) !important;
+    font-weight: 700 !important;
+  }
+
+  html:not(#vrx) body .vr-nav-item[aria-current="page"] .vr-nav-ic {
+    opacity: 1;
+  }
+
+  html:not(#vrx) body .vr-nav-item[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: -13.5px;
+    top: 9px;
+    bottom: 9px;
+    width: 3px;
+    border-radius: 99px;
+    background: var(--ac);
+  }
+
+  html:not(#vrx) body .vr-nav-check {
+    width: 7px;
+    height: 7px;
+    border-radius: 99px;
+    background: var(--ac);
+    flex: none;
+    display: none;
+  }
+
+  html:not(#vrx) body .vr-nav-item[aria-current="page"] .vr-nav-check {
+    display: inline-block;
+  }
+
+  /* Honours Settings -> Appearance: Icons Off */
+  html[data-uic="off"]:not(#vrx) body .vr-acc-ic,
+  html[data-uic="off"]:not(#vrx) body .vr-nav-ic,
+  html[data-uic="off"]:not(#vrx) body .rp2-nav button > span:first-child {
+    display: none !important;
+  }
+
+  /* Drawer Fixed Bottom Actions Footer */
+  html:not(#vrx) body .vr-drawer-ft {
+    flex: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--ds-border, var(--bd));
+    background: var(--ds-surface, var(--card));
+  }
+
+  html:not(#vrx) body .vr-drawer-ft-btn {
+    min-height: 44px;
+    padding: 0 12px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--ds-border, var(--bd)) !important;
+    background: var(--ds-surface-2, var(--card)) !important;
+    color: var(--tx) !important;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background .15s ease, border-color .15s ease !important;
+  }
+
+  html:not(#vrx) body .vr-drawer-ft-btn:hover {
+    background: var(--hv) !important;
+  }
+
+  html:not(#vrx) body .vr-drawer-ft-btn.is-danger {
+    color: var(--er) !important;
+    border-color: color-mix(in srgb, var(--er) 24%, var(--ds-border, var(--bd))) !important;
+  }
+
+  /* Card-based Dashboard & Bottom Action Dock Clearance */
+  html:not(#vrx) body main#m {
+    padding: 12px 12px calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html:not(#vrx) body :is(.dz-card, .st-card, .fhp-card, .hcard, .st-mcard, .yc) {
+    border-radius: 14px !important;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, .04) !important;
+  }
+
+  /* Fixed Bottom Actions Bar (.rp2-nav & .st-bnav) */
+  html:not(#vrx) body .rp2-nav {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 80 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+    background: color-mix(in srgb, var(--ds-surface, var(--card)) 96%, transparent) !important;
+    backdrop-filter: saturate(150%) blur(14px);
+    -webkit-backdrop-filter: saturate(150%) blur(14px);
+    border-top: 1px solid var(--ds-border, var(--bd)) !important;
+    box-shadow: 0 -6px 24px rgba(15, 23, 42, .08) !important;
+    gap: 4px !important;
+  }
+
+  html:not(#vrx) body .rp2-nav button {
+    position: relative;
+    min-height: 50px !important;
+    height: auto !important;
+    padding: 6px 4px !important;
+    border-radius: 10px !important;
+    border: 0 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.15 !important;
+    gap: 4px !important;
+    color: var(--mu) !important;
+    background: transparent !important;
+    transition: background .15s ease, color .15s ease !important;
+  }
+
+  html:not(#vrx) body .rp2-nav button > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  html:not(#vrx) body .rp2-nav button:is([aria-current="page"], [aria-selected="true"]) {
+    background: color-mix(in srgb, var(--ac) 12%, transparent) !important;
+    color: var(--ac) !important;
+    font-weight: 700 !important;
+  }
+
+  html:not(#vrx) body .rp2-nav button:is([aria-current="page"], [aria-selected="true"])::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 22%;
+    right: 22%;
+    height: 2.5px;
+    border-radius: 0 0 99px 99px;
+    background: var(--ac);
+  }
+}
+
+/* Responsive Breakpoints Across Different Mobile Screen Sizes */
+@media (max-width: 360px) {
+  html:not(#vrx) body #vr-drawer {
+    width: min(304px, 90vw);
+  }
+  html:not(#vrx) body .vr-drawer-hd {
+    padding: 12px 10px 10px;
+  }
+  html:not(#vrx) body .vr-drawer-body {
+    padding: 10px 9px;
+    gap: 6px;
+  }
+  html:not(#vrx) body .vr-acc-trigger {
+    font-size: 13.5px;
+    padding: 7px 8px !important;
+  }
+  html:not(#vrx) body .vr-acc-list {
+    margin-left: 21px;
+    padding-left: 10px;
+  }
+  html:not(#vrx) body .vr-nav-item {
+    font-size: 13px;
+    padding: 7px 9px !important;
+  }
+  html:not(#vrx) body header.hd #fhp {
+    max-width: 112px;
+  }
+  html:not(#vrx) body .rp2-nav button {
+    font-size: 10px !important;
+    padding: 5px 2px !important;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 720px) {
+  html:not(#vrx) body #vr-drawer {
+    width: min(356px, 74vw);
+  }
+}
+
+@media (max-width: 720px) and (max-height: 520px) {
+  html:not(#vrx) body .vr-drawer-hd {
+    padding: 8px 12px;
+  }
+  html:not(#vrx) body .vr-drawer-body {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  html:not(#vrx) body .vr-acc-trigger {
+    min-height: 40px;
+  }
+  html:not(#vrx) body .vr-nav-item {
+    min-height: 38px;
+  }
+  html:not(#vrx) body .vr-drawer-ft {
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(#vrx) body #vr-mob-menu-btn,
+  html:not(#vrx) body #vr-mob-theme-btn,
+  html:not(#vrx) body #vr-drawer-backdrop,
+  html:not(#vrx) body #vr-drawer,
+  html:not(#vrx) body .vr-acc-trigger,
+  html:not(#vrx) body .vr-acc-ic,
+  html:not(#vrx) body .vr-acc-chev,
+  html:not(#vrx) body .vr-acc-panel,
+  html:not(#vrx) body .vr-nav-item,
+  html:not(#vrx) body .vr-drawer-ft-btn,
+  html:not(#vrx) body .rp2-nav button {
+    transition-duration: 0.01ms !important;
+  }
+}
