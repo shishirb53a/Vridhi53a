@@ -471,10 +471,8 @@
     closeDrawer(false);
     try {
       if (kind === "gp") {
-        /* Route from application state instead of simulating a click on a rendered tab.
-           The target tab can be hidden/replaced during report rendering, which made
-           sidebar navigation dependent on stale DOM elements. */
-        if (["Dashboard", "Holdings", "Reports"].indexOf(val) < 0) return;
+        var gpBtn = document.querySelector('#m [data-gptab="' + val + '"]');
+        if (gpBtn) { gpBtn.click(); return; }
         if (typeof UI !== "undefined" && typeof render === "function") {
           UI.tab = val;
           render();
@@ -483,24 +481,15 @@
         }
       }
       if (kind === "rv") {
-        /* Report navigation is state-driven. Do not click a possibly hidden/stale
-           [data-rv] control inside the Reports dock; render the requested view directly. */
-        var reportViews = window.RV_VIEWS || [
-          ["year"], ["month"], ["int"], ["sav"], ["ent"], ["vdate"], ["hold"]
-        ];
-        if (!reportViews.some(function (view) { return view && view[0] === val; })) return;
+        var rvBtn = document.querySelector('#m [data-rv="' + val + '"]');
+        if (rvBtn) { rvBtn.click(); return; }
         if (typeof UI !== "undefined" && typeof render === "function") {
-          if (val === "hold") {
-            UI.tab = "Holdings";
-          } else {
-            UI.tab = "Reports";
-            UI.rv = val;
-            UI.sel = null;
-            UI.rk = "a";
-            UI.rd = 1;
-            UI.rq = "";
-            UI.msd = null;
-          }
+          UI.tab = "Reports";
+          UI.rv = val;
+          UI.sel = null;
+          UI.rk = "a";
+          UI.rd = 1;
+          UI.rq = "";
           render();
           if (window.scrollTo) window.scrollTo(0, 0);
           return;
@@ -572,7 +561,7 @@
           return;
         }
       }
-    } catch (e) { if (window.console && console.error) console.error('[Vriddhi navigation]', e); }
+    } catch (e) {}
   }
 
   function showSupportModal(kind) {
@@ -806,18 +795,6 @@
     syncHeaderChrome();
     upgradeBottomNavIcons();
   }
-
-  /* Capture drawer route clicks before report/table handlers. A report may install
-     document-level delegated click listeners; routing the drawer action in capture
-     phase keeps navigation reliable on touch and desktop-sized mobile browsers. */
-  document.addEventListener("click", function (e) {
-    var tgt = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
-    var item = tgt && tgt.closest && tgt.closest("#vr-drawer [data-vr-nav]");
-    if (!item || item.disabled) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    navigateTo(item.getAttribute("data-vr-nav"));
-  }, true);
 
   document.addEventListener("click", function (e) {
     var tgt = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
