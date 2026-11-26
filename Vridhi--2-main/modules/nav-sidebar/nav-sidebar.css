@@ -1,0 +1,40 @@
+/* Desktop sidebar: shown only above 960px, the same breakpoint the mobile drawer uses. */
+#vr-side { display: none; }
+
+@media (min-width: 961px) {
+  html.vr-side-on #vr-side {
+    display: flex; flex-direction: column;
+    position: fixed; left: 0; top: var(--vr-hd-h, 64px); bottom: 0;
+    width: 256px; box-sizing: border-box; overflow-y: auto;
+    background: var(--card); border-right: 1px solid var(--bd);
+    padding: 12px 10px 18px; z-index: 5; font-family: var(--ff);
+  }
+  html.vr-side-on #vr-side[hidden] { display: none; }
+  html.vr-side-on #nav,
+  html.vr-side-on #settings-menu-wrap { display: none !important; }
+  html.vr-side-on .w { margin-left: 256px; margin-right: auto; }
+}
+
+.vr-side-grp { margin-bottom: 4px; }
+.vr-side-trg {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px;
+  padding: 0 10px; border: 0; border-radius: 8px; background: transparent;
+  color: var(--tx); font: 600 14px/1.2 var(--ff); text-align: left; cursor: pointer;
+}
+.vr-side-trg:hover { background: color-mix(in srgb, var(--ac) 8%, transparent); }
+.vr-side-trg[aria-expanded="true"] { color: var(--ac); }
+.vr-side-grp.has-active > .vr-side-trg { background: color-mix(in srgb, var(--ac) 14%, transparent); color: var(--ac); }
+.vr-side-ic { display: flex; width: 18px; height: 18px; flex: none; }
+.vr-side-ic svg { width: 18px; height: 18px; }
+.vr-side-lbl { flex: 1; min-width: 0; }
+.vr-side-chev { flex: none; color: var(--mu); transition: transform .2s ease; }
+.vr-side-trg[aria-expanded="true"] .vr-side-chev { transform: rotate(180deg); }
+.vr-side-pnl { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 8px 28px; }
+.vr-side-pnl[hidden] { display: none; }
+.vr-side-item {
+  display: block; width: 100%; min-height: 38px; padding: 0 10px; border: 0; border-radius: 6px;
+  background: transparent; color: var(--tx); font: 500 13px/1.2 var(--ff); text-align: left; cursor: pointer;
+}
+.vr-side-item:hover { background: color-mix(in srgb, var(--ac) 8%, transparent); }
+.vr-side-item[aria-current="page"] { background: var(--ac); color: #fff; font-weight: 600; }
+.vr-side-trg:focus-visible, .vr-side-item:focus-visible { outline: 2px solid var(--ac); outline-offset: 2px; }
