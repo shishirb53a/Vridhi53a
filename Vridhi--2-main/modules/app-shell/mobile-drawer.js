@@ -106,41 +106,41 @@
     var polBtn = document.querySelector('#m [data-vpp][aria-current="page"], #m [data-vpp][aria-pressed="true"]');
     if (polBtn) activePolPage = polBtn.getAttribute("data-vpp") || "list";
 
-    if (tab === "Dashboard") return { id: "gp:Dashboard", group: "dashboard", title: "Dashboard · Summary" };
-    if (tab === "Holdings") return { id: "gp:Holdings", group: "investments", title: "Investments · Holdings" };
+    if (tab === "Dashboard") return { id: "gp:Dashboard", group: "goal", title: "Goal Planner · Dashboard" };
+    if (tab === "Holdings") return { id: "gp:Holdings", group: "goal", title: "Goal Planner · Holdings" };
     if (tab === "Reports") {
-      if (rv === "ent") return { id: "rv:ent", group: "investments", title: "Investments · Holdings register" };
-      if (rv === "vdate") return { id: "rv:vdate", group: "investments", title: "Investments · Value on Date" };
-      if (rv === "sav") return { id: "rv:sav", group: "savings", title: "Savings · Savings schedule" };
-      if (rv === "int") return { id: "rv:int", group: "savings", title: "Savings · Interest and income" };
-      if (rv === "month") return { id: "rv:month", group: "reports", title: "Reports · Monthly Projection" };
-      return { id: "rv:year", group: "reports", title: "Reports · Annual Projection" };
+      var rvLabels = {
+        year: "Annual projection", month: "Monthly projection", int: "Interest & income",
+        sav: "Savings schedule", ent: "Holdings register", vdate: "Value on date"
+      };
+      var rvKey = rvLabels[rv] ? rv : "year";
+      return { id: "rv:" + rvKey, group: "goal", title: "Goal Planner · " + rvLabels[rvKey] };
     }
     if (tab === "Retirement planner" || tab === "RP Reports") {
       if (rp.tab === "report") {
-        if (rp.rv === "yy") return { id: "rp:yy", group: "reports", title: "Reports · Year by Year" };
-        return { id: "rp:clients", group: "reports", title: "Reports · Clients" };
+        if (rp.rv === "yy") return { id: "rp:yy", group: "retire", title: "Retirement Planner · Year by year" };
+        return { id: "rp:clients", group: "retire", title: "Retirement Planner · Clients" };
       }
-      return { id: "rp:status", group: "retire", title: "Retirement Planner" };
+      return { id: "rp:status", group: "retire", title: "Retirement Planner · Planner" };
     }
     if (tab === "Stress Test") {
-      var stTitles = {
-        overview: "Summary",
-        scenarios: "Scenarios",
-        settings: "Stress Settings",
-        engine: "Engine & Notes"
-      };
-      return { id: "st:" + activeStTab, group: "retire", title: "Stress Test · " + (stTitles[activeStTab] || "Summary") };
+      var stTitles = { overview: "Summary", scenarios: "Scenarios", settings: "Stress settings", engine: "Engine & notes" };
+      return { id: "st:" + activeStTab, group: "stress", title: "Stress Test · " + (stTitles[activeStTab] || "Summary") };
     }
     if (tab === "Policies") {
       return activePolPage === "rep"
-        ? { id: "pol:rep", group: "policy", title: "Protection · Reports" }
-        : { id: "pol:list", group: "policy", title: "Protection · Policies" };
+        ? { id: "pol:rep", group: "policy", title: "Policies · Policy reports" }
+        : { id: "pol:list", group: "policy", title: "Policies · My policies" };
     }
-    if (tab === "Settings") return { id: "set:Settings", group: "settings", title: "Settings" };
+    if (tab === "Settings") {
+      var stSel = document.querySelector('#m [data-stab][aria-selected="true"]');
+      var stKey = (stSel && stSel.getAttribute("data-stab")) || "plan";
+      var stLabels = { plan: "Plan", reports: "Reports", appearance: "Appearance", data: "Data & backup" };
+      return { id: "set:" + stKey, group: "settings", title: "Settings · " + (stLabels[stKey] || "Plan") };
+    }
     if (tab === "Users") return { id: "set:Users", group: "settings", title: "Settings · Users" };
-    if (tab === "Help") return { id: "set:Help", group: null, title: "Help & FAQ" };
-    return { id: "gp:Dashboard", group: "dashboard", title: tab || "Vriddhi" };
+    if (tab === "Help") return { id: "set:Help", group: "settings", title: "Help & FAQ" };
+    return { id: "gp:Dashboard", group: "goal", title: tab || "Vriddhi" };
   }
 
   function buildGroups() {
@@ -149,96 +149,70 @@
 
     if (dataOk && canAccess("Goal Planner")) {
       groups.push({
-        id: "dashboard",
-        label: "Dashboard",
+        id: "goal",
+        label: "Goal Planner",
         icon: ICONS.dashboard,
         items: [
-          { id: "gp:Dashboard", label: "Summary", icon: ICONS.dashboard }
-        ]
-      });
-      groups.push({
-        id: "investments",
-        label: "Investments",
-        icon: ICONS.investments,
-        items: [
+          { id: "gp:Dashboard", label: "Dashboard", icon: ICONS.dashboard },
           { id: "gp:Holdings", label: "Holdings", icon: ICONS.holdings },
-          { id: "rv:ent", label: "Holdings register", icon: ICONS.list },
-          { id: "rv:vdate", label: "Value on Date", icon: ICONS.clock }
-        ]
-      });
-      groups.push({
-        id: "savings",
-        label: "Savings",
-        icon: ICONS.savings,
-        items: [
+          { id: "rv:year", label: "Annual projection", icon: ICONS.barChart },
+          { id: "rv:month", label: "Monthly projection", icon: ICONS.calendar },
+          { id: "rv:int", label: "Interest & income", icon: ICONS.percent },
           { id: "rv:sav", label: "Savings schedule", icon: ICONS.layers },
-          { id: "rv:int", label: "Interest and income", icon: ICONS.percent }
+          { id: "rv:ent", label: "Holdings register", icon: ICONS.list },
+          { id: "rv:vdate", label: "Value on date", icon: ICONS.clock }
         ]
       });
     }
 
-    if (dataOk && (canAccess("Retirement planner") || (hasModule("Stress Test") && canAccess("Stress Test")))) {
-      var retItems = [];
-      if (canAccess("Retirement planner")) {
-        retItems.push({ id: "rp:status", label: "Retirement Planner", icon: ICONS.retire });
-      }
-      if (hasModule("Stress Test") && canAccess("Stress Test")) {
-        retItems.push(
+    if (dataOk && canAccess("Retirement planner")) {
+      groups.push({
+        id: "retire",
+        label: "Retirement Planner",
+        icon: ICONS.retire,
+        items: [
+          { id: "rp:status", label: "Planner", icon: ICONS.retire },
+          { id: "rp:clients", label: "Clients", icon: ICONS.users },
+          { id: "rp:yy", label: "Year by year", icon: ICONS.pulse }
+        ]
+      });
+    }
+
+    if (dataOk && hasModule("Stress Test") && canAccess("Stress Test")) {
+      groups.push({
+        id: "stress",
+        label: "Stress Test",
+        icon: ICONS.pulse,
+        items: [
           { id: "st:overview", label: "Summary", icon: ICONS.pulse },
           { id: "st:scenarios", label: "Scenarios", icon: ICONS.table },
-          { id: "st:settings", label: "Stress Settings", icon: ICONS.sliders },
-          { id: "st:engine", label: "Engine & Notes", icon: ICONS.engine }
-        );
-      }
-      if (retItems.length) {
-        groups.push({
-          id: "retire",
-          label: "Retirement & Stress",
-          icon: ICONS.retire,
-          items: retItems
-        });
-      }
+          { id: "st:settings", label: "Stress settings", icon: ICONS.sliders },
+          { id: "st:engine", label: "Engine & notes", icon: ICONS.engine }
+        ]
+      });
     }
 
     if (dataOk && hasModule("Policies") && canAccess("Policies")) {
       groups.push({
         id: "policy",
-        label: "Protection",
+        label: "Policies",
         icon: ICONS.policy,
         items: [
-          { id: "pol:list", label: "Policies", icon: ICONS.shield },
-          { id: "pol:rep", label: "Reports", icon: ICONS.reports }
+          { id: "pol:list", label: "My policies", icon: ICONS.shield },
+          { id: "pol:rep", label: "Policy reports", icon: ICONS.reports }
         ]
       });
     }
 
-    if (dataOk && (canAccess("Goal Planner") || canAccess("Retirement planner"))) {
-      var repItems = [];
-      if (canAccess("Goal Planner")) {
-        repItems.push(
-          { id: "rv:year", label: "Annual Portfolio Projection", icon: ICONS.barChart },
-          { id: "rv:month", label: "Monthly Portfolio Projection", icon: ICONS.calendar }
-        );
-      }
-      if (canAccess("Retirement planner")) {
-        repItems.push(
-          { id: "rp:clients", label: "Clients", icon: ICONS.users },
-          { id: "rp:yy", label: "Year by Year", icon: ICONS.pulse }
-        );
-      }
-      if (repItems.length) {
-        groups.push({
-          id: "reports",
-          label: "Reports",
-          icon: ICONS.reports,
-          items: repItems
-        });
-      }
-    }
-
     var setItems = [];
     if (canAccess("Settings")) {
-      setItems.push({ id: "set:Settings", label: "Settings", icon: ICONS.sliders });
+      setItems.push(
+        { id: "set:plan", label: "Plan", icon: ICONS.sliders },
+        { id: "set:reports", label: "Reports", icon: ICONS.reports },
+        { id: "set:appearance", label: "Appearance", icon: ICONS.sun },
+        { id: "set:data", label: "Data & backup", icon: ICONS.layers },
+        { id: "set:Help", label: "Help & FAQ", icon: ICONS.help }
+      );
     }
     if (allowUsers()) {
       setItems.push({ id: "set:Users", label: "Users", icon: ICONS.users });
@@ -247,7 +221,7 @@
       groups.push({
         id: "settings",
         label: "Settings",
-        icon: ICONS.settings,
+        icon: ICONS.sliders,
         items: setItems
       });
     }
@@ -579,6 +553,14 @@
         if (navPol) { navPol.click(); return; }
       }
       if (kind === "set") {
+        if (["plan", "reports", "appearance", "data"].indexOf(val) >= 0) {
+          navigateTo("set:Settings");
+          setTimeout(function () {
+            var stBtn2 = document.querySelector('#m [data-stab="' + val + '"]');
+            if (stBtn2) stBtn2.click();
+          }, 80);
+          return;
+        }
         var setBtn = document.querySelector('#m [data-settab="' + val + '"]');
         if (setBtn) { setBtn.click(); return; }
         if (val === "Settings") {
@@ -945,7 +927,8 @@
     close: closeDrawer,
     refresh: function () { ensureShell(); if (drawerOpen) renderDrawerBody(); },
     getGroups: buildGroups,
-    getRoute: currentRoute
+    getRoute: currentRoute,
+    navigate: navigateTo
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initObservers);
