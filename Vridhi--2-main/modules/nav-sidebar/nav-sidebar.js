@@ -172,22 +172,6 @@
     }
   }
 
-  /* Route desktop sidebar items during capture, before report-level handlers.
-     This keeps report rendering from consuming navigation clicks and prevents
-     the same click from being processed twice. */
-  document.addEventListener("click", function (e) {
-    var tgt = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target;
-    var item = tgt && tgt.closest && tgt.closest("#vr-side [data-side-nav]");
-    if (!item || item.disabled) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    var a = api();
-    if (a && typeof a.navigate === "function") {
-      a.navigate(item.getAttribute("data-side-nav"));
-      scheduleRender();
-    }
-  }, true);
-
   function init() {
     ensure();
     render();
