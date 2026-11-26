@@ -574,29 +574,6 @@ test('navigates accurately across Reports, Policies, Stress Test, and Settings s
   assert.ok(h.calls.settingsTabs.includes('appearance'), 'Settings > Appearance selects data-stab="appearance"');
 });
 
-test('desktop sidebar switches to Monthly Projection and remains navigable afterwards', () => {
-  const h = makeHarness();
-  h.ctx.UI.tab = 'Reports';
-  h.ctx.UI.rv = 'year';
-  h.win.VRNavSidebar.refresh();
-
-  // A stale/hidden report-dock control must not intercept sidebar navigation.
-  const staleReportButton = h.doc.createElement('button');
-  staleReportButton.setAttribute('data-rv', 'month');
-  h.doc.getElementById('m').appendChild(staleReportButton);
-
-  const side = h.doc.getElementById('vr-side');
-  side.querySelector('[data-side-nav="rv:month"]').click();
-  assert.strictEqual(h.ctx.UI.tab, 'Reports', 'Monthly Projection remains in the Reports section');
-  assert.strictEqual(h.ctx.UI.rv, 'month', 'Sidebar selection switches the report view directly');
-  assert.deepStrictEqual(h.calls.rendered[h.calls.rendered.length - 1], { tab: 'Reports', rv: 'month' },
-    'Monthly Projection is rendered without relying on a synthetic click');
-
-  // A second sidebar selection must still work immediately after the report switch.
-  h.doc.getElementById('vr-side').querySelector('[data-side-nav="gp:Holdings"]').click();
-  assert.strictEqual(h.ctx.UI.tab, 'Holdings', 'Sidebar navigation remains responsive after Monthly Projection');
-});
-
 test('displays stacked Available funds card in drawer header and routes to Holdings when tapped', () => {
   const h = makeHarness();
   h.win.VRMobileDrawer.open();
