@@ -180,7 +180,7 @@
 
   const LINKED = { corpus: 1, monthly: 1, buffer: 1, other: 1, roi: 1, bufRoi: 1, infl: 1 };
   const TABS = [
-    ["overview", "Trajectory & Summary", "\ud83d\udcc8"],
+    ["overview", "Summary", "\ud83d\udcc8"],
     ["scenarios", "Scenarios", "\ud83d\udccb"],
     ["settings", "Stress Settings", "\u2699\ufe0f"],
     ["engine", "Engine & Notes", "\ud83d\udcc4"]
