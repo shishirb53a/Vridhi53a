@@ -9,10 +9,14 @@ const assert = require('assert');
 const ROOT = path.join(__dirname, '..');
 const cssPath = path.join(ROOT, 'modules', 'app-shell', 'mobile-drawer.css');
 const jsPath = path.join(ROOT, 'modules', 'app-shell', 'mobile-drawer.js');
+const sideCssPath = path.join(ROOT, 'modules', 'nav-sidebar', 'nav-sidebar.css');
+const sideJsPath = path.join(ROOT, 'modules', 'nav-sidebar', 'nav-sidebar.js');
 const htmlPath = path.join(ROOT, 'index.html');
 
 const css = fs.readFileSync(cssPath, 'utf8');
 const js = fs.readFileSync(jsPath, 'utf8');
+const sideCss = fs.readFileSync(sideCssPath, 'utf8');
+const sideJs = fs.readFileSync(sideJsPath, 'utf8');
 const html = fs.readFileSync(htmlPath, 'utf8');
 
 let passed = 0;
@@ -22,23 +26,26 @@ function test(name, fn) {
   console.log('  PASS:', name);
 }
 
-console.log('Running Vriddhi Mobile & Tablet Navigation Drawer tests...');
+console.log('Running Vriddhi Mobile Drawer & Desktop Sidebar Navigation tests...');
 
 /* -------------------------------------------------------------------------
    1. HTML & CSS Structural / Responsive Contract Checks
    ------------------------------------------------------------------------- */
-test('index.html loads mobile-drawer.css and mobile-drawer.js after design-system.css', () => {
+test('index.html loads mobile-drawer and nav-sidebar assets in order after design-system.css', () => {
   const idxDs = html.indexOf('modules/theme/design-system.css');
   const idxCss = html.indexOf('modules/app-shell/mobile-drawer.css');
   const idxJs = html.indexOf('modules/app-shell/mobile-drawer.js');
-  assert.ok(idxDs > -1 && idxCss > idxDs && idxJs > idxCss,
-    'mobile-drawer assets must load after design-system.css');
+  const idxSideCss = html.indexOf('modules/nav-sidebar/nav-sidebar.css');
+  const idxSideJs = html.indexOf('modules/nav-sidebar/nav-sidebar.js');
+  assert.ok(idxDs > -1 && idxCss > idxDs && idxJs > idxCss && idxSideCss > idxJs && idxSideJs > idxSideCss,
+    'mobile-drawer and nav-sidebar assets must load after design-system.css');
 });
 
-test('mobile-drawer.css has balanced braces', () => {
-  const opens = (css.match(/\{/g) || []).length;
-  const closes = (css.match(/\}/g) || []).length;
-  assert.strictEqual(opens, closes, `Unbalanced braces: ${opens} vs ${closes}`);
+test('mobile-drawer.css and nav-sidebar.css have balanced braces', () => {
+  assert.strictEqual((css.match(/\{/g) || []).length, (css.match(/\}/g) || []).length,
+    'Unbalanced braces in mobile-drawer.css');
+  assert.strictEqual((sideCss.match(/\{/g) || []).length, (sideCss.match(/\}/g) || []).length,
+    'Unbalanced braces in nav-sidebar.css');
 });
 
 test('mobile-drawer.css separates desktop (>=961px), tablet (601-960px), mobile (<=600px), 320-360px, and landscape tiers', () => {
@@ -47,23 +54,27 @@ test('mobile-drawer.css separates desktop (>=961px), tablet (601-960px), mobile 
   assert.ok(css.includes('@media (max-width: 360px)'), 'Small phone 320-360px breakpoint missing');
   assert.ok(css.includes('@media (max-width: 960px) and (max-height: 520px)'), 'Landscape phone breakpoint missing');
   assert.ok(css.includes('@media (prefers-reduced-motion: reduce)'), 'Reduced motion media query missing');
-  // Base defaults keep drawer UI hidden on desktop (>=961px)
   assert.ok(/#vr-mob-menu-btn,\s*#vr-mob-theme-btn,\s*\.vr-mob-sub,\s*#vr-drawer-backdrop,\s*#vr-drawer\s*\{\s*display:\s*none;\s*\}/.test(css),
     'Desktop layout must hide mobile drawer chrome');
-  // Mobile drawer occupies ~85-90% viewport width
   assert.ok(css.includes('width: clamp(276px, 87vw, 375px)'), 'Mobile drawer should use ~87% viewport width');
   assert.ok(css.includes('width: min(312px, 89vw)'), '320-360px drawer width should cap cleanly at ~89vw');
   assert.ok(css.includes('width: min(352px, 50vw)'), 'Tablet drawer should use adaptive width');
 });
 
-test('mobile-drawer.css enforces flat accordion hierarchy, scroll lock, independent body scroll, and >=44px touch targets', () => {
+test('mobile-drawer.css and nav-sidebar.css match attached GUI specs (circular close, tinted headers, filled active bars, >=44px targets)', () => {
   assert.ok(css.includes('html.vr-drawer-open,\n  html.vr-drawer-open body {\n    overflow: hidden !important;'),
     'Background scroll lock missing');
-  assert.ok(css.includes('overflow-y: auto;\n    overflow-x: hidden;'), 'Independent vertical drawer scroll missing');
   assert.ok(css.includes('min-height: 44px'), 'Touch targets >= 44px missing');
-  assert.ok(css.includes('.vr-nav-item[aria-current="page"]::before'), 'Left active indicator bar missing');
-  assert.ok(!css.includes('.vr-acc-group.has-active {'), 'Parent section container should not be boxed/highlighted');
-  assert.ok(!css.includes('border-radius: 8px;\n    flex: none;'), 'Nested icon card box should be removed');
+  assert.ok(css.includes('border-radius: 999px !important'), 'Circular close button missing');
+  assert.ok(css.includes('.vr-acc-group.is-open > .vr-acc-trigger'), 'Tinted open section header missing');
+  assert.ok(css.includes('.vr-nav-item[aria-current="page"] {\n    background: var(--ac) !important;\n    color: var(--ac2, #fff) !important;'),
+    'Filled active item bar missing in mobile-drawer.css');
+
+  assert.ok(sideCss.includes('@media (min-width: 961px)'), 'Desktop >=961px sidebar breakpoint missing');
+  assert.ok(sideCss.includes('top: 0;\n    bottom: 0;\n    width: 256px;'), 'Full-height 256px desktop sidebar missing');
+  assert.ok(sideCss.includes('.vr-side-grp.is-open > .vr-side-trg'), 'Desktop tinted open header missing');
+  assert.ok(sideCss.includes('.vr-side-item[aria-current="page"] {\n    background: var(--ac);\n    color: var(--ac2, #fff);'),
+    'Filled active item bar missing in nav-sidebar.css');
 });
 
 /* -------------------------------------------------------------------------
@@ -95,7 +106,7 @@ function makeHarness() {
       this.hidden = false;
       this.disabled = false;
       this.value = '';
-      this.textContent = '';
+      this._text = '';
       this._innerHTML = '';
       this._listeners = {};
       this.style = {};
@@ -157,6 +168,16 @@ function makeHarness() {
     }
     click() {
       if (typeof this.onclick === 'function') this.onclick({ target: this, preventDefault() {}, stopPropagation() {} });
+      if (this._listeners.click) {
+        for (const fn of this._listeners.click) fn({ target: this, preventDefault() {}, stopPropagation() {} });
+      }
+      let cur = this.parentElement;
+      while (cur) {
+        if (cur._listeners && cur._listeners.click) {
+          for (const fn of cur._listeners.click) fn({ target: this, preventDefault() {}, stopPropagation() {} });
+        }
+        cur = cur.parentElement;
+      }
       dispatch(listeners, {
         type: 'click',
         target: this,
@@ -190,19 +211,26 @@ function makeHarness() {
       walk(this);
       return out;
     }
+    get textContent() {
+      return this._text + this.children.map(c => c.textContent).join('');
+    }
+    set textContent(v) {
+      this._text = String(v == null ? '' : v);
+      this.children = [];
+    }
     get innerHTML() {
       return this._innerHTML;
     }
     set innerHTML(val) {
       this._innerHTML = String(val || '');
       this.children = [];
+      this._text = '';
       parseInto(this, this._innerHTML);
     }
   }
 
   function matchSinglePart(el, part) {
     if (!part) return true;
-    // Strip tag prefix if present
     let rest = part;
     const tagM = rest.match(/^([a-zA-Z0-9_-]+)/);
     if (tagM) {
@@ -277,7 +305,7 @@ function makeHarness() {
       const parent = stack[stack.length - 1];
       if (m[5] !== undefined) {
         const txt = m[5].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
-        parent.textContent += txt;
+        parent._text += txt;
       } else if (m[1] === '/') {
         if (stack.length > 1) stack.pop();
       } else {
@@ -289,7 +317,6 @@ function makeHarness() {
         if (!selfClose && tag !== 'svg') {
           stack.push(el);
         } else if (tag === 'svg') {
-          // Skip inner svg markup until </svg>
           const closeIdx = htmlStr.indexOf('</svg>', tokenRe.lastIndex);
           if (closeIdx > -1) {
             el._innerHTML = htmlStr.slice(tokenRe.lastIndex, closeIdx);
@@ -307,16 +334,20 @@ function makeHarness() {
       '<div class="brand"><div class="logo"></div><div><div class="wm">Vriddhi</div><div class="tg">Old</div></div></div>' +
       '<nav id="nav"><button data-t="Goal Planner">Goal</button><button data-t="Policies">Policies</button><button data-t="Stress Test">Stress Test</button></nav>' +
       '<div id="fhp"></div>' +
-      '<span id="who">adviser@vriddhi.in</span>' +
+      '<span id="who">Aarav Adviser</span>' +
       '<div id="settings-menu-wrap"><div id="settings-menu"><button data-settings-tab="Settings">Settings</button></div></div>' +
       '<button id="so">Sign Out</button>' +
     '</div></header>' +
-    '<main id="m"><div class="rp2-nav">' +
-      '<button data-gptab="Dashboard"><span aria-hidden="true">emoji</span><span>Summary</span></button>' +
-      '<button data-gptab="Holdings"><span aria-hidden="true">emoji</span><span>View Holding</span></button>' +
-      '<button data-vpp="list"><span aria-hidden="true">emoji</span><span>Policies</span></button>' +
-      '<button data-vpp="rep"><span aria-hidden="true">emoji</span><span>Reports</span></button>' +
-    '</div></main>' +
+    '<main id="m">' +
+      '<div class="rp2-nav">' +
+        '<button data-gptab="Dashboard"><span aria-hidden="true">emoji</span><span>Summary</span></button>' +
+        '<button data-gptab="Holdings"><span aria-hidden="true">emoji</span><span>View Holding</span></button>' +
+        '<button data-vpp="list"><span aria-hidden="true">emoji</span><span>Policies</span></button>' +
+        '<button data-vpp="rep"><span aria-hidden="true">emoji</span><span>Reports</span></button>' +
+      '</div>' +
+      '<button data-stab="plan">Plan</button>' +
+      '<button data-stab="appearance">Appearance</button>' +
+    '</main>' +
     '<dialog id="dg"></dialog>';
 
   const dgEl = body.querySelector('#dg');
@@ -333,6 +364,12 @@ function makeHarness() {
       classList: {
         add: c => rootClasses.add(c),
         remove: c => rootClasses.delete(c),
+        toggle: (c, force) => {
+          const next = force === undefined ? !rootClasses.has(c) : !!force;
+          if (next) rootClasses.add(c);
+          else rootClasses.delete(c);
+          return next;
+        },
         contains: c => rootClasses.has(c)
       }
     },
@@ -347,6 +384,7 @@ function makeHarness() {
     rendered: [],
     policyOpened: [],
     stressOpened: [],
+    settingsTabs: [],
     toasts: [],
     alerts: 0,
     pushedStates: [],
@@ -364,7 +402,7 @@ function makeHarness() {
     innerWidth: 375,
     document: doc,
     history: {
-      pushState: (s, t) => { calls.pushedStates.push(s); },
+      pushState: (s) => { calls.pushedStates.push(s); },
       back: () => { calls.historyBacks++; }
     },
     navigator: {
@@ -407,7 +445,8 @@ function makeHarness() {
     VR_PROD: false,
     VR_ACCESS: null,
     calc: () => ({ rows: [{ tot: 23200000 }] }),
-    cr: (n) => '\u20B9 ' + (n / 1e7).toFixed(2) + ' Cr',
+    f: (n) => '\u20B9 2,32,00,000',
+    cr: (n) => '\u20B9 2.32 Cr',
     render: () => { calls.rendered.push({ tab: ctx.UI.tab, rv: ctx.UI.rv }); },
     save: () => { calls.saved++; },
     theme: () => {
@@ -438,9 +477,21 @@ function makeHarness() {
       ctx.UI.tab = gp.getAttribute('data-gptab');
       ctx.render();
     }
+    const st = t && t.closest && t.closest('[data-stab]');
+    if (st) {
+      const val = st.getAttribute('data-stab');
+      calls.settingsTabs.push(val);
+      doc.querySelectorAll('[data-stab]').forEach(b => b.setAttribute('aria-selected', String(b === st)));
+    }
+    const sm = t && t.closest && t.closest('[data-settings-tab="Settings"]');
+    if (sm) {
+      ctx.UI.tab = 'Settings';
+      ctx.render();
+    }
   });
   vm.createContext(ctx);
   vm.runInContext(js, ctx);
+  vm.runInContext(sideJs, ctx);
 
   return {
     doc,
@@ -453,59 +504,58 @@ function makeHarness() {
   };
 }
 
-test('builds all 7 primary accordion categories with zero duplicate destinations and Help/Feedback/Contact in footer', () => {
+test('builds the 5 accordion categories matching the GUI mockups with zero duplicate route IDs', () => {
   const h = makeHarness();
   const groups = h.win.VRMobileDrawer.getGroups();
   assert.deepStrictEqual(
     Array.from(groups, g => g.label),
-    ['Dashboard', 'Investments', 'Savings', 'Retirement & Stress', 'Protection', 'Reports', 'Settings']
+    ['Goal Planner', 'Retirement Planner', 'Stress Test', 'Policies', 'Settings']
   );
 
   const ids = [];
   for (const g of groups) {
     for (const it of g.items) ids.push(it.id);
   }
-  assert.strictEqual(new Set(ids).size, ids.length, 'Every drawer route ID must be unique');
-  assert.ok(ids.includes('pol:list') && ids.includes('pol:rep'), 'Policies and Policy Reports must both exist');
-  assert.ok(!ids.includes('set:Help'), 'Help stays in compact footer without duplicating in Settings');
-  assert.ok(h.doc.getElementById('vr-drawer-help'));
-  assert.ok(h.doc.getElementById('vr-drawer-feedback'));
-  assert.ok(h.doc.getElementById('vr-drawer-contact'));
+  assert.strictEqual(new Set(ids).size, ids.length, 'Every route ID across all 5 groups must be unique');
+  assert.ok(ids.includes('pol:list') && ids.includes('pol:rep'), 'Policies and Policy reports must both exist');
+  assert.ok(ids.includes('set:plan') && ids.includes('set:appearance') && ids.includes('set:Help'),
+    'Settings items must include Plan, Appearance, and Help & FAQ');
+
+  h.win.VRMobileDrawer.open();
+  const subhd = h.doc.querySelector('#vr-drawer .vr-acc-subhd');
+  assert.ok(subhd && subhd.textContent === 'Reports', 'Goal Planner mobile drawer renders Reports subheader');
 });
 
-test('keeps categories collapsed by default except the active page category, and toggles single-open without navigating', () => {
+test('mobile drawer keeps categories collapsed except active category and switches single-open without navigating', () => {
   const h = makeHarness();
   h.ctx.UI.tab = 'Reports';
-  h.ctx.UI.rv = 'vdate'; // Inside 'investments'
+  h.ctx.UI.rv = 'vdate';
 
   h.win.VRMobileDrawer.open();
   assert.ok(h.doc.documentElement.classList.contains('vr-drawer-open'), 'Scroll-lock class added on open');
 
   const triggers = h.doc.querySelectorAll('[data-vr-acc]');
   const openIds = triggers.filter(b => b.getAttribute('aria-expanded') === 'true').map(b => b.getAttribute('data-vr-acc'));
-  assert.deepStrictEqual(openIds, ['investments'], 'Only the active category (investments) opens by default');
+  assert.deepStrictEqual(openIds, ['goal'], 'Only the active category (goal) opens by default');
 
   const currentBtns = h.doc.querySelectorAll('.vr-nav-item[aria-current="page"]');
   assert.strictEqual(currentBtns.length, 1);
   assert.strictEqual(currentBtns[0].getAttribute('data-vr-nav'), 'rv:vdate');
 
-  // Expand 'reports' -> collapses 'investments', zero navigation triggered
   const navBefore = h.calls.rendered.length;
-  h.doc.querySelector('[data-vr-acc="reports"]').click();
+  h.doc.querySelector('[data-vr-acc="retire"]').click();
   const openAfter = h.doc.querySelectorAll('[data-vr-acc]')
     .filter(b => b.getAttribute('aria-expanded') === 'true')
     .map(b => b.getAttribute('data-vr-acc'));
-  assert.deepStrictEqual(openAfter, ['reports'], 'Expanding another category collapses the previous one');
-  assert.strictEqual(h.calls.rendered.length, navBefore, 'Clicking accordion header must not trigger navigation');
+  assert.deepStrictEqual(openAfter, ['retire'], 'Expanding another category collapses the previous one');
+  assert.strictEqual(h.calls.rendered.length, navBefore, 'Clicking accordion header must not navigate');
 
-  // Clicking 'reports' again collapses all
-  h.doc.querySelector('[data-vr-acc="reports"]').click();
-  const openNone = h.doc.querySelectorAll('[data-vr-acc]')
-    .filter(b => b.getAttribute('aria-expanded') === 'true');
+  h.doc.querySelector('[data-vr-acc="retire"]').click();
+  const openNone = h.doc.querySelectorAll('[data-vr-acc]').filter(b => b.getAttribute('aria-expanded') === 'true');
   assert.strictEqual(openNone.length, 0, 'Clicking open category collapses it');
 });
 
-test('navigates accurately to destinations (Reports, Policies Reports, Stress Test) and auto-closes drawer', () => {
+test('navigates accurately across Reports, Policies, Stress Test, and Settings sub-tabs and auto-closes drawer', () => {
   const h = makeHarness();
   h.win.VRMobileDrawer.open();
 
@@ -517,15 +567,20 @@ test('navigates accurately to destinations (Reports, Policies Reports, Stress Te
   h.doc.querySelector('[data-vr-nav="st:scenarios"]').click();
   assert.deepStrictEqual(Array.from(h.calls.stressOpened), ['scenarios'], 'Stress Scenarios routes cleanly');
   assert.ok(!h.doc.documentElement.classList.contains('vr-drawer-open'), 'Drawer auto-closes after Stress Test route');
+
+  h.win.VRMobileDrawer.open();
+  h.doc.querySelector('[data-vr-nav="set:appearance"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Settings');
+  assert.ok(h.calls.settingsTabs.includes('appearance'), 'Settings > Appearance selects data-stab="appearance"');
 });
 
-test('displays live Available Funds / Current Corpus in header and routes to Holdings when tapped', () => {
+test('displays stacked Available funds card in drawer header and routes to Holdings when tapped', () => {
   const h = makeHarness();
   h.win.VRMobileDrawer.open();
   const fundsBtn = h.doc.getElementById('vr-drawer-funds');
-  assert.ok(fundsBtn, 'Available Funds summary exists in drawer header');
-  assert.strictEqual(fundsBtn.querySelector('.vr-funds-client').textContent, 'Aarav Mehta');
-  assert.strictEqual(fundsBtn.querySelector('.vr-funds-val').textContent, '\u20B9 2.32 Cr');
+  assert.ok(fundsBtn, 'Available funds card exists in drawer header');
+  assert.strictEqual(fundsBtn.querySelector('.vr-funds-k').textContent, 'Available funds');
+  assert.strictEqual(fundsBtn.querySelector('.vr-funds-val').textContent, '\u20B9 2,32,00,000');
 
   fundsBtn.click();
   assert.strictEqual(h.ctx.UI.tab, 'Holdings');
@@ -535,66 +590,111 @@ test('displays live Available Funds / Current Corpus in header and routes to Hol
 test('handles Android back button (popstate), scrim tap, Escape, and desktop resize (>960px)', () => {
   const h = makeHarness();
 
-  // Android back button
   h.win.VRMobileDrawer.open();
   assert.strictEqual(h.calls.pushedStates.length, 1, 'Opening drawer pushes history state');
   h.dispatchWin('popstate');
   assert.ok(!h.doc.documentElement.classList.contains('vr-drawer-open'), 'popstate closes drawer cleanly');
 
-  // Scrim tap
   h.win.VRMobileDrawer.open();
   h.doc.getElementById('vr-drawer-backdrop').click();
   assert.ok(!h.doc.documentElement.classList.contains('vr-drawer-open'), 'Backdrop tap closes drawer');
 
-  // Escape key
   h.win.VRMobileDrawer.open();
   h.dispatchKey('Escape');
   assert.ok(!h.doc.documentElement.classList.contains('vr-drawer-open'), 'Escape closes drawer');
 
-  // Desktop resize (>960px closes drawer, <=960px keeps it open)
   h.win.VRMobileDrawer.open();
-  h.win.innerWidth = 820; // Tablet
+  h.win.innerWidth = 820;
   h.dispatchWin('resize');
   assert.ok(h.doc.documentElement.classList.contains('vr-drawer-open'), 'Drawer remains open at tablet width 820px');
-  h.win.innerWidth = 1024; // Desktop
+  h.win.innerWidth = 1024;
   h.dispatchWin('resize');
   assert.ok(!h.doc.documentElement.classList.contains('vr-drawer-open'), 'Drawer closes on resize to desktop >=961px');
 });
 
-test('footer Feedback, Contact, Theme toggle, and Sign Out work without window.alert', () => {
+test('mobile drawer 1-row footer (Help, Feedback, Sign out) and top-bar theme toggle work without window.alert', () => {
   const h = makeHarness();
+  assert.ok(h.doc.getElementById('vr-drawer-help'));
+  assert.ok(h.doc.getElementById('vr-drawer-feedback'));
+  assert.ok(h.doc.getElementById('vr-drawer-signout'));
 
-  // Feedback modal
+  // Feedback & Support modal
   h.win.VRMobileDrawer.open();
   h.doc.getElementById('vr-drawer-feedback').click();
-  assert.ok(!h.doc.documentElement.classList.contains('vr-drawer-open'), 'Drawer closes before Feedback modal');
   const dg = h.doc.getElementById('dg');
   assert.strictEqual(dg.open, true, 'Feedback opens inside #dg dialog');
-  assert.ok(dg.querySelector('#vr-fb-form'), 'Feedback form rendered');
-  h.doc.getElementById('vr-fb-msg').value = 'Great drawer spacing';
+  h.doc.getElementById('vr-copy-mail').click();
+  assert.deepStrictEqual(Array.from(h.calls.copied), ['support@vriddhi.app']);
+  h.doc.getElementById('vr-fb-msg').value = 'Matches mockup well';
   dg.querySelector('#vr-fb-form').onsubmit({ preventDefault() {} });
   assert.strictEqual(dg.open, false);
   assert.ok(h.calls.toasts.some(t => /feedback/i.test(t)), 'Feedback shows toast');
 
-  // Contact modal
+  // Footer Help & Sign out
   h.win.VRMobileDrawer.open();
-  h.doc.getElementById('vr-drawer-contact').click();
-  assert.strictEqual(dg.open, true, 'Contact opens inside #dg dialog');
-  h.doc.getElementById('vr-copy-mail').click();
-  assert.deepStrictEqual(h.calls.copied, ['support@vriddhi.app']);
-  h.doc.getElementById('vr-go-help').click();
+  h.doc.getElementById('vr-drawer-help').click();
   assert.strictEqual(h.ctx.UI.tab, 'Help');
 
-  // Theme & Sign Out
   h.win.VRMobileDrawer.open();
-  h.doc.getElementById('vr-drawer-theme').click();
-  assert.strictEqual(h.doc.documentElement.getAttribute('data-theme'), 'dark');
   h.doc.getElementById('vr-drawer-signout').click();
   assert.strictEqual(h.calls.signedOut, 1);
+
+  // Quick header theme toggle
+  h.doc.getElementById('vr-mob-theme-btn').click();
+  assert.strictEqual(h.doc.documentElement.getAttribute('data-theme'), 'dark');
   assert.strictEqual(h.calls.alerts, 0, 'Must never call window.alert');
 });
 
-test('enforces RBAC permissions on accordion groups and Help route keeps categories collapsed', () => {
+test('desktop sidebar renders 5 sections, REPORTS subheader, breadcrumb, single-open accordion, and Help · Sign out footer', () => {
+  const h = makeHarness();
+  h.ctx.UI.tab = 'Reports';
+  h.ctx.UI.rv = 'year';
+  h.win.VRNavSidebar.refresh();
+
+  assert.ok(h.doc.documentElement.classList.contains('vr-side-on'), 'Desktop sidebar enabled when signed in');
+  const side = h.doc.getElementById('vr-side');
+  assert.ok(side && !side.hidden, 'Sidebar rendered and visible');
+
+  // Breadcrumb matches mockup: Goal Planner › Reports › Annual projection
+  const bc = h.doc.getElementById('vr-side-bc');
+  assert.ok(bc && bc.textContent.includes('Goal Planner') && bc.textContent.includes('Reports') && bc.textContent.includes('Annual projection'),
+    'Desktop breadcrumb renders active hierarchy');
+
+  // Subheader REPORTS inside Goal Planner
+  const subhd = side.querySelector('.vr-side-subhd');
+  assert.ok(subhd && subhd.textContent === 'Reports', 'Desktop Goal Planner renders Reports subheader');
+
+  // Single open section (goal) & filled active bar
+  const openTrgs = side.querySelectorAll('[data-side-acc]').filter(b => b.getAttribute('aria-expanded') === 'true');
+  assert.strictEqual(openTrgs.length, 1);
+  assert.strictEqual(openTrgs[0].getAttribute('data-side-acc'), 'goal');
+  const curItem = side.querySelector('.vr-side-item[aria-current="page"]');
+  assert.ok(curItem && curItem.getAttribute('data-side-nav') === 'rv:year');
+
+  // Toggle Stress Test accordion without navigating
+  const rendersBefore = h.calls.rendered.length;
+  side.querySelector('[data-side-acc="stress"]').click();
+  const openNow = side.querySelectorAll('[data-side-acc]')
+    .filter(b => b.getAttribute('aria-expanded') === 'true')
+    .map(b => b.getAttribute('data-side-acc'));
+  assert.deepStrictEqual(openNow, ['stress'], 'Desktop accordion opens one section at a time');
+  assert.strictEqual(h.calls.rendered.length, rendersBefore, 'Accordion click does not navigate');
+
+  // Sidebar footer Advisor name, Help, and Sign out
+  assert.strictEqual(h.doc.getElementById('vr-side-who').textContent, 'Aarav Adviser');
+  assert.strictEqual(side.querySelector('.vr-side-av').textContent, 'A');
+  h.doc.getElementById('vr-side-help').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Help');
+  h.doc.getElementById('vr-side-so').click();
+  assert.strictEqual(h.calls.signedOut, 1);
+
+  // Login dialog hides sidebar
+  h.doc.getElementById('lg').classList.add('on');
+  h.win.VRNavSidebar.refresh();
+  assert.ok(!h.doc.documentElement.classList.contains('vr-side-on'), 'Sidebar disabled on sign-in page');
+});
+
+test('enforces RBAC permissions on shared accordion groups and replaces bottom dock emoji icons', () => {
   const h = makeHarness();
   h.perms.sections['Policies'] = false;
   h.perms.sections['Retirement planner'] = false;
@@ -602,20 +702,12 @@ test('enforces RBAC permissions on accordion groups and Help route keeps categor
   h.perms.users = false;
 
   const restricted = h.win.VRMobileDrawer.getGroups().map(g => g.id);
-  assert.ok(!restricted.includes('policy'), 'Protection hidden when Policies denied');
-  assert.ok(!restricted.includes('retire'), 'Retirement & Stress hidden when denied');
-  assert.strictEqual(h.win.VRMobileDrawer.getGroups().find(g => g.id === 'settings').items.length, 1, 'Users hidden without manage_users');
+  assert.ok(!restricted.includes('policy'), 'Policies hidden when denied');
+  assert.ok(!restricted.includes('retire'), 'Retirement Planner hidden when denied');
+  assert.ok(!restricted.includes('stress'), 'Stress Test hidden when denied');
+  assert.ok(!h.win.VRMobileDrawer.getGroups().find(g => g.id === 'settings').items.some(i => i.id === 'set:Users'),
+    'Users hidden without manage_users');
 
-  // Help tab active -> all 7 accordion categories stay collapsed, footer Help highlighted
-  h.ctx.UI.tab = 'Help';
-  h.win.VRMobileDrawer.open();
-  const expanded = h.doc.querySelectorAll('[data-vr-acc]').filter(b => b.getAttribute('aria-expanded') === 'true');
-  assert.strictEqual(expanded.length, 0, 'All categories collapsed when Help page is active');
-  assert.strictEqual(h.doc.getElementById('vr-drawer-help').getAttribute('aria-current'), 'page');
-});
-
-test('replaces emoji icons inside bottom .rp2-nav bars with stroke-width=1.75 SVGs', () => {
-  const h = makeHarness();
   const spans = h.doc.querySelectorAll('#m .rp2-nav button > span[data-vr-svg="1"]');
   assert.strictEqual(spans.length, 4, 'All 4 bottom nav buttons (including Policies) get SVG icons');
   spans.forEach(sp => {
@@ -623,4 +715,4 @@ test('replaces emoji icons inside bottom .rp2-nav bars with stroke-width=1.75 SV
   });
 });
 
-console.log(`All ${passed} mobile-drawer tests passed.`);
+console.log(`All ${passed} navigation tests passed.`);

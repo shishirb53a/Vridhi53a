@@ -1,9 +1,10 @@
 /* Modern Mobile & Tablet FinTech Navigation System (<= 960px):
    - Mobile phones (<= 600px): ~85-90% slide-out drawer, compact 52px top bar, compact bottom dock
    - Tablets (601px - 960px): adaptive slide-out drawer, 56px single-row header
-   - Desktop (>= 961px): completely untouched (existing navigation preserved)
-   - Flat, low-noise accordion hierarchy (single-open, active-by-default), uniform 18px stroke icons,
-     >= 44px touch targets, Available Funds summary, Feedback/Contact footer, and scroll lock. */
+   - Desktop (>= 961px): mobile drawer hidden (desktop sidebar handled by nav-sidebar.css)
+   - Matches reference GUI: brand header + circular close, stacked Available funds card,
+     5 single-open accordion categories, tinted active/open parent header, solid filled active
+     item pill, uppercase REPORTS subheader, and clean 1-row footer (Help, Feedback, Sign out). */
 
 #vr-mob-menu-btn,
 #vr-mob-theme-btn,
@@ -20,7 +21,7 @@
     overscroll-behavior: none;
   }
 
-  /* Compact Single-Row FinTech Top Bar (overrides base.css 720px/900px rules cleanly) */
+  /* Compact Single-Row FinTech Top Bar */
   html:not(#vrx) body header.hd {
     position: sticky;
     top: 0;
@@ -47,7 +48,7 @@
     margin: 0 !important;
   }
 
-  /* Hide desktop navigation chrome up to 960px (moved into slide-out drawer) */
+  /* Hide desktop navigation chrome up to 960px */
   html:not(#vrx) body header.hd nav#nav,
   html:not(#vrx) body header.hd #settings-menu-wrap,
   html:not(#vrx) body header.hd #so {
@@ -204,9 +205,9 @@
     position: fixed;
     inset: 0;
     z-index: 1990;
-    background: rgba(15, 23, 42, .46);
-    backdrop-filter: blur(2.5px);
-    -webkit-backdrop-filter: blur(2.5px);
+    background: rgba(15, 23, 42, .45);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -220,7 +221,7 @@
     transition: opacity .24s cubic-bezier(.22, 1, .36, 1), visibility 0s linear 0s !important;
   }
 
-  /* Adaptive Drawer Shell (Tablet 601-960px default: 352px max / 50vw) */
+  /* Adaptive Drawer Shell */
   html:not(#vrx) body #vr-drawer {
     display: flex;
     flex-direction: column;
@@ -239,7 +240,7 @@
     background: var(--ds-surface, var(--card)) !important;
     color: var(--tx);
     border-right: 1px solid var(--ds-border, var(--bd));
-    box-shadow: 0 20px 48px rgba(15, 23, 42, .24);
+    box-shadow: 0 20px 48px rgba(15, 23, 42, .22);
     overflow: hidden;
     transform: translate3d(-104%, 0, 0);
     visibility: hidden;
@@ -253,14 +254,13 @@
     transition: transform .26s cubic-bezier(.22, 1, .36, 1), visibility 0s linear 0s !important;
   }
 
-  /* Compact Drawer Header: Profile + Close + Available Funds Strip */
+  /* Compact Drawer Header: Brand + Circular Close + Stacked Available Funds */
   html:not(#vrx) body .vr-drawer-hd {
     flex: none;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 14px 10px;
-    border-bottom: 1px solid var(--ds-border, var(--bd));
+    gap: 12px;
+    padding: 16px 16px 10px;
     background: var(--ds-surface, var(--card));
   }
 
@@ -275,15 +275,15 @@
   html:not(#vrx) body .vr-drawer-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 11px;
     min-width: 0;
     flex: 1;
   }
 
   html:not(#vrx) body .vr-drawer-logo {
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     background: var(--ac);
     display: grid;
     place-items: center;
@@ -298,16 +298,18 @@
 
   html:not(#vrx) body .vr-drawer-title {
     margin: 0;
-    font-size: 15.5px;
+    font-size: 16px;
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1.15;
     color: var(--tx);
   }
 
-  html:not(#vrx) body .vr-drawer-user {
-    font-size: 11.5px;
-    font-weight: 500;
+  html:not(#vrx) body .vr-drawer-sub {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
     color: var(--mu);
     white-space: nowrap;
     overflow: hidden;
@@ -322,9 +324,9 @@
     min-width: 44px;
     min-height: 44px;
     padding: 0 !important;
-    border-radius: 10px !important;
-    border: 1px solid var(--ds-border, var(--bd)) !important;
-    background: var(--ds-surface-2, var(--card)) !important;
+    border-radius: 999px !important;
+    border: 0 !important;
+    background: color-mix(in srgb, var(--tx) 5.5%, var(--ds-surface, var(--card))) !important;
     color: var(--tx) !important;
     display: inline-flex;
     align-items: center;
@@ -335,22 +337,23 @@
   }
 
   html:not(#vrx) body #vr-drawer-close:hover {
-    background: var(--hv) !important;
+    background: color-mix(in srgb, var(--tx) 10%, var(--ds-surface, var(--card))) !important;
   }
 
-  /* Compact Borderless Available Funds / Portfolio Corpus Strip */
+  /* Stacked Available Funds Card */
   html:not(#vrx) body .vr-drawer-funds {
     width: 100%;
-    min-height: 40px;
-    padding: 7px 10px !important;
-    border-radius: 8px !important;
+    min-height: 56px;
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
     border: 0 !important;
-    background: color-mix(in srgb, var(--ac) 7%, var(--ds-surface-2, var(--card))) !important;
+    background: color-mix(in srgb, var(--tx) 4.2%, var(--ds-surface, var(--card))) !important;
     color: var(--tx) !important;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
     text-align: left;
     cursor: pointer;
     box-shadow: none !important;
@@ -362,44 +365,26 @@
   }
 
   html:not(#vrx) body .vr-drawer-funds:not([disabled]):hover {
-    background: color-mix(in srgb, var(--ac) 12%, var(--ds-surface-2, var(--card))) !important;
-  }
-
-  html:not(#vrx) body .vr-funds-meta {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+    background: color-mix(in srgb, var(--tx) 7.5%, var(--ds-surface, var(--card))) !important;
   }
 
   html:not(#vrx) body .vr-funds-k {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 11.5px;
+    font-weight: 500;
     color: var(--mu);
-    line-height: 1.2;
-  }
-
-  html:not(#vrx) body .vr-funds-client {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--tx);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     line-height: 1.25;
   }
 
   html:not(#vrx) body .vr-funds-val {
-    flex: none;
-    font-size: 14px;
+    font-size: 16.5px;
     font-weight: 800;
-    color: var(--ac);
+    color: var(--tx);
     font-variant-numeric: tabular-nums;
-    white-space: nowrap;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
   }
 
-  /* Independent Vertical Scrolling Body — Flat Accordion List (Zero Nested Card Boxes) */
+  /* Independent Vertical Scrolling Body */
   html:not(#vrx) body .vr-drawer-body {
     flex: 1 1 auto;
     min-height: 0;
@@ -407,30 +392,26 @@
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 4px 0;
+    padding: 6px 14px 12px;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 2px;
   }
 
   html:not(#vrx) body .vr-acc-group {
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid var(--ds-border-subtle, var(--bd));
+    border-bottom: 0;
     background: transparent;
   }
 
-  html:not(#vrx) body .vr-acc-group:last-child {
-    border-bottom: 0;
-  }
-
-  /* Accordion Parent Row (>= 44px touch target, never highlights entire box) */
+  /* Accordion Parent Row (>= 44px touch target) */
   html:not(#vrx) body .vr-acc-trigger {
     width: 100%;
     min-height: 44px;
-    padding: 9px 14px !important;
+    padding: 8px 12px !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: 10px !important;
     background: transparent !important;
     color: var(--tx) !important;
     display: flex;
@@ -438,15 +419,22 @@
     justify-content: space-between;
     gap: 10px;
     text-align: left;
-    font-size: 13.5px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     box-shadow: none !important;
     transition: background .14s ease, color .14s ease !important;
   }
 
   html:not(#vrx) body .vr-acc-trigger:hover {
-    background: color-mix(in srgb, var(--tx) 4%, transparent) !important;
+    background: color-mix(in srgb, var(--ac) 6%, transparent) !important;
+  }
+
+  /* Tinted header when expanded or containing active page */
+  html:not(#vrx) body .vr-acc-group.is-open > .vr-acc-trigger,
+  html:not(#vrx) body .vr-acc-group.has-active > .vr-acc-trigger {
+    background: color-mix(in srgb, var(--ac) 11%, transparent) !important;
+    color: var(--ac) !important;
   }
 
   html:not(#vrx) body .vr-acc-lead {
@@ -468,6 +456,7 @@
     transition: color .14s ease !important;
   }
 
+  html:not(#vrx) body .vr-acc-group.is-open .vr-acc-ic,
   html:not(#vrx) body .vr-acc-group.has-active .vr-acc-ic {
     color: var(--ac);
   }
@@ -481,26 +470,18 @@
   html:not(#vrx) body .vr-acc-trail {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
     flex: none;
     color: var(--mu);
   }
 
-  html:not(#vrx) body .vr-acc-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 99px;
-    background: var(--ac);
-    display: none;
-  }
-
-  html:not(#vrx) body .vr-acc-group.has-active .vr-acc-trigger[aria-expanded="false"] .vr-acc-dot {
-    display: inline-block;
+  html:not(#vrx) body .vr-acc-group.is-open .vr-acc-trail,
+  html:not(#vrx) body .vr-acc-group.has-active .vr-acc-trail {
+    color: var(--ac);
   }
 
   html:not(#vrx) body .vr-acc-chev {
     display: block;
-    transition: transform .22s cubic-bezier(.22, 1, .36, 1) !important;
+    transition: transform .2s cubic-bezier(.22, 1, .36, 1) !important;
   }
 
   html:not(#vrx) body .vr-acc-trigger[aria-expanded="true"] .vr-acc-chev {
@@ -512,7 +493,7 @@
     display: grid;
     grid-template-rows: 0fr;
     opacity: 0;
-    transition: grid-template-rows .22s cubic-bezier(.22, 1, .36, 1), opacity .18s ease !important;
+    transition: grid-template-rows .2s cubic-bezier(.22, 1, .36, 1), opacity .16s ease !important;
   }
 
   html:not(#vrx) body .vr-acc-panel.is-open {
@@ -525,29 +506,35 @@
     min-height: 0;
   }
 
-  /* Compact Child Menu Items (No Nested Cards or Icon Boxes) */
+  /* Compact Child Menu Items + REPORTS Subheader */
   html:not(#vrx) body .vr-acc-list {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: 2px 10px 8px 14px;
+    padding: 4px 0 6px;
     margin: 0;
-    border-left: 0;
+  }
+
+  html:not(#vrx) body .vr-acc-subhd {
+    padding: 10px 14px 4px 41px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--mu);
+    line-height: 1.2;
   }
 
   html:not(#vrx) body .vr-nav-item {
-    position: relative;
     width: 100%;
     min-height: 44px;
-    padding: 8px 12px 8px 28px !important;
-    border-radius: 8px !important;
+    padding: 0 14px 0 41px !important;
+    border-radius: 10px !important;
     border: 0 !important;
     background: transparent !important;
-    color: var(--mu) !important;
+    color: var(--tx) !important;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
     text-align: left;
     font-size: 13.5px;
     font-weight: 500;
@@ -557,27 +544,7 @@
   }
 
   html:not(#vrx) body .vr-nav-item:hover {
-    background: color-mix(in srgb, var(--tx) 4.5%, transparent) !important;
-    color: var(--tx) !important;
-  }
-
-  html:not(#vrx) body .vr-nav-item-lead {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    flex: 1;
-  }
-
-  html:not(#vrx) body .vr-nav-ic {
-    width: 18px;
-    height: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: none;
-    color: currentColor;
-    opacity: .78;
+    background: color-mix(in srgb, var(--ac) 7%, transparent) !important;
   }
 
   html:not(#vrx) body .vr-nav-lbl {
@@ -586,65 +553,43 @@
     text-overflow: ellipsis;
   }
 
-  /* Active Page Indicator: Subtle Tint + Crisp 3px Left Accent Bar */
+  /* Solid Filled Pill = Current Page */
   html:not(#vrx) body .vr-nav-item[aria-current="page"] {
-    background: color-mix(in srgb, var(--ac) 11%, transparent) !important;
-    color: var(--ac) !important;
-    font-weight: 700 !important;
-  }
-
-  html:not(#vrx) body .vr-nav-item[aria-current="page"] .vr-nav-ic {
-    opacity: 1;
-  }
-
-  html:not(#vrx) body .vr-nav-item[aria-current="page"]::before {
-    content: "";
-    position: absolute;
-    left: 8px;
-    top: 8px;
-    bottom: 8px;
-    width: 3px;
-    border-radius: 99px;
-    background: var(--ac);
+    background: var(--ac) !important;
+    color: var(--ac2, #fff) !important;
+    font-weight: 600 !important;
   }
 
   /* Honours Settings -> Appearance: Icons Off */
   html[data-uic="off"]:not(#vrx) body .vr-acc-ic,
-  html[data-uic="off"]:not(#vrx) body .vr-nav-ic,
   html[data-uic="off"]:not(#vrx) body .rp2-nav button > span:first-child {
     display: none !important;
   }
 
-  /* Compact Non-Overlapping Footer: Secondary Support Links + Theme & Sign Out */
+  /* Clean 1-Row Footer: Help | Feedback | Sign out */
   html:not(#vrx) body .vr-drawer-ft {
     flex: none;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 14px calc(10px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--ds-border, var(--bd));
     background: var(--ds-surface, var(--card));
   }
 
-  html:not(#vrx) body .vr-drawer-ft-links {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 4px;
-  }
-
   html:not(#vrx) body .vr-drawer-link {
-    min-height: 40px;
-    padding: 4px 6px !important;
+    min-height: 44px;
+    padding: 0 10px !important;
     border-radius: 8px !important;
     border: 0 !important;
     background: transparent !important;
-    color: var(--mu) !important;
-    font-size: 12px;
+    color: var(--tx) !important;
+    font-size: 13.5px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
     cursor: pointer;
     white-space: nowrap;
     box-shadow: none !important;
@@ -657,38 +602,9 @@
     color: var(--ac) !important;
   }
 
-  html:not(#vrx) body .vr-drawer-ft-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  html:not(#vrx) body .vr-drawer-ft-btn {
-    min-height: 44px;
-    padding: 0 10px !important;
-    border-radius: 9px !important;
-    border: 1px solid var(--ds-border, var(--bd)) !important;
-    background: var(--ds-surface-2, var(--card)) !important;
-    color: var(--tx) !important;
-    font-size: 12.5px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: none !important;
-    transition: background .14s ease, border-color .14s ease !important;
-  }
-
-  html:not(#vrx) body .vr-drawer-ft-btn:hover {
-    background: var(--hv) !important;
-  }
-
-  html:not(#vrx) body .vr-drawer-ft-btn.is-danger {
+  html:not(#vrx) body .vr-drawer-link.is-danger:hover {
+    background: color-mix(in srgb, var(--er) 10%, transparent) !important;
     color: var(--er) !important;
-    border-color: color-mix(in srgb, var(--er) 26%, var(--ds-border, var(--bd))) !important;
   }
 
   /* Feedback & Contact Modal Content inside #dg */
@@ -815,28 +731,30 @@
   }
 
   html:not(#vrx) body .vr-drawer-hd {
-    padding: 10px 10px 8px;
-    gap: 6px;
+    padding: 12px 12px 8px;
+    gap: 8px;
+  }
+
+  html:not(#vrx) body .vr-drawer-body {
+    padding: 4px 10px 10px;
   }
 
   html:not(#vrx) body .vr-acc-trigger {
     padding: 8px 10px !important;
-    font-size: 13px;
+    font-size: 13.5px;
   }
 
   html:not(#vrx) body .vr-nav-item {
-    padding: 7px 10px 7px 24px !important;
-    font-size: 12.5px;
+    padding: 0 12px 0 36px !important;
+    font-size: 13px;
+  }
+
+  html:not(#vrx) body .vr-acc-subhd {
+    padding-left: 36px;
   }
 
   html:not(#vrx) body .vr-drawer-ft {
-    padding: 7px 10px calc(8px + env(safe-area-inset-bottom, 0px));
-    gap: 6px;
-  }
-
-  html:not(#vrx) body .vr-drawer-link {
-    font-size: 11.5px;
-    padding: 4px !important;
+    padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px));
   }
 
   html:not(#vrx) body header.hd #fhp {
@@ -852,35 +770,30 @@
 /* Landscape Mobile & Short Viewports */
 @media (max-width: 960px) and (max-height: 520px) {
   html:not(#vrx) body .vr-drawer-hd {
-    padding: 7px 12px;
-    gap: 5px;
+    padding: 8px 12px 6px;
+    gap: 6px;
   }
 
   html:not(#vrx) body .vr-drawer-funds {
-    min-height: 34px;
-    padding: 5px 8px !important;
+    min-height: 44px;
+    padding: 6px 12px !important;
   }
 
   html:not(#vrx) body .vr-acc-trigger {
     min-height: 40px;
-    padding: 6px 12px !important;
+    padding: 6px 10px !important;
   }
 
   html:not(#vrx) body .vr-nav-item {
-    min-height: 40px;
-    padding: 6px 10px 6px 26px !important;
+    min-height: 38px;
+    padding: 0 12px 0 38px !important;
   }
 
   html:not(#vrx) body .vr-drawer-ft {
-    padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px));
-    gap: 5px;
+    padding: 4px 12px calc(6px + env(safe-area-inset-bottom, 0px));
   }
 
   html:not(#vrx) body .vr-drawer-link {
-    min-height: 36px;
-  }
-
-  html:not(#vrx) body .vr-drawer-ft-btn {
     min-height: 40px;
   }
 }
@@ -897,7 +810,6 @@
   html:not(#vrx) body .vr-nav-item,
   html:not(#vrx) body .vr-drawer-funds,
   html:not(#vrx) body .vr-drawer-link,
-  html:not(#vrx) body .vr-drawer-ft-btn,
   html:not(#vrx) body .rp2-nav button {
     transition-duration: 0.01ms !important;
   }
