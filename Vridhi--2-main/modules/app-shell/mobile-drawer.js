@@ -471,8 +471,10 @@
     closeDrawer(false);
     try {
       if (kind === "gp") {
-        var gpBtn = document.querySelector('#m [data-gptab="' + val + '"]');
-        if (gpBtn) { gpBtn.click(); return; }
+        /* Route from application state instead of simulating a click on a rendered tab.
+           The target tab can be hidden/replaced during report rendering, which made
+           sidebar navigation dependent on stale DOM elements. */
+        if (["Dashboard", "Holdings", "Reports"].indexOf(val) < 0) return;
         if (typeof UI !== "undefined" && typeof render === "function") {
           UI.tab = val;
           render();
@@ -481,15 +483,24 @@
         }
       }
       if (kind === "rv") {
-        var rvBtn = document.querySelector('#m [data-rv="' + val + '"]');
-        if (rvBtn) { rvBtn.click(); return; }
+        /* Report navigation is state-driven. Do not click a possibly hidden/stale
+           [data-rv] control inside the Reports dock; render the requested view directly. */
+        var reportViews = window.RV_VIEWS || [
+          ["year"], ["month"], ["int"], ["sav"], ["ent"], ["vdate"], ["hold"]
+        ];
+        if (!reportViews.some(function (view) { return view && view[0] === val; })) return;
         if (typeof UI !== "undefined" && typeof render === "function") {
-          UI.tab = "Reports";
-          UI.rv = val;
-          UI.sel = null;
-          UI.rk = "a";
-          UI.rd = 1;
-          UI.rq = "";
+          if (val === "hold") {
+            UI.tab = "Holdings";
+          } else {
+            UI.tab = "Reports";
+            UI.rv = val;
+            UI.sel = null;
+            UI.rk = "a";
+            UI.rd = 1;
+            UI.rq = "";
+            UI.msd = null;
+          }
           render();
           if (window.scrollTo) window.scrollTo(0, 0);
           return;
