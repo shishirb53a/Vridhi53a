@@ -1,31 +1,36 @@
-/* Modern Mobile FinTech UI Controller:
-   - Mobile header drawer trigger & quick Light/Dark toggle (<= 720px)
-   - Slide-out modal navigation drawer with focus trap, Escape, scrim & smooth animation
-   - Accordion-based menu hierarchy filtered by RBAC permissions
-   - Uniform stroke-width=1.75 SVG icons across drawer & fixed bottom action bars */
+/* Modern Mobile & Tablet FinTech Navigation Controller (<= 960px):
+   - Compact single-row top bar trigger & quick Light/Dark mode toggle
+   - Slide-out modal navigation drawer (~85-90% mobile width, adaptive tablet width)
+   - Single-open accordion hierarchy collapsed by default except active category
+   - Compact header profile + live Available Funds corpus strip
+   - Compact non-overlapping footer with Help, Feedback, Contact, Theme & Sign Out
+   - Focus trap, Escape, scrim tap, swipe-to-close, background scroll lock & Android back button
+   - Uniform 18px stroke-width=1.75 SVG icons across drawer & bottom docks */
 (function () {
   "use strict";
 
-  var SW = '1.75';
+  var SW = "1.75";
   function ic(size, body) {
     return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size +
       '" fill="none" stroke="currentColor" stroke-width="' + SW +
       '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
-      body + '</svg>';
+      body + "</svg>";
   }
 
   var ICONS = {
-    menu: ic(20, '<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>'),
-    close: ic(20, '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'),
-    chev: '<svg class="vr-acc-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>',
+    menu: ic(18, '<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>'),
+    close: ic(18, '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'),
+    chev: '<svg class="vr-acc-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>',
     sun: ic(18, '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>'),
     moon: ic(18, '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'),
     signout: ic(18, '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>'),
-    goalGroup: ic(20, '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>'),
-    retireGroup: ic(20, '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>'),
-    policyGroup: ic(20, '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>'),
-    accountGroup: ic(20, '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.79 1 1.44 1.07H21a2 2 0 1 1 0 4h-.09c-.65.07-1.18.47-1.51 1Z"/>'),
-    summary: ic(18, '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
+    dashboard: ic(18, '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
+    investments: ic(18, '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>'),
+    savings: ic(18, '<path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/><circle cx="15" cy="11" r="1"/>'),
+    retire: ic(18, '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>'),
+    policy: ic(18, '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>'),
+    reports: ic(18, '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'),
+    settings: ic(18, '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.79 1 1.44 1.07H21a2 2 0 1 1 0 4h-.09c-.65.07-1.18.47-1.51 1Z"/>'),
     holdings: ic(18, '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'),
     barChart: ic(18, '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>'),
     calendar: ic(18, '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
@@ -39,16 +44,20 @@
     sliders: ic(18, '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>'),
     engine: ic(18, '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'),
     shield: ic(18, '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'),
-    help: ic(18, '<circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'),
-    file: ic(18, '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'),
+    help: ic(16, '<circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'),
+    feedback: ic(16, '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
+    contact: ic(16, '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'),
     edit: ic(18, '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>'),
     target: ic(18, '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>')
   };
 
-  var expandedGroups = {};
+  var openGroup = null;
   var drawerOpen = false;
   var lastFocused = null;
   var activeStTab = "overview";
+  var activePolPage = "list";
+  var hasHistoryEntry = false;
+  var ignoringPop = 0;
 
   function canAccess(tab) {
     try {
@@ -60,6 +69,15 @@
       var sw = document.getElementById("settings-menu-wrap");
       return !sw || !sw.hidden;
     }
+    return true;
+  }
+
+  function allowData() {
+    try {
+      if (window.VR_PROD && window.VR_ACCESS && typeof canReadData === "function") {
+        return !!canReadData();
+      }
+    } catch (e) {}
     return true;
   }
 
@@ -81,113 +99,159 @@
     var tab = ui ? ui.tab : "Dashboard";
     var rv = ui && ui.rv ? ui.rv : "year";
     var rp = window.RPUI || { tab: "status", rv: "clients" };
+
     var stBtn = document.querySelector('#m [data-st-tab][aria-selected="true"]');
     if (stBtn) activeStTab = stBtn.getAttribute("data-st-tab") || "overview";
 
-    if (tab === "Dashboard") return { id: "gp:Dashboard", group: "goal", title: "Goal Planner · Summary" };
-    if (tab === "Holdings") return { id: "gp:Holdings", group: "goal", title: "Goal Planner · Holdings" };
+    var polBtn = document.querySelector('#m [data-vpp][aria-current="page"], #m [data-vpp][aria-pressed="true"]');
+    if (polBtn) activePolPage = polBtn.getAttribute("data-vpp") || "list";
+
+    if (tab === "Dashboard") return { id: "gp:Dashboard", group: "dashboard", title: "Dashboard · Summary" };
+    if (tab === "Holdings") return { id: "gp:Holdings", group: "investments", title: "Investments · Holdings" };
     if (tab === "Reports") {
-      var rvTitles = {
-        year: "Annual Projection",
-        month: "Monthly Projection",
-        int: "Interest & Income",
-        sav: "Savings Schedule",
-        ent: "Holdings Register",
-        vdate: "Value on Date"
-      };
-      return { id: "rv:" + rv, group: "goal", title: "Reports · " + (rvTitles[rv] || "Reports") };
+      if (rv === "ent") return { id: "rv:ent", group: "investments", title: "Investments · Holdings register" };
+      if (rv === "vdate") return { id: "rv:vdate", group: "investments", title: "Investments · Value on Date" };
+      if (rv === "sav") return { id: "rv:sav", group: "savings", title: "Savings · Savings schedule" };
+      if (rv === "int") return { id: "rv:int", group: "savings", title: "Savings · Interest and income" };
+      if (rv === "month") return { id: "rv:month", group: "reports", title: "Reports · Monthly Projection" };
+      return { id: "rv:year", group: "reports", title: "Reports · Annual Projection" };
     }
     if (tab === "Retirement planner" || tab === "RP Reports") {
       if (rp.tab === "report") {
-        if (rp.rv === "yy") return { id: "rp:yy", group: "retire", title: "Retirement · Year-by-Year" };
-        return { id: "rp:clients", group: "retire", title: "Retirement · Client Plans" };
+        if (rp.rv === "yy") return { id: "rp:yy", group: "reports", title: "Reports · Year by Year" };
+        return { id: "rp:clients", group: "reports", title: "Reports · Clients" };
       }
       return { id: "rp:status", group: "retire", title: "Retirement Planner" };
     }
     if (tab === "Stress Test") {
       var stTitles = {
-        overview: "Overview",
-        scenarios: "Scenarios Report",
+        overview: "Summary",
+        scenarios: "Scenarios",
         settings: "Stress Settings",
         engine: "Engine & Notes"
       };
-      return { id: "st:" + activeStTab, group: "retire", title: "Stress Test · " + (stTitles[activeStTab] || "Overview") };
+      return { id: "st:" + activeStTab, group: "retire", title: "Stress Test · " + (stTitles[activeStTab] || "Summary") };
     }
-    if (tab === "Policies") return { id: "tab:Policies", group: "policy", title: "Insurance Policies" };
-    if (tab === "Settings") return { id: "set:Settings", group: "account", title: "Settings" };
-    if (tab === "Help") return { id: "set:Help", group: "account", title: "Help & Guide" };
-    if (tab === "Users") return { id: "set:Users", group: "account", title: "User Management" };
-    return { id: "gp:Dashboard", group: "goal", title: tab || "Vriddhi" };
+    if (tab === "Policies") {
+      return activePolPage === "rep"
+        ? { id: "pol:rep", group: "policy", title: "Protection · Reports" }
+        : { id: "pol:list", group: "policy", title: "Protection · Policies" };
+    }
+    if (tab === "Settings") return { id: "set:Settings", group: "settings", title: "Settings" };
+    if (tab === "Users") return { id: "set:Users", group: "settings", title: "Settings · Users" };
+    if (tab === "Help") return { id: "set:Help", group: null, title: "Help & FAQ" };
+    return { id: "gp:Dashboard", group: "dashboard", title: tab || "Vriddhi" };
   }
 
   function buildGroups() {
     var groups = [];
-    if (canAccess("Goal Planner")) {
+    var dataOk = allowData();
+
+    if (dataOk && canAccess("Goal Planner")) {
       groups.push({
-        id: "goal",
-        label: "Goal Planner",
-        icon: ICONS.goalGroup,
+        id: "dashboard",
+        label: "Dashboard",
+        icon: ICONS.dashboard,
         items: [
-          { id: "gp:Dashboard", label: "Summary", icon: ICONS.summary },
-          { id: "gp:Holdings", label: "Portfolio Holdings", icon: ICONS.holdings },
-          { id: "rv:year", label: "Annual Projection", icon: ICONS.barChart },
-          { id: "rv:month", label: "Monthly Projection", icon: ICONS.calendar },
-          { id: "rv:int", label: "Interest & Income", icon: ICONS.percent },
-          { id: "rv:sav", label: "Savings Schedule", icon: ICONS.layers },
-          { id: "rv:ent", label: "Holdings Register", icon: ICONS.list },
+          { id: "gp:Dashboard", label: "Summary", icon: ICONS.dashboard }
+        ]
+      });
+      groups.push({
+        id: "investments",
+        label: "Investments",
+        icon: ICONS.investments,
+        items: [
+          { id: "gp:Holdings", label: "Holdings", icon: ICONS.holdings },
+          { id: "rv:ent", label: "Holdings register", icon: ICONS.list },
           { id: "rv:vdate", label: "Value on Date", icon: ICONS.clock }
         ]
       });
+      groups.push({
+        id: "savings",
+        label: "Savings",
+        icon: ICONS.savings,
+        items: [
+          { id: "rv:sav", label: "Savings schedule", icon: ICONS.layers },
+          { id: "rv:int", label: "Interest and income", icon: ICONS.percent }
+        ]
+      });
     }
-    if (canAccess("Retirement planner")) {
-      var retItems = [
-        { id: "rp:status", label: "Retirement Summary", icon: ICONS.summary },
-        { id: "rp:clients", label: "Client Plans", icon: ICONS.users },
-        { id: "rp:yy", label: "Year-by-Year Cashflow", icon: ICONS.pulse }
-      ];
+
+    if (dataOk && (canAccess("Retirement planner") || (hasModule("Stress Test") && canAccess("Stress Test")))) {
+      var retItems = [];
+      if (canAccess("Retirement planner")) {
+        retItems.push({ id: "rp:status", label: "Retirement Planner", icon: ICONS.retire });
+      }
       if (hasModule("Stress Test") && canAccess("Stress Test")) {
         retItems.push(
-          { id: "st:overview", label: "Stress Test Overview", icon: ICONS.pulse },
-          { id: "st:scenarios", label: "Stress Scenarios Report", icon: ICONS.table },
+          { id: "st:overview", label: "Summary", icon: ICONS.pulse },
+          { id: "st:scenarios", label: "Scenarios", icon: ICONS.table },
           { id: "st:settings", label: "Stress Settings", icon: ICONS.sliders },
           { id: "st:engine", label: "Engine & Notes", icon: ICONS.engine }
         );
       }
-      groups.push({
-        id: "retire",
-        label: "Retirement & Stress",
-        icon: ICONS.retireGroup,
-        items: retItems
-      });
+      if (retItems.length) {
+        groups.push({
+          id: "retire",
+          label: "Retirement & Stress",
+          icon: ICONS.retire,
+          items: retItems
+        });
+      }
     }
-    if (hasModule("Policies") && canAccess("Policies")) {
+
+    if (dataOk && hasModule("Policies") && canAccess("Policies")) {
       groups.push({
         id: "policy",
         label: "Protection",
-        icon: ICONS.policyGroup,
+        icon: ICONS.policy,
         items: [
-          { id: "tab:Policies", label: "Insurance Policies", icon: ICONS.shield }
+          { id: "pol:list", label: "Policies", icon: ICONS.shield },
+          { id: "pol:rep", label: "Reports", icon: ICONS.reports }
         ]
       });
     }
-    var accItems = [];
+
+    if (dataOk && (canAccess("Goal Planner") || canAccess("Retirement planner"))) {
+      var repItems = [];
+      if (canAccess("Goal Planner")) {
+        repItems.push(
+          { id: "rv:year", label: "Annual Portfolio Projection", icon: ICONS.barChart },
+          { id: "rv:month", label: "Monthly Portfolio Projection", icon: ICONS.calendar }
+        );
+      }
+      if (canAccess("Retirement planner")) {
+        repItems.push(
+          { id: "rp:clients", label: "Clients", icon: ICONS.users },
+          { id: "rp:yy", label: "Year by Year", icon: ICONS.pulse }
+        );
+      }
+      if (repItems.length) {
+        groups.push({
+          id: "reports",
+          label: "Reports",
+          icon: ICONS.reports,
+          items: repItems
+        });
+      }
+    }
+
+    var setItems = [];
     if (canAccess("Settings")) {
-      accItems.push(
-        { id: "set:Settings", label: "Settings & Appearance", icon: ICONS.sliders },
-        { id: "set:Help", label: "Help & Guide", icon: ICONS.help }
-      );
+      setItems.push({ id: "set:Settings", label: "Settings", icon: ICONS.sliders });
     }
     if (allowUsers()) {
-      accItems.push({ id: "set:Users", label: "User Management", icon: ICONS.users });
+      setItems.push({ id: "set:Users", label: "Users", icon: ICONS.users });
     }
-    if (accItems.length) {
+    if (setItems.length) {
       groups.push({
-        id: "account",
-        label: "Account & Preferences",
-        icon: ICONS.accountGroup,
-        items: accItems
+        id: "settings",
+        label: "Settings",
+        icon: ICONS.settings,
+        items: setItems
       });
     }
+
     return groups;
   }
 
@@ -195,6 +259,55 @@
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
+  }
+
+  function formatAmt(n) {
+    try {
+      if (typeof cr === "function") return cr(n);
+      if (typeof f === "function") return f(n);
+    } catch (e) {}
+    var v = Math.round(Number(n) || 0);
+    return "\u20B9 " + v.toLocaleString("en-IN");
+  }
+
+  function computeFundsSummary() {
+    var clientName = "Portfolio";
+    var totalVal = null;
+    try {
+      if (typeof window.gppActiveName === "function") {
+        var nm = window.gppActiveName();
+        if (nm) clientName = String(nm).trim();
+      }
+    } catch (e) {}
+
+    if (allowData()) {
+      try {
+        if (typeof S !== "undefined" && S && Array.isArray(S.assets)) {
+          if (clientName === "Portfolio" && S.members && S.members[0] && S.members[0].name) {
+            clientName = String(S.members[0].name).trim();
+          }
+          if (S.assets.length === 0) {
+            totalVal = 0;
+          } else if (typeof calc === "function") {
+            var res = calc(S);
+            if (res && res.rows && res.rows[0] && typeof res.rows[0].tot === "number") {
+              totalVal = res.rows[0].tot;
+            }
+          }
+          if (totalVal === null) {
+            totalVal = S.assets.reduce(function (sum, a) {
+              return sum + (Number(a && a.value) || 0);
+            }, 0);
+          }
+        }
+      } catch (e) {}
+    }
+
+    return {
+      client: clientName,
+      formatted: totalVal !== null ? formatAmt(totalVal) : "\u2014",
+      interactive: allowData() && canAccess("Goal Planner")
+    };
   }
 
   function isDarkNow() {
@@ -256,7 +369,7 @@
     if (tBtn) tBtn.hidden = !signedIn;
     if (sub) {
       var cur = currentRoute();
-      sub.textContent = signedIn ? cur.title : "Plan · Track · Retire";
+      sub.textContent = signedIn ? cur.title : "Plan \u00B7 Track \u00B7 Retire";
     }
     if (!signedIn && drawerOpen) closeDrawer(false);
   }
@@ -266,38 +379,36 @@
     if (!body) return;
     var cur = currentRoute();
     var groups = buildGroups();
-    if (expandedGroups[cur.group] === undefined) expandedGroups[cur.group] = true;
 
     body.innerHTML = groups.map(function (g) {
       var hasActive = g.items.some(function (it) { return it.id === cur.id; });
-      var isOpen = expandedGroups[g.id] !== undefined ? !!expandedGroups[g.id] : hasActive;
+      var isOpen = openGroup === g.id;
       var panelId = "vr-acc-panel-" + g.id;
       return '<section class="vr-acc-group' + (hasActive ? " has-active" : "") + '" data-vr-group="' + g.id + '">' +
         '<button type="button" class="vr-acc-trigger" aria-expanded="' + isOpen + '" aria-controls="' + panelId + '" data-vr-acc="' + g.id + '">' +
           '<span class="vr-acc-lead">' +
-            '<span class="vr-acc-ic" aria-hidden="true">' + g.icon + '</span>' +
-            '<span class="vr-acc-lbl">' + esc(g.label) + '</span>' +
-          '</span>' +
+            '<span class="vr-acc-ic" aria-hidden="true">' + g.icon + "</span>" +
+            '<span class="vr-acc-lbl">' + esc(g.label) + "</span>" +
+          "</span>" +
           '<span class="vr-acc-trail" aria-hidden="true">' +
             '<span class="vr-acc-dot"></span>' +
             ICONS.chev +
-          '</span>' +
-        '</button>' +
+          "</span>" +
+        "</button>" +
         '<div id="' + panelId + '" class="vr-acc-panel' + (isOpen ? " is-open" : "") + '" aria-hidden="' + (!isOpen) + '">' +
           '<div class="vr-acc-inner"><div class="vr-acc-list" role="group" aria-label="' + esc(g.label) + '">' +
             g.items.map(function (it) {
               var on = it.id === cur.id;
-              return '<button type="button" class="vr-nav-item" data-vr-nav="' + esc(it.id) + '"' + (on ? ' aria-current="page"' : "") + '>' +
+              return '<button type="button" class="vr-nav-item" data-vr-nav="' + esc(it.id) + '"' + (on ? ' aria-current="page"' : "") + ">" +
                 '<span class="vr-nav-item-lead">' +
-                  '<span class="vr-nav-ic" aria-hidden="true">' + it.icon + '</span>' +
-                  '<span class="vr-nav-lbl">' + esc(it.label) + '</span>' +
-                '</span>' +
-                '<span class="vr-nav-check" aria-hidden="true"></span>' +
-              '</button>';
+                  '<span class="vr-nav-ic" aria-hidden="true">' + it.icon + "</span>" +
+                  '<span class="vr-nav-lbl">' + esc(it.label) + "</span>" +
+                "</span>" +
+              "</button>";
             }).join("") +
-          '</div></div>' +
-        '</div>' +
-      '</section>';
+          "</div></div>" +
+        "</div>" +
+      "</section>";
     }).join("");
 
     var whoEl = document.getElementById("who");
@@ -306,7 +417,40 @@
       var whoTxt = whoEl && !whoEl.hidden ? (whoEl.textContent || "").trim() : "";
       userEl.textContent = whoTxt || "Wealth & Retirement Workspace";
     }
+
+    var fundsBtn = document.getElementById("vr-drawer-funds");
+    if (fundsBtn) {
+      var summary = computeFundsSummary();
+      fundsBtn.disabled = !summary.interactive;
+      var clEl = fundsBtn.querySelector(".vr-funds-client");
+      var vlEl = fundsBtn.querySelector(".vr-funds-val");
+      if (clEl) clEl.textContent = summary.client;
+      if (vlEl) vlEl.textContent = summary.formatted;
+    }
+
+    var helpLink = document.getElementById("vr-drawer-help");
+    if (helpLink) {
+      if (cur.id === "set:Help") helpLink.setAttribute("aria-current", "page");
+      else helpLink.removeAttribute("aria-current");
+      helpLink.hidden = !canAccess("Settings");
+    }
+
     syncThemeUI();
+  }
+
+  function applyAccordionState() {
+    var body = document.getElementById("vr-drawer-body");
+    if (!body) return;
+    body.querySelectorAll("[data-vr-acc]").forEach(function (btn) {
+      var gId = btn.getAttribute("data-vr-acc");
+      var isOpen = openGroup === gId;
+      btn.setAttribute("aria-expanded", String(isOpen));
+      var panel = document.getElementById("vr-acc-panel-" + gId);
+      if (panel) {
+        panel.classList.toggle("is-open", isOpen);
+        panel.setAttribute("aria-hidden", String(!isOpen));
+      }
+    });
   }
 
   function openDrawer() {
@@ -316,21 +460,28 @@
     var mBtn = document.getElementById("vr-mob-menu-btn");
     if (!drawer || !backdrop) return;
     lastFocused = document.activeElement;
-    var cur = currentRoute();
-    expandedGroups[cur.group] = true;
+    openGroup = currentRoute().group;
     renderDrawerBody();
     drawerOpen = true;
     document.documentElement.classList.add("vr-drawer-open");
     drawer.setAttribute("aria-hidden", "false");
     backdrop.setAttribute("aria-hidden", "false");
     if (mBtn) mBtn.setAttribute("aria-expanded", "true");
+
+    try {
+      if (window.history && typeof window.history.pushState === "function") {
+        window.history.pushState({ vrDrawer: true }, "");
+        hasHistoryEntry = true;
+      }
+    } catch (e) {}
+
     var targetFocus = drawer.querySelector('.vr-nav-item[aria-current="page"]') || document.getElementById("vr-drawer-close");
     if (targetFocus && targetFocus.focus) {
       setTimeout(function () { if (drawerOpen) targetFocus.focus(); }, 30);
     }
   }
 
-  function closeDrawer(restoreFocus) {
+  function closeDrawer(restoreFocus, fromPopState) {
     if (!drawerOpen) return;
     var drawer = document.getElementById("vr-drawer");
     var backdrop = document.getElementById("vr-drawer-backdrop");
@@ -340,6 +491,19 @@
     if (drawer) drawer.setAttribute("aria-hidden", "true");
     if (backdrop) backdrop.setAttribute("aria-hidden", "true");
     if (mBtn) mBtn.setAttribute("aria-expanded", "false");
+
+    if (hasHistoryEntry) {
+      hasHistoryEntry = false;
+      if (!fromPopState && window.history && typeof window.history.back === "function") {
+        try {
+          ignoringPop++;
+          window.history.back();
+        } catch (e) {
+          ignoringPop = Math.max(0, ignoringPop - 1);
+        }
+      }
+    }
+
     if (restoreFocus !== false) {
       var ret = (mBtn && !mBtn.hidden) ? mBtn : lastFocused;
       if (ret && ret.focus) ret.focus();
@@ -357,7 +521,7 @@
         if (typeof UI !== "undefined" && typeof render === "function") {
           UI.tab = val;
           render();
-          window.scrollTo(0, 0);
+          if (window.scrollTo) window.scrollTo(0, 0);
           return;
         }
       }
@@ -372,7 +536,7 @@
           UI.rd = 1;
           UI.rq = "";
           render();
-          window.scrollTo(0, 0);
+          if (window.scrollTo) window.scrollTo(0, 0);
           return;
         }
       }
@@ -386,31 +550,33 @@
         if (typeof UI !== "undefined" && typeof render === "function") {
           UI.tab = "Retirement planner";
           render();
-          window.scrollTo(0, 0);
+          if (window.scrollTo) window.scrollTo(0, 0);
           return;
         }
       }
       if (kind === "st") {
         activeStTab = val || "overview";
-        var inSt = document.querySelector('#m [data-st-tab="' + activeStTab + '"]');
-        if (inSt) { inSt.click(); return; }
         if (window.StressTestUI && typeof window.StressTestUI.open === "function") {
           window.StressTestUI.open(activeStTab);
-          window.scrollTo(0, 0);
+          if (window.scrollTo) window.scrollTo(0, 0);
           return;
         }
+        var inSt = document.querySelector('#m [data-st-tab="' + activeStTab + '"]');
+        if (inSt) { inSt.click(); return; }
         var navSt = document.querySelector('#nav [data-t="Stress Test"]');
         if (navSt) { navSt.click(); return; }
       }
-      if (kind === "tab") {
-        var navTab = document.querySelector('#nav [data-t="' + val + '"]');
-        if (navTab) { navTab.click(); return; }
-        if (typeof UI !== "undefined" && typeof render === "function") {
-          UI.tab = val;
-          render();
-          window.scrollTo(0, 0);
+      if (kind === "pol") {
+        activePolPage = val || "list";
+        if (window.VRPolicyUI && typeof window.VRPolicyUI.open === "function") {
+          window.VRPolicyUI.open(activePolPage);
+          if (window.scrollTo) window.scrollTo(0, 0);
           return;
         }
+        var polBtn = document.querySelector('#m [data-vpp="' + activePolPage + '"]');
+        if (polBtn) { polBtn.click(); return; }
+        var navPol = document.querySelector('#nav [data-t="Policies"]');
+        if (navPol) { navPol.click(); return; }
       }
       if (kind === "set") {
         var setBtn = document.querySelector('#m [data-settab="' + val + '"]');
@@ -422,14 +588,102 @@
         if (typeof UI !== "undefined" && typeof render === "function") {
           UI.tab = val;
           render();
-          window.scrollTo(0, 0);
+          if (window.scrollTo) window.scrollTo(0, 0);
           return;
         }
       }
     } catch (e) {}
   }
 
-  /* Replace raw emoji glyphs inside bottom .rp2-nav docks with uniform 18px stroke-width=1.75 SVG icons */
+  function showSupportModal(kind) {
+    closeDrawer(false);
+    var dg = document.getElementById("dg");
+    if (!dg || typeof dg.showModal !== "function") return;
+    var whoEl = document.getElementById("who");
+    var userTxt = (whoEl && whoEl.textContent) ? whoEl.textContent.trim() : "Adviser workspace";
+
+    if (kind === "feedback") {
+      dg.className = "";
+      dg.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+          '<h2 style="margin:0">Share Feedback</h2>' +
+          '<button type="button" id="vr-sup-x" class="tbs" aria-label="Close">' + ICONS.close + "</button>" +
+        "</div>" +
+        '<p class="mu">Tell us what would make Vriddhi even smoother on your phone or tablet.</p>' +
+        '<form id="vr-fb-form" class="vr-sup-form">' +
+          '<label class="fl"><span>Topic</span><select id="vr-fb-cat"><option>Navigation &amp; Usability</option><option>Reports &amp; Calculations</option><option>Feature Request</option><option>Bug Report</option></select></label>' +
+          '<label class="fl"><span>Comments</span><textarea id="vr-fb-msg" rows="4" placeholder="Write your feedback..." required></textarea></label>' +
+          '<div class="tb" style="justify-content:flex-end;margin-top:4px">' +
+            '<button type="button" id="vr-sup-cn">Cancel</button>' +
+            '<button type="submit" class="p">Submit Feedback</button>' +
+          "</div>" +
+        "</form>";
+      dg.showModal();
+      var xBtn = document.getElementById("vr-sup-x");
+      var cnBtn = document.getElementById("vr-sup-cn");
+      var form = document.getElementById("vr-fb-form");
+      if (xBtn) xBtn.onclick = function () { dg.close(); };
+      if (cnBtn) cnBtn.onclick = function () { dg.close(); };
+      if (form) {
+        form.onsubmit = function (ev) {
+          ev.preventDefault();
+          var cat = (document.getElementById("vr-fb-cat") || {}).value || "General";
+          var msg = ((document.getElementById("vr-fb-msg") || {}).value || "").trim();
+          if (!msg) return;
+          try {
+            var list = JSON.parse(localStorage.getItem("vr-feedback-log") || "[]");
+            list.push({ at: new Date().toISOString(), cat: cat, msg: msg.slice(0, 500) });
+            localStorage.setItem("vr-feedback-log", JSON.stringify(list.slice(-20)));
+          } catch (e) {}
+          dg.close();
+          try { if (typeof toast === "function") toast("Thank you for your feedback!"); } catch (e) {}
+        };
+      }
+      return;
+    }
+
+    dg.className = "";
+    dg.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+        '<h2 style="margin:0">Contact &amp; Support</h2>' +
+        '<button type="button" id="vr-sup-x" class="tbs" aria-label="Close">' + ICONS.close + "</button>" +
+      "</div>" +
+      '<p class="mu">Signed in as <b>' + esc(userTxt) + "</b>. Reach your adviser desk or administrator using the channels below.</p>" +
+      '<div class="vr-sup-form">' +
+        '<div class="vr-sup-row"><div><div style="font-size:12px;color:var(--mu)">Support Desk</div><div style="font-weight:700;font-size:13.5px">support@vriddhi.app</div></div>' +
+          '<button type="button" id="vr-copy-mail" class="tbs">Copy</button></div>' +
+        '<div class="vr-sup-row"><div><div style="font-size:12px;color:var(--mu)">Documentation</div><div style="font-weight:700;font-size:13.5px">In-app Help &amp; FAQ</div></div>' +
+          '<button type="button" id="vr-go-help" class="tbs">Open Help</button></div>' +
+      "</div>" +
+      '<div class="tb" style="justify-content:flex-end;margin-top:12px">' +
+        '<button type="button" id="vr-sup-cn" class="p">Done</button>' +
+      "</div>";
+    dg.showModal();
+    var cx = document.getElementById("vr-sup-x");
+    var ccn = document.getElementById("vr-sup-cn");
+    var cpy = document.getElementById("vr-copy-mail");
+    var gh = document.getElementById("vr-go-help");
+    if (cx) cx.onclick = function () { dg.close(); };
+    if (ccn) ccn.onclick = function () { dg.close(); };
+    if (cpy) {
+      cpy.onclick = function () {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText("support@vriddhi.app");
+          }
+          if (typeof toast === "function") toast("Support email copied");
+        } catch (e) {}
+      };
+    }
+    if (gh) {
+      gh.onclick = function () {
+        dg.close();
+        navigateTo("set:Help");
+      };
+    }
+  }
+
+  /* Replace emoji glyphs inside bottom .rp2-nav docks with uniform 18px stroke-width=1.75 SVG icons */
   function upgradeBottomNavIcons() {
     var navs = document.querySelectorAll("#m .rp2-nav");
     if (!navs.length) return;
@@ -438,9 +692,10 @@
         var sp = btn.querySelector("span[aria-hidden='true']");
         if (!sp || sp.getAttribute("data-vr-svg") === "1") return;
         var svg = null;
-        if (btn.matches('[data-gptab="Dashboard"],[data-rp="tab:status"],[data-st-tab="overview"]')) svg = ICONS.summary;
+        if (btn.matches('[data-gptab="Dashboard"],[data-rp="tab:status"],[data-st-tab="overview"]')) svg = ICONS.dashboard;
         else if (btn.matches('[data-gptab="Holdings"]')) svg = ICONS.holdings;
-        else if (btn.matches('[data-rpm-toggle],[data-gptab="Reports"],[data-rp="tab:report"]')) svg = ICONS.file;
+        else if (btn.matches('[data-rpm-toggle],[data-gptab="Reports"],[data-rp="tab:report"],[data-vpp="rep"]')) svg = ICONS.reports;
+        else if (btn.matches('[data-vpp="list"]')) svg = ICONS.shield;
         else if (btn.matches('[data-fh-open="status"]')) svg = ICONS.edit;
         else if (btn.matches('[data-fh-open="milestones"]')) svg = ICONS.target;
         else if (btn.matches('[data-st-tab="scenarios"]')) svg = ICONS.table;
@@ -472,7 +727,7 @@
       if (brandText && !brandText.querySelector(".vr-mob-sub")) {
         var sub = document.createElement("div");
         sub.className = "vr-mob-sub";
-        sub.textContent = "Plan · Track · Retire";
+        sub.textContent = "Plan \u00B7 Track \u00B7 Retire";
         brandText.appendChild(sub);
       }
 
@@ -488,6 +743,9 @@
       var bd = document.createElement("div");
       bd.id = "vr-drawer-backdrop";
       bd.setAttribute("aria-hidden", "true");
+      bd.addEventListener("touchmove", function (e) {
+        if (drawerOpen && e.cancelable) e.preventDefault();
+      }, { passive: false });
       document.body.appendChild(bd);
     }
 
@@ -500,28 +758,63 @@
       dr.setAttribute("aria-hidden", "true");
       dr.innerHTML =
         '<div class="vr-drawer-hd">' +
-          '<div class="vr-drawer-brand">' +
-            '<div class="vr-drawer-logo" aria-hidden="true">' +
-              '<svg width="20" height="20" viewBox="3.5 2 27 27" fill="none" focusable="false">' +
-                '<rect x="5.5" y="20" width="4.6" height="7" rx="2.3" style="fill:var(--on,#fff);opacity:.55"/>' +
-                '<rect x="13.7" y="15" width="4.6" height="12" rx="2.3" style="fill:var(--on,#fff);opacity:.78"/>' +
-                '<rect x="21.9" y="11" width="4.6" height="16" rx="2.3" style="fill:var(--on,#fff);opacity:1"/>' +
-                '<path d="M24.2 9.6C23.6 6 25.6 3.6 29 3.2c.4 3.5-1.5 6-4.8 6.4z" style="fill:var(--on,#fff);opacity:1"/>' +
-                '<path d="M24.2 9.6C24.4 7 22.7 5.1 20 4.6c-.3 2.8 1.4 4.8 4.2 5z" style="fill:var(--on,#fff);opacity:.8"/>' +
-              '</svg>' +
-            '</div>' +
-            '<div class="vr-drawer-meta">' +
-              '<h2 id="vr-drawer-title" class="vr-drawer-title">Vriddhi</h2>' +
-              '<span id="vr-drawer-user" class="vr-drawer-user">Wealth &amp; Retirement</span>' +
-            '</div>' +
-          '</div>' +
-          '<button type="button" id="vr-drawer-close" aria-label="Close navigation menu">' + ICONS.close + '</button>' +
-        '</div>' +
+          '<div class="vr-drawer-top">' +
+            '<div class="vr-drawer-brand">' +
+              '<div class="vr-drawer-logo" aria-hidden="true">' +
+                '<svg width="19" height="19" viewBox="3.5 2 27 27" fill="none" focusable="false">' +
+                  '<rect x="5.5" y="20" width="4.6" height="7" rx="2.3" style="fill:var(--on,#fff);opacity:.55"/>' +
+                  '<rect x="13.7" y="15" width="4.6" height="12" rx="2.3" style="fill:var(--on,#fff);opacity:.78"/>' +
+                  '<rect x="21.9" y="11" width="4.6" height="16" rx="2.3" style="fill:var(--on,#fff);opacity:1"/>' +
+                  '<path d="M24.2 9.6C23.6 6 25.6 3.6 29 3.2c.4 3.5-1.5 6-4.8 6.4z" style="fill:var(--on,#fff);opacity:1"/>' +
+                  '<path d="M24.2 9.6C24.4 7 22.7 5.1 20 4.6c-.3 2.8 1.4 4.8 4.2 5z" style="fill:var(--on,#fff);opacity:.8"/>' +
+                "</svg>" +
+              "</div>" +
+              '<div class="vr-drawer-meta">' +
+                '<h2 id="vr-drawer-title" class="vr-drawer-title">Vriddhi</h2>' +
+                '<span id="vr-drawer-user" class="vr-drawer-user">Wealth &amp; Retirement</span>' +
+              "</div>" +
+            "</div>" +
+            '<button type="button" id="vr-drawer-close" aria-label="Close navigation menu">' + ICONS.close + "</button>" +
+          "</div>" +
+          '<button type="button" id="vr-drawer-funds" class="vr-drawer-funds" data-vr-nav="gp:Holdings" aria-label="Available funds overview">' +
+            '<span class="vr-funds-meta">' +
+              '<span class="vr-funds-k">Available Funds</span>' +
+              '<span class="vr-funds-client">Portfolio</span>' +
+            "</span>" +
+            '<span class="vr-funds-val">\u2014</span>' +
+          "</button>" +
+        "</div>" +
         '<nav id="vr-drawer-body" class="vr-drawer-body" aria-label="Primary navigation"></nav>' +
         '<div class="vr-drawer-ft">' +
-          '<button type="button" id="vr-drawer-theme" class="vr-drawer-ft-btn"></button>' +
-          '<button type="button" id="vr-drawer-signout" class="vr-drawer-ft-btn is-danger">' + ICONS.signout + '<span>Sign Out</span></button>' +
-        '</div>';
+          '<div class="vr-drawer-ft-links">' +
+            '<button type="button" id="vr-drawer-help" class="vr-drawer-link" data-vr-nav="set:Help">' + ICONS.help + "<span>Help</span></button>" +
+            '<button type="button" id="vr-drawer-feedback" class="vr-drawer-link" data-vr-action="feedback">' + ICONS.feedback + "<span>Feedback</span></button>" +
+            '<button type="button" id="vr-drawer-contact" class="vr-drawer-link" data-vr-action="contact">' + ICONS.contact + "<span>Contact</span></button>" +
+          "</div>" +
+          '<div class="vr-drawer-ft-actions">' +
+            '<button type="button" id="vr-drawer-theme" class="vr-drawer-ft-btn"></button>' +
+            '<button type="button" id="vr-drawer-signout" class="vr-drawer-ft-btn is-danger">' + ICONS.signout + "<span>Sign Out</span></button>" +
+          "</div>" +
+        "</div>";
+
+      var swipeX = 0, swipeY = 0, swiping = false;
+      dr.addEventListener("touchstart", function (e) {
+        if (!drawerOpen || !e.touches || e.touches.length !== 1) return;
+        swipeX = e.touches[0].clientX;
+        swipeY = e.touches[0].clientY;
+        swiping = true;
+      }, { passive: true });
+      dr.addEventListener("touchend", function (e) {
+        if (!swiping || !drawerOpen || !e.changedTouches || !e.changedTouches.length) {
+          swiping = false;
+          return;
+        }
+        swiping = false;
+        var dx = e.changedTouches[0].clientX - swipeX;
+        var dy = e.changedTouches[0].clientY - swipeY;
+        if (dx < -64 && Math.abs(dx) > Math.abs(dy) * 1.35) closeDrawer(true);
+      }, { passive: true });
+
       document.body.appendChild(dr);
     }
 
@@ -553,22 +846,22 @@
       if (so) so.click();
       return;
     }
+    var actionBtn = tgt.closest("[data-vr-action]");
+    if (actionBtn) {
+      showSupportModal(actionBtn.getAttribute("data-vr-action"));
+      return;
+    }
     var acc = tgt.closest("[data-vr-acc]");
     if (acc) {
+      e.preventDefault();
       var gId = acc.getAttribute("data-vr-acc");
-      var wasOpen = acc.getAttribute("aria-expanded") === "true";
-      var nextOpen = !wasOpen;
-      expandedGroups[gId] = nextOpen;
-      acc.setAttribute("aria-expanded", String(nextOpen));
-      var panel = document.getElementById("vr-acc-panel-" + gId);
-      if (panel) {
-        panel.classList.toggle("is-open", nextOpen);
-        panel.setAttribute("aria-hidden", String(!nextOpen));
-      }
+      openGroup = (openGroup === gId) ? null : gId;
+      applyAccordionState();
       return;
     }
     var navItem = tgt.closest("[data-vr-nav]");
     if (navItem) {
+      if (navItem.disabled) return;
       navigateTo(navItem.getAttribute("data-vr-nav"));
     }
   });
@@ -602,8 +895,18 @@
     }
   }, true);
 
+  window.addEventListener("popstate", function () {
+    if (ignoringPop > 0) {
+      ignoringPop--;
+      return;
+    }
+    if (drawerOpen) {
+      closeDrawer(true, true);
+    }
+  });
+
   window.addEventListener("resize", function () {
-    if (drawerOpen && window.innerWidth > 720) closeDrawer(false);
+    if (drawerOpen && window.innerWidth > 960) closeDrawer(false);
   });
 
   function initObservers() {
@@ -630,7 +933,7 @@
     if (typeof MutationObserver === "function") {
       var mo = new MutationObserver(syncSoon);
       targets.forEach(function (el) {
-        mo.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "class", "aria-selected"] });
+        mo.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "class", "aria-selected", "aria-current", "aria-pressed"] });
       });
       mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-uic"] });
     }
@@ -640,7 +943,9 @@
   window.VRMobileDrawer = {
     open: openDrawer,
     close: closeDrawer,
-    refresh: function () { ensureShell(); if (drawerOpen) renderDrawerBody(); }
+    refresh: function () { ensureShell(); if (drawerOpen) renderDrawerBody(); },
+    getGroups: buildGroups,
+    getRoute: currentRoute
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initObservers);
