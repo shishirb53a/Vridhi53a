@@ -312,10 +312,12 @@
   }
 
   html.vr-side-on:not(#vrx) body header.hd .hdi {
-    max-width: 1180px !important;
-    margin: 0 auto !important;
-    padding: 18px 28px 2px !important;
-    min-height: 44px;
+    max-width: min(1180px, 100%) !important;
+    width: 100%;
+    margin: 0 auto 0 0 !important;
+    padding: 12px 28px 6px !important;
+    min-height: 40px;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -334,8 +336,10 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 7px;
     font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
     color: var(--mu);
     min-width: 0;
   }
@@ -349,11 +353,20 @@
     margin-left: auto !important;
   }
 
+  html.vr-side-on:not(#vrx) body header.hd #vr-pwa-install {
+    margin-left: auto;
+    flex: none;
+  }
+
+  html.vr-side-on:not(#vrx) body header.hd #fhp:not([hidden]) ~ #vr-pwa-install {
+    margin-left: 0;
+  }
+
   html.vr-side-on:not(#vrx) body .w {
     margin-left: 256px !important;
     margin-right: auto !important;
     max-width: min(1180px, calc(100% - 256px)) !important;
-    padding: 8px 28px 28px !important;
+    padding: 6px 28px 28px !important;
   }
 
   html.vr-side-on:not(#vrx) body main#m.vr-rmax,

@@ -47,10 +47,13 @@
 #dsh .dz-pill{border-radius:8px;background:var(--pill-bg);padding:4px 12px;font-size:14px;font-weight:800;color:var(--ac)}
 #dsh .dz-box .stp{margin-top:22px}
 #dsh .dz-box .stp button{width:40px;height:40px;min-height:40px;border-radius:12px;font-size:20px}
-#dsh input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;outline:none;width:100%;border:0;padding:0;background:var(--bd)}
-#dsh input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--brand);border:4px solid #fff;box-shadow:0 0 0 1px var(--acb),0 4px 10px #0003;cursor:pointer}
-#dsh input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--brand);border:4px solid #fff;box-shadow:0 0 0 1px var(--acb),0 4px 10px #0003;cursor:pointer}
-#dsh .dz-rng{margin-top:8px;display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--mu)}
+#dsh input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;outline:none;width:100%;margin:0;border:0;padding:0;background:var(--bd);cursor:pointer}
+#dsh input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #fff;box-shadow:0 1px 4px rgba(15,23,42,.24),0 0 0 1px color-mix(in srgb,var(--ac) 35%,transparent);cursor:pointer}
+#dsh input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--ac);border:2px solid #fff;box-shadow:0 1px 4px rgba(15,23,42,.24),0 0 0 1px color-mix(in srgb,var(--ac) 35%,transparent);cursor:pointer}
+#dsh .dz-rng{margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 2px;font-size:11px;font-weight:700;color:var(--mu)}
+#dsh .dz-rmin{display:inline-flex;align-items:baseline;gap:4px;flex-wrap:wrap}
+#dsh .dz-rmin b{font-weight:700;color:var(--tx)}
+#dsh .dz-rmin em{font-style:normal;font-weight:500;color:var(--mu)}
 #dsh .dz-note{margin:14px 0 0;font-size:12px;line-height:1.5;color:var(--mu)}
 #dsh .dz-in2{position:relative;margin-top:12px}
 #dsh .dz-in2 input{width:100%;padding:12px 44px 12px 30px;font-size:16px;font-weight:800;border-radius:12px;background:color-mix(in srgb,var(--tx) 3%,var(--card))}
@@ -63,6 +66,7 @@
 #dsh .dz-sum>div{padding:16px;border-right:1px solid var(--bd)}#dsh .dz-sum>div:last-child{border-right:0}
 #dsh .dz-mini{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
 #dsh .dz-sv{margin:4px 0 0;font-size:16px;font-weight:800;color:var(--tx);line-height:1.2}
+#dsh .dz-sv .dz-u{font-size:12px;font-weight:600;color:var(--mu)}
 #dsh .dz-sn{margin:2px 0 0;font-size:11px;color:var(--mu)}
 #dsh .dz-sn.dz-o{color:#059669}#dsh .dz-sn.dz-b{color:#e11d48}#dsh .dz-sn.dz-w{color:#d97706}
 /* timeline + insights */
@@ -79,7 +83,7 @@
 #dsh .dz-tlv>div{display:flex;flex-direction:column;gap:4px}#dsh .dz-tlv .dz-c{text-align:center}#dsh .dz-tlv .dz-r{text-align:right}
 #dsh .dz-tlv b{font-weight:800;color:var(--tx)}#dsh .dz-tlv span{color:var(--mu)}
 #dsh .dz-in{margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:stretch}
-#dsh .dz-in article{border:1px solid;border-radius:12px;padding:16px;display:block;height:100%;box-sizing:border-box}
+#dsh .dz-in article{border:1px solid;border-radius:12px;padding:16px;display:flex;flex-direction:column;height:auto;min-height:0;overflow:visible;box-sizing:border-box}
 #dsh .dz-in article.dz-r{border-color:color-mix(in srgb,#f43f5e 40%,var(--bd));background:linear-gradient(135deg,color-mix(in srgb,#f43f5e 12%,var(--card)),var(--card))}
 #dsh .dz-in article.dz-g{border-color:color-mix(in srgb,#10b981 40%,var(--bd));background:linear-gradient(135deg,color-mix(in srgb,#10b981 12%,var(--card)),var(--card))}
 #dsh .dz-in article.dz-p{border-color:color-mix(in srgb,var(--brand) 40%,var(--bd));background:linear-gradient(135deg,color-mix(in srgb,var(--brand) 14%,var(--card)),var(--card))}
@@ -87,7 +91,7 @@
 
 
 
-#dsh .dz-ik{margin:12px 0 0;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+#dsh .dz-ik{margin:0;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
 #dsh .dz-in article p:last-child{margin:4px 0 0;font-size:14px;font-weight:700;line-height:1.55;color:var(--tx)}
 /* allocation */
 #dsh .dz-al{margin-top:24px;display:grid;grid-template-columns:1.35fr .65fr;gap:32px;align-items:center}

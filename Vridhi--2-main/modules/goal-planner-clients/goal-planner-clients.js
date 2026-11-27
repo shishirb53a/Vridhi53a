@@ -5,6 +5,7 @@
 const MAXP=12,KEYS=GPP_KEYS;
 const slug=n=>String(n).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,24)||'client';
 const nm=n=>String(n==null?'':n).replace(/\s+/g,' ').trim().slice(0,30);
+const displayName=n=>{const s=String(n==null?'':n).trim();if(!s)return'';if(/[_-]/.test(s)&&!/\s/.test(s))return s.split(/[_-]+/).filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');return s};
 const snap=s=>{const o={};for(const k of KEYS)o[k]=JSON.parse(JSON.stringify(s[k]));return o};
 const defName=()=>{try{const m=S.members&&S.members[0],n=m&&nm(m.name);if(n&&n.toLowerCase()!=='self')return n}catch(e){}return'My portfolio'};
 let drawerOpen=false,drawerCloseTimer=0;
@@ -38,7 +39,7 @@ function del(id){const P=ensure();if(!P||!P.profiles[id]||Object.keys(P.profiles
 function restore(x){const P=ensure();if(!P||!x||P.profiles[x.id])return;P.profiles[x.id]=x.snap;if(x.was)sw(x.id);else{save();render()}}
 
 window.gppBarHTML=function(top){
-  const clients=list(),active=clients.find(p=>p.active),label=active?active.name:translate('Add your first client');
+  const clients=list(),active=clients.find(p=>p.active),label=active?displayName(active.name):translate('Add your first client');
   if(!top)return'';
   let portal=document.getElementById('gpp-drawer-portal');
   if(!portal){portal=document.createElement('div');portal.id='gpp-drawer-portal';document.body.appendChild(portal)}
@@ -46,14 +47,14 @@ window.gppBarHTML=function(top){
   return'<span class="fhp-l">'+esc(translate('Client'))+'</span><button type="button" class="client-trigger gpp-client-trigger" id="gpp-sel" data-gpp-drawer-trigger aria-expanded="'+drawerOpen+'" aria-controls="gpp-drawer" title="'+esc(label)+'"><span class="client-trigger-value">'+esc(label)+'</span><svg class="client-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m3 6 5 5 5-5"/></svg></button>'
 };
 window.gppDashClient=function(){
-  const clients=list(),active=clients.find(p=>p.active),label=active?active.name:translate('Add your first client');
+  const clients=list(),active=clients.find(p=>p.active),label=active?displayName(active.name):translate('Add your first client');
   let portal=document.getElementById('gpp-drawer-portal');
   if(!portal){portal=document.createElement('div');portal.id='gpp-drawer-portal';document.body.appendChild(portal)}
   portal.innerHTML=window.gppDrawerHTML();
   return'<div class="dz-client"><span class="dz-client-l">'+esc(translate('Client'))+'</span><button type="button" class="client-trigger gpp-client-trigger" id="gpp-sel" data-gpp-drawer-trigger aria-expanded="'+drawerOpen+'" aria-controls="gpp-drawer" title="'+esc(label)+'"><span class="client-trigger-value">'+esc(label)+'</span><svg class="client-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m3 6 5 5 5-5"/></svg></button></div>'
 };
-window.gppHeroInner=function(){const P=ensure();if(!P)return'';const p=P.profiles[P.active],m=S.members&&S.members[0],M0=typeof cr==='function'?cr:null,nm=String(p.name||'').trim();if(!nm)return'';
-  const bits=[];if(m&&Number.isFinite(+m.age))bits.push('Age '+(+m.age));if(Number.isFinite(+S.ret))bits.push('retiring at '+(+S.ret));if(Number.isFinite(+S.goal)&&M0)bits.push('goal '+String(M0(+S.goal)).replace('\u20b9 ','\u20b9'));
+window.gppHeroInner=function(){const P=ensure();if(!P)return'';const p=P.profiles[P.active],m=S.members&&S.members[0],M0=typeof cr==='function'?cr:null,nm=displayName(p.name||'');if(!nm)return'';
+  const bits=[];if(m&&Number.isFinite(+m.age))bits.push('Age '+(+m.age));if(Number.isFinite(+S.ret))bits.push('retiring at '+(+S.ret));if(Number.isFinite(+S.goal)&&M0)bits.push('goal '+String(M0(+S.goal)));
   const ini=nm.split(/\s+/).filter(Boolean).slice(0,2).map(w=>Array.from(w)[0].toUpperCase()).join('');
   return'<div class="dz-who"><span class="fhp-av sm" aria-hidden="true">'+esc(ini)+'</span><div class="fhp-ht"><span class="fhp-eb">Goal plan prepared for</span><div class="dz-nr"><h2 class="fhp-nm sm">'+esc(nm)+'</h2>'+(bits.length?'<span class="fhp-sub">'+bits.join(' \u00b7 ')+'</span>':'')+'</div></div></div>'};
 window.gppMBar=function(){return''};
@@ -69,12 +70,12 @@ function metrics(p){
   try{Object.assign(S,JSON.parse(JSON.stringify(p.d)));const c=ctx();let sv=0,fy='';/* savings per year = yearly + monthly additions in the first financial year, same rule as Reports > Annual Savings Schedule */let sn=0,s1=0,f1='',f2='';try{const D=calc(S),lab=i=>'FY '+(S.start+i-1)+'-'+String(S.start+i).slice(2);let tot=0;for(let i=1;i<D.rows.length;i++){const v=D.rows[i].add||0;if(v>0){tot+=v;sn++;if(sn===1){s1=Math.round(v);f1=lab(i)}f2=lab(i)}}sv=sn?Math.round(tot/sn):0;fy=f1&&f1+' to '+f2}catch(e){sv=0}/* Monthly income at retirement = the Dashboard's 'Income at Retirement' (D.incT / 12); expected return = value-weighted average of the holdings' own return rates */let inc=0,er=0;try{const D2=c.D;inc=Math.round((D2.incT||0)/12);const L=S.assets.filter(x=>x.type!=='gratuity'),tv=L.reduce((q,x)=>q+(+x.value||0),0);er=tv>0?L.reduce((q,x)=>q+(+x.value||0)*(+x.ret||0),0)/tv*100:(L.length?L.reduce((q,x)=>q+(+x.ret||0),0)/L.length*100:0)}catch(e){inc=0;er=0}return{today:c.r0.tot,atRet:c.rr.tot,goal:c.G,yr:c.yr,tm:c.tm,ret:S.ret,sav:sv,fy:fy,sn:sn,s1:s1,inc:inc,er:er}}
   catch(e){return null}
   finally{Object.assign(S,keep)}}
-window.gppActiveName=function(){const P=ensure();return P&&P.profiles[P.active]?String(P.profiles[P.active].name||''):''};
+window.gppActiveName=function(){const P=ensure();return P&&P.profiles[P.active]?displayName(P.profiles[P.active].name||''):''};
 window.gppReportTitle=function(title){const name=window.gppActiveName();return esc(translate(title))+(name?' · '+esc(name):'')};
 /* ---- Option 2: side-by-side comparison table (transient UI state only; nothing new is stored) ---- */
 const MINC=2,MAXC=5;
 let cmpSel=[],cmpMode=false,detOpen={},cmpQuery='';
-const money=x=>{const M0=typeof cr==='function'?cr:(v=>'\u20b9'+Math.round(v).toLocaleString('en-IN'));return String(M0(x)).replace('\u20b9 ','\u20b9')};
+const money=x=>{const M0=typeof cr==='function'?cr:(v=>'\u20b9 '+Math.round(v).toLocaleString('en-IN'));return String(M0(x))};
 const pc1=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,'')+'%';
 /* one row of numbers per client, all from metrics() -> the same engine the Dashboard and Reports use */
 function rowData(p){const m=metrics(p),goal=+(p.d.goal||0),has=!!m,atRet=has?m.atRet:0,pct=goal>0?atRet/goal*100:0;
@@ -94,10 +95,10 @@ function detailHTML(r){const p=r.p,m=r.m,M=money,members=p.d.members.length,hold
   return'<div class="gpp-detail-grid">'+c('Holdings',holdings+' '+translate(holdings===1?'holding':'holdings'))+c('Members',members+' '+translate(members===1?'member':'members'))+c('Worth today',M(r.today))+c('At retirement',m?M(m.atRet)+' ('+translate('age')+' '+m.ret+')':'\u2014')+c('Goal',M(r.goal))+c(r.ok?'Ahead by':'Short by',m?M(Math.abs(r.gap)):'\u2014')+c('Goal reached in',reached)+c('Savings per year',m&&m.sav>0?M(m.sav):'\u2014',savingsTitle)+'</div>'+(!m?'<p class="gpp-no-holdings">'+esc(translate('No holdings yet. Open the plan to add one.'))+'</p>':'')}
 function tableHTML(rows,best){
   const maxed=cmpSel.length>=MAXC;
-  const body=rows.map(function(r){const p=r.p,sel=cmpSel.indexOf(p.id)>-1,dis=!sel&&maxed,lab=translate('Select')+' '+p.name,open=!!detOpen[p.id];
-    const name='<button type="button" class="gpp-client-select" data-gpp="switch:'+esc(p.id)+'" aria-label="'+esc(translate('Switch')+' '+p.name)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</button>'+(p.active?'<span class="fhp-chip fhp-act">'+esc(translate('Active'))+'</span>':'')+(p.id===best?'<span class="gpp-best-tag" title="'+esc(translate('Best performing plan'))+'">\u2605 '+esc(translate('Best'))+'</span>':'');
+  const body=rows.map(function(r){const p=r.p,dn=displayName(p.name),sel=cmpSel.indexOf(p.id)>-1,dis=!sel&&maxed,lab=translate('Select')+' '+dn,open=!!detOpen[p.id];
+    const name='<button type="button" class="gpp-client-select" data-gpp="switch:'+esc(p.id)+'" aria-label="'+esc(translate('Switch')+' '+dn)+'" title="'+esc(dn)+'">'+esc(dn)+'</button>'+(p.active?'<span class="fhp-chip fhp-act">'+esc(translate('Active'))+'</span>':'')+(p.id===best?'<span class="gpp-best-tag" title="'+esc(translate('Best performing plan'))+'">\u2605 '+esc(translate('Best'))+'</span>':'');
     const st='<span class="gpp-status'+(r.has?(r.ok?' is-ok':' is-bad'):'')+'">'+esc(statusOf(r))+'</span>';
-    return'<tr class="gpp-row'+(p.active?' is-active':'')+(sel?' is-selected':'')+'" data-gpp-card="'+esc(p.id)+'" data-gpp-card-name="'+esc(p.name.toLowerCase())+'">'
+    return'<tr class="gpp-row'+(p.active?' is-active':'')+(sel?' is-selected':'')+'" data-gpp-card="'+esc(p.id)+'" data-gpp-card-name="'+esc(dn.toLowerCase())+'">'
       +'<td class="gpp-c-sel" data-label=""><input type="checkbox" class="gpp-chk" data-gpp-sel="'+esc(p.id)+'" aria-label="'+esc(lab)+'"'+(sel?' checked':'')+(dis?' disabled title="'+esc(translate('You can compare up to 5 plans'))+'"':'')+'></td>'
       +'<td class="gpp-c-name" data-label="'+esc(translate('Plan Name'))+'">'+name+'</td>'
       +'<td data-label="'+esc(translate('Status'))+'">'+st+'</td>'
@@ -123,14 +124,14 @@ function compareHTML(rows){
   if(sel.length<MINC){cmpMode=false;return''}
   const best=bestId(sel),bestRow=sel.find(r=>r.p.id===best);
   const defs=cmpDefs();
-  const head=sel.map(r=>'<th scope="col" class="'+(r.p.id===best?'is-best':'')+'"><span class="gpp-cmp-name">'+esc(r.p.name)+'</span>'+(r.p.id===best?'<span class="gpp-best-tag">\u2605 '+esc(translate('Best performing'))+'</span>':'')+'<span class="gpp-status'+(r.has?(r.ok?' is-ok':' is-bad'):'')+'">'+esc(statusOf(r))+'</span></th>').join('');
+  const head=sel.map(r=>'<th scope="col" class="'+(r.p.id===best?'is-best':'')+'"><span class="gpp-cmp-name">'+esc(displayName(r.p.name))+'</span>'+(r.p.id===best?'<span class="gpp-best-tag">\u2605 '+esc(translate('Best performing'))+'</span>':'')+'<span class="gpp-status'+(r.has?(r.ok?' is-ok':' is-bad'):'')+'">'+esc(statusOf(r))+'</span></th>').join('');
   const rowsH=defs.map(function(d){const vals=sel.map(r=>d[2](r)),ok=vals.filter(v=>v!=null&&isFinite(v)),top=d[3]&&ok.length>1?Math.max.apply(null,ok):null,tie=top!=null&&ok.every(v=>Math.abs(v-top)<1e-9);
     return'<tr><th scope="row">'+esc(translate(d[0]))+'</th>'+sel.map(function(r,i){const v=vals[i],isTop=top!=null&&!tie&&v!=null&&Math.abs(v-top)<1e-9,sub=d[4]?d[4](r):'';
       const cls=(r.p.id===best?'is-best-col ':'')+(isTop?'is-top ':'')+(d[0]==='Corpus Gap'&&r.has?(r.ok?'is-pos ':'is-neg '):'');
       let inner=esc(d[1](r));if(d[0]==='Achievement %'&&r.has)inner+=bar(r.pct,r.ok);
-      return'<td class="'+cls+'" data-label="'+esc(r.p.name)+'"><b>'+inner+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+(isTop?'<span class="gpp-top-mark" title="'+esc(translate('Best value in this row'))+'">\u2605</span>':'')+'</td>'}).join('')+'</tr>'}).join('');
+      return'<td class="'+cls+'" data-label="'+esc(displayName(r.p.name))+'"><b>'+inner+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+(isTop?'<span class="gpp-top-mark" title="'+esc(translate('Best value in this row'))+'">\u2605</span>':'')+'</td>'}).join('')+'</tr>'}).join('');
   return'<section class="gpp-compare" data-gpp-compare aria-label="'+esc(translate('Plan comparison'))+'"><div class="gpp-cmp-bar"><button type="button" class="gpp-act" data-gpp="cmpback">\u2190 '+esc(translate('Back to clients'))+'</button><h3>'+esc(translate('Compare plans'))+' <span class="gpp-count">'+sel.length+'</span></h3>'+(window.rptInfo?window.rptInfo('\u2605 '+translate('marks the best value in each row')+'. '+translate('Achievement % = projected corpus at retirement \u00f7 target corpus. Corpus gap = projected corpus \u2212 target. Monthly income = yearly interest at retirement \u00f7 12. Expected returns = holdings\' return rates weighted by current value.'),translate('About this comparison')):'')+'</div>'
-    +(bestRow?'<div class="gpp-best-banner" role="status"><span class="gpp-best-ico" aria-hidden="true">\u2605</span><div><b>'+esc(bestRow.p.name)+'</b> '+esc(translate('is the best performing plan'))+' \u2014 '+esc(pc1(bestRow.pct))+' '+esc(translate('of target'))+', '+esc(translate('projected corpus'))+' '+esc(money(bestRow.atRet))+'.</div></div>':'')
+    +(bestRow?'<div class="gpp-best-banner" role="status"><span class="gpp-best-ico" aria-hidden="true">\u2605</span><div><b>'+esc(displayName(bestRow.p.name))+'</b> '+esc(translate('is the best performing plan'))+' \u2014 '+esc(pc1(bestRow.pct))+' '+esc(translate('of target'))+', '+esc(translate('projected corpus'))+' '+esc(money(bestRow.atRet))+'.</div></div>':'')
     +'<div class="gpp-table-wrap"><table class="gpp-cmp-table" data-gpp-cmp-table><thead><tr><th scope="col" class="gpp-cmp-corner">'+esc(translate('Metric'))+'</th>'+head+'</tr></thead><tbody>'+rowsH+'</tbody></table></div>'
     +'</section>'}
 function toolbarHTML(n,total){
@@ -174,7 +175,7 @@ document.addEventListener('click',e=>{
   if(e.target&&e.target.matches&&e.target.matches('[data-gpp-overlay]')){closeDrawer(true);return}
   if(e.target.closest&&e.target.closest('[data-gpp-close]')){closeDrawer(true);return}
   const card=e.target.closest&&e.target.closest('[data-gpp-card]');
-  if(card&&!(e.target.closest('button,summary,details,input,label,.gpp-c-sel,.gpp-c-act'))){const id=card.dataset.gppCard;drawerOpen=false;if(sw(id)){const t=document.getElementById('gpp-sel');if(t){t.setAttribute('aria-expanded','false');t.focus()}toast(translate('Switched to')+' '+ensure().profiles[id].name)}return}
+  if(card&&!(e.target.closest('button,summary,details,input,label,.gpp-c-sel,.gpp-c-act'))){const id=card.dataset.gppCard;drawerOpen=false;if(sw(id)){const t=document.getElementById('gpp-sel');if(t){t.setAttribute('aria-expanded','false');t.focus()}toast(translate('Switched to')+' '+displayName(ensure().profiles[id].name))}return}
   if(e.target&&e.target.id==='gpp-x'){dg.close();return}
   const b=e.target.closest&&e.target.closest('[data-gpp]');if(!b)return;
   const [act,id]=b.dataset.gpp.split(':'),P=ensure();if(!P)return;
@@ -187,10 +188,10 @@ document.addEventListener('click',e=>{
   else if(act==='cmpclear'){cmpSel=[];cmpMode=false;redrawDrawer()}
   else if(act==='det'){detOpen[id]=!detOpen[id];redrawDrawer()}
   else if(act==='ren'){gppAddReturnFocus='gpp-sel';drawerOpen=false;closeDrawer(false,true);nameDialog('ren',id)}
-  else if(act==='switch'){drawerOpen=false;if(sw(id)){const t=document.getElementById('gpp-sel');if(t){t.setAttribute('aria-expanded','false');t.focus()}toast(translate('Switched to')+' '+P.profiles[id].name)}}
+  else if(act==='switch'){drawerOpen=false;if(sw(id)){const t=document.getElementById('gpp-sel');if(t){t.setAttribute('aria-expanded','false');t.focus()}toast(translate('Switched to')+' '+displayName(P.profiles[id].name))}}
   else if(act==='dup'){const n=dup(id);if(n)toast('Duplicated as '+n)}
   else if(act==='del'){if(Object.keys(P.profiles).length<2){toast('Keep at least one person');return}
-    confirmBox('Delete \u201c'+P.profiles[id].name+'\u201d and their saved holdings? This cannot be undone.',()=>{const x=del(id);if(x)toast('Deleted '+x.snap.name,()=>restore(x))})}});
+    confirmBox('Delete \u201c'+displayName(P.profiles[id].name)+'\u201d and their saved holdings? This cannot be undone.',()=>{const x=del(id);if(x)toast('Deleted '+displayName(x.snap.name),()=>restore(x))})}});
 function redrawDrawer(){const portal=document.getElementById('gpp-drawer-portal');if(!portal)return;const list0=portal.querySelector('[data-gpp-client-list]'),top=list0?list0.scrollTop:0;portal.innerHTML=window.gppDrawerHTML();const l=portal.querySelector('[data-gpp-client-list]');if(l)l.scrollTop=top;applyFilter()}
 function applyFilter(){const q=cmpQuery.trim().toLowerCase();let shown=0;document.querySelectorAll('[data-gpp-card]').forEach(row=>{const hit=row.dataset.gppCardName.includes(q);row.hidden=!hit;if(hit)shown++;const d=document.querySelector('[data-gpp-card-detail="'+row.dataset.gppCard+'"]');if(d)d.hidden=!hit});const n=document.querySelector('[data-gpp-none]');if(n)n.hidden=shown>0||!q}
 document.addEventListener('change',e=>{const c=e.target&&e.target.matches&&e.target.matches('[data-gpp-sel]')?e.target:null;if(!c)return;const id=c.dataset.gppSel,at=cmpSel.indexOf(id);

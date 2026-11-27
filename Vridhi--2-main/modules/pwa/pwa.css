@@ -2,18 +2,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
-  background: color-mix(in srgb, currentColor 10%, transparent);
+  min-height: 32px;
+  padding: 5px 12px;
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  background: color-mix(in srgb, currentColor 8%, transparent);
   color: inherit;
-  font: 600 13px/1.2 var(--ff, Inter, system-ui, sans-serif);
+  font: 600 12px/1.2 var(--ff, Inter, system-ui, sans-serif);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .vr-pwa-install:hover {
-  background: color-mix(in srgb, currentColor 18%, transparent);
+  background: color-mix(in srgb, currentColor 14%, transparent);
 }
 
 .vr-pwa-install[hidden] {
