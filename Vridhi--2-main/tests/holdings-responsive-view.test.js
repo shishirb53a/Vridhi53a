@@ -184,6 +184,8 @@ test('Portfolio Overview Widget aggregates values and renders multi-segmented ba
 
   assert.ok(pageHtml.includes('Total Portfolio Value') && pageHtml.includes('₹ 2,65,31,185'), 'Aggregates exact Total Portfolio Value (₹ 2,65,31,185)');
   assert.ok(pageHtml.includes('Yearly Contribution') && pageHtml.includes('₹ 11,20,488'), 'Aggregates exact Yearly Contribution (₹ 11,20,488)');
+  assert.ok(pageHtml.includes('Asset Allocation') && pageHtml.includes('5 Asset Classes') && pageHtml.includes('5 Holdings'), 'Renders compact Asset Allocation header with class and holding counts');
+  assert.ok(holdingsCss.includes('grid-template-columns:auto auto minmax(0,1fr)') && holdingsCss.includes('.hp-card > #hr{display:contents}'), 'Overview renders as compact 3-column horizontal strip above toolbar');
 
   assert.ok(pageHtml.includes('class="hp-ov-bar"'), 'Renders multi-segmented CSS bar chart');
   const expectedShares = [
@@ -194,7 +196,7 @@ test('Portfolio Overview Widget aggregates values and renders multi-segmented ba
     ['Savings AC', '3.0%']
   ];
   expectedShares.forEach(([cat, pct]) => {
-    assert.ok(pageHtml.includes(cat) && pageHtml.includes(pct), `Overview includes ${cat} (${pct})`);
+    assert.ok(pageHtml.includes(`${cat}</span><span class="hp-ov-pct">(${pct})</span>`), `Overview includes ${cat} (${pct})`);
   });
 
   // Check exact 3.0% case too (3.0% of 26531185 = 795,935; total 26531185 if Equity = 11343156 -> 42.8% or 42.7% + 37.5% + 9.0% + 7.7% + 3.0% = 99.9% rounding)
