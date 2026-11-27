@@ -1979,7 +1979,8 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
     const sv = savedState();
     if (!sv || FHE.validateAll(sv.v).length) return null;
     const v = sv.v, earn = hzEarn(v), vis = hzVisible(hzColumns(hzKids(v), earn, v), hzHide()), flat = [].concat(...vis.map(g => g.cols));
-    let rows = FHE.horizonReport(v).map((r, i) => (r.__i = i, r));
+    const allRows = FHE.horizonReport(v).map((r, i) => (r.__i = i, r));
+    let rows = allRows.slice();
     if (earn && (RP.ph === "Earning" || RP.ph === "Retired")) rows = rows.filter(r => r.phase === RP.ph);
     const q = String(RP.q || "").trim().toLowerCase().replace(/[₹,\s]/g, "");
     if (q) rows = rows.filter(r => flat.some(c => { if (c.sno) return false; const x = c.get(r); return (c.txt ? String(x) : hzMoney(x, c.zero) + " " + Math.round(x)).toLowerCase().replace(/[₹,\s()]/g, "").includes(q); }));
@@ -1988,18 +1989,18 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
       const g = flat[k].get, n = x => (isFinite(Number(x)) && String(x).trim() !== "" ? Number(x) : null);
       rows = rows.slice().sort((a, b) => { const x = g(a), y = g(b), nx = n(x), ny = n(y); return (nx !== null && ny !== null ? nx - ny : String(x).localeCompare(String(y))) * RP.d || a.__i - b.__i; });
     } else if (RP.d < 0) rows = rows.slice().reverse();
-    return { v, flat, rows, cols: vis };
+    return { v, flat, rows, allRows, cols: vis };
   }
   const hzC = x => { const a = Math.abs(x), n = a >= 1e7 ? (a / 1e7).toFixed(2) + " Cr" : a >= 1e5 ? (a / 1e5).toFixed(2) + " L" : null; return n ? (x < 0 ? "(₹" + n + ")" : "₹" + n) : hzMoney(x); };
-  function hzPhaseBar(v, shown) {
+  function hzPhaseBar(v, shown, allRows) {
     if (!hzEarn(v)) return "";
-    const all = FHE.horizonReport(v), es = FHE.earningSummary(v), pre = all.filter(r => r.phase === "Earning"), sum = f => pre.reduce((t, r) => t + f(r), 0);
+    const all = allRows || [], es = FHE.earningSummary(v), pre = all.filter(r => r.phase === "Earning"), sum = f => pre.reduce((t, r) => t + f(r), 0);
     const last = pre[pre.length - 1], M = x => hzC(x), c = (l, val) => `<div><small>${l}</small><b>${val}</b></div>`;
     return `<div class="mu" style="margin:6px 0 2px;font-size:12px">Pre-retirement plan: age ${es.from} to ${es.retire} (${es.years} year${es.years === 1 ? "" : "s"}), then retirement to ${es.until}. Use the phase filter to see one stage.</div>
 <div class="hz-es">${c("Earnings over " + es.years + " yrs", M(sum(r => r.earn)))}${c("Spent over " + es.years + " yrs", M(sum(r => r.spent)))}${c("Paid from corpus", M(sum(r => r.fromCorpus)))}${c("Savings fund interest", M(sum(r => r.interestS)))}${c("Savings fund moved in", M(sum(r => r.merged)))}${c("Corpus at retirement", last ? M(last.end) : "—")}</div>`;
   }
-  function hzTable() {
-    const w = hzView();
+  function hzTable(view) {
+    const w = view || hzView();
     if (!w) return "";
     const { flat, rows } = w, sel = Number(RP.sel);
     if (!rows.length) return `<div class="mu" style="padding:14px">No rows match your search.</div>`;
@@ -2040,14 +2041,13 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
   window.hzReport = function () {
     const w = hzView();
     if (!w) return "";
-    const rows = FHE.horizonReport(w.v);
     const opt = (val, cur, t) => `<option value="${val}"${String(cur) === String(val) ? " selected" : ""}>${t}</option>`;
     return `<div class="card"><div class="rph2" data-rpx><div class="rpt"><h2>Year-by-year plan</h2>${window.rptInfo("Click or tap a row to highlight it · click a column heading to sort · Freeze keeps the first columns in view while you scroll · amounts in ₹ Lakh / Crore (hover for the exact amount)", "About this table")}</div>${window.rptCsv ? window.rptCsv("hzcsv") : '<button type="button" id="hzcsv" class="vr-ib vr-ib-csv" title="Copy as CSV" aria-label="Copy as CSV"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>'}</div>
 ${hzFilters(w.v)}
 <div class="tb hz-tb"><input id="hzq" type="search" placeholder="Search year, age, amount…" aria-label="Search year by year plan" value="${esc(RP.q || "")}"><select id="hzs" aria-label="Sort by">${opt(-1, RP.k, "Sort: S.No")}${w.flat.map((c, i) => opt(i, RP.k, "Sort: " + esc(c.label))).join("")}</select><select id="fzs" aria-label="Freeze columns">${[["0", "Freeze: none"], ["2", "Freeze: Year"], ["3", "Freeze: Year + Ages"]].map(o => `<option value="${o[0]}"${(document.body.dataset.fz || "2") === o[0] ? " selected" : ""}>${o[1]}</option>`).join("")}</select><button type="button" id="hzd" aria-label="Toggle sort direction">${RP.d > 0 ? "▲" : "▼"}</button></div>
-${hzPhaseBar(w.v, rows)}
+${hzPhaseBar(w.v, w.rows, w.allRows)}
 
-<div id="hz-rows">${hzTable()}</div>
+<div id="hz-rows">${hzTable(w)}</div>
 </div>`;
   };
   function hzRefresh() {
