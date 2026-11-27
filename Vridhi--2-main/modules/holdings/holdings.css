@@ -765,19 +765,19 @@ html body .hp-card .hp-mob{display:none}
   html body .hd-metrics article small{grid-column:1}
 }
 
-/* Mobile/tablet: View Holding shows the card list (one card per holding) instead of the six-column table.
-   The wide table is desktop-only; without this the table and the cards both appeared and the table scrolled sideways. */
-@media(max-width:900px){
+/* Mobile/tablet: View Holding shows the card list (one card per holding) at <= 768px (md breakpoint),
+   and the clean six-column data table at >= 769px. */
+@media(max-width:768px){
   html body .hp-card .ht,
   html body .hp-card .ht.tw{display:none!important}
   html body .hp-card .hc{display:block!important;padding:0 10px 10px}
   html body .hp-card .hc .hgh{margin:12px 0 0}
   html body .hp-card .hc .hcard{margin:10px 0}
 }
-@media(min-width:901px){
+@media(min-width:769px){
   html body .hp-card .hc{display:none!important}
 }
-@media(max-width:900px){
+@media(max-width:768px){
   /* category header on the card list: arrow + pill + "n holdings · x%" on the left, value on the right */
   html body .hp-card .hc .hgh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px}
   html body .hp-card .hc .hgh .gtg{display:flex!important;flex:1 1 auto;flex-wrap:wrap;align-items:center;justify-content:flex-start!important;gap:4px 8px;min-width:0;min-height:44px!important;width:auto;padding:0!important;margin:0;border:0!important;background:transparent!important;box-shadow:none!important;text-align:left;font-size:13px}
@@ -795,4 +795,336 @@ html body .hp-card .ht table tr.gh td {
 }
 html body .hp-card .ht table tr.gh td:first-child {
   border-left: 4px solid var(--c, var(--ac));
+}
+
+/* Responsive Wealth Management Portfolio Holdings View (Header, Overview Widget, Bar Chart, md=768px Breakpoint) */
+html body .hp-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px 20px;
+  flex-wrap:wrap;
+  margin:4px 0 16px;
+}
+html body .hp-head .hp-ttl{
+  order:-1;
+  min-width:0;
+}
+html body .hp-head .hp-ttl h1{
+  margin:0;
+  font-size:clamp(22px,2.4vw,28px);
+  font-weight:800;
+  letter-spacing:-0.025em;
+  line-height:1.15;
+  color:var(--tx);
+}
+html body .hp-head .hp-ttl p{
+  margin:4px 0 0;
+  font-size:13px;
+  color:var(--mu);
+}
+html body .hp-head button.hp-add,
+html body .hp-head button.hp-add span{
+  display:inline-flex!important;
+  align-items:center;
+}
+html body .hp-head button.hp-add{
+  flex:0 0 auto;
+  min-height:42px;
+  padding:0 18px;
+  border-radius:10px!important;
+  font-size:14px;
+  font-weight:700;
+}
+html body .hp-card #hr{padding:0 0 8px}
+html body .hp-card .ht.tw{
+  margin:14px 16px 6px;
+  width:calc(100% - 32px);
+}
+html body .hp-overview{
+  padding:18px 20px;
+  border-bottom:1px solid var(--bd);
+  background:color-mix(in srgb,var(--bg) 35%,var(--card));
+}
+html body .hp-ov-kpis{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:16px;
+}
+html body .hp-ov-kpi{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:14px 16px;
+  border:1px solid var(--bd);
+  border-radius:12px;
+  background:var(--card);
+  min-width:0;
+}
+html body .hp-ov-label{
+  font-size:11.5px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--mu);
+}
+html body .hp-ov-num{
+  font-size:clamp(22px,2.6vw,28px);
+  font-weight:800;
+  line-height:1.15;
+  letter-spacing:-0.02em;
+  color:var(--tx);
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+html body .hp-ov-sub{
+  font-size:12px;
+  color:var(--mu);
+  line-height:1.35;
+}
+html body .hp-ov-alloc{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+html body .hp-ov-alloc-hd{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--mu);
+}
+html body .hp-ov-bar{
+  display:flex;
+  align-items:stretch;
+  gap:2px;
+  width:100%;
+  height:12px;
+  border-radius:999px;
+  overflow:hidden;
+  background:color-mix(in srgb,var(--bd) 55%,transparent);
+}
+html body .hp-ov-seg{
+  display:block;
+  height:100%;
+  min-width:3px;
+  transition:width .25s ease;
+}
+html body .hp-ov-seg.is-empty{
+  background:var(--bd);
+}
+html body .hp-ov-leg{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 18px;
+  align-items:center;
+}
+html body .hp-ov-item{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-size:12.5px;
+  line-height:1.3;
+  font-variant-numeric:tabular-nums;
+}
+html body .hp-ov-dot{
+  width:9px;
+  height:9px;
+  border-radius:3px;
+  flex:none;
+}
+html body .hp-ov-cat{
+  font-weight:650;
+  color:var(--tx);
+}
+html body .hp-ov-pct{
+  font-weight:750;
+  color:var(--tx);
+}
+html body .hp-ov-val{
+  color:var(--mu);
+}
+html body .hp-subline{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:2px;
+}
+html body .hp-card .ht table th .hp-sort-arr{
+  margin-left:3px;
+  font-size:11px;
+  opacity:.85;
+}
+
+/* Desktop & Tablet (> 768px): 6-column table fits cleanly without forced horizontal overflow; inline toolbar */
+@media(min-width:769px){
+  html body .hp-card .hp-tools{
+    display:flex!important;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    padding:12px 16px;
+  }
+  html body .hp-card .hp-tools .hp-search{flex:1 1 240px;min-width:190px}
+  html body .hp-card .hp-mob{display:none!important}
+  html body .hp-card .hp-more{
+    display:flex!important;
+    flex:0 1 auto;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px 12px;
+    padding:0;
+    border:0;
+    background:transparent;
+  }
+  html body .hp-card .hp-more .hp-sort,
+  html body .hp-card .hp-more .hp-portfolio-actions{
+    display:flex!important;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:7px;
+  }
+  html body .hp-card .hp-more button{
+    display:inline-flex!important;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    min-height:36px;
+    width:auto!important;
+    max-width:none!important;
+    padding:7px 10px!important;
+    font-size:12px!important;
+  }
+  html body .hp-card .hp-more button.hp-grp-icon,
+  html body .hp-card .hp-more button.hp-cat-icon{
+    width:36px!important;
+    min-width:36px!important;
+    padding:0!important;
+  }
+  html body .hp-card .ht.tw{overflow-x:auto!important}
+  html body .hp-card .ht table{width:100%!important;min-width:0!important;max-width:100%;table-layout:fixed}
+  html body .hp-card .ht table th:nth-child(1),
+  html body .hp-card .ht table td:nth-child(1){width:26%!important;min-width:0!important}
+  html body .hp-card .ht table th:nth-child(2),
+  html body .hp-card .ht table td:nth-child(2){width:15%!important;min-width:0!important}
+  html body .hp-card .ht table th:nth-child(3),
+  html body .hp-card .ht table td:nth-child(3){width:19%!important;min-width:0!important}
+  html body .hp-card .ht table th:nth-child(4),
+  html body .hp-card .ht table td:nth-child(4){width:17%!important;min-width:0!important}
+  html body .hp-card .ht table th:nth-child(5),
+  html body .hp-card .ht table td:nth-child(5){width:9%!important;min-width:0!important}
+  html body .hp-card .ht table th:nth-child(6),
+  html body .hp-card .ht table td:nth-child(6){width:14%!important;min-width:0!important}
+}
+
+/* Mobile (<= 768px): Stacked tactile cards with high-contrast numerical metrics, nested child details & anchored total */
+@media(max-width:768px){
+  html body .hp-head{align-items:stretch;gap:10px}
+  html body .hp-head .hp-ttl{width:100%}
+  html body .hp-head button.hp-add{width:100%;justify-content:center}
+  html body .hp-overview{padding:14px}
+  html body .hp-ov-kpis{gap:10px;margin-bottom:12px}
+  html body .hp-ov-kpi{padding:12px 13px}
+  html body .hp-card .hp-tools{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:8px;
+    padding:10px 12px;
+  }
+  html body .hp-card .hp-mob{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 44px 44px;
+    gap:6px;
+    width:100%;
+  }
+  html body .hp-card .hp-more{
+    display:none;
+    grid-template-columns:repeat(auto-fit,44px);
+    gap:8px;
+    padding:8px;
+    border:1px solid var(--bd);
+    border-radius:10px;
+  }
+  html body .hp-card .hp-more.open{display:flex;flex-wrap:wrap}
+  html body .hp-card .hc{padding:2px 12px 12px}
+  html body .hp-card .hc .hcard{
+    border:1px solid var(--bd);
+    border-left:4px solid var(--c,var(--ac));
+    border-radius:12px;
+    padding:14px;
+    margin:10px 0;
+    background:var(--card);
+    box-shadow:0 1px 3px rgba(15,23,42,.06);
+  }
+  html body .hp-card .hc .hcard .hh{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+  }
+  html body .hp-card .hc .hcard .vv{
+    text-align:right;
+    flex:none;
+    font-variant-numeric:tabular-nums;
+  }
+  html body .hp-card .hc .hcard .vv b{
+    font-size:17px;
+    font-weight:800;
+    color:var(--tx);
+  }
+  html body .hp-card .hc .hcard .vv .mu{font-size:11px}
+  html body .hp-card .hc .hp-card-kpis{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+    margin:10px 0 8px;
+    padding:9px 10px;
+    border-radius:9px;
+    background:color-mix(in srgb,var(--bg) 55%,var(--card));
+    border:1px solid color-mix(in srgb,var(--bd) 70%,transparent);
+    font-variant-numeric:tabular-nums;
+  }
+  html body .hp-card .hc .hp-card-kpis>div{min-width:0}
+  html body .hp-card .hc .hp-card-kpis span{
+    display:block;
+    font-size:10.5px;
+    font-weight:600;
+    color:var(--mu);
+    line-height:1.25;
+  }
+  html body .hp-card .hc .hp-card-kpis b{
+    display:block;
+    margin-top:2px;
+    font-size:13px;
+    font-weight:750;
+    color:var(--tx);
+    overflow-wrap:anywhere;
+  }
+  html body .hp-card .hc .hcard .hp-kvd-child{
+    margin:6px 0 10px;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--bd);
+    background:color-mix(in srgb,var(--bg) 42%,var(--card));
+  }
+  html body .hp-card .hc .hcard .hp-kvd-child .kv{margin-top:0}
+  html body .hp-card .hc .hcard.hp-total{
+    position:sticky;
+    bottom:calc(62px + env(safe-area-inset-bottom,0px));
+    z-index:3;
+    border:1px solid color-mix(in srgb,var(--ac) 35%,var(--bd));
+    border-left:4px solid var(--ac);
+    background:color-mix(in srgb,var(--ac) 6%,var(--card));
+    box-shadow:0 -4px 14px rgba(15,23,42,.12);
+  }
+}
+@media(max-width:560px){
+  html body .hp-ov-kpis{grid-template-columns:1fr}
+  html body .hp-card .hc .hp-card-kpis{grid-template-columns:1fr 1fr}
+  html body .hp-card .hc .hp-card-kpis>div:last-child{grid-column:1/-1}
 }

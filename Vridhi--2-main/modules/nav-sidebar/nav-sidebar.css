@@ -337,7 +337,8 @@
   }
 
   html.vr-side-on:not(#vrx) body:has(#dsh) header.hd,
-  html.vr-side-on:not(#vrx) body:has(#dsh) header.hd .vr-side-bc {
+  html.vr-side-on:not(#vrx) body:has(#dsh) header.hd .vr-side-bc,
+  html.vr-side-on:not(#vrx) body:has(.hp-head) header.hd .vr-side-bc {
     display: none !important;
   }
 
@@ -360,6 +361,8 @@
 
   html.vr-side-on:not(#vrx) body header.hd #fhp {
     margin-left: auto !important;
+    padding-right: 0 !important;
+    border-right: 0 !important;
   }
 
   html.vr-side-on:not(#vrx) body .w {
