@@ -89,8 +89,10 @@
     });
   }
   function syncBar(bar, t) {
-    Array.prototype.forEach.call(bar.querySelectorAll('[data-aph-cols]'), function (b) { b.classList.toggle('on', b.dataset.aphCols === st.cols); b.setAttribute('aria-pressed', String(b.dataset.aphCols === st.cols)); });
-    Array.prototype.forEach.call(bar.querySelectorAll('[data-aph-years]'), function (b) { b.classList.toggle('on', +b.dataset.aphYears === st.years); b.setAttribute('aria-pressed', String(+b.dataset.aphYears === st.years)); });
+    if (!bar) return;
+    var root = document.getElementById('m') || bar;
+    Array.prototype.forEach.call(root.querySelectorAll('[data-aph-cols]'), function (b) { b.classList.toggle('on', b.dataset.aphCols === st.cols); b.setAttribute('aria-pressed', String(b.dataset.aphCols === st.cols)); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-aph-years]'), function (b) { b.classList.toggle('on', +b.dataset.aphYears === st.years); b.setAttribute('aria-pressed', String(+b.dataset.aphYears === st.years)); });
     var ctl = bar.querySelector('.vr-ctl'); if (ctl) ctl.hidden = !(t && t.getClientRects().length);     /* phones show year cards instead of the table: keep the summary, drop the table controls */
   }
 
@@ -100,12 +102,19 @@
     try {
       var rr = document.getElementById('rr'), m = document.getElementById('m');
       if (!m || !rr || !onAnnualPage()) return;
+      var customBar = m.querySelector('.ap-controls');
       var bar = rr.previousElementSibling;
-      if (!bar || !bar.classList || !bar.classList.contains('vr-aph')) { rr.insertAdjacentHTML('beforebegin', barHTML()); bar = rr.previousElementSibling; }
+      if (customBar && customBar.querySelector('[data-aph-cols]')) {
+        bar = customBar;
+      } else if (!bar || !bar.classList || !bar.classList.contains('vr-aph')) {
+        rr.insertAdjacentHTML('beforebegin', barHTML());
+        bar = rr.previousElementSibling;
+      }
       var t = rr.querySelector(':scope > table.rt');
       if (t && t.dataset.rc && !t.dataset.aph) decorate(t);
       if (t && t.dataset.aph) applyView(t);
       syncBar(bar, t);
+      if (typeof window.vrSyncAnnualProjection === 'function') window.vrSyncAnnualProjection();
     } finally {
       var mm = document.getElementById('m'); if (mm && obs) obs.observe(mm, { childList: true, subtree: true });
     }

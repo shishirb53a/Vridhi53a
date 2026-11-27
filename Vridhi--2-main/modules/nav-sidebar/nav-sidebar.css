@@ -339,7 +339,9 @@
   html.vr-side-on:not(#vrx) body:has(#dsh) header.hd,
   html.vr-side-on:not(#vrx) body:has(#dsh) header.hd .vr-side-bc,
   html.vr-side-on:not(#vrx) body:has(.hp-head) header.hd,
-  html.vr-side-on:not(#vrx) body:has(.hp-head) header.hd .vr-side-bc {
+  html.vr-side-on:not(#vrx) body:has(.hp-head) header.hd .vr-side-bc,
+  html.vr-side-on:not(#vrx) body:has(.ap-head) header.hd,
+  html.vr-side-on:not(#vrx) body:has(.ap-head) header.hd .vr-side-bc {
     display: none !important;
   }
 
@@ -374,7 +376,8 @@
   }
 
   html.vr-side-on:not(#vrx) body .w:has(#dsh),
-  html.vr-side-on:not(#vrx) body .w:has(.hp-head) {
+  html.vr-side-on:not(#vrx) body .w:has(.hp-head),
+  html.vr-side-on:not(#vrx) body .w:has(.ap-head) {
     padding-top: 12px !important;
   }
 
