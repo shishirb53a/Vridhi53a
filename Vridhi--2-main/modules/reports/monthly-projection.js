@@ -1,6 +1,6 @@
 (function(){
 const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-window.monthData=function(state){const state0=state||S,D=calc(state0),A=state0.assets,rows=[];
+window.monthData=function(state){const state0=state||S,D=(state0===S&&window.vrReportCalc?window.vrReportCalc():calc(state0)),A=state0.assets,rows=[];
 for(let a=2;a<=D.rows.length;a++){const p=D.rows[a-2],c=D.rows[a-1],fy=state0.start+a-2,fi=A.map(function(x){return x.type==='gratuity'?null:fyInfo(x,state0,a)});let last=p.v.slice();
 for(let m=1;m<=12;m++){const t=m/12,cm=(m+2)%12,cy=m<=9?fy:fy+1;
 const v=A.map(function(x,i){const s=p.v[i],e=c.v[i];
