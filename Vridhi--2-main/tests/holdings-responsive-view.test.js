@@ -134,19 +134,29 @@ test('CSS files have balanced braces and md=768px responsive breakpoint', () => 
     'holdings.css must toggle desktop table vs mobile cards at md (768px / 769px)'
   );
   assert.ok(
+    navSidebarCss.includes('body:has(.hp-head) header.hd') &&
     navSidebarCss.includes('body:has(.hp-head) header.hd .vr-side-bc'),
-    'nav-sidebar.css must hide desktop breadcrumb when Holdings view (.hp-head) is active'
+    'nav-sidebar.css must hide desktop breadcrumb and header bar when Holdings view (.hp-head) is active'
+  );
+  assert.ok(
+    holdingsCss.includes('.hp-head-badge') &&
+    holdingsCss.includes('.hp-head-left') &&
+    holdingsCss.includes('.hp-head-right'),
+    'holdings.css must style the unified single-row header with icon badge, title cluster, and pill client switcher'
   );
 });
 
 test('hold() and holdRows() exclude redundant top tabs, hp-gf-* classes, and Est. at age column', () => {
   const holdFn = appJs.slice(appJs.indexOf('function hold(){'), appJs.indexOf('function hin('));
   const holdRowsFn = appJs.slice(appJs.indexOf('function holdRows(){'), appJs.indexOf('function hold(){'));
+  const rpUiJs = fs.readFileSync(path.join(ROOT, 'modules', 'retirement-planner', 'ui.js'), 'utf8');
 
   assert.ok(!holdFn.includes('hp-gf-tabs') && !holdFn.includes('hp-gf-bar'), 'Redundant top tab navigation removed from hold()');
   assert.ok(!holdRowsFn.includes('hp-gf-') && !holdRowsFn.includes('Est. at age'), 'Legacy hp-gf-* classes and Est. at age removed from holdRows()');
   assert.ok(holdFn.includes('<div class="hp-head"><button type="button" class="p hp-add" id="add">'), 'Prominent + Add holding CTA rendered in .hp-head');
-  assert.ok(holdFn.includes('<h1>Portfolio Holdings</h1>'), 'Page title rendered in .hp-head');
+  assert.ok(holdFn.includes('class="hp-head-badge"') && holdFn.includes('<h1>Portfolio Holdings</h1>') && holdFn.includes('Wealth Management &amp; Assets'), 'Icon badge, title, and subtitle rendered in .hp-head-left');
+  assert.ok(holdFn.includes('hp-head-right') && holdFn.includes('gppDashClient'), 'Inline client switcher rendered in .hp-head-right');
+  assert.ok(rpUiJs.includes('UI.tab === "Holdings"') && rpUiJs.includes('#m .hp-head'), 'fhpBar hides #fhp bar on Holdings when unified header renders client switcher');
 });
 
 test('Portfolio Overview Widget aggregates values and renders multi-segmented bar chart dynamically in VM', () => {

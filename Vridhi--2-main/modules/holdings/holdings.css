@@ -797,44 +797,157 @@ html body .hp-card .ht table tr.gh td:first-child {
   border-left: 4px solid var(--c, var(--ac));
 }
 
-/* Responsive Wealth Management Portfolio Holdings View (Header, Overview Widget, Bar Chart, md=768px Breakpoint) */
-html body .hp-head{
+/* Responsive Wealth Management Portfolio Holdings View (Unified Single-Row Header, Overview Widget, Bar Chart, md=768px Breakpoint) */
+html body #m .hp-head{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:12px 20px;
+  justify-content:flex-start;
+  gap:12px 18px;
   flex-wrap:wrap;
-  margin:4px 0 16px;
+  margin:0 0 18px;
+  padding:4px 0 14px;
+  border-bottom:1px solid var(--bd);
 }
-html body .hp-head .hp-ttl{
-  order:-1;
+html body #m .hp-head-left{
+  order:1;
+  display:flex;
+  align-items:center;
+  gap:12px;
   min-width:0;
 }
-html body .hp-head .hp-ttl h1{
+html body #m .hp-head-badge{
+  display:inline-grid;
+  place-items:center;
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:var(--ac);
+  color:var(--ac2,#fff);
+  flex:none;
+  box-shadow:0 2px 8px -3px color-mix(in srgb,var(--ac) 60%,transparent);
+}
+html body #m .hp-head-badge svg{
+  display:block;
+  width:22px;
+  height:22px;
+}
+html body #m .hp-head .hp-ttl{
+  order:0;
+  min-width:0;
+}
+html body #m .hp-head .hp-ttl h1{
   margin:0;
-  font-size:clamp(22px,2.4vw,28px);
+  font-size:20px;
   font-weight:800;
-  letter-spacing:-0.025em;
-  line-height:1.15;
+  letter-spacing:-0.02em;
+  line-height:1.2;
   color:var(--tx);
 }
-html body .hp-head .hp-ttl p{
-  margin:4px 0 0;
-  font-size:13px;
+html body #m .hp-head .hp-ttl p{
+  margin:2px 0 0;
+  font-size:12.5px;
+  font-weight:500;
+  line-height:1.25;
   color:var(--mu);
 }
-html body .hp-head button.hp-add,
-html body .hp-head button.hp-add span{
+html body #m .hp-head button.hp-add,
+html body #m .hp-head button.hp-add span{
   display:inline-flex!important;
   align-items:center;
+  justify-content:center;
 }
-html body .hp-head button.hp-add{
+html body #m .hp-head button.hp-add{
+  order:2;
   flex:0 0 auto;
-  min-height:42px;
-  padding:0 18px;
-  border-radius:10px!important;
-  font-size:14px;
+  width:auto;
+  min-height:38px;
+  height:38px;
+  padding:0 16px;
+  border-radius:8px!important;
+  font-size:13.5px;
   font-weight:700;
+  line-height:1;
+  box-shadow:0 4px 12px -6px color-mix(in srgb,var(--ac) 75%,transparent),0 1px 2px rgba(15,23,42,.12);
+}
+html body #m .hp-head-right{
+  order:3;
+  margin-left:auto;
+  flex:none;
+  max-width:100%;
+}
+html body #m .hp-head-right .dz-client{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  height:38px;
+  padding:0 14px;
+  border-radius:999px;
+  border:1px solid var(--bd);
+  background:color-mix(in srgb,var(--bg) 55%,var(--card));
+  box-shadow:0 1px 2px rgba(15,23,42,.04);
+  transition:border-color .15s ease,background-color .15s ease;
+}
+html body #m .hp-head-right .dz-client:hover,
+html body #m .hp-head-right .dz-client:focus-within{
+  border-color:var(--ac);
+  background:var(--card);
+}
+html body #m .hp-head-right .dz-client-l{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--mu);
+  white-space:nowrap;
+}
+html body #m .hp-head-right .gpp-client-trigger{
+  position:static;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  width:auto!important;
+  min-width:0!important;
+  max-width:220px;
+  height:36px!important;
+  min-height:36px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:var(--tx)!important;
+  font-size:13.5px!important;
+  font-weight:700!important;
+  cursor:pointer;
+}
+html body #m .hp-head-right .gpp-client-trigger::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+}
+html body #m .hp-head-right .gpp-client-trigger:focus-visible{
+  outline:none;
+}
+html body #m .hp-head-right .dz-client:has(.gpp-client-trigger:focus-visible){
+  outline:2px solid var(--ac);
+  outline-offset:2px;
+}
+html body #m .hp-head-right .client-trigger-value{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+html body #m .hp-head-right .client-chevron{
+  width:14px;
+  height:14px;
+  fill:none;
+  stroke:var(--mu);
+  stroke-width:1.9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex:none;
 }
 html body .hp-card #hr{padding:0 0 8px}
 html body .hp-card .ht.tw{
@@ -1024,9 +1137,11 @@ html body .hp-card .ht table th .hp-sort-arr{
 
 /* Mobile (<= 768px): Stacked tactile cards with high-contrast numerical metrics, nested child details & anchored total */
 @media(max-width:768px){
-  html body .hp-head{align-items:stretch;gap:10px}
-  html body .hp-head .hp-ttl{width:100%}
-  html body .hp-head button.hp-add{width:100%;justify-content:center}
+  html body #m .hp-head{align-items:center;gap:10px 12px;margin-bottom:14px;padding-bottom:12px}
+  html body #m .hp-head-left{flex:1 1 100%}
+  html body #m .hp-head button.hp-add{flex:1 1 auto;width:auto;min-height:42px;height:42px;justify-content:center}
+  html body #m .hp-head-right{flex:0 1 auto;margin-left:auto}
+  html body #m .hp-head-right .dz-client{height:42px}
   html body .hp-overview{padding:14px}
   html body .hp-ov-kpis{gap:10px;margin-bottom:12px}
   html body .hp-ov-kpi{padding:12px 13px}
