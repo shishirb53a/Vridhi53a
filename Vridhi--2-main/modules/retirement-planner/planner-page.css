@@ -368,3 +368,13 @@ html body dialog.hf.fh #fh-s-milestones .sx ol.sx-tl li.tl-ok::before{background
 html body #fh-ul[data-st="ok"]{color:var(--sl-ok)}html body #fh-ul[data-st="mid"]{color:var(--sl-mid)}html body #fh-ul[data-st="bad"]{color:var(--sl-bad)}
 html body #fh-ul[data-st]{font-weight:700}
 html body #dsh #fh-ul.dz-pill[data-st="ok"]{background:color-mix(in srgb,var(--sl-ok) 18%,var(--card));border-color:var(--sl-ok)}html body #dsh #fh-ul.dz-pill[data-st="mid"]{background:color-mix(in srgb,var(--sl-mid) 18%,var(--card));border-color:var(--sl-mid)}html body #dsh #fh-ul.dz-pill[data-st="bad"]{background:color-mix(in srgb,var(--sl-bad) 18%,var(--card));border-color:var(--sl-bad)}
+
+/* Retirement planner summary: client dropdown lives in the banner, top right; the client name keeps its room */
+html body .rp-ban{flex-wrap:wrap;align-items:flex-start;gap:8px 16px}
+html body .rp-ban .dz-who{flex:1 1 240px;min-width:0}
+html body .rp-ban .fhp-nm{overflow-wrap:break-word;word-break:normal}
+html body .rp-ban .rp-ban-client{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
+html body .rp-ban .rp-ban-client .fhp-l{display:block;font-size:12px;font-weight:600;color:var(--mu);letter-spacing:0;text-transform:none;opacity:1}
+html body .rp-ban .rp-ban-client .client-picker{position:relative;flex:none;min-width:0}
+html body .rp-ban .rp-ban-client .client-trigger{width:200px;max-width:100%;height:38px;min-height:38px}
+@media (max-width:720px){html body .rp-ban .rp-ban-client{flex:1 1 100%;margin-left:0}html body .rp-ban .rp-ban-client .client-picker{flex:1}html body .rp-ban .rp-ban-client .client-trigger{width:100%}}

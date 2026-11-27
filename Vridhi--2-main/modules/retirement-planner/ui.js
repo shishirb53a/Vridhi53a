@@ -2319,6 +2319,10 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
     const el = document.getElementById("fhp"); if (!el) return;
     if (typeof UI !== "undefined" && UI.tab === "Dashboard" && typeof window.gppDashClient === "function") { el.hidden = true; el.innerHTML = ""; return; }
     if (typeof GP !== "undefined" && typeof UI !== "undefined" && GP.includes(UI.tab) && typeof window.gppBarHTML === "function") { el.hidden = false; el.innerHTML = window.gppBarHTML(true); return; }
+    if (typeof UI !== "undefined" && UI.tab === "Retirement planner" && RP.tab !== "report") {
+      fhpEnsure();
+      if (String((fhpList().find(p => p.active) || { name: "" }).name || "").trim()) { el.hidden = true; el.innerHTML = ""; return; }
+    }
     const on = typeof UI !== "undefined" && (UI.tab === "Retirement planner" || UI.tab === "RP Reports");
     const P = on ? fhpEnsure() : null;
     el.hidden = !P; if (!P) return;
@@ -2564,7 +2568,7 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
     const nm = String(name || "").trim(); if (!nm) return "";
     const ini = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(w => Array.from(w)[0].toUpperCase()).join("");
     const sub = (bits || []).filter(Boolean), eb = "Retirement plan prepared for";
-    return `<header class="rp-ban" aria-label="${eb} ${esc(nm)}"><div class="dz-who"><span class="fhp-av sm" aria-hidden="true">${esc(ini)}</span><div class="fhp-ht"><span class="fhp-eb">${eb}</span><div class="dz-nr"><h2 class="fhp-nm sm">${esc(nm)}</h2>${sub.length ? `<span class="fhp-sub">${sub.join(" \u00b7 ")}</span>` : ""}</div></div></div></header>`;
+    return `<header class="rp-ban" aria-label="${eb} ${esc(nm)}"><div class="dz-who"><span class="fhp-av sm" aria-hidden="true">${esc(ini)}</span><div class="fhp-ht"><span class="fhp-eb">${eb}</span><div class="dz-nr"><h2 class="fhp-nm sm">${esc(nm)}</h2>${sub.length ? `<span class="fhp-sub">${sub.join(" \u00b7 ")}</span>` : ""}</div></div></div><div class="rp-ban-client">${fhpBarHTML(true)}</div></header>`;
   }
   function clientHero(name, v) {
     const bits = [];
@@ -2588,7 +2592,7 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
     }
     const none = rp2Welcome();
     ensureSxCss();
-    return `<div class="fh-page rp2-page"><div class="fhp fhp-m">${fhpBarHTML(false)}</div>${clientHero(cur, sv && sv.v)}${ok ? `<div class="rptv" id="rptv">${rptInner()}</div>` : none}${rp2Nav("status")}</div>`;
+    return `<div class="fh-page rp2-page">${String(cur || "").trim() ? "" : `<div class="fhp fhp-m">${fhpBarHTML(false)}</div>`}${clientHero(cur, sv && sv.v)}${ok ? `<div class="rptv" id="rptv">${rptInner()}</div>` : none}${rp2Nav("status")}</div>`;
   };
 
   document.addEventListener("click", e => {
