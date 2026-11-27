@@ -4,7 +4,7 @@
 (function(){
 function fyLab(y){return 'FY '+y+'-'+String(y+1).slice(2)}
 function data(){
- var SEL=repSel(),D=calc(S),A=S.assets,R=D.rows,cats=[],out=[];
+ var SEL=repSel(),D=(window.vrReportCalc?window.vrReportCalc():calc(S)),A=S.assets,R=D.rows,cats=[],out=[];
  for(var a=2;a<=R.length;a++){
   var y=S.start+a-2,by={},tot=0;
   SEL.idx.forEach(function(i){var x=A[i];if(x.type==='gratuity')return;var k=fyInfo(x,S,a),v=k.act?(k.yp?x.add:0)+(x.madd||0)*k.n:0;if(v>0){by[x.cat]=(by[x.cat]||0)+v;tot+=v;if(cats.indexOf(x.cat)<0)cats.push(x.cat)}});
