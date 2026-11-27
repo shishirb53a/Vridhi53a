@@ -84,11 +84,12 @@
     var parts = Array.isArray(cur && cur.crumbs) && cur.crumbs.length
       ? cur.crumbs
       : [cur && cur.title ? cur.title : "Vriddhi"];
-    bc.innerHTML = parts.map(function (seg, idx) {
+    var bcHtml = parts.map(function (seg, idx) {
       var isLast = idx === parts.length - 1;
       return (idx > 0 ? '<span aria-hidden="true">&rsaquo;</span>' : "") +
         (isLast ? "<b>" + esc(seg) + "</b>" : "<span>" + esc(seg) + "</span>");
     }).join("");
+    if (bc.__html !== bcHtml) { bc.__html = bcHtml; bc.innerHTML = bcHtml; }
   }
 
   function renderFooterUser() {
@@ -96,8 +97,9 @@
     var nameTxt = (whoEl && !whoEl.hidden && whoEl.textContent) ? whoEl.textContent.trim() : "Advisor";
     var whoOut = document.getElementById("vr-side-who");
     var avOut = side ? side.querySelector(".vr-side-av") : null;
-    if (whoOut) whoOut.textContent = nameTxt;
-    if (avOut) avOut.textContent = (nameTxt.charAt(0) || "A").toUpperCase();
+    var avTxt = (nameTxt.charAt(0) || "A").toUpperCase();
+    if (whoOut && whoOut.textContent !== nameTxt) whoOut.textContent = nameTxt;
+    if (avOut && avOut.textContent !== avTxt) avOut.textContent = avTxt;
   }
 
   function render() {
@@ -105,7 +107,7 @@
     if (!a || typeof a.getGroups !== "function") return;
     ensure();
     var on = signedIn();
-    side.hidden = !on;
+    if (side.hidden !== !on) side.hidden = !on;
     document.documentElement.classList.toggle("vr-side-on", on);
     if (!on) return;
 
@@ -115,7 +117,7 @@
     if (openId && !groups.some(function (g) { return g.id === openId; })) openId = null;
 
     var nav = side.querySelector(".vr-side-nav");
-    nav.innerHTML = groups.map(function (g) {
+    var navHtml = groups.map(function (g) {
       var isOpen = openId === g.id;
       var hasActive = g.items.some(function (it) { return it.id === cur.id; });
       var panel = "vr-side-pnl-" + g.id;
@@ -134,6 +136,9 @@
         "</div>" +
       "</section>";
     }).join("");
+    /* Skip identical markup: replacing the buttons every frame detaches them between mousedown and
+       mouseup, so the browser never fires "click" and the menu looks dead. */
+    if (nav.__html !== navHtml) { nav.__html = navHtml; nav.innerHTML = navHtml; }
 
     renderFooterUser();
     renderBreadcrumb(cur);
