@@ -2,7 +2,7 @@
 window.rowRoi=function(r){const A=S.assets,t=r.v.reduce(function(s,x){return s+(x||0)},0);return t>0?r.v.reduce(function(s,x,i){return s+(x||0)*A[i].ret},0)/t:null};
 window.rowRoiTxt=function(r){const x=rowRoi(r);return x==null?'—':(x*100).toFixed(2)+'%'};
 window.rowRoiPct=function(r){const x=rowRoi(r);return x==null?'':(x*100).toFixed(2)};
-window.rsTiles=function(){if(UI.rv==='int')return window.intTiles();const SEL=repSel(),A=S.assets,idx=SEL.idx,D=calc(S),R=D.rows;
+window.rsTiles=function(){if(UI.rv==='int')return window.intTiles();const SEL=repSel(),A=S.assets,idx=SEL.idx,D=(window.vrReportCalc?window.vrReportCalc():calc(S)),R=D.rows;
 const st=function(r){return idx.reduce(function(s,i){return s+r.v[i]},0)};
 const rate=function(r){const t=st(r);return t>0?idx.reduce(function(s,i){return s+r.v[i]*A[i].ret},0)/t:null};
 const pc=function(x){return x==null?'—':(x*100).toFixed(2)+'%'};
