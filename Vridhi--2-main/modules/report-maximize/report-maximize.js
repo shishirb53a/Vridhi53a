@@ -484,7 +484,14 @@ document.addEventListener('click',function(e){
 document.addEventListener('keydown',function(e){if(e.key!=='Escape'||!pref)return;var m=document.getElementById('m');
  if(!m||!m.classList.contains('vr-rmax')||document.querySelector('dialog[open]')||document.querySelector('.msd-p:not([hidden])'))return;
  e.preventDefault();toggle()});
-new MutationObserver(queue).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','open']});
+new MutationObserver(function(recs){
+ for(var i=0;i<recs.length;i++){
+  var t=recs[i].target;
+  if(t&&t.nodeType===3)t=t.parentElement;
+  if(t&&t.closest&&t.closest('#vr-side,#vr-drawer,#vr-drawer-backdrop,#vr-side-bc,#toast,#vr-pdf-frame'))continue;
+  queue();break;
+ }
+}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','open']});
 document.addEventListener('close',queue,true);
 if(typeof window!=='undefined'){
  if(window.addEventListener)window.addEventListener('resize',function(){if(pref)scheduleFit(40)});

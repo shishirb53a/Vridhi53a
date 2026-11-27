@@ -715,4 +715,90 @@ test('enforces RBAC permissions on shared accordion groups and replaces bottom d
   });
 });
 
+test('navigates Reports Annual -> Monthly -> Dashboard -> Holdings cleanly on both desktop sidebar and mobile drawer', () => {
+  const h = makeHarness();
+  const side = h.doc.getElementById('vr-side');
+
+  // Desktop sidebar flow: Annual projection -> Monthly projection -> Dashboard -> Holdings
+  side.querySelector('[data-side-nav="rv:year"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Reports');
+  assert.strictEqual(h.ctx.UI.rv, 'year');
+
+  h.win.VRNavSidebar.refresh();
+  side.querySelector('[data-side-nav="rv:month"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Reports');
+  assert.strictEqual(h.ctx.UI.rv, 'month');
+
+  h.win.VRNavSidebar.refresh();
+  side.querySelector('[data-side-nav="gp:Dashboard"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Dashboard');
+
+  h.win.VRNavSidebar.refresh();
+  h.ctx.UI.hv = 'asset-1';
+  side.querySelector('[data-side-nav="gp:Holdings"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Holdings');
+  assert.strictEqual(h.ctx.UI.hv, null, 'Navigating to Holdings clears holding detail selection UI.hv');
+
+  // Mobile drawer flow: Annual -> Monthly -> Dashboard -> Holdings
+  h.win.VRMobileDrawer.open();
+  h.doc.querySelector('[data-vr-nav="rv:year"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Reports');
+  assert.strictEqual(h.ctx.UI.rv, 'year');
+
+  h.win.VRMobileDrawer.open();
+  h.doc.querySelector('[data-vr-nav="rv:month"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Reports');
+  assert.strictEqual(h.ctx.UI.rv, 'month');
+
+  h.win.VRMobileDrawer.open();
+  h.doc.querySelector('[data-vr-nav="gp:Dashboard"]').click();
+  assert.strictEqual(h.ctx.UI.tab, 'Dashboard');
+});
+
+test('repeated VRNavSidebar.refresh() on the same route preserves button node identity (no DOM thrash)', () => {
+  const h = makeHarness();
+  h.ctx.UI.tab = 'Reports';
+  h.ctx.UI.rv = 'year';
+  h.win.VRNavSidebar.refresh();
+
+  const side = h.doc.getElementById('vr-side');
+  const firstMonthBtn = side.querySelector('[data-side-nav="rv:month"]');
+  assert.ok(firstMonthBtn, 'Monthly projection button rendered');
+
+  h.win.VRNavSidebar.refresh();
+  h.win.VRNavSidebar.refresh();
+  const afterRefreshBtn = side.querySelector('[data-side-nav="rv:month"]');
+  assert.strictEqual(afterRefreshBtn, firstMonthBtn, 'Button DOM node must remain identical across same-route refreshes');
+});
+
+test('MutationObservers avoid class ping-pong loop between nav chrome and report-maximize', () => {
+  const reportMaxJs = fs.readFileSync(path.join(ROOT, 'modules', 'report-maximize', 'report-maximize.js'), 'utf8');
+  assert.ok(sideJs.includes('["nav", "m", "who"].forEach') &&
+    sideJs.includes('attributeFilter: ["hidden", "aria-selected", "aria-current", "aria-pressed"]'),
+    'nav-sidebar.js must not observe class changes on #m');
+  assert.ok(js.includes('["nav", "m", "who"].forEach') &&
+    js.includes('attributeFilter: ["hidden", "aria-selected", "aria-current", "aria-pressed"]'),
+    'mobile-drawer.js must not observe class changes on #m');
+  assert.ok(reportMaxJs.includes("#vr-side,#vr-drawer"),
+    'report-maximize.js MutationObserver must filter out #vr-side and #vr-drawer mutations');
+});
+
+test('View Holding restores top-left Add holding button and 6-column table with Action icons (no Est. at age column)', () => {
+  const appJs = fs.readFileSync(path.join(ROOT, 'modules', 'app-core', 'app.js'), 'utf8');
+  const holdingsCss = fs.readFileSync(path.join(ROOT, 'modules', 'holdings', 'holdings.css'), 'utf8');
+  const holdFn = appJs.slice(appJs.indexOf('function hold(){'), appJs.indexOf('function hin('));
+  const holdRowsFn = appJs.slice(appJs.indexOf('function holdRows(){'), appJs.indexOf('function hold(){'));
+
+  assert.ok(holdFn.startsWith('function hold(){') &&
+    holdFn.includes('<div class="hp-head"><button type="button" class="p hp-add" id="add">'),
+    'hold() renders top-left Add holding button inside .hp-head');
+  assert.ok(!holdRowsFn.includes('Est. at age') && !holdRowsFn.includes('hp-gf-'),
+    'holdRows() does not include Est. at age column or hp-gf-* classes');
+  assert.ok(holdRowsFn.includes('<th class="hp-action-heading">Action</th>') &&
+    holdRowsFn.includes('<td class="hp-action-cell">${bt(o)}</td>'),
+    'holdRows() renders Action column with View, Edit, Delete icon buttons');
+  assert.ok(holdingsCss.includes('button.hp-add span{display:inline!important}'),
+    'holdings.css keeps Add holding label visible on mobile');
+});
+
 console.log(`All ${passed} navigation tests passed.`);

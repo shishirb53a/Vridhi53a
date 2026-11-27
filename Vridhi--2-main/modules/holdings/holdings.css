@@ -785,6 +785,7 @@ html body .hp-card .hp-mob{display:none}
   html body .hp-card .hc .hgh .gtg .pill{flex:none;margin:0}
   html body .hp-card .hc .hgh .gtg small{flex:1 1 100%;margin:0;font-size:12px;line-height:1.3;white-space:normal}
   html body .hp-card .hc .hgh>b{flex:none;font-size:15px;white-space:nowrap}
+  html[data-vt="Holdings"] body .hp-head button.hp-add span{display:inline!important}
 }
 
 /* Group header rows: a quiet neutral top rule. The category colour stays on the left edge and the pill only,

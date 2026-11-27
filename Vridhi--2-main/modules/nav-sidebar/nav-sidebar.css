@@ -23,7 +23,7 @@
     box-sizing: border-box;
     background: var(--ds-surface, var(--card));
     border-right: 1px solid var(--ds-border, var(--bd));
-    z-index: 40;
+    z-index: 95;
     font-family: var(--ds-font-sans, var(--ff));
     overflow: hidden;
   }
@@ -354,6 +354,17 @@
     margin-right: auto !important;
     max-width: min(1180px, calc(100% - 256px)) !important;
     padding: 8px 28px 28px !important;
+  }
+
+  html.vr-side-on:not(#vrx) body main#m.vr-rmax,
+  html.vr-side-on:not(#vrx) body :is(.st-scen-card, .st-eng-card).st-max {
+    left: 256px !important;
+  }
+
+  html.vr-side-on:not(#vrx) body .rp2-nav {
+    left: calc(50% + 128px) !important;
+    max-width: calc(100% - 256px) !important;
+    z-index: 70 !important;
   }
 }
 

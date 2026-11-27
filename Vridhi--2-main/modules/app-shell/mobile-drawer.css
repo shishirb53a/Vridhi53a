@@ -693,6 +693,10 @@
     border-radius: 0 0 99px 99px;
     background: var(--ac);
   }
+
+  html:not(#vrx) body main#m.vr-rmax {
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;
+  }
 }
 
 /* Mobile Phone Tier (<= 600px: 85-90% viewport drawer width, compact 52px header) */
@@ -721,6 +725,10 @@
 
   html:not(#vrx) body #vr-drawer {
     width: clamp(276px, 87vw, 375px);
+  }
+
+  html:not(#vrx) body main#m.vr-rmax {
+    top: calc(52px + env(safe-area-inset-top, 0px)) !important;
   }
 }
 
