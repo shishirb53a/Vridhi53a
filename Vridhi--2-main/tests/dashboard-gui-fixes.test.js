@@ -54,12 +54,12 @@ assert.ok(fitCss.includes('html body #dsh .dz-sum{margin-top:8px;border-radius:1
 assert.ok(fitCss.includes('html body #dsh .dz-in article{padding:11px 12px 13px;border-radius:12px;height:auto;min-height:0;overflow:visible}'),
   'Desktop fit stylesheet prevents bottom text clipping in insight sub-cards');
 
-assert.ok(sideCss.includes('max-width: min(1180px, 100%) !important;') &&
-  sideCss.includes('margin: 0 auto 0 0 !important;') &&
+assert.ok(sideCss.includes('html.vr-side-on:not(#vrx) body:has(#dsh) header.hd') &&
+  sideCss.includes('html.vr-side-on:not(#vrx) body header.hd #ap-mode') &&
   sideCss.includes('html.vr-side-on:not(#vrx) body header.hd #vr-pwa-install'),
-  'Desktop breadcrumb header and Install App button align flush with workspace container');
-assert.ok(pwaCss.includes('min-height: 32px;'),
-  'Install App button maintains compact height alignment');
+  'Dashboard removes top breadcrumb bar, Install App button, and header theme toggle');
+assert.ok(pwaCss.includes('.vr-pwa-install {\n  display: none !important;\n}'),
+  'Install App button stays hidden');
 console.log('  ok   CSS fixes verified across dashboard, fit, sidebar, and pwa stylesheets');
 
 // 3. Color distinction + displayName + formatting checks via VM

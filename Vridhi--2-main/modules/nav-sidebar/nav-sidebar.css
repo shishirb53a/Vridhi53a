@@ -328,7 +328,16 @@
   html.vr-side-on:not(#vrx) body header.hd #nav,
   html.vr-side-on:not(#vrx) body header.hd #settings-menu-wrap,
   html.vr-side-on:not(#vrx) body header.hd #who,
-  html.vr-side-on:not(#vrx) body header.hd #so {
+  html.vr-side-on:not(#vrx) body header.hd #so,
+  html.vr-side-on:not(#vrx) body header.hd #ap-mode,
+  html.vr-side-on:not(#vrx) body header.hd #vr-mob-menu-btn,
+  html.vr-side-on:not(#vrx) body header.hd #vr-mob-theme-btn,
+  html.vr-side-on:not(#vrx) body header.hd #vr-pwa-install {
+    display: none !important;
+  }
+
+  html.vr-side-on:not(#vrx) body:has(#dsh) header.hd,
+  html.vr-side-on:not(#vrx) body:has(#dsh) header.hd .vr-side-bc {
     display: none !important;
   }
 
@@ -353,20 +362,15 @@
     margin-left: auto !important;
   }
 
-  html.vr-side-on:not(#vrx) body header.hd #vr-pwa-install {
-    margin-left: auto;
-    flex: none;
-  }
-
-  html.vr-side-on:not(#vrx) body header.hd #fhp:not([hidden]) ~ #vr-pwa-install {
-    margin-left: 0;
-  }
-
   html.vr-side-on:not(#vrx) body .w {
     margin-left: 256px !important;
     margin-right: auto !important;
     max-width: min(1180px, calc(100% - 256px)) !important;
     padding: 6px 28px 28px !important;
+  }
+
+  html.vr-side-on:not(#vrx) body .w:has(#dsh) {
+    padding-top: 12px !important;
   }
 
   html.vr-side-on:not(#vrx) body main#m.vr-rmax,
