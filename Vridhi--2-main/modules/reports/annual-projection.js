@@ -51,7 +51,7 @@
   }
 
   function computeModel() {
-    var D = calc(S);
+    var D = window.vrReportCalc ? window.vrReportCalc() : calc(S);
     var A = S.assets || [];
     var Ms = S.members || [];
     var SEL = repSel();
