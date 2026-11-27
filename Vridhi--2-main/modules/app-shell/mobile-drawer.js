@@ -313,9 +313,15 @@
     var dark = isDarkNow();
     var hBtn = document.getElementById("vr-mob-theme-btn");
     if (hBtn) {
-      hBtn.innerHTML = dark ? ICONS.sun : ICONS.moon;
-      hBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
-      hBtn.setAttribute("title", dark ? "Light mode" : "Dark mode");
+      /* Only write when something changed: unconditional writes re-trigger every MutationObserver
+         on the page (report-maximize, sidebar) and cause an endless re-render loop. */
+      var tKey = dark ? "dark" : "light";
+      if (hBtn.getAttribute("data-vr-theme-state") !== tKey) {
+        hBtn.setAttribute("data-vr-theme-state", tKey);
+        hBtn.innerHTML = dark ? ICONS.sun : ICONS.moon;
+        hBtn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+        hBtn.setAttribute("title", dark ? "Light mode" : "Dark mode");
+      }
     }
   }
 
@@ -331,11 +337,12 @@
     var mBtn = document.getElementById("vr-mob-menu-btn");
     var tBtn = document.getElementById("vr-mob-theme-btn");
     var sub = document.querySelector("header.hd .vr-mob-sub");
-    if (mBtn) mBtn.hidden = !signedIn;
-    if (tBtn) tBtn.hidden = !signedIn;
+    if (mBtn && mBtn.hidden !== !signedIn) mBtn.hidden = !signedIn;
+    if (tBtn && tBtn.hidden !== !signedIn) tBtn.hidden = !signedIn;
     if (sub) {
       var cur = currentRoute();
-      sub.textContent = signedIn ? cur.title : "Plan \u00B7 Track \u00B7 Retire";
+      var subTxt = signedIn ? cur.title : "Plan \u00B7 Track \u00B7 Retire";
+      if (sub.textContent !== subTxt) sub.textContent = subTxt;
     }
     if (!signedIn && drawerOpen) closeDrawer(false);
   }
