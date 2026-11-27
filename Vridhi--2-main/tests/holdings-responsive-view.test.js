@@ -185,7 +185,8 @@ test('Portfolio Overview Widget aggregates values and renders multi-segmented ba
   assert.ok(pageHtml.includes('Total Portfolio Value') && pageHtml.includes('₹ 2,65,31,185'), 'Aggregates exact Total Portfolio Value (₹ 2,65,31,185)');
   assert.ok(pageHtml.includes('Yearly Contribution') && pageHtml.includes('₹ 11,20,488'), 'Aggregates exact Yearly Contribution (₹ 11,20,488)');
   assert.ok(pageHtml.includes('Asset Allocation') && pageHtml.includes('5 Asset Classes') && pageHtml.includes('5 Holdings'), 'Renders compact Asset Allocation header with class and holding counts');
-  assert.ok(holdingsCss.includes('grid-template-columns:auto auto minmax(0,1fr)') && holdingsCss.includes('.hp-card > #hr{display:contents}'), 'Overview renders as compact 3-column horizontal strip above toolbar');
+  assert.ok(pageHtml.includes('id="hp-ov"') && pageHtml.includes('class="hp-overview"') && pageHtml.includes('class="card hp-card"'), 'Header, Overview (#hp-ov), and Holdings Table (.hp-card) render as three distinct parts');
+  assert.ok(holdingsCss.includes('grid-template-columns:auto auto minmax(0,1fr)') && holdingsCss.includes('#m #hp-ov') && holdingsCss.includes('hp-gh-name'), 'CSS styles standalone Overview card, neutral headers, and group header titles');
 
   assert.ok(pageHtml.includes('class="hp-ov-bar"'), 'Renders multi-segmented CSS bar chart');
   const expectedShares = [
@@ -209,7 +210,7 @@ test('Portfolio Overview Widget aggregates values and renders multi-segmented ba
 
   assert.ok(pageHtml.includes('class="hc"') && pageHtml.includes('class="hp-card-kpis"') && pageHtml.includes('class="hp-kvd-child"'), 'Mobile view renders stacked tactile cards with KPIs and nested child details');
   assert.ok(pageHtml.includes('data-holding-view=') && pageHtml.includes('data-e=') && pageHtml.includes('data-x='), 'View, Edit, and Delete quick action triggers present');
-  assert.ok(pageHtml.includes('<tr class="t"><td>Total (5)</td>') && pageHtml.includes('class="hcard hp-total"'), 'Dynamic anchored summary row rendered in both desktop and mobile views');
+  assert.ok(pageHtml.includes('<tr class="t"><td>Total (5 Active Holdings)</td>') && pageHtml.includes('class="hcard hp-total"'), 'Dynamic anchored summary row rendered in both desktop and mobile views');
 
   // Verify pinned bottom navigation tabs
   assert.ok(navHtml.includes('rp2-nav rp2-nav3'), 'Pinned bottom nav container rendered');
@@ -219,7 +220,7 @@ test('Portfolio Overview Widget aggregates values and renders multi-segmented ba
   // Verify dynamic search filter updates Overview + Total row
   vm.runInNewContext(`UI.q = 'Nifty';`, ctx);
   const filteredHtml = ctx.hold();
-  assert.ok(filteredHtml.includes('₹ 1,13,40,000') && filteredHtml.includes('Total (1)') && filteredHtml.includes('100.0%'), 'Search dynamically recalculates portfolio total, bar segments, and summary row');
+  assert.ok(filteredHtml.includes('₹ 1,13,40,000') && filteredHtml.includes('Total (1 Active Holding)') && filteredHtml.includes('100.0%'), 'Search dynamically recalculates portfolio total, bar segments, and summary row');
 });
 
 console.log(`All ${passed} responsive Holdings view tests passed.`);
