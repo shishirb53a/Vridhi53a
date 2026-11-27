@@ -5,7 +5,23 @@
   'use strict';
 
   var HELPERS_KEY = 'vr-annual-helpers';
+  var COLS_GRID_SVG = '<svg class="ap-cols-ic" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg>';
   var mobState = { details: false, chip: 'all', openCards: {} };
+
+  function enhanceDropsHtml(html, assetCount) {
+    if (!html) return '';
+    var out = String(html).replace(/<b>All holdings<\/b>/g, '<b>All holdings (' + assetCount + ')</b>');
+    out = out.replace(/<b>All columns<\/b>/g, '<b>Default columns</b>');
+    out = out.replace(/(data-msd="cols"[\s\S]*?<button[^>]*class="msd-b"[^>]*>[\s\S]*?<\/b>)<svg[\s\S]*?<\/svg>(<\/button>)/, '$1' + COLS_GRID_SVG + '$2');
+    return out;
+  }
+
+  function syncFreezeLabel() {
+    var fzs = document.querySelector('#m .ap-fz-wrap #fzs');
+    if (!fzs) return;
+    var opt3 = fzs.querySelector('option[value="3"]');
+    if (opt3 && opt3.textContent !== 'Freeze: Year & Ages') opt3.textContent = 'Freeze: Year & Ages';
+  }
 
   function safeEsc(s) {
     return typeof esc === 'function' ? esc(s) : String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -386,8 +402,8 @@
       '<section class="ap-controls" aria-label="Projection filters and view controls">' +
         '<div class="ap-ctrl-row1">' +
           '<div class="ap-search-box"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="rq" type="search" placeholder="Search year, family age, asset, or balance..." aria-label="Search forecast" value="' + safeEsc(UI.rq || '') + '"></div>' +
-          (typeof window.rsDrops === 'function' ? window.rsDrops() : '') +
-          '<div class="ap-sort-grp"><select id="rsf" aria-label="Sort by">' + so.map(function (pair) { return '<option value="' + safeEsc(pair[0]) + '"' + (UI.rk === pair[0] ? ' selected' : '') + '>Sort: ' + safeEsc(pair[1]) + '</option>'; }).join('') + '</select><button type="button" id="rsd" aria-label="Toggle sort direction">' + (UI.rd > 0 ? '▲' : '▼') + '</button></div>' +
+          (typeof window.rsDrops === 'function' ? enhanceDropsHtml(window.rsDrops(), A.length) : '') +
+          '<div class="ap-fz-wrap"><select id="rsf" class="ap-sr-ctrl" aria-label="Sort by">' + so.map(function (pair) { return '<option value="' + safeEsc(pair[0]) + '"' + (UI.rk === pair[0] ? ' selected' : '') + '>Sort: ' + safeEsc(pair[1]) + '</option>'; }).join('') + '</select><button type="button" id="rsd" class="ap-sr-ctrl" aria-label="Toggle sort direction">' + (UI.rd > 0 ? '▲' : '▼') + '</button><svg class="ap-fz-lock" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>' +
         '</div>' +
         '<div class="ap-ctrl-row2">' +
           '<div class="ap-seg" role="group" aria-label="Columns shown">' +
@@ -405,7 +421,7 @@
       '<div class="card ap-tbl-card">' +
         '<div class="rph2 ap-tbl-hd" data-rpx>' +
           '<div class="rpt"><h2>Annual Portfolio Projection</h2>' + (typeof window.rptInfo === 'function' ? window.rptInfo(infoHelp, 'About this table') : '') + '</div>' +
-          '<span class="ap-units">Values in ₹ Lakhs (individual holdings) &amp; ₹ Full Currency (Totals)</span>' +
+          '<span class="ap-units">Values in <b>₹ Lakhs</b> (individual holdings) &amp; <b>₹ Full Currency</b> (Totals)</span>' +
           csvBtnHtml +
         '</div>' +
         '<div id="rr">' + (typeof window.repRows === 'function' ? window.repRows() : '') + '</div>' +
@@ -460,6 +476,17 @@
       var visCount = t.querySelectorAll('tr[data-r]:not(.vr-skip)').length;
       snapEl.textContent = visCount + ' milestone snapshot' + (visCount === 1 ? '' : 's');
     }
+
+    var holdBtnTxt = wrap.querySelector('.msd[data-msd="hold"] .msd-b b');
+    if (holdBtnTxt && holdBtnTxt.textContent === 'All holdings') {
+      holdBtnTxt.textContent = 'All holdings (' + m.A.length + ')';
+    }
+    var colsBtn = wrap.querySelector('.msd[data-msd="cols"] .msd-b');
+    if (colsBtn && !colsBtn.querySelector('.ap-cols-ic')) {
+      var oldSvg = colsBtn.querySelector('svg');
+      if (oldSvg) oldSvg.outerHTML = COLS_GRID_SVG;
+    }
+    syncFreezeLabel();
 
     var mNode = document.getElementById('m');
     var maxBtn = wrap.querySelector('[data-ap-max]');
@@ -540,6 +567,15 @@
         setTimeout(syncAnnualProjection, 20);
       }
     });
+
+    if (typeof MutationObserver === 'function' && typeof document.getElementById === 'function') {
+      var mRoot = document.getElementById('m');
+      if (mRoot) {
+        new MutationObserver(function () {
+          if (mRoot.querySelector('.ap-wrap')) syncFreezeLabel();
+        }).observe(mRoot, { childList: true, subtree: true });
+      }
+    }
   }
 
   window.vrSyncAnnualProjection = syncAnnualProjection;

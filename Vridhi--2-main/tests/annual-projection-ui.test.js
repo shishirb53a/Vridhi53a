@@ -106,7 +106,7 @@ test('repAnnualPage() dynamically renders desktop dashboard and mobile milestone
     RCOLS: { annualMonthlyIncome: (i, p) => ((i || 0) + (p || 0)) / 12 },
     VRPolicy: { hasPayouts: () => false },
     repRows: () => '<table class="rt"><tr><th>As on</th></tr><tr data-r="1"><td>1 Apr 2026</td></tr></table>',
-    rsDrops: () => '<div class="msds"><div class="msd">Drops</div></div>',
+    rsDrops: () => '<div class="msds"><div class="msd" data-msd="cls"><button class="msd-b"><b>All asset classes</b><svg></svg></button></div><div class="msd" data-msd="hold"><button class="msd-b"><b>All holdings</b><svg></svg></button></div><div class="msd" data-msd="cols"><button class="msd-b"><b>All columns</b><svg class="old"></svg></button></div></div>',
     gppDashClient: () => '<button id="gpp-sel" type="button">Asha</button>',
     rptInfo: t => `<span class="rpi" title="${t}">i</span>`,
     rptCsv: id => `<button type="button" id="${id}">CSV</button>`
@@ -124,7 +124,12 @@ test('repAnnualPage() dynamically renders desktop dashboard and mobile milestone
   assert.ok(out.includes('₹ 4.76 <small>Cr</small>'), 'Computes terminal KPI from calc(S)');
   assert.ok(out.includes('₹ 7.50 <small>L</small><small>/yr</small>'), 'Computes yearly inflow KPI dynamically');
   assert.ok(out.includes('Jump to retirement (2030)'), 'Labels Jump button with live retirement year');
-  assert.ok(out.includes('data-rpx') && out.includes('Annual Portfolio Projection'), 'Exposes data-rpx header for report-maximize and PDF export');
+  assert.ok(out.includes('All holdings (2)'), 'Displays dynamic holding count inside Holdings filter');
+  assert.ok(out.includes('Default columns') && out.includes('class="ap-cols-ic"'), 'Replaces Columns icon with 3-column grid SVG and Default columns label');
+  assert.ok(out.includes('class="ap-fz-wrap"') && out.includes('id="rsf" class="ap-sr-ctrl"') && out.includes('class="ap-fz-lock"'), 'Hosts hidden #rsf/#rsd inside .ap-fz-wrap for #fzs freeze pill');
+  assert.ok(out.includes('Values in <b>₹ Lakhs</b> (individual holdings) &amp; <b>₹ Full Currency</b> (Totals)'), 'Bolds unit labels in .ap-tbl-hd');
+  assert.ok(out.includes('data-rpx') && out.includes('Annual Portfolio Projection') && out.includes('id="csv"'), 'Exposes data-rpx header and #csv trigger for report-maximize and PDF export');
+  assert.ok(css.includes('.ap-tbl-hd :is(#csv, #rp-max, #rp-pdf)'), 'Visually hides redundant inline icons in .ap-tbl-hd while keeping programmatic triggers');
   assert.ok(out.includes('id="milestone-retirement"'), 'Renders featured mobile retirement milestone card');
   assert.ok(out.includes('All Projections') && out.includes('Holdings Breakdown') && out.includes('Cashflow & Payouts') && out.includes('Family Ages'), 'Renders mobile filter chips');
   assert.ok(out.includes('data-ap-csv') && out.includes('data-ap-pdf'), 'Renders export CSV and PDF triggers');

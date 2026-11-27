@@ -14,6 +14,7 @@ main#m:has(.ap-wrap) > .ordbar {
   --ap-surface: var(--ds-surface, var(--card, #ffffff));
   --ap-surface-2: var(--ds-surface-2, #f8fafc);
   --ap-surface-3: var(--ds-surface-3, #f1f5f9);
+  --ap-ctrl-bg: color-mix(in srgb, #e8eefc 62%, var(--ap-surface-2));
   --ap-border: var(--ds-border, #e2e8f0);
   --ap-border-str: var(--ds-border-strong, #cbd5e1);
   --ap-tx: var(--tx, #0b1c30);
@@ -411,8 +412,8 @@ html body .ap-head-av {
 .ap-controls {
   background: var(--ap-surface);
   border: 1px solid var(--ap-border);
-  border-radius: 14px;
-  padding: 12px 16px;
+  border-radius: 12px;
+  padding: 12px 14px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
@@ -423,12 +424,12 @@ html body .ap-head-av {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .ap-search-box {
   position: relative;
-  flex: 1 1 250px;
+  flex: 1.7 1 240px;
   min-width: 200px;
 }
 
@@ -443,23 +444,49 @@ html body .ap-head-av {
 
 html body .ap-controls #rq {
   width: 100%;
-  height: 36px !important;
-  min-height: 36px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   padding: 0 12px 0 36px !important;
-  border-radius: 10px !important;
-  border: 1px solid var(--ap-border) !important;
-  background: var(--ap-surface-2) !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
+  background: var(--ap-ctrl-bg) !important;
   color: var(--ap-tx) !important;
   font-size: 13px !important;
+  font-weight: 400 !important;
+  box-shadow: none !important;
+}
+
+html body .ap-controls #rq::placeholder {
+  color: var(--ap-mu);
+}
+
+html body .ap-controls #rq:focus {
+  border-color: var(--ap-indigo-bd) !important;
+  background: var(--ap-surface) !important;
+  outline: none;
 }
 
 html body .ap-controls .msds {
+  display: contents !important;
   margin: 0 !important;
   padding: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-  gap: 8px !important;
-  align-items: center !important;
+}
+
+html body .ap-controls .msd {
+  min-width: 0;
+  max-width: none !important;
+}
+
+html body .ap-controls .msd[data-msd="cls"] {
+  flex: 0.9 1 135px;
+}
+
+html body .ap-controls .msd[data-msd="hold"] {
+  flex: 1.28 1 170px;
+}
+
+html body .ap-controls .msd[data-msd="cols"] {
+  flex: 0.95 1 140px;
 }
 
 html body .ap-controls .msds .msd-t {
@@ -473,49 +500,93 @@ html body .ap-controls .msds .msd-t {
 }
 
 html body .ap-controls .msd-b {
-  height: 36px !important;
-  min-height: 36px !important;
-  border-radius: 10px !important;
-  background: var(--ap-surface-2) !important;
-  border-color: var(--ap-border) !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: 8px !important;
+  background: var(--ap-ctrl-bg) !important;
+  border: 1px solid transparent !important;
   box-shadow: none !important;
-  font-size: 12.5px !important;
-  padding: 0 11px !important;
-}
-
-.ap-sort-grp {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-html body .ap-controls #rsf,
-html body .ap-controls #fzs {
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 0 10px !important;
-  border-radius: 10px !important;
-  border: 1px solid var(--ap-border) !important;
-  background: var(--ap-surface-2) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
   color: var(--ap-tx) !important;
-  font-size: 12.5px !important;
-  font-weight: 600 !important;
+  padding: 0 12px !important;
 }
 
-html body .ap-controls #rsd {
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
-  min-height: 36px;
-  padding: 0;
-  border-radius: 10px;
-  border: 1px solid var(--ap-border);
-  background: var(--ap-surface-2);
-  color: var(--ap-tx);
-  font-size: 12px;
-  font-weight: 700;
+html body .ap-controls .msd-b b {
+  font-weight: 500 !important;
+}
+
+html body .ap-controls .msd-b svg {
+  width: 15px;
+  height: 15px;
+  color: var(--ap-mu);
+}
+
+html body .ap-controls .msd[data-msd="cols"] .msd-b[aria-expanded="true"] svg {
+  transform: none !important;
+}
+
+html body .ap-controls .msd[data-msd="cols"] .msd-p {
+  left: auto;
+  right: 0;
+}
+
+.ap-fz-wrap {
+  position: relative;
+  flex: 0.96 1 148px;
+  min-width: 142px;
+  display: flex;
+  align-items: center;
+}
+
+.ap-sr-ctrl {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+html body .ap-controls #fzs {
+  width: 100%;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 32px 0 12px !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
+  background: var(--ap-ctrl-bg) !important;
+  color: var(--ap-tx) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
   cursor: pointer;
+  box-shadow: none !important;
+}
+
+html body .ap-controls #fzs:focus {
+  border-color: var(--ap-indigo-bd) !important;
+  outline: none;
+}
+
+.ap-fz-lock {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ap-mu);
+  pointer-events: none;
+}
+
+@media (max-width: 1020px) {
+  .ap-ctrl-row1 {
+    flex-wrap: wrap;
+  }
 }
 
 .ap-ctrl-row2 {
@@ -530,21 +601,21 @@ html body .ap-controls #rsd {
   align-items: center;
   gap: 2px;
   padding: 3px;
-  border-radius: 10px;
-  background: var(--ap-surface-3);
-  border: 1px solid var(--ap-border);
+  border-radius: 8px;
+  background: var(--ap-ctrl-bg);
+  border: 0;
 }
 
 html body .ap-seg button {
-  min-height: 30px !important;
-  height: 30px;
-  padding: 0 12px !important;
+  min-height: 28px !important;
+  height: 28px;
+  padding: 0 11px !important;
   border: 0 !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   background: transparent !important;
   color: var(--ap-mu) !important;
   font-size: 12.5px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   cursor: pointer;
   box-shadow: none !important;
   white-space: nowrap;
@@ -555,24 +626,37 @@ html body .ap-seg button[aria-pressed="true"] {
   background: var(--ap-surface) !important;
   color: var(--ap-tx) !important;
   font-weight: 700 !important;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
 }
 
 html body .ap-jump-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  min-height: 36px;
-  height: 36px;
+  min-height: 32px;
+  height: 32px;
   padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, #d97706 38%, var(--ap-border));
-  background: var(--ap-amber-soft);
-  color: var(--ap-amber);
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #f59e0b 30%, var(--ap-border));
+  background: #fef3c7;
+  color: #92400e;
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   box-shadow: none;
+}
+
+:root[data-theme="dark"] .ap-jump-btn {
+  background: var(--ap-amber-soft);
+  color: var(--ap-amber);
+  border-color: color-mix(in srgb, #f59e0b 38%, var(--ap-border));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ap-jump-btn {
+    background: var(--ap-amber-soft);
+    color: var(--ap-amber);
+    border-color: color-mix(in srgb, #f59e0b 38%, var(--ap-border));
+  }
 }
 
 html body .ap-jump-btn:hover {
@@ -586,7 +670,7 @@ html body main#m .card.ap-tbl-card,
 html body main#m.vr-rmax .card.ap-tbl-card {
   padding: 0 !important;
   overflow: hidden;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   border: 1px solid var(--ap-border) !important;
   background: var(--ap-surface) !important;
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05) !important;
@@ -598,25 +682,40 @@ html body main#m.vr-rmax .ap-tbl-card .ap-tbl-hd {
   align-items: center;
   justify-content: space-between;
   gap: 10px 14px;
-  padding: 14px 18px !important;
+  padding: 12px 16px !important;
   margin: 0 !important;
   border-bottom: 1px solid var(--ap-border) !important;
   background: var(--ap-surface) !important;
+  position: relative;
 }
 
 html body .ap-tbl-card .ap-tbl-hd .rpt h2 {
   font-size: 16px !important;
-  font-weight: 750 !important;
+  font-weight: 700 !important;
   letter-spacing: -0.02em !important;
   color: var(--ap-tx) !important;
 }
 
 .ap-units {
   margin-left: auto;
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: var(--ap-mu);
   white-space: nowrap;
+}
+
+.ap-units b {
+  color: var(--ap-tx);
+  font-weight: 700;
+}
+
+html body .ap-tbl-card .ap-tbl-hd :is(#csv, #rp-max, #rp-pdf) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
 }
 
 .ap-tbl-card #rr {
