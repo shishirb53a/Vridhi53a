@@ -111,3 +111,13 @@
 #dsh .dz-sum{grid-template-columns:1fr 1fr}#dsh .dz-sum>div:nth-child(2){border-right:0}#dsh .dz-sum>div:nth-child(-n+2){border-bottom:1px solid var(--bd)}
 #dsh .dz-kv{font-size:28px}#dsh .dz-pr{grid-template-columns:repeat(4,1fr)}#dsh .dz-tlh{font-size:11px;letter-spacing:.04em}
 }
+
+/* Goal Planner summary: client dropdown lives in the banner, top right */
+html body #dsh .dz-hero{align-items:flex-start}
+html body #dsh .dz-hero .dz-hr{align-self:flex-start;align-items:flex-end;margin-left:auto}
+#dsh .dz-client{display:flex;align-items:center;gap:10px}
+#dsh .dz-client-l{font-size:12px;font-weight:600;color:#ffffffb3}
+#dsh .dz-client .gpp-client-trigger{width:200px;max-width:100%;height:38px;min-height:38px;padding:0 12px;border:1px solid #ffffff4d;border-radius:8px;background:#ffffff1f;color:#fff;cursor:pointer}
+#dsh .dz-client .gpp-client-trigger:hover{background:#ffffff33}
+#dsh .dz-client .client-chevron{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+@media (max-width:640px){html body #dsh .dz-hero .dz-hr{flex:1 1 100%;margin-left:0;align-items:stretch}#dsh .dz-client{width:100%}#dsh .dz-client .gpp-client-trigger{flex:1;width:auto}}
