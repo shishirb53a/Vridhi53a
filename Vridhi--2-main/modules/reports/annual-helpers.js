@@ -36,7 +36,7 @@
   function summaryHTML() {
     try {
       if (typeof calc !== 'function' || typeof S === 'undefined') return '';
-      var D = calc(S), sum = function (r) { return r.v.reduce(function (a, b) { return a + b; }, 0); };
+      var D = window.vrReportCalc ? window.vrReportCalc() : calc(S), sum = function (r) { return r.v.reduce(function (a, b) { return a + b; }, 0); };
       var first = D.rows[0], ret = D.rows[D.ri];
       if (!first || !ret) return '';
       return '<span>Today <b>' + money(sum(first)) + '</b></span><span>→ At retirement (1 Apr ' + ret.year + ') <b>' + money(sum(ret)) + '</b></span>'
