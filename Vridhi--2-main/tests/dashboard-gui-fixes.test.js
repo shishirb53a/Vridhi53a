@@ -58,6 +58,10 @@ assert.ok(sideCss.includes('html.vr-side-on:not(#vrx) body:has(#dsh) header.hd')
   sideCss.includes('html.vr-side-on:not(#vrx) body header.hd #ap-mode') &&
   sideCss.includes('html.vr-side-on:not(#vrx) body header.hd #vr-pwa-install'),
   'Dashboard removes top breadcrumb bar, Install App button, and header theme toggle');
+assert.ok(sideCss.includes('justify-content: flex-start !important;') &&
+  sideCss.includes('left: 256px !important;') &&
+  sideCss.includes('width: calc(100% - 256px) !important;'),
+  'Desktop bottom navigation bar is left-aligned flush with the main workspace');
 assert.ok(pwaCss.includes('.vr-pwa-install {\n  display: none !important;\n}'),
   'Install App button stays hidden');
 console.log('  ok   CSS fixes verified across dashboard, fit, sidebar, and pwa stylesheets');

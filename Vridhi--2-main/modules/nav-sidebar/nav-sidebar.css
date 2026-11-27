@@ -373,15 +373,38 @@
     padding-top: 12px !important;
   }
 
+  html.vr-side-on:not(#vrx) body .w:has(.rp2-nav) {
+    padding-bottom: 72px !important;
+  }
+
   html.vr-side-on:not(#vrx) body main#m.vr-rmax,
   html.vr-side-on:not(#vrx) body :is(.st-scen-card, .st-eng-card).st-max {
     left: 256px !important;
   }
 
   html.vr-side-on:not(#vrx) body .rp2-nav {
-    left: calc(50% + 128px) !important;
-    max-width: calc(100% - 256px) !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    left: 256px !important;
+    right: 0 !important;
+    width: calc(100% - 256px) !important;
+    max-width: none !important;
+    transform: none !important;
+    padding: 0 28px !important;
+    box-sizing: border-box !important;
     z-index: 70 !important;
+  }
+
+  html.vr-side-on:not(#vrx) body .rp2-nav > button,
+  html.vr-side-on:not(#vrx) body .rp2-nav > .rpm {
+    flex: 1 1 0 !important;
+    max-width: 210px !important;
+    min-width: 0 !important;
+  }
+
+  html.vr-side-on:not(#vrx) body .rp2-nav > .rpm > .rpm-t {
+    width: 100% !important;
+    max-width: none !important;
   }
 }
 
