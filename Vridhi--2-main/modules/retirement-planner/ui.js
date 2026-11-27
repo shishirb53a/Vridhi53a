@@ -2317,6 +2317,7 @@ ${acc("alloc", "Fund allocation", "today and by age", `<div id="dsh" class="fh-d
   /* top bar: client switcher + "+ Add Person" (shown on the Retirement Planner screens) */
   window.fhpBar = function () {
     const el = document.getElementById("fhp"); if (!el) return;
+    if (typeof UI !== "undefined" && UI.tab === "Dashboard" && typeof window.gppDashClient === "function") { el.hidden = true; el.innerHTML = ""; return; }
     if (typeof GP !== "undefined" && typeof UI !== "undefined" && GP.includes(UI.tab) && typeof window.gppBarHTML === "function") { el.hidden = false; el.innerHTML = window.gppBarHTML(true); return; }
     const on = typeof UI !== "undefined" && (UI.tab === "Retirement planner" || UI.tab === "RP Reports");
     const P = on ? fhpEnsure() : null;
