@@ -562,6 +562,187 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body .rcs-
   color: var(--mu) !important;
 }
 
+/* Monthly Portfolio Projection: Single-Line Consolidated Control Bar */
+html body #m .mp-card {
+  overflow: visible;
+}
+
+html body #m .mp-card .mp-ctrl-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--ds-border, var(--bd));
+  border-radius: var(--ds-r-box, 10px);
+  background: var(--ds-surface-2, color-mix(in srgb, var(--tx) 3%, var(--card)));
+  overflow: visible;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msds,
+html body #m .mp-card .mp-ctrl-bar .tb {
+  display: contents !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd {
+  min-width: 0;
+  max-width: none !important;
+  gap: 0 !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msds .msd-t {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar #rq {
+  order: 1;
+  flex: 1.45 1 180px;
+  min-width: 130px;
+  width: auto !important;
+  max-width: none !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd[data-msd="cls"] {
+  order: 2;
+  flex: 0.95 1 132px;
+  min-width: 112px;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd[data-msd="hold"] {
+  order: 3;
+  flex: 1.05 1 136px;
+  min-width: 115px;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd[data-msd="cols"] {
+  order: 4;
+  flex: 1 1 136px;
+  min-width: 118px;
+}
+
+html body #m .mp-card .mp-ctrl-bar #rsf {
+  order: 5;
+  flex: 0.85 1 122px;
+  min-width: 105px;
+  max-width: 180px !important;
+  width: auto !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar #fzs {
+  order: 6;
+  flex: 0.85 1 122px;
+  min-width: 108px;
+  max-width: 165px !important;
+  width: auto !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar button#rsd {
+  order: 7;
+  flex: 0 0 36px !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-r-ctl, 8px) !important;
+  border: 1px solid var(--ds-border, var(--bd)) !important;
+  background: var(--ds-surface, var(--card)) !important;
+  color: var(--tx) !important;
+  box-shadow: var(--ds-sh-xs, none) !important;
+  line-height: 1 !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar button#rsd:hover:not(:disabled) {
+  border-color: var(--ds-border-strong, var(--ac)) !important;
+  background: var(--ds-surface-2, var(--hv)) !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar :is(input#rq, select#rsf, select#fzs) {
+  height: 36px !important;
+  min-height: 36px !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  padding: 0 11px;
+  border-radius: var(--ds-r-ctl, 8px) !important;
+  border: 1px solid var(--ds-border, var(--bd)) !important;
+  background: var(--ds-surface, var(--card)) !important;
+  color: var(--tx) !important;
+  font-size: 13px !important;
+  box-shadow: var(--ds-sh-xs, none) !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar :is(select#rsf, select#fzs) {
+  font-weight: 600 !important;
+  text-overflow: ellipsis;
+}
+
+html body #m .mp-card .mp-ctrl-bar :is(input#rq, select#rsf, select#fzs):hover {
+  border-color: var(--ds-border-strong, var(--ac)) !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar :is(input#rq, select#rsf, select#fzs):focus {
+  border-color: var(--ds-accent, var(--ac)) !important;
+  box-shadow: 0 0 0 3px var(--ds-ring, color-mix(in srgb, var(--ac) 22%, transparent)) !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd-b {
+  width: 100%;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 11px !important;
+  gap: 6px !important;
+  border-radius: var(--ds-r-ctl, 8px) !important;
+  border: 1px solid var(--ds-border, var(--bd)) !important;
+  background: var(--ds-surface, var(--card)) !important;
+  color: var(--tx) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: var(--ds-sh-xs, none) !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd-b:hover {
+  border-color: var(--ds-border-strong, var(--ac)) !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd-b[aria-expanded="true"] {
+  border-color: var(--ds-accent, var(--ac)) !important;
+  box-shadow: 0 0 0 3px var(--ds-ring, color-mix(in srgb, var(--ac) 22%, transparent)) !important;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd-b svg {
+  width: 15px;
+  height: 15px;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd-p {
+  z-index: 40;
+}
+
+html body #m .mp-card .mp-ctrl-bar .msd[data-msd="cols"] .msd-p {
+  left: auto;
+  right: 0;
+}
+
 /* --------------------------------------------------------------------------
    4. INSTITUTIONAL FINANCIAL-STATEMENT TABLES (All Reports)
       Explicitly yields to [data-utcol="custom"] & report-maximize.css
@@ -1038,5 +1219,78 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
     height: 36px !important;
     min-height: 36px !important;
     padding: 0 !important;
+  }
+}
+
+@media (max-width: 1080px) {
+  html body #m .mp-card .mp-ctrl-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar #rq {
+    flex: 1 1 240px;
+    min-width: 190px;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar .msd {
+    flex: 1 1 150px;
+    min-width: 135px;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar :is(select#rsf, select#fzs) {
+    flex: 1 1 135px;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  html body #m .mp-card .mp-ctrl-bar {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar #rq {
+    flex: 1 1 100%;
+    min-width: 0;
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar .msd {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar .msd-b {
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar .msd[data-msd="cols"] .msd-p {
+    left: 0;
+    right: auto;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar :is(select#rsf, select#fzs) {
+    flex: 1 1 calc(50% - 28px);
+    min-width: 0;
+    min-height: 40px !important;
+    height: 40px !important;
+  }
+
+  html body #m .mp-card .mp-ctrl-bar button#rsd {
+    flex: 0 0 40px !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+}
+
+@media print {
+  html body #m .mp-card .mp-ctrl-bar {
+    display: none !important;
   }
 }

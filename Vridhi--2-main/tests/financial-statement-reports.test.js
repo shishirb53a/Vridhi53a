@@ -111,4 +111,83 @@ test('financial-statement.css has balanced braces', () => {
   assert.strictEqual(opens, closes, `Unbalanced braces in financial-statement.css: ${opens} vs ${closes}`);
 });
 
+test('Monthly Portfolio Projection consolidates filters and toolbar into one scoped single-line control bar', () => {
+  const vm = require('vm');
+  const appJs = fs.readFileSync(path.join(ROOT, 'modules', 'app-core', 'app.js'), 'utf8');
+  const rcJs = fs.readFileSync(path.join(ROOT, 'modules', 'report-columns', 'report-columns.js'), 'utf8');
+
+  assert.ok(css.includes('#m .mp-card .mp-ctrl-bar') && css.includes('flex-wrap: nowrap;'), 'financial-statement.css defines single-line .mp-ctrl-bar flex row');
+  assert.ok(css.includes('.mp-ctrl-bar .msds') && css.includes('.mp-ctrl-bar .tb') && css.includes('display: contents !important;'), 'Monthly control bar promotes all 7 controls to a single flex row');
+  assert.ok(css.includes('.mp-ctrl-bar .msd[data-msd="cols"] .msd-p'), 'Monthly control bar anchors COLUMNS popover cleanly');
+  assert.ok(css.includes('@media (max-width: 1080px)') && css.includes('@media (max-width: 640px)'), 'Monthly control bar defines tablet and mobile responsive breakpoints');
+  assert.ok(css.includes('@media print') && css.includes('#m .mp-card .mp-ctrl-bar'), 'Monthly control bar hides cleanly in print output');
+
+  const repStart = appJs.indexOf('function rep(){');
+  const repEnd = appJs.indexOf('window.fyl=function', repStart);
+  assert.ok(repStart > -1 && repEnd > repStart, 'Found rep() in app-core/app.js');
+  const repFnCode = appJs.slice(repStart, repEnd);
+
+  const ctx = {
+    UI: { rv: 'month', rk: 'a', rd: 1, rq: '' },
+    S: { assets: [{ id: 1, name: 'Index Fund', yrs: 10 }] },
+    VRPolicy: { hasPayouts: () => false },
+    repSel: () => ({ min: false, none: false, idx: [0] }),
+    gpEmpty: () => '',
+    esc: s => String(s || ''),
+    repRows: () => '<table></table>',
+    vrRrDomKey: () => '',
+    __vrRrDomCache: Object.create(null),
+    window: {
+      rsDrops: () => '<div class="msds">DROPS</div>',
+      repISort: () => [['a', 'S.No']],
+      rptInfo: () => '',
+      rptCsv: () => '<button id="csv"></button>'
+    }
+  };
+  vm.createContext(ctx);
+  vm.runInContext(repFnCode, ctx);
+
+  const monthHtml = ctx.rep();
+  assert.ok(monthHtml.includes('class="card mp-card"'), 'Monthly Projection card includes mp-card class');
+  assert.ok(monthHtml.includes('<div class="mp-ctrl-bar"><div class="msds">DROPS</div>') && monthHtml.includes('</div>\n<div id="rr"'), 'Monthly Projection wraps .msds and .tb inside .mp-ctrl-bar');
+
+  ctx.UI.rv = 'int';
+  const intHtml = ctx.rep();
+  assert.ok(!intHtml.includes('mp-card') && !intHtml.includes('mp-ctrl-bar'), 'Interest & Income stays uncoupled from Monthly Projection control bar');
+
+  let renderCalls = 0;
+  let filterCalls = 0;
+  const changeListeners = [];
+  const rcCtx = {
+    window: {
+      render() { renderCalls++; },
+      vrUpdateReportFilters(attr, val) {
+        filterCalls++;
+        return attr === 'data-rck' || attr === 'data-msda';
+      }
+    },
+    document: {
+      addEventListener(name, fn) { if (name === 'change') changeListeners.push(fn); },
+      getElementById() { return null; },
+      querySelector() { return null; }
+    },
+    localStorage: { getItem() { return null; }, setItem() {} },
+    S: { assets: [] },
+    CATS: [],
+    VRPolicy: { hasPayouts() { return false; } },
+    UI: { rv: 'month' },
+    render() { renderCalls++; }
+  };
+  vm.createContext(rcCtx);
+  vm.runInContext(rcJs, rcCtx);
+
+  rcCtx.window.__colsAct('all');
+  assert.strictEqual(filterCalls, 1, 'Monthly COLUMNS Show all uses surgical vrUpdateReportFilters');
+  assert.strictEqual(renderCalls, 0, 'Monthly COLUMNS Show all avoids full page render()');
+
+  changeListeners[0]({ target: { dataset: { rck: 'chg' }, checked: true } });
+  assert.strictEqual(filterCalls, 2, 'Monthly COLUMNS checkbox toggle uses surgical vrUpdateReportFilters');
+  assert.strictEqual(renderCalls, 0, 'Monthly COLUMNS checkbox toggle avoids full page render()');
+});
+
 console.log(`All ${passed} financial-statement report tests passed.`);
