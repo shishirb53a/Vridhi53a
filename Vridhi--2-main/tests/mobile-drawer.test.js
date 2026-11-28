@@ -801,4 +801,59 @@ test('View Holding restores top-left Add holding button and 6-column table with 
     'holdings.css keeps Add holding label visible on mobile');
 });
 
+test('mobile drawer body isolates <nav#vr-drawer-body> from base.css fixed mobile nav rules and enables native vertical scroll', () => {
+  const bodyRuleMatch = css.match(/html:not\(#vrx\)\s+body\s+nav#vr-drawer-body\.vr-drawer-body\s*\{([^}]*)\}/);
+  assert.ok(bodyRuleMatch, 'nav#vr-drawer-body.vr-drawer-body rule must exist in mobile-drawer.css');
+  const bodyRule = bodyRuleMatch[1];
+  assert.ok(bodyRule.includes('position: relative !important'), 'Drawer body must override base.css mobile nav position:fixed');
+  assert.ok(bodyRule.includes('bottom: auto !important') && bodyRule.includes('top: auto !important'),
+    'Drawer body must reset base.css mobile nav inset offsets');
+  assert.ok(bodyRule.includes('overflow-y: auto !important') && bodyRule.includes('overflow-x: hidden !important'),
+    'Drawer body must enforce native vertical scrolling');
+  assert.ok(bodyRule.includes('min-height: 0') && bodyRule.includes('flex: 1 1 0%'),
+    'Drawer body must remain bounded flex-1 scroll container');
+  assert.ok(bodyRule.includes('-webkit-overflow-scrolling: touch') && bodyRule.includes('overscroll-behavior: contain') && bodyRule.includes('touch-action: pan-y'),
+    'Drawer body must support touch momentum scrolling without leaking scroll to page');
+
+  const groupMatch = css.match(/html:not\(#vrx\)\s+body\s+\.vr-acc-group\s*\{([^}]*)\}/);
+  assert.ok(groupMatch && groupMatch[1].includes('flex: 0 0 auto'),
+    '.vr-acc-group must not flex-shrink inside .vr-drawer-body so bottom items never clip');
+  const trgMatch = css.match(/html:not\(#vrx\)\s+body\s+\.vr-acc-trigger\s*\{([^}]*)\}/);
+  assert.ok(trgMatch && trgMatch[1].includes('flex: 0 0 auto') && trgMatch[1].includes('flex-direction: row'),
+    '.vr-acc-trigger must override base.css mobile nav button flex:1 and flex-direction:column');
+  const itemMatch = css.match(/html:not\(#vrx\)\s+body\s+\.vr-nav-item\s*\{([^}]*)\}/);
+  assert.ok(itemMatch && itemMatch[1].includes('flex: 0 0 auto') && itemMatch[1].includes('flex-direction: row'),
+    '.vr-nav-item must override base.css mobile nav button flex:1 and flex-direction:column');
+
+  assert.ok(css.includes('html.vr-drawer-open body {\n    position: fixed;'),
+    'iOS Safari background scroll lock must fix body position while drawer is open');
+  assert.ok(css.includes('box-sizing: border-box;') && css.includes('touch-action: none;'),
+    'Drawer shell uses border-box sizing and backdrop blocks touch scroll propagation');
+});
+
+test('mobile drawer preserves and restores page scroll position cleanly across open/close paths', () => {
+  const h = makeHarness();
+  const scrollCalls = [];
+  h.win.scrollY = 420;
+  h.win.scrollTo = (x, y) => { scrollCalls.push([x, y]); h.win.scrollY = y; };
+
+  h.win.VRMobileDrawer.open();
+  assert.ok(h.doc.documentElement.classList.contains('vr-drawer-open'));
+  assert.strictEqual(h.doc.body.style.top, '-420px', 'Opening drawer locks body at negative scrollY');
+
+  h.doc.getElementById('vr-drawer-close').click();
+  assert.ok(!h.doc.documentElement.classList.contains('vr-drawer-open'));
+  assert.strictEqual(h.doc.body.style.top, '', 'Closing drawer clears body top offset');
+  assert.deepStrictEqual(scrollCalls[scrollCalls.length - 1], [0, 420], 'Closing drawer restores exact prior scroll position');
+
+  // Verify resize to desktop (>960px) also unlocks body scroll cleanly
+  h.win.scrollY = 180;
+  h.win.VRMobileDrawer.open();
+  assert.strictEqual(h.doc.body.style.top, '-180px');
+  h.win.innerWidth = 1024;
+  h.dispatchWin('resize');
+  assert.strictEqual(h.doc.body.style.top, '', 'Desktop resize clears scroll-lock top offset');
+  assert.deepStrictEqual(scrollCalls[scrollCalls.length - 1], [0, 180], 'Desktop resize restores prior scroll position');
+});
+
 console.log(`All ${passed} navigation tests passed.`);

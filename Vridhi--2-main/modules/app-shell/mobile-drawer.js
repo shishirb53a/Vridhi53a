@@ -44,6 +44,13 @@
   var activeSetTab = "plan";
   var hasHistoryEntry = false;
   var ignoringPop = 0;
+  var savedScrollY = 0;
+
+  function focusNoScroll(el) {
+    if (!el || typeof el.focus !== "function") return;
+    try { el.focus({ preventScroll: true }); }
+    catch (e) { el.focus(); }
+  }
 
   function canAccess(tab) {
     try {
@@ -423,9 +430,13 @@
     var mBtn = document.getElementById("vr-mob-menu-btn");
     if (!drawer || !backdrop) return;
     lastFocused = document.activeElement;
+    savedScrollY = window.scrollY || window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || 0;
     openGroup = currentRoute().group;
     renderDrawerBody();
     drawerOpen = true;
+    if (document.body && document.body.style) {
+      document.body.style.top = savedScrollY ? (-savedScrollY + "px") : "0px";
+    }
     document.documentElement.classList.add("vr-drawer-open");
     drawer.setAttribute("aria-hidden", "false");
     backdrop.setAttribute("aria-hidden", "false");
@@ -440,7 +451,18 @@
 
     var targetFocus = drawer.querySelector('.vr-nav-item[aria-current="page"]') || document.getElementById("vr-drawer-close");
     if (targetFocus && targetFocus.focus) {
-      setTimeout(function () { if (drawerOpen) targetFocus.focus(); }, 30);
+      setTimeout(function () {
+        if (!drawerOpen) return;
+        focusNoScroll(targetFocus);
+        var bodyEl = document.getElementById("vr-drawer-body");
+        if (bodyEl && bodyEl.clientHeight && targetFocus.closest && targetFocus.closest("#vr-drawer-body")) {
+          var top = targetFocus.offsetTop || 0;
+          var h = targetFocus.offsetHeight || 0;
+          if (top + h > bodyEl.scrollTop + bodyEl.clientHeight || top < bodyEl.scrollTop) {
+            bodyEl.scrollTop = Math.max(0, top - Math.round(bodyEl.clientHeight / 3));
+          }
+        }
+      }, 30);
     }
   }
 
@@ -451,6 +473,13 @@
     var mBtn = document.getElementById("vr-mob-menu-btn");
     drawerOpen = false;
     document.documentElement.classList.remove("vr-drawer-open");
+    if (document.body && document.body.style) {
+      document.body.style.top = "";
+    }
+    if (savedScrollY > 0 && typeof window.scrollTo === "function") {
+      try { window.scrollTo(0, savedScrollY); } catch (e) {}
+    }
+    savedScrollY = 0;
     if (drawer) drawer.setAttribute("aria-hidden", "true");
     if (backdrop) backdrop.setAttribute("aria-hidden", "true");
     if (mBtn) mBtn.setAttribute("aria-expanded", "false");
@@ -469,7 +498,7 @@
 
     if (restoreFocus !== false) {
       var ret = (mBtn && !mBtn.hidden) ? mBtn : lastFocused;
-      if (ret && ret.focus) ret.focus();
+      focusNoScroll(ret);
     }
   }
 
@@ -785,6 +814,9 @@
         swipeX = e.touches[0].clientX;
         swipeY = e.touches[0].clientY;
         swiping = true;
+      }, { passive: true });
+      dr.addEventListener("touchcancel", function () {
+        swiping = false;
       }, { passive: true });
       dr.addEventListener("touchend", function (e) {
         if (!swiping || !drawerOpen || !e.changedTouches || !e.changedTouches.length) {

@@ -21,6 +21,17 @@
     overscroll-behavior: none;
   }
 
+  html.vr-drawer-open body {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  html.vr-drawer-open main#m.vr-rmax {
+    overflow: hidden !important;
+  }
+
   /* Compact Single-Row FinTech Top Bar */
   html:not(#vrx) body header.hd {
     position: sticky;
@@ -211,6 +222,8 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    touch-action: none;
+    overscroll-behavior: none;
     transition: opacity .24s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .24s !important;
   }
 
@@ -223,6 +236,7 @@
 
   /* Adaptive Drawer Shell */
   html:not(#vrx) body #vr-drawer {
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -232,7 +246,7 @@
     z-index: 2000;
     width: min(352px, 50vw);
     max-width: 100vw;
-    height: 100vh;
+    height: 100%;
     height: 100dvh;
     max-height: 100dvh;
     padding-top: env(safe-area-inset-top, 0px);
@@ -242,6 +256,7 @@
     border-right: 1px solid var(--ds-border, var(--bd));
     box-shadow: 0 20px 48px rgba(15, 23, 42, .22);
     overflow: hidden;
+    overscroll-behavior: contain;
     transform: translate3d(-104%, 0, 0);
     visibility: hidden;
     will-change: transform;
@@ -262,6 +277,7 @@
     gap: 12px;
     padding: 16px 16px 10px;
     background: var(--ds-surface, var(--card));
+    overscroll-behavior: none;
   }
 
   html:not(#vrx) body .vr-drawer-top {
@@ -384,21 +400,35 @@
     line-height: 1.25;
   }
 
-  /* Independent Vertical Scrolling Body */
-  html:not(#vrx) body .vr-drawer-body {
-    flex: 1 1 auto;
+  /* Independent Vertical Scrolling Body (explicitly isolated from base.css bare nav rules) */
+  html:not(#vrx) body nav#vr-drawer-body.vr-drawer-body {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: auto !important;
+    flex: 1 1 0%;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    margin: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 6px 14px 12px;
+    touch-action: pan-y;
+    padding: 6px 14px 16px !important;
     display: flex;
     flex-direction: column;
     gap: 2px;
   }
 
   html:not(#vrx) body .vr-acc-group {
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     border-bottom: 0;
@@ -407,6 +437,8 @@
 
   /* Accordion Parent Row (>= 44px touch target) */
   html:not(#vrx) body .vr-acc-trigger {
+    flex: 0 0 auto;
+    flex-direction: row;
     width: 100%;
     min-height: 44px;
     padding: 8px 12px !important;
@@ -421,6 +453,8 @@
     text-align: left;
     font-size: 14px;
     font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
     cursor: pointer;
     box-shadow: none !important;
     transition: background .14s ease, color .14s ease !important;
@@ -490,6 +524,7 @@
 
   /* Smooth Accordion Expand/Collapse Grid Wrapper */
   html:not(#vrx) body .vr-acc-panel {
+    flex: 0 0 auto;
     display: grid;
     grid-template-rows: 0fr;
     opacity: 0;
@@ -516,6 +551,7 @@
   }
 
   html:not(#vrx) body .vr-acc-subhd {
+    flex: 0 0 auto;
     padding: 10px 14px 4px 41px;
     font-size: 10.5px;
     font-weight: 700;
@@ -526,6 +562,8 @@
   }
 
   html:not(#vrx) body .vr-nav-item {
+    flex: 0 0 auto;
+    flex-direction: row;
     width: 100%;
     min-height: 44px;
     padding: 0 14px 0 41px !important;
@@ -535,9 +573,12 @@
     color: var(--tx) !important;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     text-align: left;
     font-size: 13.5px;
     font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
     cursor: pointer;
     box-shadow: none !important;
     transition: background .14s ease, color .14s ease !important;
@@ -558,6 +599,7 @@
     background: var(--ac) !important;
     color: var(--ac2, #fff) !important;
     font-weight: 600 !important;
+    text-decoration: none !important;
   }
 
   /* Honours Settings -> Appearance: Icons Off */
@@ -576,6 +618,7 @@
     padding: 8px 14px calc(10px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--ds-border, var(--bd));
     background: var(--ds-surface, var(--card));
+    overscroll-behavior: none;
   }
 
   html:not(#vrx) body .vr-drawer-link {
@@ -743,8 +786,8 @@
     gap: 8px;
   }
 
-  html:not(#vrx) body .vr-drawer-body {
-    padding: 4px 10px 10px;
+  html:not(#vrx) body nav#vr-drawer-body.vr-drawer-body {
+    padding: 4px 10px 14px !important;
   }
 
   html:not(#vrx) body .vr-acc-trigger {
