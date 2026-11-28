@@ -2,12 +2,19 @@
 const pc=function(x){return x==null?'—':(x*100).toFixed(2)+'%'};
 window.intData=function(){const D=window.vrReportCalc?window.vrReportCalc():calc(S),ic=window.__vrIntDataCache;
 if(ic&&ic.D===D&&ic.len===(S.assets?S.assets.length:0))return ic.value;
-const R=D.rows,A=S.assets,out=[];
+const R=D.rows,A=S.assets,nA=A.length,mt=D._meta&&D._meta.len===nA&&D._meta.N===R.length?D._meta:null,out=[];
 for(let a=2;a<=R.length;a++){const o=R[a-2],c=R[a-1];
-const ad=A.map(function(x){if(x.type==='gratuity')return 0;const k=fyInfo(x,S,a);return k.act?((k.yp?x.add:0)+(x.madd||0)*k.n):0});
-const it=A.map(function(x,i){return c.v[i]-o.v[i]-ad[i]});
+const fa=mt&&mt.fyAdd[a];
+const ad=new Array(nA),it=new Array(nA);
+for(let i=0;i<nA;i++){
+  let adV=0;
+  if(fa){adV=fa[i]}
+  else{const x=A[i];if(x.type!=='gratuity'){const k=fyInfo(x,S,a);adV=k.act?((k.yp?x.add:0)+(x.madd||0)*k.n):0}}
+  ad[i]=adV;
+  it[i]=c.v[i]-o.v[i]-adV;
+}
 out.push({a:a-1,fy:'FY '+o.year+'-'+String(c.year).slice(-2),age:c.age,o:o,c:c,   /* age at the END of the financial year, like the Annual and Monthly Portfolio Projection reports, so the Retired row shows the retirement age */ad:ad,it:it,pay:c.pay||0,payL:c.payL||0})}
-const res={rows:out,D:D};window.__vrIntDataCache={D:D,len:A.length,value:res};return res};
+const res={rows:out,D:D};window.__vrIntDataCache={D:D,len:nA,value:res};return res};
 window.intCalc=function(r,idx){const s=function(v){return idx.reduce(function(t,i){return t+v[i]},0)};
 const open=s(r.o.v),close=s(r.c.v),add=s(r.ad),intr=s(r.it);return{open:open,close:close,add:add,intr:intr,mi:intr/12,yl:(function(){var b=idx.reduce(function(t,i){return t+r.o.v[i]+(S.assets[i]&&S.assets[i].cmp==='oa'?r.ad[i]:0)},0);return b>0?intr/b:null})()}};
 window.repISort=function(){const A=S.assets,idx=repSel().idx;

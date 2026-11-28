@@ -17,8 +17,8 @@
     }
     var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, hits = [];
     while ((n = w.nextNode())) {
+      var nv = n.nodeValue; if (!nv || nv.indexOf('\u20b9') < 0 || (nv.indexOf(' L') < 0 && nv.indexOf(' Cr') < 0)) continue;
       var pe = n.parentElement; if (!pe || SKIP.test(pe.tagName) || (pe.closest && pe.closest(SKIP_CONT))) continue;
-      var nv = n.nodeValue; if (!nv || nv.indexOf('\u20b9') < 0) continue;
       RX.lastIndex = 0; if (RX.test(nv)) hits.push(n);
     }
     if (hits.length) wrapNodes(hits, flexCache);
@@ -70,16 +70,18 @@
       for (var i = 0; i < recs.length; i++) {
         var rec = recs[i];
         if (rec.type === "characterData") {
-          var t = rec.target, tp = t && t.parentElement;
+          var t = rec.target, tv = t && t.nodeValue;
+          if (!tv || tv.indexOf('\u20b9') < 0 || (tv.indexOf(' L') < 0 && tv.indexOf(' Cr') < 0)) continue;
+          var tp = t.parentElement;
           if (!tp || SKIP.test(tp.tagName) || (tp.closest && tp.closest(SKIP_CONT))) continue;
-          if (t.nodeValue && t.nodeValue.indexOf('\u20b9') >= 0 && pendingRoots.indexOf(t) < 0) pendingRoots.push(t);
+          if (pendingRoots.indexOf(t) < 0) pendingRoots.push(t);
         } else if (rec.addedNodes && rec.addedNodes.length) {
           for (var j = 0; j < rec.addedNodes.length; j++) {
             var nd = rec.addedNodes[j];
             if (nd.nodeType === 1) {
               if ((nd.matches && nd.matches(SKIP_CONT)) || (nd.closest && nd.closest(SKIP_CONT))) continue;
               if (pendingRoots.indexOf(nd) < 0) pendingRoots.push(nd);
-            } else if (nd.nodeType === 3 && nd.nodeValue && nd.nodeValue.indexOf('\u20b9') >= 0) {
+            } else if (nd.nodeType === 3 && nd.nodeValue && nd.nodeValue.indexOf('\u20b9') >= 0 && (nd.nodeValue.indexOf(' L') >= 0 || nd.nodeValue.indexOf(' Cr') >= 0)) {
               var np = rec.target;
               if (np && (!np.closest || !np.closest(SKIP_CONT)) && pendingRoots.indexOf(nd) < 0) pendingRoots.push(nd);
             }

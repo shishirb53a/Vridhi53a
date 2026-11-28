@@ -15,10 +15,12 @@ const hb=A.map(function(x){return'<label class="msd-i"><input type="checkbox" da
 const hn=(A.filter(function(x){return String(x.id)===sel[0]})[0]||{}).name;
 return'<div class="msds">'+dd('cls','Asset class',con.length===cs.length?'All asset classes':con.length===0?'None selected':con.length===1?esc(con[0]):con.length+' of '+cs.length+' selected',cb)+dd('hold','Holding',sel.length===A.length?'All holdings':sel.length===0?'None selected':sel.length===1?escn(hn):sel.length+' of '+A.length+' selected',hb)+dd('cols','Columns','All columns','')+'</div>'};
 const sync=function(){document.querySelectorAll('.msd').forEach(function(d){const o=UI.msd===d.dataset.msd,p=d.querySelector('.msd-p'),b=d.querySelector('.msd-b');if(p)p.hidden=!o;if(b)b.setAttribute('aria-expanded',String(o))})};
-const refocus=function(attr,val){render();const n=Array.prototype.filter.call(document.querySelectorAll('['+attr+']'),function(x){return x.getAttribute(attr)===val})[0];if(n)n.focus()};
+const refocus=function(attr,val){
+  if(typeof window.vrUpdateAnnualFilters==='function'&&window.vrUpdateAnnualFilters(attr,val))return;
+  render();const n=Array.prototype.filter.call(document.querySelectorAll('['+attr+']'),function(x){return x.getAttribute(attr)===val})[0];if(n)n.focus()};
 document.addEventListener('click',function(e){const t=e.target;if(!t.closest)return;
 const b=t.closest('[data-msdb]');if(b){const k=b.dataset.msdb;UI.msd=UI.msd===k?null:k;sync();return}
-const a=t.closest('[data-msda]');if(a){const p=a.dataset.msda.split(':');if(p[0]==='cols'){window.__colsAct(p[1]);return}if(p[1]==='all'){UI.rsel=null;UI.rcl=null}else setSel([]);UI.msd=p[0];render();const n=document.querySelector('[data-msda="'+a.dataset.msda+'"]');if(n)n.focus();return}
+const a=t.closest('[data-msda]');if(a){const p=a.dataset.msda.split(':');if(p[0]==='cols'){window.__colsAct(p[1]);return}if(p[1]==='all'){UI.rsel=null;UI.rcl=null}else setSel([]);UI.msd=p[0];if(typeof window.vrUpdateAnnualFilters==='function'&&window.vrUpdateAnnualFilters('data-msda',a.dataset.msda))return;render();const n=document.querySelector('[data-msda="'+a.dataset.msda+'"]');if(n)n.focus();return}
 if(UI.msd&&!t.closest('.msd')){UI.msd=null;sync()}});
 document.addEventListener('change',function(e){const t=e.target;if(!t.dataset)return;let cur=selIds();
 if(t.dataset.rcls!=null){const c=t.dataset.rcls,cid=S.assets.filter(function(x){return x.cat===c}).map(function(x){return String(x.id)});

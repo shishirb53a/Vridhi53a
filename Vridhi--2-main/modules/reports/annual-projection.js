@@ -8,6 +8,11 @@
   var COLS_GRID_SVG = '<svg class="ap-cols-ic" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg>';
   var mobState = { details: false, chip: 'all', openCards: {} };
   var lastRenderedMobSig = '';
+  var syncTimer = 0;
+
+  function isMobileViewport() {
+    return typeof window !== 'undefined' && typeof window.innerWidth === 'number' ? window.innerWidth <= 768 : true;
+  }
 
   function enhanceDropsHtml(html, assetCount) {
     if (!html) return '';
@@ -51,38 +56,47 @@
     var Ms = S.members || [];
     var SEL = repSel();
     var idx = SEL.idx || [];
+    var nIdx = idx.length;
     var rows = D.rows || [];
+    var nRows = rows.length;
+    var mt = D._meta && D._meta.len === A.length && D._meta.N === nRows ? D._meta : null;
     var first = rows[0] || { a: 1, year: S.start, age: Ms.map(function (m) { return m.age; }), st: [], v: [], tot: 0, add: 0, chg: 0, pay: 0 };
     var ret = rows[D.ri] || first;
-    var end = rows[rows.length - 1] || ret;
+    var end = rows[nRows - 1] || ret;
     var spanYrs = Math.max(1, (end.year || S.end) - (first.year || S.start));
     var yToRet = Math.max(0, (ret.year || first.year) - first.year);
 
     var totOf = function (r) {
-      if (!r) return 0;
-      if (SEL.none) return 0;
+      if (!r || SEL.none) return 0;
       if (SEL.all) return r.tot || 0;
-      return idx.reduce(function (s, i) { return s + (r.v[i] || 0); }, 0);
+      var s = 0;
+      for (var k = 0; k < nIdx; k++) s += r.v[idx[k]] || 0;
+      return s;
     };
-    var roiOf = function (r) {
+    var roiOf = function (r, preTot) {
       if (!r || SEL.none) return null;
-      var t = totOf(r);
+      var t = preTot !== undefined ? preTot : totOf(r);
       if (!(t > 0)) return null;
-      return idx.reduce(function (s, i) { return s + (r.v[i] || 0) * (A[i] ? (A[i].ret || 0) : 0); }, 0) / t;
+      var rs = 0;
+      for (var k = 0; k < nIdx; k++) {
+        var i = idx[k];
+        rs += (r.v[i] || 0) * (A[i] ? (A[i].ret || 0) : 0);
+      }
+      return rs / t;
     };
-    var yearlyIntOf = function (r) {
+    var yearlyIntOf = function (r, preTot, preRoi, preAllMat) {
       if (!r || r.a <= 1 || SEL.none) return null;
       if (SEL.all) return (r.chg || 0) - (r.add || 0);
-      var t = totOf(r);
-      var roi = roiOf(r);
+      var t = preTot !== undefined ? preTot : totOf(r);
+      var roi = preRoi !== undefined ? preRoi : roiOf(r, t);
       if (roi == null) return 0;
-      var allMatured = typeof allMat === 'function' ? allMat(idx, r, false) : false;
+      var allMatured = preAllMat !== undefined ? preAllMat : (typeof allMat === 'function' ? allMat(idx, r, false) : false);
       return allMatured ? 0 : Math.round(t * roi / (1 + roi));
     };
-    var monthlyIntOf = function (r) {
+    var monthlyIntOf = function (r, preYInt, preAllMat) {
       if (!r || r.a <= 1 || SEL.none) return null;
-      var yInt = yearlyIntOf(r);
-      var allMatured = typeof allMat === 'function' ? allMat(idx, r, false) : false;
+      var allMatured = preAllMat !== undefined ? preAllMat : (typeof allMat === 'function' ? allMat(idx, r, false) : false);
+      var yInt = preYInt !== undefined ? preYInt : yearlyIntOf(r, undefined, undefined, allMatured);
       if (typeof RCOLS !== 'undefined' && RCOLS && typeof RCOLS.annualMonthlyIncome === 'function') {
         return RCOLS.annualMonthlyIncome(yInt, r.pay || 0, allMatured);
       }
@@ -90,15 +104,21 @@
     };
     var addOf = function (r) {
       if (!r || r.a <= 1 || SEL.none) return 0;
-      if (typeof depShow === 'function') return depShow(r.a, SEL.all ? null : idx, rows.length);
+      if (mt && r.a <= mt.N) {
+        if (SEL.all) return mt.depShowAll[r.a] || 0;
+        var dr = mt.depShowRow[r.a], t = 0;
+        for (var k = 0; k < nIdx; k++) t += dr[idx[k]] || 0;
+        return t;
+      }
+      if (typeof depShow === 'function') return depShow(r.a, SEL.all ? null : idx, nRows);
       return r.add || 0;
     };
 
     var baseTot = totOf(first);
     var retTot = totOf(ret);
     var endTot = totOf(end);
-    var baseRoi = roiOf(first);
-    var endRoi = roiOf(end);
+    var baseRoi = roiOf(first, baseTot);
+    var endRoi = roiOf(end, endTot);
 
     var multRet = baseTot > 0 ? (retTot / baseTot).toFixed(1) + '×' : '—';
     var multEnd = baseTot > 0 ? (endTot / baseTot).toFixed(1) + '×' : '—';
@@ -107,14 +127,22 @@
     var nextAdd = SEL.none ? 0 : (SEL.all ? ai.next : (rows[1] ? addOf(rows[1]) : 0));
     var discLast = ai.last || ret.year;
 
-    var retMi = monthlyIntOf(ret);
+    var retAllMat = typeof allMat === 'function' ? allMat(idx, ret, false) : false;
+    var retYInt = yearlyIntOf(ret, retTot, roiOf(ret, retTot), retAllMat);
+    var retMi = monthlyIntOf(ret, retYInt, retAllMat);
     if (retMi == null && !SEL.none) {
       var retY = D.incT || 0;
-      if (SEL.min) retY = idx.reduce(function (s, i) { return s + (ret.v[i] || 0) * (A[i] ? A[i].ret || 0 : 0); }, 0);
+      if (SEL.min) {
+        retY = 0;
+        for (var k2 = 0; k2 < nIdx; k2++) {
+          var i2 = idx[k2];
+          retY += (ret.v[i2] || 0) * (A[i2] ? A[i2].ret || 0 : 0);
+        }
+      }
       retMi = (retY + (D.payRet || 0)) / 12;
     }
 
-    var endAnnInt = yearlyIntOf(end);
+    var endAnnInt = yearlyIntOf(end, endTot, endRoi);
     if (endAnnInt == null) endAnnInt = Math.round(endTot * (endRoi || 0));
 
     var goalVal = S.goal || 0;
@@ -134,47 +162,49 @@
   }
 
   function filteredSortedRows(m) {
-    var A = m.A, Ms = m.Ms, rows = m.rows;
+    var rows = m.rows;
     var q = (UI && UI.rq ? UI.rq : '').trim().toLowerCase();
-    var L = rows.filter(function (r) {
-      if (!q) return true;
+    var L = q ? rows.filter(function (r) {
       var fyTxt = typeof fyl === 'function' ? fyl(r.year) : '';
       var totTxt = typeof f === 'function' ? f(r.tot) : String(r.tot);
       var hinTxt = typeof hin === 'function' ? hin(r.tot) : '';
       var roiTxt = typeof rowRoiTxt === 'function' ? rowRoiTxt(r) : '';
       var vs = r.v.map(function (v) { return typeof f === 'function' ? f(v) : String(v); });
       return [r.a, r.year, fyTxt, r.age.join(' '), r.st.join(' '), r.tot, totTxt, hinTxt, roiTxt].concat(vs).join(' ').toLowerCase().indexOf(q) > -1;
-    });
+    }) : rows.slice();
     var rk = (UI && UI.rk) || 'a';
     var rd = (UI && UI.rd) || 1;
-    var keyVal = function (r, k) {
-      if (k === 'a' || k[0] === 's') return r.a;
-      if (k === 'year') return r.year;
-      if (k === 'age') return r.age[0];
-      if (k === 'tot' || k === 'hi') return m.totOf(r);
-      if (k === 'roi') return m.roiOf(r) || 0;
-      if (k === 'chg') return r.chg || 0;
-      if (k === 'add') return m.addOf(r);
-      if (k === 'pay') return r.pay || 0;
-      if (k === 'ti') return typeof polTiVal === 'function' ? polTiVal(r.a > 1 ? r.chg - r.add : null, r.pay) : 0;
-      if (k === 'int') return r.a > 1 ? (m.yearlyIntOf(r) || 0) : -1e18;
-      if (k === 'mi') { var mi = m.monthlyIntOf(r); return mi == null ? -1e18 : mi; }
-      return r.v[+k.slice(1)] || 0;
-    };
-    L.sort(function (x, y) {
-      var a = keyVal(x, rk), b = keyVal(y, rk);
-      return (a > b ? 1 : a < b ? -1 : 0) * rd;
-    });
+    if (rk !== 'a' || rd < 0) {
+      var keyVal = function (r, k) {
+        if (k === 'a' || k[0] === 's') return r.a;
+        if (k === 'year') return r.year;
+        if (k === 'age') return r.age[0];
+        if (k === 'tot' || k === 'hi') return m.totOf(r);
+        if (k === 'roi') return m.roiOf(r) || 0;
+        if (k === 'chg') return r.chg || 0;
+        if (k === 'add') return m.addOf(r);
+        if (k === 'pay') return r.pay || 0;
+        if (k === 'ti') return typeof polTiVal === 'function' ? polTiVal(r.a > 1 ? r.chg - r.add : null, r.pay) : 0;
+        if (k === 'int') return r.a > 1 ? (m.yearlyIntOf(r) || 0) : -1e18;
+        if (k === 'mi') { var mi = m.monthlyIntOf(r); return mi == null ? -1e18 : mi; }
+        return r.v[+k.slice(1)] || 0;
+      };
+      L.sort(function (x, y) {
+        var a = keyVal(x, rk), b = keyVal(y, rk);
+        return (a > b ? 1 : a < b ? -1 : 0) * rd;
+      });
+    }
     return L;
   }
 
   function mobBreakdownItems(m, r, expandAll) {
     if (m.SEL.none || !expandAll) return '';
-    return m.idx.map(function (i) {
-      var asset = m.A[i];
-      if (!asset) return '';
-      return '<div class="ap-mc-det-item"><span>' + safeEscName(asset.name) + '</span><b>' + safeEsc(fmtCr(r.v[i] || 0)) + '</b></div>';
-    }).join('');
+    var parts = new Array(m.idx.length);
+    for (var k = 0; k < m.idx.length; k++) {
+      var i = m.idx[k], asset = m.A[i];
+      parts[k] = asset ? '<div class="ap-mc-det-item"><span>' + safeEscName(asset.name) + '</span><b>' + safeEsc(fmtCr(r.v[i] || 0)) + '</b></div>' : '';
+    }
+    return parts.join('');
   }
 
   function mobCardHtml(m, r, prefs) {
@@ -194,9 +224,10 @@
     }).join(' · ');
 
     var totVal = m.totOf(r);
-    var roiVal = m.roiOf(r);
-    var yInt = m.yearlyIntOf(r);
-    var mInt = m.monthlyIntOf(r);
+    var roiVal = m.roiOf(r, totVal);
+    var am = r.a > 1 && typeof allMat === 'function' ? allMat(m.idx, r, false) : false;
+    var yInt = m.yearlyIntOf(r, totVal, roiVal, am);
+    var mInt = m.monthlyIntOf(r, yInt, am);
     var yAdd = m.addOf(r);
     var mult = m.baseTot > 0 ? (totVal / m.baseTot).toFixed(1) + '×' : '';
 
@@ -308,42 +339,58 @@
     '</div>';
   }
 
-  var cachedAnnualHtml = null;
-  var cachedAnnualKey = '';
-
-  window.repAnnualPage = function () {
-    var prefs = readAnnualPrefs();
-    var maxActive = false;
-    try { maxActive = localStorage.getItem('vr-rep-max') !== '0'; } catch (e) {}
-    var key = [
-      typeof vrStateSig === 'function' ? vrStateSig(S) : JSON.stringify(S),
-      UI.rq || '',
-      UI.rk || 'a',
-      UI.rd || 1,
-      JSON.stringify(UI.rsel || null),
-      prefs.cols,
-      prefs.years,
-      mobState.details,
-      mobState.chip,
-      JSON.stringify(mobState.openCards),
-      UI.sel,
-      maxActive
-    ].join('|');
-
-    var m = computeModel();
-    if (cachedAnnualHtml && cachedAnnualKey === key) {
-      lastRenderedMobSig = mobHtml(m, prefs);
-      return cachedAnnualHtml;
+  function renderAnnualRowsHtml() {
+    if (typeof window.repRows !== 'function') return '';
+    try {
+      window.__apSkipRc = true;
+      return window.repRows();
+    } finally {
+      window.__apSkipRc = false;
     }
+  }
 
+  function sortOptionsFor(m) {
     var SEL = m.SEL, A = m.A;
-    var so = SEL.min
+    return SEL.min
       ? [['a', 'S.No'], ['year', 'As on']].concat(m.idx.map(function (i) { return ['v' + i, A[i].name]; }), [['age', 'Age'], ['tot', 'Year end balance'], ['roi', 'Blended ROI'], ['add', 'Amount deposited'], ['int', 'Yearly income'], ['mi', 'Monthly income'], ['chg', 'Yearly change']])
       : [['a', 'S.No'], ['year', 'As on'], ['age', 'Age'], ['tot', 'Year end balance'], ['roi', 'Blended ROI'], ['add', 'Amount deposited'], ['int', 'Yearly income'], ['mi', 'Monthly income']].concat(
           (typeof VRPolicy !== 'undefined' && VRPolicy.hasPayouts && VRPolicy.hasPayouts('goal')) ? [['pay', 'Policy payouts'], ['ti', 'Total income']] : [],
           [['chg', 'Yearly change']],
           A.map(function (x, i) { return ['v' + i, x.name]; })
         );
+  }
+
+  var cachedAnnualHtml = null;
+  var cachedAnnualKey = '';
+
+  window.repAnnualPage = function () {
+    var prefs = readAnnualPrefs();
+    var isMob = isMobileViewport();
+    var maxActive = false;
+    try { maxActive = localStorage.getItem('vr-rep-max') !== '0'; } catch (e) {}
+    var activeClient = typeof window.gppActiveName === 'function' ? window.gppActiveName() : '';
+    var key = [
+      typeof vrStateSig === 'function' ? vrStateSig(S) : JSON.stringify(S),
+      activeClient,
+      UI.rq || '',
+      UI.rk || 'a',
+      UI.rd || 1,
+      UI.rsel ? UI.rsel.join(',') : 'ALL',
+      prefs.cols,
+      prefs.years,
+      isMob ? ('m:' + mobState.details + ':' + mobState.chip + ':' + JSON.stringify(mobState.openCards)) : 'd',
+      UI.sel,
+      UI.msd || '',
+      maxActive
+    ].join('|');
+
+    if (cachedAnnualHtml && cachedAnnualKey === key) {
+      return cachedAnnualHtml;
+    }
+
+    var m = computeModel();
+    var A = m.A;
+    var so = sortOptionsFor(m);
 
     var clientSel = typeof window.gppDashClient === 'function' ? window.gppDashClient() : '';
     var horizonYrs = Math.max(1, (S.end || m.end.year) - (S.start || m.first.year) + 1);
@@ -356,6 +403,8 @@
     var goalHealth = m.goalVal > 0
       ? 'Retirement capital covers ' + m.goalPct.toFixed(1) + '% of ' + safeEsc(fmtCr(m.goalVal)) + ' target goal'
       : 'Portfolio grows ' + safeEsc(m.multEnd) + ' across ' + m.spanYrs + ' projection years';
+
+    var mobMarkup = isMob ? (lastRenderedMobSig = mobHtml(m, prefs)) : (lastRenderedMobSig = '');
 
     cachedAnnualKey = key;
     cachedAnnualHtml = '<div class="ap-wrap">' +
@@ -397,7 +446,7 @@
           '<span class="ap-units">Values in <b>₹ Lakhs</b> (individual holdings) &amp; <b>₹ Full Currency</b> (Totals)</span>' +
           csvBtnHtml +
         '</div>' +
-        '<div id="rr">' + (typeof window.repRows === 'function' ? window.repRows() : '') + '</div>' +
+        '<div id="rr">' + renderAnnualRowsHtml() + '</div>' +
         '<footer class="ap-tbl-foot">' +
           '<div class="ap-foot-info"><span>Displaying <b id="ap-snap-n">' + m.rows.length + ' milestone snapshots</b> across a ' + m.spanYrs + '-year trajectory</span><span aria-hidden="true">•</span><span class="ap-foot-health">' + goalHealth + '</span></div>' +
           '<div class="ap-foot-acts">' +
@@ -406,7 +455,7 @@
           '</div>' +
         '</footer>' +
       '</div>' +
-      '<div id="ap-mob-host">' + (lastRenderedMobSig = mobHtml(m, prefs)) + '</div>' +
+      '<div id="ap-mob-host">' + mobMarkup + '</div>' +
     '</div>';
     return cachedAnnualHtml;
   };
@@ -416,9 +465,10 @@
     var endRow = D.rows[D.rows.length - 1];
     if (!endRow) return;
     var bestIdx = -1, bestVal = -1;
-    A.forEach(function (x, i) {
-      if ((endRow.v[i] || 0) > bestVal) { bestVal = endRow.v[i] || 0; bestIdx = i; }
-    });
+    for (var k = 0; k < A.length; k++) {
+      var vv = endRow.v[k] || 0;
+      if (vv > bestVal) { bestVal = vv; bestIdx = k; }
+    }
     if (bestIdx < 0) return;
     var targetKey = 'v' + bestIdx;
     var cells = t.rows[0].cells;
@@ -431,21 +481,21 @@
     if (t.dataset) t.dataset.apHlCol = String(colIdx);
     Array.prototype.forEach.call(t.querySelectorAll('.ap-hl-col'), function (el) { el.classList.remove('ap-hl-col'); });
     if (colIdx > -1) {
-      Array.prototype.forEach.call(t.rows, function (r) {
-        if (r.cells[colIdx]) r.cells[colIdx].classList.add('ap-hl-col');
-      });
+      for (var r = 0; r < t.rows.length; r++) {
+        if (t.rows[r].cells[colIdx]) t.rows[r].cells[colIdx].classList.add('ap-hl-col');
+      }
     }
   }
 
   function syncAnnualProjection() {
     var wrap = document.querySelector('#m .ap-wrap');
     if (!wrap) return;
-    var prefs = readAnnualPrefs();
     var rr = document.getElementById('rr');
     var t = rr && rr.querySelector(':scope > table.rt');
-    var m = computeModel();
+    var D = window.vrReportCalc ? window.vrReportCalc() : calc(S);
+    var A = S.assets || [];
 
-    if (t) highlightPrimaryHoldingCol(t, m.A, m.D);
+    if (t) highlightPrimaryHoldingCol(t, A, D);
 
     var snapEl = document.getElementById('ap-snap-n');
     if (snapEl && t) {
@@ -456,7 +506,7 @@
 
     var holdBtnTxt = wrap.querySelector('.msd[data-msd="hold"] .msd-b b');
     if (holdBtnTxt && holdBtnTxt.textContent === 'All holdings') {
-      holdBtnTxt.textContent = 'All holdings (' + m.A.length + ')';
+      holdBtnTxt.textContent = 'All holdings (' + A.length + ')';
     }
     var colsBtn = wrap.querySelector('.msd[data-msd="cols"] .msd-b');
     if (colsBtn && !colsBtn.querySelector('.ap-cols-ic')) {
@@ -473,7 +523,9 @@
     }
 
     var mobHost = document.getElementById('ap-mob-host');
-    if (mobHost) {
+    if (mobHost && isMobileViewport()) {
+      var prefs = readAnnualPrefs();
+      var m = computeModel();
       var nextMob = mobHtml(m, prefs);
       if (mobHost.__apSig == null && mobHost.firstElementChild && nextMob === lastRenderedMobSig) {
         mobHost.__apSig = nextMob;
@@ -482,6 +534,121 @@
         mobHost.innerHTML = nextMob;
       }
     }
+  }
+
+  function syncDropdownsInPlace(wrap) {
+    var A = S.assets || [];
+    if (!A.length) return;
+    var SEL = repSel();
+    var selSet = {};
+    for (var k = 0; k < SEL.idx.length; k++) selSet[String(A[SEL.idx[k]].id)] = true;
+    var selLen = SEL.idx.length;
+
+    var cs = typeof CATS !== 'undefined' ? CATS.filter(function (c) { return A.some(function (x) { return x.cat === c; }); }) : [];
+    var con = cs.filter(function (c) { return A.every(function (x) { return x.cat !== c || selSet[String(x.id)]; }); });
+
+    var clsBtn = wrap.querySelector('.msd[data-msd="cls"] .msd-b b');
+    if (clsBtn) {
+      var clsLabel = con.length === cs.length ? 'All asset classes' : con.length === 0 ? 'None selected' : con.length === 1 ? con[0] : con.length + ' of ' + cs.length + ' selected';
+      if (clsBtn.textContent !== clsLabel) clsBtn.textContent = clsLabel;
+    }
+    var holdBtn = wrap.querySelector('.msd[data-msd="hold"] .msd-b b');
+    if (holdBtn) {
+      var firstName = selLen === 1 && A[SEL.idx[0]] ? A[SEL.idx[0]].name : '';
+      var holdLabel = selLen === A.length ? 'All holdings (' + A.length + ')' : selLen === 0 ? 'None selected' : selLen === 1 ? firstName : selLen + ' of ' + A.length + ' selected';
+      if (holdBtn.textContent !== holdLabel) holdBtn.textContent = holdLabel;
+    }
+
+    var clsInputs = wrap.querySelectorAll('input[data-rcls]');
+    for (var ci = 0; ci < clsInputs.length; ci++) {
+      var cb = clsInputs[ci], catName = cb.dataset.rcls;
+      var want = con.indexOf(catName) > -1;
+      if (cb.checked !== want) cb.checked = want;
+    }
+    var holdInputs = wrap.querySelectorAll('input[data-rh]');
+    for (var hi = 0; hi < holdInputs.length; hi++) {
+      var hb = holdInputs[hi], hid = hb.dataset.rh;
+      var hwant = !!selSet[hid];
+      if (hb.checked !== hwant) hb.checked = hwant;
+    }
+
+    var msdEls = wrap.querySelectorAll('.msd');
+    for (var di = 0; di < msdEls.length; di++) {
+      var d = msdEls[di], open = UI.msd === d.dataset.msd;
+      var p = d.querySelector('.msd-p'), b = d.querySelector('.msd-b');
+      if (p && p.hidden !== !open) p.hidden = !open;
+      if (b) b.setAttribute('aria-expanded', String(open));
+    }
+  }
+
+  /* Surgical in-place update for Annual Projection filters/columns:
+     avoids tearing down #nav, .ap-head, .ap-controls, open dropdowns, and client drawer portal. */
+  window.vrUpdateAnnualFilters = function (focusAttr, focusVal) {
+    if (typeof UI === 'undefined' || UI.tab !== 'Reports' || (UI.rv && UI.rv !== 'year')) return false;
+    var wrap = document.querySelector('#m .ap-wrap');
+    var rr = document.getElementById('rr');
+    if (!wrap || !rr) return false;
+
+    cachedAnnualHtml = null;
+    cachedAnnualKey = '';
+
+    rr.innerHTML = renderAnnualRowsHtml();
+    rr.scrollLeft = 0;
+    rr.scrollTop = 0;
+
+    syncDropdownsInPlace(wrap);
+
+    var rsf = document.getElementById('rsf');
+    if (rsf && typeof sortOptionsFor === 'function') {
+      var m = computeModel();
+      var so = sortOptionsFor(m);
+      var optsHtml = so.map(function (pair) { return '<option value="' + safeEsc(pair[0]) + '"' + (UI.rk === pair[0] ? ' selected' : '') + '>Sort: ' + safeEsc(pair[1]) + '</option>'; }).join('');
+      if (rsf.__apOpts !== optsHtml) {
+        rsf.__apOpts = optsHtml;
+        rsf.innerHTML = optsHtml;
+      }
+      var footHealth = wrap.querySelector('.ap-foot-health');
+      if (footHealth) {
+        var goalHealth = m.goalVal > 0
+          ? 'Retirement capital covers ' + m.goalPct.toFixed(1) + '% of ' + fmtCr(m.goalVal) + ' target goal'
+          : 'Portfolio grows ' + m.multEnd + ' across ' + m.spanYrs + ' projection years';
+        if (footHealth.textContent !== goalHealth) footHealth.textContent = goalHealth;
+      }
+    }
+
+    if (typeof RCOLS !== 'undefined' && RCOLS && typeof RCOLS.apply === 'function') {
+      RCOLS.apply(rr, 'year');
+    }
+    if (typeof window.vrMarkRetired === 'function') {
+      window.vrMarkRetired(false);
+    }
+    if (window.VRAnnualHelpers && typeof window.VRAnnualHelpers.refresh === 'function') {
+      window.VRAnnualHelpers.refresh();
+    } else {
+      syncAnnualProjection();
+    }
+    if (typeof window.vrReportFit === 'function') {
+      window.vrReportFit();
+    }
+
+    if (focusAttr && focusVal != null) {
+      var nodes = wrap.querySelectorAll('[' + focusAttr + ']');
+      for (var fi = 0; fi < nodes.length; fi++) {
+        if (nodes[fi].getAttribute(focusAttr) === String(focusVal)) {
+          if (typeof nodes[fi].focus === 'function') nodes[fi].focus();
+          break;
+        }
+      }
+    }
+    return true;
+  };
+
+  function scheduleSync(delay) {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(function () {
+      syncTimer = 0;
+      syncAnnualProjection();
+    }, delay == null ? 20 : delay);
   }
 
   function triggerPdfWithVisibleTable() {
@@ -527,7 +694,7 @@
       } else if (b.hasAttribute('data-ap-max')) {
         var rpMax = document.getElementById('rp-max');
         if (rpMax) rpMax.click();
-        setTimeout(syncAnnualProjection, 40);
+        scheduleSync(40);
       } else if (b.hasAttribute('data-ap-pdf')) {
         triggerPdfWithVisibleTable();
       } else if (b.hasAttribute('data-ap-mob-jump')) {
@@ -546,15 +713,24 @@
 
     document.addEventListener('input', function (e) {
       if (e.target && e.target.id === 'rq' && document.querySelector('#m .ap-wrap')) {
-        setTimeout(syncAnnualProjection, 20);
+        scheduleSync(20);
       }
     });
 
     document.addEventListener('change', function (e) {
       if (e.target && e.target.id === 'rsf' && document.querySelector('#m .ap-wrap')) {
-        setTimeout(syncAnnualProjection, 20);
+        scheduleSync(20);
       }
     });
+
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+      window.addEventListener('resize', function () {
+        if (isMobileViewport()) {
+          var mobHost = document.getElementById('ap-mob-host');
+          if (mobHost && !mobHost.firstElementChild) scheduleSync(30);
+        }
+      });
+    }
   }
 
   window.vrSyncAnnualProjection = syncAnnualProjection;

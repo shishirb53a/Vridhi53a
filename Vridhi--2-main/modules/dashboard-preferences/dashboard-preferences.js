@@ -33,7 +33,7 @@ apply();dg.innerHTML=tr(html(),1);const f=dg.querySelector('[data-mv="'+v+'"]:no
 })();
 (function(){const K='fwt2-fz';let v='2';try{v=localStorage.getItem(K)||'2'}catch(e){}
 const set=x=>{v=x;document.body.dataset.fz=x;try{localStorage.setItem(K,x)}catch(e){}};set(['0','2','3'].includes(v)?v:'2');
-const inj=()=>{const s=document.getElementById('rsf');if(s&&!document.getElementById('fzs')){const f=document.createElement('select');f.id='fzs';f.setAttribute('aria-label','Freeze columns');f.innerHTML='<option value="0">Freeze: none</option><option value="2">Freeze: Year</option><option value="3">Freeze: Year + Ages</option>';f.value=v;s.after(f)}};
+const inj=()=>{if(document.getElementById('fzs'))return;const s=document.getElementById('rsf');if(s){const f=document.createElement('select');f.id='fzs';f.setAttribute('aria-label','Freeze columns');f.innerHTML='<option value="0">Freeze: none</option><option value="2">Freeze: Year</option><option value="3">Freeze: Year + Ages</option>';f.value=v;s.after(f)}};
 const mEl=document.getElementById('m');
 if(mEl)new MutationObserver(inj).observe(mEl,{childList:true,subtree:true});else new MutationObserver(inj).observe(document.documentElement,{childList:true,subtree:true});inj();
 document.addEventListener('change',e=>{if(e.target.id==='fzs')set(e.target.value)});})();

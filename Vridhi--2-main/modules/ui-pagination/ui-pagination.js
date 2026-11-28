@@ -3,7 +3,7 @@ var PGS='auto';try{PGS=localStorage.getItem('fwt2-pgs')||'auto'}catch(e){}var PG
 var FIT={pg:{},sp:'family',hg:null,fo:false},M=document.getElementById('m'),busy=false,raf=0;
 function tab(){var b=document.querySelector('nav button[aria-current=page]'),t=b?b.textContent.trim():'';return t==='Settings'&&typeof UI!=='undefined'&&SET.includes(UI.tab)?UI.tab:t}   /* Help and Users now sit under the Settings nav item, so report the real page */
 function over(){return document.documentElement.scrollHeight-innerHeight}
-function hts(e){var c=getComputedStyle(e);return e.getBoundingClientRect().height+(parseFloat(c.marginTop)||0)+(parseFloat(c.marginBottom)||0)}
+function hts(e){if(e.tagName==='TR')return e.offsetHeight||0;var c=getComputedStyle(e);return e.getBoundingClientRect().height+(parseFloat(c.marginTop)||0)+(parseFloat(c.marginBottom)||0)}
 function escHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function rm(sel){M.querySelectorAll(sel).forEach(function(e){e.remove()})}
 function pager(key,cont,cur,np,label){var safeKey=String(key||'').replace(/[^a-zA-Z0-9_-]/g,'');rm('.vpg[data-k="'+safeKey+'"]');var d=document.createElement('div');d.className='vpg';d.dataset.k=safeKey;
@@ -20,7 +20,7 @@ items.forEach(function(e,i){e.classList.toggle('vh',i<pages[cur][0]||i>=pages[cu
 pager(key,cont,cur,pages.length,'Page '+(cur+1)+' of '+pages.length+' \u00b7 '+items.length+' items');
 var ex=over();if(ex<=0||tries++>6||budget<=mn)break;budget-=ex+2}}
 function rowsOf(c){if(!c)return[];var tb=c.querySelector('table');
-if(tb&&tb.offsetParent!==null)return[].filter.call(tb.querySelectorAll('tr'),function(r){return!r.querySelector('th')&&!r.classList.contains('t')});
+if(tb&&tb.offsetParent!==null)return[].filter.call(tb.querySelectorAll('tr'),function(r){return!r.querySelector('th')&&!r.classList.contains('t')&&!r.classList.contains('vr-skip')});
 var fam=!!c.closest('#m>.card:not(.hp-card)')&&tab()==='Settings';return[].filter.call(c.querySelectorAll('.hcard,.yc'),function(e){return e.offsetParent!==null&&(fam||e.classList.contains('yc')||e.querySelector('.kv'))})}
 function modeOf(c){var tb=c&&c.querySelector('table');return tb&&tb.offsetParent!==null?'t':'c'}
 function lst(key,c){fitList(key+modeOf(c),c,rowsOf(c))}
@@ -58,7 +58,7 @@ else if(t==='Users'){var u=M.querySelector('.ut');if(u){var tw=u.querySelector('
 else if(t==='Settings')settingsFit();
 else if(t==='Help')helpFit()}finally{obs.takeRecords();busy=false}}
 function isNoise(recs){if(!Array.isArray(recs)||!recs.length)return false;
-var IGN='.vpg,.vsub,.vflt,.nb,.rtg,#ap-mob-host,.vr-aph,#fzs';
+var IGN='.vpg,.vsub,.vflt,.nb,.rtg,.vr-i,.vr-tdy,#rp-max,#rp-pdf,#ap-mob-host,.vr-aph,#fzs';
 for(var i=0;i<recs.length;i++){var r=recs[i],t=r.target&&r.target.nodeType===3?r.target.parentElement:r.target;
 if(t&&t.closest&&t.closest(IGN))continue;
 if(r.addedNodes&&r.addedNodes.length===1&&r.removedNodes&&r.removedNodes.length===0&&r.addedNodes[0].nodeType===1&&r.addedNodes[0].matches&&r.addedNodes[0].matches(IGN))continue;

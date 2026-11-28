@@ -54,28 +54,55 @@
   /* one-time decoration of a rendered table (the Columns feature has already removed / reordered columns when data-rc is set) */
   function decorate(t) {
     var head = t.rows[0]; if (!head) return;
-    var keys = Array.prototype.map.call(head.cells, function (c) { var b = c.querySelector('button[data-rk]'); return b ? b.dataset.rk : ''; });
+    var nCols = head.cells.length;
+    var keys = new Array(nCols), groups = new Array(nCols), keyCls = new Array(nCols), sep = new Array(nCols);
+    for (var i = 0; i < nCols; i++) {
+      var b = head.cells[i].querySelector('button[data-rk]');
+      var k = b ? b.dataset.rk : '';
+      var g = groupOf(k);
+      keys[i] = k;
+      groups[i] = 'vr-g-' + g;
+      keyCls[i] = 'vr-k-' + k.replace(/\d+$/, k[0] === 'v' ? 'x' : '');
+      sep[i] = i > 0 && groupOf(keys[i - 1]) !== g;
+      var tip = hintOf(k);
+      if (tip) {
+        head.cells[i].title = tip;
+        var s = document.createElement('span');
+        s.className = 'vr-i';
+        s.setAttribute('aria-hidden', 'true');
+        s.textContent = 'ⓘ';
+        head.cells[i].appendChild(s);
+      }
+    }
     t.dataset.aph = '1';
-    keys.forEach(function (k, i) {
-      var g = groupOf(k), tip = hintOf(k);
-      Array.prototype.forEach.call(t.rows, function (r, ri) {
-        var c = r.cells[i]; if (!c || r.cells.length !== keys.length) return;
-        c.classList.add('vr-g-' + g, 'vr-k-' + k.replace(/\d+$/, k[0] === 'v' ? 'x' : ''));
-        if (i > 0 && groupOf(keys[i - 1]) !== g) c.classList.add('vr-gs');
-        if (ri === 0 && tip) { c.title = tip; var s = document.createElement('span'); s.className = 'vr-i'; s.setAttribute('aria-hidden', 'true'); s.textContent = 'ⓘ'; c.appendChild(s); }
-      });
-    });
-    var yi = keys.indexOf('year'); t.dataset.aphYear = String(yi);
-    var first = firstYear(t);     /* Today = the earliest year in the table (the row for the start of the plan) */
+    var yi = keys.indexOf('year');
+    t.dataset.aphYear = String(yi);
+    var first = 0, firstRow = null;
+    var nRows = t.rows.length;
+    for (var ri = 0; ri < nRows; ri++) {
+      var r = t.rows[ri];
+      if (r.cells.length === nCols) {
+        for (var ci = 0; ci < nCols; ci++) {
+          var c = r.cells[ci];
+          if (sep[ci]) c.classList.add(groups[ci], keyCls[ci], 'vr-gs');
+          else c.classList.add(groups[ci], keyCls[ci]);
+        }
+      }
+      if (ri > 0 && r.dataset && r.dataset.r != null && yi >= 0 && r.cells[yi]) {
+        var yr = yearOf(r.cells[yi]);
+        r.__apYear = yr;
+        if (yr && (!first || yr < first)) { first = yr; firstRow = r; }
+      }
+    }
     t.dataset.aphFirst = String(first);
-    Array.prototype.forEach.call(t.querySelectorAll('tr[data-r]'), function (r) {
-      if (yi >= 0 && r.cells[yi] && yearOf(r.cells[yi]) === first && !r.cells[yi].querySelector('.vr-tdy')) r.cells[yi].insertAdjacentHTML('beforeend', '<span class="vr-tdy">Today</span>');
-    });
+    if (firstRow && yi >= 0 && firstRow.cells[yi] && !firstRow.cells[yi].querySelector('.vr-tdy')) {
+      firstRow.cells[yi].insertAdjacentHTML('beforeend', '<span class="vr-tdy">Today</span>');
+    }
   }
   function yearOf(cell) { var m = /\b(\d{4})\b/.exec(cell.textContent); return m ? +m[1] : 0; }
   function firstYear(t) {
     var yi = +t.dataset.aphYear, y = 0;
-    Array.prototype.forEach.call(t.querySelectorAll('tr[data-r]'), function (r) { var v = yi >= 0 && r.cells[yi] ? yearOf(r.cells[yi]) : 0; if (v && (!y || v < y)) y = v; });
+    Array.prototype.forEach.call(t.querySelectorAll('tr[data-r]'), function (r) { var v = r.__apYear || (yi >= 0 && r.cells[yi] ? yearOf(r.cells[yi]) : 0); if (v && (!y || v < y)) y = v; });
     return y;
   }
   function applyView(t) {
@@ -83,11 +110,19 @@
     t.classList.toggle('vr-view-inc', st.cols === 'inc');
     var yi = +t.dataset.aphYear;
     var first = +t.dataset.aphFirst || firstYear(t);
-    Array.prototype.forEach.call(t.querySelectorAll('tr[data-r]:not(.t)'), function (r) {
-      var year = yi >= 0 && r.cells[yi] ? yearOf(r.cells[yi]) : 0;
-      var keep = !year || keepRow(year, year === first, !!r.querySelector('.rtg'), r.getAttribute('aria-selected') === 'true', st.years);
+    var rows = t.rows;
+    for (var ri = 1; ri < rows.length; ri++) {
+      var r = rows[ri];
+      if (!r.dataset || r.dataset.r == null || r.classList.contains('t')) continue;
+      var year = r.__apYear;
+      if (year == null) {
+        year = yi >= 0 && r.cells[yi] ? yearOf(r.cells[yi]) : 0;
+        r.__apYear = year;
+      }
+      var isRet = r.classList.contains('a') || !!(yi >= 0 && r.cells[yi] && r.cells[yi].querySelector('.rtg'));
+      var keep = !year || keepRow(year, year === first, isRet, r.getAttribute('aria-selected') === 'true', st.years);
       r.classList.toggle('vr-skip', !keep);
-    });
+    }
   }
   function syncBar(bar, t) {
     if (!bar) return;
@@ -107,6 +142,7 @@
 
   var obs = null, timer = 0;
   function work() {
+    clearTimeout(timer); timer = 0;
     if (obs) obs.disconnect();
     try {
       var rr = document.getElementById('rr'), m = document.getElementById('m');
@@ -131,7 +167,7 @@
   }
   function isHelperMutation(recs) {
     if (!recs || !recs.length) return false;
-    var IGNORE = '.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#ap-mob-host,#fzs';
+    var IGNORE = '.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#ap-mob-host,#fzs,#rp-max,#rp-pdf';
     for (var i = 0; i < recs.length; i++) {
       var rec = recs[i], t = rec.target && rec.target.nodeType === 3 ? rec.target.parentElement : rec.target;
       if (t && t.closest && t.closest(IGNORE)) continue;
@@ -148,8 +184,11 @@
     clearTimeout(timer); timer = setTimeout(work, 30);
   }   /* after the Columns feature has finished with the new table */
 
-  var hotTable = null, hotIndex = -1;
-  function clearHot() { if (hotTable) Array.prototype.forEach.call(hotTable.querySelectorAll('.vr-col'), function (c) { c.classList.remove('vr-col'); }); hotTable = null; hotIndex = -1; }
+  var hotTable = null, hotIndex = -1, hotCells = [];
+  function clearHot() {
+    for (var i = 0; i < hotCells.length; i++) hotCells[i].classList.remove('vr-col');
+    hotCells.length = 0; hotTable = null; hotIndex = -1;
+  }
 
   function start() {
     if (typeof MutationObserver === 'undefined') return;
@@ -167,14 +206,14 @@
       persist(); work();
     });
     document.addEventListener('mouseover', function (e) {
-      var td = e.target.closest && e.target.closest('table.rt[data-aph] td'); if (!td) { clearHot(); return; }
+      var td = e.target.closest && e.target.closest('table.rt[data-aph] td'); if (!td) { if (hotCells.length) clearHot(); return; }
       var t = td.closest('table'), i = td.cellIndex; if (t === hotTable && i === hotIndex) return;
       clearHot(); hotTable = t; hotIndex = i;
-      Array.prototype.forEach.call(t.rows, function (r) { var c = r.cells[i]; if (c) c.classList.add('vr-col'); });
+      for (var r = 0; r < t.rows.length; r++) { var c = t.rows[r].cells[i]; if (c) { c.classList.add('vr-col'); hotCells.push(c); } }
     });
     window.addEventListener('resize', schedule);
     schedule();
   }
-  window.VRAnnualHelpers = { groupOf: groupOf, hintOf: hintOf, keepRow: keepRow };
+  window.VRAnnualHelpers = { groupOf: groupOf, hintOf: hintOf, keepRow: keepRow, refresh: work };
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
 })();

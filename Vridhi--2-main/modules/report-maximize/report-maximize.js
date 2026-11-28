@@ -117,10 +117,10 @@ function fitContainer(root,active){
  var tables=root.querySelectorAll(FIT_SEL);
  for(var i=0;i<tables.length;i++)fitTable(tables[i]);
 }
-function fitAll(){
+function fitAll(force){
  if(fitting)return;
  fitting=true;
- var prevForce=forceRefit;forceRefit=true;
+ var prevForce=forceRefit;forceRefit=force!==false;
  try{
   var m=document.getElementById('m');
   if(m)fitContainer(m,!!(m.classList&&m.classList.contains('vr-rmax')));
@@ -133,10 +133,10 @@ function fitAll(){
   fitting=false;
  }
 }
-function scheduleFit(delay){
- if(typeof setTimeout!=='function'){fitAll();return}
+function scheduleFit(delay,force){
+ if(typeof setTimeout!=='function'){fitAll(!!force);return}
  if(typeof clearTimeout==='function')clearTimeout(fitTimer);
- fitTimer=setTimeout(function(){fitTimer=0;fitAll()},delay==null?60:delay);
+ fitTimer=setTimeout(function(){fitTimer=0;fitAll(!!force)},delay==null?60:delay);
 }
 
 /* ---------- Printable PDF export (landscape A4, fits all visible columns, no window.open) ---------- */
@@ -466,9 +466,10 @@ function syncPage(){
  if(btn&&!host.contains(btn)){btn.remove();btn=null}
  if(!btn){btn=mk('rp-max','vr-ib vr-ib-max rp-max');host.appendChild(btn)}
  if(m.classList.contains('vr-rmax')!==pref)m.classList.toggle('vr-rmax',pref);
- var thKey=(document.documentElement.getAttribute('data-theme')||'')+'|'+(document.documentElement.dataset.pal||'');
- if(!lastBgVal||thKey!==lastBgTheme){lastBgTheme=thKey;lastBgVal=getComputedStyle(document.body).backgroundColor}
- if(m.style.getPropertyValue('--vr-bg')!==lastBgVal)m.style.setProperty('--vr-bg',lastBgVal);
+ var de=document.documentElement;
+ var thKey=de?((de.getAttribute&&de.getAttribute('data-theme')||'')+'|'+(de.dataset&&de.dataset.pal||'')):'';
+ if(!lastBgVal||thKey!==lastBgTheme){lastBgTheme=thKey;lastBgVal=(typeof getComputedStyle==='function'&&document.body)?getComputedStyle(document.body).backgroundColor:''}
+ if(m.style&&m.style.getPropertyValue&&m.style.getPropertyValue('--vr-bg')!==lastBgVal)m.style.setProperty('--vr-bg',lastBgVal);
  paint(btn,pref);
  syncPdfBtn('rp-pdf','vr-ib vr-ib-pdf rp-pdf',host,btn,pref);
  fitContainer(m,pref)}
@@ -510,7 +511,7 @@ new MutationObserver(function(recs){
 }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','open']});
 document.addEventListener('close',queue,true);
 if(typeof window!=='undefined'){
- if(window.addEventListener)window.addEventListener('resize',function(){if(pref)scheduleFit(40)});
+ if(window.addEventListener)window.addEventListener('resize',function(){if(pref)scheduleFit(40,true)});
  window.vrReportFit=fitAll;
  window.vrExportReportPDF=exportReportPDF;
  window.__vrPdfBuilder={buildPrintDocument:buildPrintDocument,clonePrintableTable:clonePrintableTable,escHtml:escHtml};

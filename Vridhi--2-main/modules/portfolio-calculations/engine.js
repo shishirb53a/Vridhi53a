@@ -88,12 +88,17 @@
     const stage = dependencies.stage, policy = dependencies.policy, yearsOf = dependencies.yearsOf;
     const rows = [], N = Math.max(2, Math.min(61, s.end - s.start + 1));
     const assets = s.assets;
-    const meta = new Array(assets.length);
-    for (let i = 0; i < assets.length; i++) {
+    const nA = assets.length;
+    const meta = new Array(nA);
+    const matRow = new Int32Array(nA);
+    const matKm = new Int32Array(nA);
+    for (let i = 0; i < nA; i++) {
       const x = assets[i];
       if (x.type !== 'gratuity') x.yrs = yearsOf(x, s);
       const e = x.type === 'gratuity' ? null : entry(x, s);
       const mt = x.type === 'gratuity' ? null : matOf(x, s);
+      matRow[i] = mt ? mt.row : 0;
+      matKm[i] = mt ? mt.km : -1;
       meta[i] = {
         e: e, mt: mt,
         ek: e ? FYM(e.mo) : -1,
@@ -110,12 +115,16 @@
     const members = s.members;
     const memAges = members.map(m => m.age);
     const isChild = members.map(m => m.role === 'Child');
+    const fyAdd = new Array(N + 1);
+    const aprAdd = new Array(N + 1);
     for (let a = 1; a <= N; a++) {
       const p = a > 1 ? rows[a - 2] : null;
       const fyy = s.start + a - 2;
-      const v = new Array(assets.length);
+      const v = new Array(nA);
+      const rowFyAdd = a > 1 ? new Float64Array(nA) : null;
+      const rowAprAdd = a > 1 ? new Float64Array(nA) : null;
       let totSum = 0, rowAdd = 0;
-      for (let i = 0; i < assets.length; i++) {
+      for (let i = 0; i < nA; i++) {
         const x = assets[i], md = meta[i];
         let val;
         if (x.type === 'gratuity') {
@@ -126,13 +135,18 @@
           const o = p.v[i], e = md.e, mt = md.mt;
           const first = a === e.a0, act = a >= e.a0 && a <= x.yrs;
           const ek = md.ek, f0 = md.f0, t0 = md.t0;
-          const ms = new Array(12);
+          const needMs = x.cmp === 'monthly' || (mt && a === mt.row && x.icr);
+          const ms = needMs ? new Array(12) : null;
           let n = 0, w = 0;
-          for (let k = 0; k < 12; k++) {
-            const ix = (k <= 8 ? fyy : fyy + 1) * 12 + (k + 3) % 12;
-            const on = !!(act && (!first || k >= ek) && (f0 == null || ix >= f0) && (t0 == null || ix <= t0) && (!mt || ix < mt.ix));
-            ms[k] = on;
-            if (on) { n++; w += 12 - k; }
+          if (act) {
+            for (let k = 0; k < 12; k++) {
+              const ix = (k <= 8 ? fyy : fyy + 1) * 12 + (k + 3) % 12;
+              const on = (!first || k >= ek) && (f0 == null || ix >= f0) && (t0 == null || ix <= t0) && (!mt || ix < mt.ix);
+              if (ms) ms[k] = on;
+              if (on) { n++; w += 12 - k; }
+            }
+          } else if (ms) {
+            for (let k = 0; k < 12; k++) ms[k] = false;
           }
           const amIx = (md.amon >= 4 ? fyy : fyy + 1) * 12 + md.amon - 1;
           const yp = (a > e.a0 || md.amk >= ek) &&
@@ -140,37 +154,44 @@
             (md.yt == null || amIx <= md.yt) &&
             (!mt || amIx < mt.ix);
           const mm = x.madd || 0, ay = act && yp ? x.add : 0, am = act ? mm * n : 0;
-          rowAdd += ay + am;
+          const addSum = ay + am;
+          rowAdd += addSum;
+          rowFyAdd[i] = addSum;
+          if (md.amon === 4 && act && yp) rowAprAdd[i] = x.add;
           if (a < e.a0 || (mt && a > mt.row)) {
             val = o;
           } else {
-            const q = { e: e, first: first, act: act, ms: ms, n: n, w: w, yp: yp, rem: md.rem, days: first ? md.firstDays : 365 };
+            const days = first ? md.firstDays : 365;
             if (mt && a === mt.row) {
-              if (x.cmp === 'oa') val = o + ay + am + (o + ay + am) * x.ret;
+              if (x.cmp === 'oa') val = o + addSum + (o + addSum) * x.ret;
               else if (x.cmp === 'monthly') {
-                const ou = mcm(o, x, q);
+                const ou = mcm(o, x, { e: e, first: first, act: act, ms: ms, n: n, w: w, yp: yp, rem: md.rem, days: days });
                 val = (mt.km > 0 ? ou[mt.km - 1] : o) * Math.pow(1 + x.ret / 12, mt.d / mt.dim);
               } else if (!x.icr) {
-                val = o * (1 + x.ret * mt.days / 365) + ay + am;
+                val = o * (1 + x.ret * mt.days / 365) + addSum;
               } else {
                 let w2 = 0;
                 for (let k = 0; k < 12; k++) if (ms[k]) w2 += mt.km - k;
                 const r2 = ay ? Math.max(0, mt.km - md.amk) : 0;
-                val = o + ay + am + o * x.ret * mt.days / 365 + (mm * w2 + ay * r2) * x.ret / 12;
+                val = o + addSum + o * x.ret * mt.days / 365 + (mm * w2 + ay * r2) * x.ret / 12;
               }
             } else if (x.cmp === 'oa') {
-              val = o + ay + am + (o + ay + am) * x.ret;
+              val = o + addSum + (o + addSum) * x.ret;
             } else if (x.cmp === 'monthly') {
-              val = mcm(o, x, q)[11];
+              val = mcm(o, x, { e: e, first: first, act: act, ms: ms, n: n, w: w, yp: yp, rem: md.rem, days: days })[11];
             } else if (!x.icr) {
-              val = o * (1 + x.ret * q.days / 365) + ay + am;
+              val = o * (1 + x.ret * days / 365) + addSum;
             } else {
-              val = o + ay + am + o * x.ret * q.days / 365 + (mm * w + ay * md.rem) * x.ret / 12;
+              val = o + addSum + o * x.ret * days / 365 + (mm * w + ay * md.rem) * x.ret / 12;
             }
           }
         }
         v[i] = val;
         totSum += val;
+      }
+      if (a > 1) {
+        fyAdd[a] = rowFyAdd;
+        aprAdd[a] = rowAprAdd;
       }
       const tot = Math.round(totSum);
       const ages = new Array(members.length), sts = new Array(members.length);
@@ -184,6 +205,20 @@
         chg: p ? tot - p.tot : 0
       });
     }
+    const depShowRow = new Array(N + 1);
+    const depShowAll = new Float64Array(N + 1);
+    for (let a = 2; a <= N; a++) {
+      const fA = fyAdd[a], apCur = a >= 3 ? aprAdd[a] : null, apNext = a < N ? aprAdd[a + 1] : null;
+      const dRow = new Float64Array(nA);
+      let dSum = 0;
+      for (let i = 0; i < nA; i++) {
+        const val = fA[i] - (apCur ? apCur[i] : 0) + (apNext ? apNext[i] : 0);
+        dRow[i] = val;
+        dSum += val;
+      }
+      depShowRow[a] = dRow;
+      depShowAll[a] = dSum;
+    }
     policy.applyToRows(s, rows);
     const cl = n => Math.min(N, Math.max(1, n));
     const ri = cl(s.ret - s.members[0].age + 1) - 1, hi = ri;
@@ -192,10 +227,15 @@
       return rows[ri].v[i] * (mt && ri + 1 >= mt.row ? 0 : x.ret);
     });
     const nx = rows[ri + 1];
-    return {
+    const res = {
       rows: rows, ri: ri, hi: hi, inc: inc, incT: inc.reduce((q, c) => q + c, 0),
       payRet: nx ? nx.payR : 0, payT: rows.reduce((q, r) => q + r.pay, 0)
     };
+    Object.defineProperty(res, '_meta', {
+      value: { len: nA, N: N, matRow: matRow, matKm: matKm, fyAdd: fyAdd, depShowRow: depShowRow, depShowAll: depShowAll },
+      enumerable: false
+    });
+    return res;
   }
 
   root.VRCalcCore = {

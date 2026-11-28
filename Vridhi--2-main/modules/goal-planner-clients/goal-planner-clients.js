@@ -39,17 +39,28 @@ function del(id){const P=ensure();if(!P||!P.profiles[id]||Object.keys(P.profiles
 function restore(x){const P=ensure();if(!P||!x||P.profiles[x.id])return;P.profiles[x.id]=x.snap;if(x.was)sw(x.id);else{save();render()}}
 
 const METRICS_CACHE=new Map();
-function metricsSig(p){
+function currentPolSig(){
+  if(typeof S==='undefined'||!S)return'';
+  if(S.polGp===false)return'off';
+  if(!S.polClients&&(!S.policies||!S.policies.length))return'';
+  try{return JSON.stringify(S.polClients||null)+'|'+JSON.stringify(S.policies||null)}catch(e){return''}
+}
+function metricsSig(p,polSig){
   if(!p||!p.d)return'';
-  let pol='';
-  if(typeof S!=='undefined'&&S){
-    try{pol=S.polGp===false?'off':JSON.stringify(S.polClients||null)+'|'+JSON.stringify(S.policies||null)}catch(e){pol=''}
-  }
+  const pol=polSig!==undefined?polSig:currentPolSig();
   return p.id+'|'+(p.active?'1':'0')+'|'+pol+'|'+JSON.stringify(p.d);
 }
 function setPortalHTML(portal){
   const html=window.gppDrawerHTML();
+  portal.__gppLazy=false;
   if(portal.__gppHtml!==html){portal.__gppHtml=html;portal.innerHTML=html}
+}
+function ensurePortalLazy(){
+  let portal=document.getElementById('gpp-drawer-portal');
+  if(!portal){portal=document.createElement('div');portal.id='gpp-drawer-portal';document.body.appendChild(portal)}
+  if(drawerOpen){setPortalHTML(portal)}
+  else{portal.__gppLazy=true}
+  return portal;
 }
 window.gppBarHTML=function(top){
   const clients=list(),active=clients.find(p=>p.active),label=active?displayName(active.name):translate('Add your first client');
@@ -61,9 +72,7 @@ window.gppBarHTML=function(top){
 };
 window.gppDashClient=function(){
   const clients=list(),active=clients.find(p=>p.active),label=active?displayName(active.name):translate('Add your first client');
-  let portal=document.getElementById('gpp-drawer-portal');
-  if(!portal){portal=document.createElement('div');portal.id='gpp-drawer-portal';document.body.appendChild(portal)}
-  setPortalHTML(portal);
+  ensurePortalLazy();
   return'<div class="dz-client"><span class="dz-client-l">'+esc(translate('Client'))+'</span><button type="button" class="client-trigger gpp-client-trigger" id="gpp-sel" data-gpp-drawer-trigger aria-expanded="'+drawerOpen+'" aria-controls="gpp-drawer" title="'+esc(label)+'"><span class="client-trigger-value">'+esc(label)+'</span><svg class="client-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m3 6 5 5 5-5"/></svg></button></div>'
 };
 window.gppHeroInner=function(){const P=ensure();if(!P)return'';const p=P.profiles[P.active],m=S.members&&S.members[0],M0=typeof cr==='function'?cr:null,nm=displayName(p.name||'');if(!nm)return'';
@@ -77,9 +86,9 @@ window.gppHoldingList=function(){/* read-only: every Goal Planner client with to
     try{const active=id===P.active&&typeof vrReportCalc==='function',d=active?S:JSON.parse(JSON.stringify(p.d)),D=active?vrReportCalc():calc(d);items=(d.assets||[]).map(function(x,i){return{id:String(x.id),name:String(x.name||'Holding'),cat:String(x.cat||''),val:Math.round(+D.rows[0].v[i]||0),ca:String(x.ca||''),ma:String(x.ma||'')}})}catch(e){items=[]}
     return{id:id,name:p.name,active:id===P.active,items:items}})};
 
-function metrics(p){
+function metrics(p,polSig){
   if(!p.d.assets.length)return null;
-  const sig=metricsSig(p),hit=METRICS_CACHE.get(p.id);
+  const sig=metricsSig(p,polSig),hit=METRICS_CACHE.get(p.id);
   if(hit&&hit.sig===sig)return hit.val;
   const keep=snap(S);
   try{Object.assign(S,JSON.parse(JSON.stringify(p.d)));const c=ctx();let sv=0,fy='';/* savings per year = yearly + monthly additions in the first financial year, same rule as Reports > Annual Savings Schedule */let sn=0,s1=0,f1='',f2='';try{const D=(c&&c.D)?c.D:calc(S),lab=i=>'FY '+(S.start+i-1)+'-'+String(S.start+i).slice(2);let tot=0;for(let i=1;i<D.rows.length;i++){const v=D.rows[i].add||0;if(v>0){tot+=v;sn++;if(sn===1){s1=Math.round(v);f1=lab(i)}f2=lab(i)}}sv=sn?Math.round(tot/sn):0;fy=f1&&f1+' to '+f2}catch(e){sv=0}/* Monthly income at retirement = the Dashboard's 'Income at Retirement' (D.incT / 12); expected return = value-weighted average of the holdings' own return rates */let inc=0,er=0;try{const D2=c.D;inc=Math.round((D2.incT||0)/12);const L=S.assets.filter(x=>x.type!=='gratuity'),tv=L.reduce((q,x)=>q+(+x.value||0),0);er=tv>0?L.reduce((q,x)=>q+(+x.value||0)*(+x.ret||0),0)/tv*100:(L.length?L.reduce((q,x)=>q+(+x.ret||0),0)/L.length*100:0)}catch(e){inc=0;er=0}const val={today:c.r0.tot,atRet:c.rr.tot,goal:c.G,yr:c.yr,tm:c.tm,ret:S.ret,sav:sv,fy:fy,sn:sn,s1:s1,inc:inc,er:er};if(METRICS_CACHE.size>24)METRICS_CACHE.clear();METRICS_CACHE.set(p.id,{sig:sig,val:val});return val}
@@ -93,7 +102,7 @@ let cmpSel=[],cmpMode=false,detOpen={},cmpQuery='';
 const money=x=>{const M0=typeof cr==='function'?cr:(v=>'\u20b9 '+Math.round(v).toLocaleString('en-IN'));return String(M0(x))};
 const pc1=x=>(Math.round(x*10)/10).toFixed(1).replace(/\.0$/,'')+'%';
 /* one row of numbers per client, all from metrics() -> the same engine the Dashboard and Reports use */
-function rowData(p){const m=metrics(p),goal=+(p.d.goal||0),has=!!m,atRet=has?m.atRet:0,pct=goal>0?atRet/goal*100:0;
+function rowData(p,polSig){const m=metrics(p,polSig),goal=+(p.d.goal||0),has=!!m,atRet=has?m.atRet:0,pct=goal>0?atRet/goal*100:0;
   return{p:p,m:m,has:has,goal:goal,today:has?m.today:0,atRet:atRet,pct:pct,gap:has?atRet-goal:null,sav:has?m.sav:0,er:has?m.er:null,inc:has?m.inc:null,ret:has?m.ret:null,ok:has&&atRet>=goal}}
 function statusOf(r){return r.has?translate(r.ok?'On track':'Behind goal'):translate('No holdings')}
 function bestId(rows){let b=null;rows.forEach(r=>{if(!r.has)return;if(!b||r.pct>b.pct+1e-9||(Math.abs(r.pct-b.pct)<=1e-9&&r.atRet>b.atRet))b=r});return b?b.p.id:null}
@@ -153,7 +162,7 @@ function toolbarHTML(n,total){
   const ready=n>=MINC,hint=n<MINC?translate('Select 2\u20135 plans to compare'):n>MAXC?'':n+' '+translate('selected');
   return'<div class="gpp-toolbar"><label class="gpp-search"><span>'+esc(translate('Search clients'))+'</span><input type="search" data-gpp-search aria-label="'+esc(translate('Search clients'))+'" value="'+esc(cmpQuery)+'"></label><div class="gpp-tb-right"><span class="gpp-sel-hint" aria-live="polite">'+esc(hint)+'</span>'+(n?'<button type="button" class="gpp-act" data-gpp="cmpclear">'+esc(translate('Clear'))+'</button>':'')+'<button type="button" class="gpp-compare-btn" data-gpp="compare"'+(ready?'':' disabled')+'>'+esc(translate('Compare'))+(n?' ('+n+')':'')+'</button></div></div>'}
 window.gppDrawerHTML=function(){
-  const L=list(),rows=L.map(rowData),best=bestId(rows);pruneSel();
+  const L=list(),polSig=currentPolSig(),rows=L.map(p=>rowData(p,polSig)),best=bestId(rows);pruneSel();
   if(!L.length)drawerOpen=true;
   const showCmp=cmpMode&&cmpSel.length>=MINC;if(!showCmp)cmpMode=false;
   const main=showCmp?compareHTML(rows):(L.length?toolbarHTML(cmpSel.length,L.length)+tableHTML(rows,best)+'<p class="gpp-none" data-gpp-none hidden>'+esc(translate('No clients match your search.'))+'</p>':'<p class="gpp-empty">'+esc(translate('Add your first client'))+'</p>');
@@ -183,7 +192,7 @@ document.addEventListener('keydown',e=>{
   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
 });
 function closeDrawer(returnFocus,immediate){drawerOpen=false;const overlay=document.getElementById('gpp-drawer-overlay');if(overlay){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;overlay.classList&&overlay.classList.toggle('gpp-closing',!immediate&&!reduced);if(immediate||reduced){overlay.hidden=true}else{clearTimeout(drawerCloseTimer);drawerCloseTimer=setTimeout(()=>{if(!drawerOpen){overlay.hidden=true;overlay.classList&&overlay.classList.remove('gpp-closing')}},180)}}const trigger=document.getElementById('gpp-sel');if(trigger){trigger.setAttribute('aria-expanded','false');if(returnFocus)trigger.focus()}}
-function openDrawer(){clearTimeout(drawerCloseTimer);drawerOpen=true;const overlay=document.getElementById('gpp-drawer-overlay');if(overlay){overlay.classList&&overlay.classList.remove('gpp-closing');overlay.hidden=false}const trigger=document.getElementById('gpp-sel');if(trigger)trigger.setAttribute('aria-expanded','true');const target=document.querySelector('[data-gpp-search]')||document.querySelector('.gpp-close');if(target)target.focus()}
+function openDrawer(){clearTimeout(drawerCloseTimer);drawerOpen=true;const portal=document.getElementById('gpp-drawer-portal');if(portal&&portal.__gppLazy)setPortalHTML(portal);const overlay=document.getElementById('gpp-drawer-overlay');if(overlay){overlay.classList&&overlay.classList.remove('gpp-closing');overlay.hidden=false}const trigger=document.getElementById('gpp-sel');if(trigger)trigger.setAttribute('aria-expanded','true');const target=document.querySelector('[data-gpp-search]')||document.querySelector('.gpp-close');if(target)target.focus()}
 document.addEventListener('click',e=>{
   if(e.target.closest){const kb=e.target.closest('details.gpp-kebab');if(!kb||e.target.closest('.gpp-menu button'))gppCloseMenus(null)}
   const trigger=e.target.closest&&e.target.closest('[data-gpp-drawer-trigger]');if(trigger){if(drawerOpen)closeDrawer(false);else openDrawer();return}

@@ -32,7 +32,9 @@ const DEF=()=>{const s=DEF0();mig(s);return s};
 const gr=PC.gratuity,FYM=PC.FYM,vd=t=>/^\d{4}-\d{2}-\d{2}$/.test(t||'')&&!isNaN(new Date(t))?t:'';
 const entry=PC.entry,matOf=PC.matOf;
 function matDone(x,r,mon){const mt=matOf(x,S);if(!mt)return false;if(mon===2)return r.a+1>mt.row;if(!mon)return r.a>mt.row;const a=Math.floor((r.a-1)/12)+2,m=(r.a-1)%12+1;return a>mt.row||(a===mt.row&&m-1>mt.km)}
-function allMat(idx,r,mon){const A=S.assets;return idx.length>0&&idx.every(function(i){return matDone(A[i],r,mon)})}
+function allMat(idx,r,mon){if(!idx.length)return false;const c=window.__vrReportCalcCache,mt=c&&c.state===S&&c.value&&c.value._meta;
+if(mt&&mt.len===S.assets.length){const mr=mt.matRow,mk=mt.matKm;if(mon===2){const a2=r.a+1;for(let k=0;k<idx.length;k++){const row=mr[idx[k]];if(!row||a2<=row)return false}return true}if(!mon){const ra=r.a;for(let k=0;k<idx.length;k++){const row=mr[idx[k]];if(!row||ra<=row)return false}return true}const a=Math.floor((r.a-1)/12)+2,m1=(r.a-1)%12;for(let k=0;k<idx.length;k++){const i=idx[k],row=mr[i];if(!row||!(a>row||(a===row&&m1>mk[i])))return false}return true}
+const A=S.assets;return idx.every(function(i){return matDone(A[i],r,mon)})}
 const fyInfo=PC.fyInfo,mcm=PC.mcm;
 /* Policy data and every policy calculation now live in the Policies module (modules/policy/policy-core.js, window.VRPolicy).
    This file only asks it for what it needs: VRPolicy.applyToRows, monthPayout, receivedBy, receivedByYear, hasPayouts, cleanState. */
@@ -43,7 +45,9 @@ function calc(s){return PC.calculate(s,{stage:stg,policy:VRPolicy,yearsOf:yrsOf}
 //CALC-END
 /* Annual Portfolio Projection display only: a yearly deposit paid on 1 April is shown on the row dated that 1 April (e.g. the Apr 2027 deposit on the '1 Apr 2027' row).
    The engine still books it in the financial year that starts that day, so balances, interest and income are unchanged. */
-function depShow(a,idx,N){if(a<2)return 0;const A=S.assets;let t=0;(idx||A.map((x,i)=>i)).forEach(i=>{const x=A[i];if(!x||x.type==='gratuity')return;const k=fyInfo(x,S,a),ap=(x.amon||4)===4;t+=k.act?(k.yp?x.add:0)+(x.madd||0)*k.n:0;if(a>=3&&ap&&k.act&&k.yp)t-=x.add;if(a<N&&ap){const k2=fyInfo(x,S,a+1);if(k2.act&&k2.yp)t+=x.add}});return t}
+function depShow(a,idx,N){if(a<2)return 0;const D=window.vrReportCalc?window.vrReportCalc():null,mt=D&&D._meta;
+if(mt&&mt.N===N&&mt.len===S.assets.length&&a<=mt.N){if(!idx)return mt.depShowAll[a]||0;const row=mt.depShowRow[a];let t=0;for(let k=0;k<idx.length;k++)t+=row[idx[k]]||0;return t}
+const A=S.assets;let t=0;(idx||A.map((x,i)=>i)).forEach(i=>{const x=A[i];if(!x||x.type==='gratuity')return;const k=fyInfo(x,S,a),ap=(x.amon||4)===4;t+=k.act?(k.yp?x.add:0)+(x.madd||0)*k.n:0;if(a>=3&&ap&&k.act&&k.yp)t-=x.add;if(a<N&&ap){const k2=fyInfo(x,S,a+1);if(k2.act&&k2.yp)t+=x.add}});return t}
 function addInfo(D){const act=S.assets.filter(x=>!x.type&&(x.add>0||x.madd>0)&&x.yrs>=2),next=D.rows.length>1?D.rows[1].add:0,
 last=act.length?S.start+Math.max(...act.map(effYrs))-1:null,tot=D.rows.slice(1,D.ri+1).reduce((q,r)=>q+r.add,0),
 y1=D.rows.length>1?D.rows[1].year:null,fy=y1?'FY '+(y1-1)+'-'+String(y1).slice(-2):'',
@@ -444,25 +448,54 @@ const LK=new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionD
 const sh=s=>s.replace('School · Class ','School ').replace('College · Yr ','College ').replace(' of ','/');
 function vrStateSig(s){if(!s)return'';var g=s.grat||{},ms=(s.members||[]).map(function(m){return m.name+':'+m.role+':'+m.age+':'+m.cls+':'+m.college}).join('|');
 var as=(s.assets||[]).map(function(x){return [x.id,x.type||'',x.value,x.add,x.madd||0,x.ret,x.yrs,x.cmp||'',x.icr,x.amon||4,x.edate||'',x.mfrom||'',x.mto||'',x.yfrom||'',x.yto||'',x.mat||0].join(',')}).join(';');
-var pol=typeof VRPolicy!=='undefined'&&VRPolicy&&VRPolicy.forState?JSON.stringify(VRPolicy.forState(s,'goal')):'';
+var hasPolData=(s.policies&&s.policies.length)||s.polClients;
+var pol=hasPolData&&typeof VRPolicy!=='undefined'&&VRPolicy&&VRPolicy.forState?JSON.stringify(VRPolicy.forState(s,'goal')):'';
 return [s.start,s.end,s.ret,s.retP,g.basic,g.svc,g.rem,g.cap,ms,as,pol].join('#')}
-window.vrReportCalc=function(){var sig=vrStateSig(S),c=window.__vrReportCalcCache;if(c&&c.state===S&&c.sig===sig)return c.value;var value=calc(S);window.__vrReportCalcCache={state:S,sig:sig,value:value};return value};
-function repRows(){if(UI.rv==='sav')return window.repSavRows();if(UI.rv==='int')return window.repIRows();if(UI.rv==='month')return window.repMRows();const SEL=repSel();if(SEL.none)return window.repNone();if(SEL.min){const D0=window.vrReportCalc();return window.repMin(D0.rows,{label:'As on',noun:'years',yr:true,lab:r=>'1 Apr '+r.year,hl:r=>r.a-1===D0.ri})}const D=window.vrReportCalc(),A=S.assets,Ms=S.members,kids=Ms.map((m,i)=>m.role==='Child'?i:-1).filter(i=>i>=0),q=UI.rq.trim().toLowerCase(),nf=A.length===1||(UI.rcl&&UI.rcl.length===1),hideDupPF=A.length===1&&/pf\s*-?\s*post|pf\s*post\s*office/i.test(A[0].name),allIdx=A.map((x,i)=>i),N=D.rows.length,depCache={};
-const getDep=r=>(r.a in depCache)?depCache[r.a]:(depCache[r.a]=depShow(r.a,null,N));
+window.vrReportCalc=function(){var sig=vrStateSig(S),c=window.__vrReportCalcCache;if(c&&c.state===S&&c.sig===sig)return c.value;var value=calc(S);window.__vrReportCalcCache={state:S,sig:vrStateSig(S),value:value};return value};
+function repRows(){if(UI.rv==='sav')return window.repSavRows();if(UI.rv==='int')return window.repIRows();if(UI.rv==='month')return window.repMRows();const SEL=repSel();if(SEL.none)return window.repNone();if(SEL.min){const D0=window.vrReportCalc();return window.repMin(D0.rows,{label:'As on',noun:'years',yr:true,lab:r=>'1 Apr '+r.year,hl:r=>r.a-1===D0.ri})}const D=window.vrReportCalc(),A=S.assets,Ms=S.members,kids=Ms.map((m,i)=>m.role==='Child'?i:-1).filter(i=>i>=0),q=UI.rq.trim().toLowerCase(),nf=A.length===1||(UI.rcl&&UI.rcl.length===1),hideDupPF=A.length===1&&/pf\s*-?\s*post|pf\s*post\s*office/i.test(A[0].name),allIdx=A.map((x,i)=>i),N=D.rows.length,mt=D._meta,depAll=mt&&mt.N===N&&mt.len===A.length?mt.depShowAll:null;
+let rc=D._repCache;
+if(!rc){rc={cellInner:new Array(N+1),vAll:new Array(N+1),hay:new Array(N+1),hin:new Array(N+1),roiT:new Array(N+1)};Object.defineProperty(D,'_repCache',{value:rc,enumerable:false,configurable:true})}
+const getDep=r=>depAll?(depAll[r.a]||0):depShow(r.a,null,N);
 const monthlyIncome=r=>r.a>1?RCOLS.annualMonthlyIncome(r.chg-r.add,r.pay,allMat(allIdx,r,false)):null;
 const key=(r,k)=>k==='a'||k[0]==='s'?r.a:k==='year'?r.year:k==='age'?r.age[0]:k==='tot'||k==='hi'?r.tot:k==='roi'?(rowRoi(r)||0):k==='chg'?r.chg:k==='add'?getDep(r):k==='pay'?r.pay:k==='ti'?polTiVal(r.a>1?r.chg-r.add:null,r.pay):k==='int'?(r.a>1?r.chg-r.add:-1e18):k==='mi'?(monthlyIncome(r)??-1e18):r.v[+k.slice(1)];
-const L=q?D.rows.filter(r=>[r.a,r.year,fyl(r.year),r.age.join(' '),r.st.join(' '),r.tot,f(r.tot),hin(r.tot),rowRoiTxt(r),...r.v.map(f)].join(' ').toLowerCase().includes(q)):D.rows.slice();
-L.sort((x,y)=>{const a=key(x,UI.rk),b=key(y,UI.rk);return(a>b?1:a<b?-1:0)*UI.rd});
+const getHin=r=>{let h=rc.hin[r.a];if(h===undefined){h=hin(r.tot);rc.hin[r.a]=h}return h};
+const getRoiT=r=>{let t=rc.roiT[r.a];if(t===undefined){t=rowRoiTxt(r);rc.roiT[r.a]=t}return t};
+const L=q?D.rows.filter(r=>{let hay=rc.hay[r.a];if(hay===undefined){hay=[r.a,r.year,fyl(r.year),r.age.join(' '),r.st.join(' '),r.tot,f(r.tot),getHin(r),getRoiT(r),...r.v.map(f)].join(' ').toLowerCase();rc.hay[r.a]=hay}return hay.includes(q)}):D.rows.slice();
+if(UI.rk!=='a'||UI.rd<0)L.sort((x,y)=>{const a=key(x,UI.rk),b=key(y,UI.rk);return(a>b?1:a<b?-1:0)*UI.rd});
 if(!L.length)return`<div class="em">No years match your search.</div>`;
 const th=(k,t)=>`<th class="${k!=='year'&&k!=='hi'&&k[0]!=='s'?'rt-num':''}" aria-sort="${UI.rk===k?(UI.rd>0?'ascending':'descending'):'none'}"><button data-rk="${k}">${t}${UI.rk===k?(UI.rd>0?' ▲':' ▼'):''}</button></th>`;
-const at=r=>`data-r="${r.a}" class="${r.a-1===D.ri?'a':''}${UI.sel===r.a?' sel':''}"`;
 const hasPol=VRPolicy.hasPayouts('goal');
-const metaL=L.map(r=>{const yInt=r.a>1?r.chg-r.add:null,am=r.a>1&&allMat(allIdx,r,false),mi=r.a>1?RCOLS.annualMonthlyIncome(yInt,r.pay,am):null,dep=getDep(r),roiT=rowRoiTxt(r),hinT=hin(r.tot);return{r,yInt,am,mi,dep,roiT,hinT}});
-return`<table class="rt"><tr>${th('a','S.No')}${th('year','As on')}${th('age','Ages<br><span class="rt-sub">'+Ms.map(m=>escn(m.name)).join(' / ')+'</span>')}${kids.map(k=>th('s'+k,escn(Ms[k].name)+'<br>stage')).join('')}${A.map((x,i)=>hideDupPF?'':th('v'+i,escn(x.name))).join('')}${th('int','Yearly<br>income (₹)')}${th('mi','Monthly<br>income (₹)')}${hasPol?th('pay','Policy<br>payouts (₹)')+th('ti','Total<br>income (₹)'):''}${th('tot','Year end<br>balance (₹)')}${th('roi','Blended<br>ROI')}${th('add','Amount<br>Deposited (₹)')}${th('chg','Change')}${th('hi','Total (हिन्दी)')}</tr>
-${metaL.map(({r,yInt,am,mi,dep,roiT,hinT})=>`<tr ${at(r)} tabindex="0" aria-selected="${UI.sel===r.a}"><td class="rt-num">${r.a}</td><td class="nw">1 Apr ${r.year}</td><td class="nw rt-num">${r.age.join(' / ')}</td>${kids.map(k=>`<td class="l">${sh(r.st[k])}</td>`).join('')}${hideDupPF?'':r.v.map(v=>`<td title="${rf(v)}">${lk(v)}</td>`).join('')}<td class="nw">${r.a>1?(am?'-':rf(yInt)):'—'}</td><td class="nw">${r.a>1?(mi==null?'-':rf(mi)):'—'}</td>${hasPol?`<td class="nw">${r.pay>0?rf(r.pay):'—'}</td><td class="nw"><b>${polTiTxt(yInt,am,r.pay)}</b></td>`:''}<td class="nw" title="${rf(r.tot)}"><b>${rf(r.tot)}</b></td><td><b>${roiT}</b></td><td class="nw" title="${rf(dep)}">${rf(dep)}</td><td>${r.a>1?lk(r.chg):'—'}</td><td class="l">${hinT}</td></tr>`).join('')}</table>
-<div class="rc">${metaL.map(({r,yInt,am,mi,dep,roiT,hinT})=>`<details class="yc ${r.a-1===D.ri?'a':''}${UI.sel===r.a?' sel':''}" data-r="${r.a}"><summary><b>As on 1 Apr ${r.year}</b>${nf?'':' · '+fyl(r.year)} · Age ${r.age[0]}<br><span class="mu">Year end balance</span> <b>${f(r.tot)}</b><div class="mu">${hinT}</div></summary><div class="kv">
+const skipRc=!!window.__apSkipRc;
+const nA=A.length;
+const metaL=skipRc?null:new Array(L.length);
+const trParts=new Array(L.length);
+for(let ri0=0;ri0<L.length;ri0++){
+  const r=L[ri0],yInt=r.a>1?r.chg-r.add:null,am=r.a>1&&allMat(allIdx,r,false),mi=r.a>1?RCOLS.annualMonthlyIncome(yInt,r.pay,am):null,dep=getDep(r),roiT=getRoiT(r),hinT=getHin(r);
+  if(!skipRc)metaL[ri0]={r,yInt,am,mi,dep,roiT,hinT};
+  let vCells='';
+  if(!hideDupPF){
+    vCells=rc.vAll[r.a];
+    if(vCells===undefined){
+      let ciArr=rc.cellInner[r.a];
+      if(!ciArr){ciArr=new Array(nA);rc.cellInner[r.a]=ciArr}
+      vCells='';
+      for(let i=0;i<nA;i++){
+        let ci=ciArr[i];
+        if(ci===undefined){const val=r.v[i];ci='title="'+rf(val)+'">'+lk(val)+'</td>';ciArr[i]=ci}
+        vCells+='<td '+ci;
+      }
+      rc.vAll[r.a]=vCells;
+    }
+  }
+  let kCells='';
+  for(let ki=0;ki<kids.length;ki++)kCells+='<td class="l">'+sh(r.st[kids[ki]])+'</td>';
+  trParts[ri0]='<tr data-r="'+r.a+'" class="'+(r.a-1===D.ri?'a':'')+(UI.sel===r.a?' sel':'')+'" tabindex="0" aria-selected="'+(UI.sel===r.a)+'"><td class="rt-num">'+r.a+'</td><td class="nw">1 Apr '+r.year+'</td><td class="nw rt-num">'+r.age.join(' / ')+'</td>'+kCells+vCells+'<td class="nw">'+(r.a>1?(am?'-':rf(yInt)):'—')+'</td><td class="nw">'+(r.a>1?(mi==null?'-':rf(mi)):'—')+'</td>'+(hasPol?'<td class="nw">'+(r.pay>0?rf(r.pay):'—')+'</td><td class="nw"><b>'+polTiTxt(yInt,am,r.pay)+'</b></td>':'')+'<td class="nw" title="'+rf(r.tot)+'"><b>'+rf(r.tot)+'</b></td><td><b>'+roiT+'</b></td><td class="nw" title="'+rf(dep)+'">'+rf(dep)+'</td><td>'+(r.a>1?lk(r.chg):'—')+'</td><td class="l">'+hinT+'</td></tr>';
+}
+const tbl='<table class="rt"><tr>'+th('a','S.No')+th('year','As on')+th('age','Ages<br><span class="rt-sub">'+Ms.map(m=>escn(m.name)).join(' / ')+'</span>')+kids.map(k=>th('s'+k,escn(Ms[k].name)+'<br>stage')).join('')+A.map((x,i)=>hideDupPF?'':th('v'+i,escn(x.name))).join('')+th('int','Yearly<br>income (₹)')+th('mi','Monthly<br>income (₹)')+(hasPol?th('pay','Policy<br>payouts (₹)')+th('ti','Total<br>income (₹)'):'')+th('tot','Year end<br>balance (₹)')+th('roi','Blended<br>ROI')+th('add','Amount<br>Deposited (₹)')+th('chg','Change')+th('hi','Total (हिन्दी)')+'</tr>\n'+trParts.join('')+'</table>';
+if(skipRc)return tbl;
+return tbl+'\n<div class="rc">'+metaL.map(({r,yInt,am,mi,dep,roiT,hinT})=>`<details class="yc ${r.a-1===D.ri?'a':''}${UI.sel===r.a?' sel':''}" data-r="${r.a}"><summary><b>As on 1 Apr ${r.year}</b>${nf?'':' · '+fyl(r.year)} · Age ${r.age[0]}<br><span class="mu">Year end balance</span> <b>${f(r.tot)}</b><div class="mu">${hinT}</div></summary><div class="kv">
 ${Ms.map((m,k)=>`<span>${escn(m.name)}</span><b>Age ${r.age[k]}${m.role==='Child'?' · '+sh(r.st[k]):''}</b>`).join('')}
-${hideDupPF?'':A.map((x,i)=>`<span>${escn(x.name)}</span><b>${rf(r.v[i])}</b>`).join('')}<span>Blended ROI</span><b>${roiT}</b><span>Yearly income</span><b>${r.a>1?(am?'-':rf(yInt)):'—'}</b><span>Monthly income</span><b>${r.a>1?(mi==null?'-':rf(mi)):'—'}</b>${hasPol?'<span>Policy payouts</span><b>'+(r.pay>0?rf(r.pay):'—')+'</b><span>Total income</span><b>'+polTiTxt(yInt,am,r.pay)+'</b>':''}<span>Amount deposited</span><b>${rf(dep)}</b><span>Yearly change</span><b>${r.a>1?rf(r.chg):'—'}</b></div></details>`).join('')}</div>`}
+${hideDupPF?'':A.map((x,i)=>`<span>${escn(x.name)}</span><b>${rf(r.v[i])}</b>`).join('')}<span>Blended ROI</span><b>${roiT}</b><span>Yearly income</span><b>${r.a>1?(am?'-':rf(yInt)):'—'}</b><span>Monthly income</span><b>${r.a>1?(mi==null?'-':rf(mi)):'—'}</b>${hasPol?'<span>Policy payouts</span><b>'+(r.pay>0?rf(r.pay):'—')+'</b><span>Total income</span><b>'+polTiTxt(yInt,am,r.pay)+'</b>':''}<span>Amount deposited</span><b>${rf(dep)}</b><span>Yearly change</span><b>${r.a>1?rf(r.chg):'—'}</b></div></details>`).join('')+'</div>'}
 function rep(){const MV=UI.rv==='month',IV=UI.rv==='int',A=S.assets,yr=x=>x.yrs;
 if(UI.rv==='vdate'&&window.repValueOnDate)return window.repValueOnDate();
 if(UI.rv==='ent'&&window.repEnt)return window.repEnt();
@@ -615,9 +648,9 @@ const target=e.target;if(target.closest&&target.closest('button')&&allowReadOnly
 if((type==='input'||type==='change')&&allowReadOnlyControl(target,type))return;
 if(type==='click'&&!(target.closest&&target.closest('button')))return;
 e.preventDefault();e.stopImmediatePropagation();if(type==='click'||type==='submit')toast('This account has read-only access.')},true));
-M.addEventListener('input',e=>{const t=e.target;if(t.id==='q'){UI.q=t.value;$('#hr').innerHTML=holdRows();const ov=$('#hp-ov');if(ov)ov.innerHTML=holdOverviewHTML()}else if(t.id==='hq'){UI.hq=t.value;$('#hl').innerHTML=window.VRHelp.body(UI,escn)}else if(t.id==='fq'){window.VRFamily.setSearch(UI,t.value);$('#fr').innerHTML=window.VRFamily.rows(familyView())}else if(t.id==='rq'){UI.rq=t.value;$('#rr').innerHTML=repRows()}else if(t.id==='ra'){S.ret=S.retP=+t.value;save();dupd()}else if(t.id==='goal'){const g=+t.value;$('#gl').textContent=g>0?f(g)+' · '+cr(g):''}});
+M.addEventListener('input',e=>{const t=e.target;if(t.id==='q'){UI.q=t.value;$('#hr').innerHTML=holdRows();const ov=$('#hp-ov');if(ov)ov.innerHTML=holdOverviewHTML()}else if(t.id==='hq'){UI.hq=t.value;$('#hl').innerHTML=window.VRHelp.body(UI,escn)}else if(t.id==='fq'){window.VRFamily.setSearch(UI,t.value);$('#fr').innerHTML=window.VRFamily.rows(familyView())}else if(t.id==='rq'){UI.rq=t.value;const onAp=!!$('#m .ap-wrap');try{if(onAp)window.__apSkipRc=true;$('#rr').innerHTML=repRows()}finally{window.__apSkipRc=false}}else if(t.id==='ra'){S.ret=S.retP=+t.value;save();dupd()}else if(t.id==='goal'){const g=+t.value;$('#gl').textContent=g>0?f(g)+' · '+cr(g):''}});
 M.addEventListener('change',e=>{const t=e.target,id=t.id,v=t.value;
-if(id==='ra'){S.ret=S.retP=+v;save();render()}else if(id==='goal'){S.goal=Math.round(num(v,1,1e12,50000000));save();render();toast('Goal updated')}else if(id==='frf'||id==='fsf'){window.VRFamily.setFilter(UI,id,v);$('#fr').innerHTML=window.VRFamily.rows(familyView())}else if(id==='rsf'){UI.rk=v;$('#rr').innerHTML=repRows()}else if(id==='hsf'){UI.k=v;UI.d=(v==='name'||v==='cat')?1:-1;const hd=$('#hsd');if(hd)hd.textContent=UI.d>0?'▲':'▼';$('#hr').innerHTML=holdRows()}else if(id==='cf'){UI.cat=v;$('#hr').innerHTML=holdRows();const ov=$('#hp-ov');if(ov)ov.innerHTML=holdOverviewHTML()}
+if(id==='ra'){S.ret=S.retP=+v;save();render()}else if(id==='goal'){S.goal=Math.round(num(v,1,1e12,50000000));save();render();toast('Goal updated')}else if(id==='frf'||id==='fsf'){window.VRFamily.setFilter(UI,id,v);$('#fr').innerHTML=window.VRFamily.rows(familyView())}else if(id==='rsf'){UI.rk=v;const onAp=!!$('#m .ap-wrap');try{if(onAp)window.__apSkipRc=true;$('#rr').innerHTML=repRows()}finally{window.__apSkipRc=false}}else if(id==='hsf'){UI.k=v;UI.d=(v==='name'||v==='cat')?1:-1;const hd=$('#hsd');if(hd)hd.textContent=UI.d>0?'▲':'▼';$('#hr').innerHTML=holdRows()}else if(id==='cf'){UI.cat=v;$('#hr').innerHTML=holdRows();const ov=$('#hp-ov');if(ov)ov.innerHTML=holdOverviewHTML()}
 else if(id==='th'){S.theme=v;save();theme()}else if(id==='lsel'){S.lang=LANGS.some(l=>l[0]===v)?v:'en';save();render();toast('Saved')}else if(id==='lk'){S.link=t.checked;save();toast('Saved')}
 else if(UI.tab==='Settings'&&id){const m={st:()=>{S.start=num(v,1990,2100,2026);fixEnd()},en:()=>{S.end=num(v,1990,2200,S.start+23);fixEnd()},gb:()=>S.grat.basic=num(v,0,1e8,0),gs:()=>S.grat.svc=num(v,0,60,0),gm:()=>S.grat.rem=num(v,0,60,0),gc:()=>S.grat.cap=num(v,0,1e9,0),hor:()=>S.hor=Math.round(num(v,0,60,6)),};
 if(m[id]){MSG='';m[id]();save();toast(MSG||'Saved');MSG='';render();}}});
