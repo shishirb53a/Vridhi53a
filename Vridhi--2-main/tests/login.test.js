@@ -38,4 +38,8 @@ assert.ok(styles.includes('width: min(420px, 100%)') &&
 assert.ok(styles.includes('#205b43') && styles.includes('font-weight: 400'),
   'Login presentation uses the forest-green accent and restrained typography');
 
+const apJs = fs.readFileSync(path.join(root, 'modules/theme/appearance-pro.js'), 'utf8');
+assert.ok(!apJs.includes('lg-thbar') && !apJs.includes('lg-thmode') && !apJs.includes('data-lg-theme') && !styles.includes('lg-thbar'),
+  'Login screen does not mount the floating theme or mode switcher');
+
 console.log('  ok   login page uses the minimal responsive sign-in presentation');

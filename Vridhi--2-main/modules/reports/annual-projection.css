@@ -1,7 +1,7 @@
 /* ==========================================================================
    Vriddhi Annual Portfolio Projection Redesign (annual-projection.css)
-   Desktop (>= 769px): Clean executive dashboard header, 4 KPI metric cards,
-   2-row filter/control bar, and refined annual table card with footer.
+   Desktop (>= 769px): Clean executive dashboard header, 2-row filter/control
+   bar, and refined annual table card with footer.
    Mobile (<= 768px): Executive milestone hero card, segmented cadence &
    detail toggles, filter chips, stacked milestone cards, & simulation notes.
    ========================================================================== */
@@ -265,149 +265,7 @@ html body .ap-head-av {
 }
 
 /* --------------------------------------------------------------------------
-   2. 4-CARD KPI EXECUTIVE GRID (.ap-kpis)
-   -------------------------------------------------------------------------- */
-.ap-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.ap-kpi {
-  background: var(--ap-surface);
-  border: 1px solid var(--ap-border);
-  border-radius: 14px;
-  padding: 15px 17px 14px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 0;
-}
-
-.ap-kpi-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.ap-kpi-lbl {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ap-mu);
-  min-width: 0;
-}
-
-.ap-kpi-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--ap-kcol, var(--ap-indigo));
-  flex: none;
-}
-
-.ap-kpi-ic {
-  color: var(--ap-kcol, var(--ap-indigo));
-  display: inline-flex;
-  flex: none;
-}
-
-.ap-kpi-tag {
-  flex: none;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  background: var(--ap-ksoft, var(--ap-indigo-soft));
-  color: var(--ap-kcol, var(--ap-indigo));
-}
-
-.ap-kpi-main {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.ap-kpi-val {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  color: var(--ap-tx);
-  font-variant-numeric: tabular-nums;
-}
-
-.ap-kpi-val small {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ap-mu);
-}
-
-.ap-kpi-sub {
-  margin-top: 5px;
-  font-size: 11.5px;
-  color: var(--ap-mu);
-  line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ap-kpi-sub b {
-  color: var(--ap-tx);
-  font-weight: 700;
-}
-
-.ap-kpi-right {
-  text-align: right;
-  flex: none;
-}
-
-.ap-kpi-rval {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--ap-kcol, var(--ap-indigo));
-  font-variant-numeric: tabular-nums;
-}
-
-.ap-kpi-rlbl {
-  display: block;
-  font-size: 10.5px;
-  color: var(--ap-mu);
-  margin-top: 2px;
-}
-
-.ap-kpi-bar {
-  height: 3.5px;
-  border-radius: 999px;
-  background: var(--ap-surface-3);
-  overflow: hidden;
-  margin-top: auto;
-}
-
-.ap-kpi-bar > i {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--ap-kcol, var(--ap-indigo));
-}
-
-.ap-kpi.k-base { --ap-kcol: var(--ap-indigo); --ap-ksoft: var(--ap-indigo-soft); }
-.ap-kpi.k-ret { --ap-kcol: var(--ap-amber); --ap-ksoft: var(--ap-amber-soft); }
-.ap-kpi.k-end { --ap-kcol: var(--ap-emerald); --ap-ksoft: var(--ap-emerald-soft); }
-.ap-kpi.k-inflow { --ap-kcol: var(--ap-tx); --ap-ksoft: var(--ap-surface-3); }
-
-/* --------------------------------------------------------------------------
-   3. 2-ROW FILTER & VIEW CONTROLS BAR (.ap-controls)
+   2. 2-ROW FILTER & VIEW CONTROLS BAR (.ap-controls)
    -------------------------------------------------------------------------- */
 .ap-controls {
   background: var(--ap-surface);
@@ -913,7 +771,6 @@ html body .ap-foot-cta:hover {
     padding: 10px 12px 92px !important;
   }
 
-  .ap-kpis,
   .ap-controls,
   .ap-tbl-card {
     display: none !important;
@@ -1449,11 +1306,5 @@ html body .ap-foot-cta:hover {
     border-radius: 11px;
     font-size: 13px;
     width: 100%;
-  }
-}
-
-@media (max-width: 1080px) and (min-width: 769px) {
-  .ap-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

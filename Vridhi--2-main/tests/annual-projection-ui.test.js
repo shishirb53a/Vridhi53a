@@ -118,11 +118,8 @@ test('repAnnualPage() dynamically renders desktop dashboard and mobile milestone
   const out = sandbox.repAnnualPage();
   assert.ok(out.includes('class="ap-wrap"'), 'Wraps report in .ap-wrap');
   assert.ok(out.includes('id="gpp-sel"'), 'Includes inline client switcher in .ap-head');
-  assert.ok(out.includes('2026 — 2032 (7Y)'), 'Computes dynamic horizon pill');
-  assert.ok(out.includes('₹ 2.50 <small>Cr</small>'), 'Computes baseline KPI from calc(S)');
-  assert.ok(out.includes('₹ 3.96 <small>Cr</small>'), 'Computes retirement KPI from calc(S)');
-  assert.ok(out.includes('₹ 4.76 <small>Cr</small>'), 'Computes terminal KPI from calc(S)');
-  assert.ok(out.includes('₹ 7.50 <small>L</small><small>/yr</small>'), 'Computes yearly inflow KPI dynamically');
+  assert.ok(!out.includes('ap-kpis-host') && !out.includes('class="ap-kpis"') && !out.includes('class="ap-kpi '), 'Does not render desktop KPI grid host');
+  assert.ok(!out.includes('Current Baseline') && !out.includes('Retirement Goal') && !out.includes('Long-Term Horizon') && !out.includes('</span>Yearly Inflow<'), 'Does not render removed KPI cards');
   assert.ok(out.includes('Jump to retirement (2030)'), 'Labels Jump button with live retirement year');
   assert.ok(out.includes('All holdings (2)'), 'Displays dynamic holding count inside Holdings filter');
   assert.ok(out.includes('Default columns') && out.includes('class="ap-cols-ic"'), 'Replaces Columns icon with 3-column grid SVG and Default columns label');

@@ -34,12 +34,6 @@
   function fmtCr(n) {
     return typeof cr === 'function' ? cr(n) : '₹ ' + Math.round(n || 0).toLocaleString('en-IN');
   }
-  function fmtSplit(n) {
-    var txt = fmtCr(n);
-    var m = /^(.+?)\s+(Cr|L)$/i.exec(txt);
-    if (m) return safeEsc(m[1]) + ' <small>' + safeEsc(m[2]) + '</small>';
-    return safeEsc(txt);
-  }
   function readAnnualPrefs() {
     var out = { cols: 'all', years: 1 };
     try {
@@ -136,50 +130,6 @@
       goalVal: goalVal, goalPct: goalPct,
       totOf: totOf, roiOf: roiOf, yearlyIntOf: yearlyIntOf, monthlyIntOf: monthlyIntOf, addOf: addOf
     };
-  }
-
-  function kpiHtml(m) {
-    var baseBar = 46;
-    var retBar = m.goalVal > 0 ? Math.max(12, Math.min(100, Math.round(m.goalPct))) : 68;
-    var endBar = 100;
-    var infBar = m.spanYrs > 0 ? Math.max(10, Math.min(100, Math.round(Math.max(1, (m.discLast - m.first.year)) / m.spanYrs * 100))) : 35;
-
-    var agesStart = m.first.age.join(' / ');
-    var agesRet = m.ret.age.join(' / ');
-
-    return '<section class="ap-kpis" aria-label="Portfolio trajectory highlights">' +
-      '<article class="ap-kpi k-base">' +
-        '<div class="ap-kpi-top"><span class="ap-kpi-lbl"><span class="ap-kpi-dot" aria-hidden="true"></span>Current Baseline</span><span class="ap-kpi-tag">1 Apr ' + m.first.year + '</span></div>' +
-        '<div class="ap-kpi-main">' +
-          '<div><div class="ap-kpi-val">' + fmtSplit(m.baseTot) + '</div><div class="ap-kpi-sub">Family Ages: <b>' + safeEsc(agesStart) + '</b></div></div>' +
-          '<div class="ap-kpi-right"><span class="ap-kpi-rval">ROI ' + (m.baseRoi != null ? (m.baseRoi * 100).toFixed(2) + '%' : '—') + '</span><span class="ap-kpi-rlbl">Nominal</span></div>' +
-        '</div>' +
-        '<div class="ap-kpi-bar" aria-hidden="true"><i style="width:' + baseBar + '%"></i></div>' +
-      '</article>' +
-      '<article class="ap-kpi k-ret">' +
-        '<div class="ap-kpi-top"><span class="ap-kpi-lbl"><span class="ap-kpi-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></span>Retirement Goal</span><span class="ap-kpi-tag">1 Apr ' + m.ret.year + ' (' + m.yToRet + 'Y)</span></div>' +
-        '<div class="ap-kpi-main">' +
-          '<div><div class="ap-kpi-val">' + fmtSplit(m.retTot) + '</div><div class="ap-kpi-sub">' + safeEsc(m.multRet) + ' baseline · Ages: <b>' + safeEsc(agesRet) + '</b></div></div>' +
-          '<div class="ap-kpi-right"><span class="ap-kpi-rval">' + (m.retMi != null ? safeEsc(fmtCr(m.retMi)) + '/mo' : '—') + '</span><span class="ap-kpi-rlbl">Target Inflow</span></div>' +
-        '</div>' +
-        '<div class="ap-kpi-bar" aria-hidden="true"><i style="width:' + retBar + '%"></i></div>' +
-      '</article>' +
-      '<article class="ap-kpi k-end">' +
-        '<div class="ap-kpi-top"><span class="ap-kpi-lbl"><span class="ap-kpi-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg></span>Long-Term Horizon (' + m.spanYrs + 'Y)</span><span class="ap-kpi-tag">1 Apr ' + m.end.year + '</span></div>' +
-        '<div class="ap-kpi-main">' +
-          '<div><div class="ap-kpi-val">' + fmtSplit(m.endTot) + '</div><div class="ap-kpi-sub">' + safeEsc(m.multEnd) + ' capital · Blended ROI: <b>' + (m.endRoi != null ? (m.endRoi * 100).toFixed(2) + '%' : '—') + '</b></div></div>' +
-          '<div class="ap-kpi-right"><span class="ap-kpi-rval">' + (m.endAnnInt != null ? '+' + safeEsc(fmtCr(m.endAnnInt)) : '—') + '</span><span class="ap-kpi-rlbl">Annual Annuity</span></div>' +
-        '</div>' +
-        '<div class="ap-kpi-bar" aria-hidden="true"><i style="width:' + endBar + '%"></i></div>' +
-      '</article>' +
-      '<article class="ap-kpi k-inflow">' +
-        '<div class="ap-kpi-top"><span class="ap-kpi-lbl"><span class="ap-kpi-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M16 12h.01"/></svg></span>Yearly Inflow</span></div>' +
-        '<div class="ap-kpi-main">' +
-          '<div><div class="ap-kpi-val">' + fmtSplit(m.nextAdd) + '<small>/yr</small></div><div class="ap-kpi-sub">Discipline window: <b>' + m.first.year + ' — ' + m.discLast + '</b></div></div>' +
-        '</div>' +
-        '<div class="ap-kpi-bar" aria-hidden="true"><i style="width:' + infBar + '%"></i></div>' +
-      '</article>' +
-    '</section>';
   }
 
   function filteredSortedRows(m) {
@@ -398,7 +348,6 @@
           '<button type="button" class="ap-head-av" data-go="Settings" title="Settings & Preferences" aria-label="Settings & Preferences"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 14.5-4 16 0"/></svg></button>' +
         '</div>' +
       '</header>' +
-      '<div id="ap-kpis-host">' + kpiHtml(m) + '</div>' +
       '<section class="ap-controls" aria-label="Projection filters and view controls">' +
         '<div class="ap-ctrl-row1">' +
           '<div class="ap-search-box"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="rq" type="search" placeholder="Search year, family age, asset, or balance..." aria-label="Search forecast" value="' + safeEsc(UI.rq || '') + '"></div>' +

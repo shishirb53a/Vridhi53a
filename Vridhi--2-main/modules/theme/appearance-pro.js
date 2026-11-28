@@ -187,7 +187,6 @@
     }
     reopen();
     paint();
-    paintLoginBar();
     if (msg && typeof toast === 'function') toast(msg);
   }
   function applyModeToggle() {
@@ -203,7 +202,6 @@
       try { render(); reopen(); } catch (x) {}
     }
     paint();
-    paintLoginBar();
   }
   function applyThemePick(key, quiet) {
     var p = PRE.filter(function (x) { return x.k === key; })[0];
@@ -215,16 +213,14 @@
     if (quiet || root.classList.contains('lk')) {
       applyAllThemeLayers();
       paint();
-      paintLoginBar();
       return;
     }
     commit(p.n + ' theme applied');
   }
   d.addEventListener('click', function (e) {
-    var t = e.target.closest && e.target.closest('[data-ap-theme],[data-ap-mode],[data-ap-dens],[data-ap-size],[data-ap-reset],#ap-mode,[data-lg-theme],#lg-thmode');
+    var t = e.target.closest && e.target.closest('[data-ap-theme],[data-ap-mode],[data-ap-dens],[data-ap-size],[data-ap-reset],#ap-mode');
     if (!t) return;
-    if (t.id === 'ap-mode' || t.id === 'lg-thmode') { applyModeToggle(); return; }
-    if (t.dataset.lgTheme) { applyThemePick(t.dataset.lgTheme, true); return; }
+    if (t.id === 'ap-mode') { applyModeToggle(); return; }
     if (t.dataset.apTheme) { applyThemePick(t.dataset.apTheme, false); return; }
     if (t.dataset.apMode) {
       var nextMode = t.dataset.apMode;
@@ -258,60 +254,13 @@
     var dk = dark(); b.innerHTML = dk ? SUN : MOON;
     b.setAttribute('aria-label', dk ? 'Switch to light mode' : 'Switch to dark mode'); b.title = b.getAttribute('aria-label');
   }
-  function paintLoginBar() {
-    var bar = d.getElementById('lg-thbar'); if (!bar) return;
-    var cur = window.vrPro ? window.vrPro.get() : 'obsidian', dk = dark();
-    bar.querySelectorAll('[data-lg-theme]').forEach(function (btn) {
-      var p = PRE.filter(function (x) { return x.k === btn.dataset.lgTheme; })[0];
-      btn.setAttribute('aria-checked', String(btn.dataset.lgTheme === cur));
-      if (p) btn.style.setProperty('--sw', dk ? p.x[3] : p.l[3]);
-    });
-    var mb = d.getElementById('lg-thmode');
-    if (mb) {
-      mb.innerHTML = dk ? SUN : MOON;
-      var lbl = dk ? 'Switch to light mode' : 'Switch to dark mode';
-      mb.setAttribute('aria-label', lbl);
-      mb.title = lbl;
-    }
-  }
-  function mountLoginBar() {
-    var lg = d.getElementById('lg'); if (!lg || d.getElementById('lg-thbar')) return;
-    var bar = d.createElement('div');
-    bar.id = 'lg-thbar';
-    bar.className = 'lg-thbar';
-    var dots = d.createElement('div');
-    dots.className = 'lg-thdots';
-    dots.setAttribute('role', 'radiogroup');
-    dots.setAttribute('aria-label', 'Theme');
-    PRE.forEach(function (p) {
-      var b = d.createElement('button');
-      b.type = 'button';
-      b.className = 'lg-thdot';
-      b.setAttribute('role', 'radio');
-      b.dataset.lgTheme = p.k;
-      b.title = p.n;
-      b.setAttribute('aria-label', p.n + ' theme');
-      dots.appendChild(b);
-    });
-    var sep = d.createElement('span');
-    sep.className = 'lg-thsep';
-    sep.setAttribute('aria-hidden', 'true');
-    var mb = d.createElement('button');
-    mb.type = 'button';
-    mb.id = 'lg-thmode';
-    mb.className = 'lg-thmode';
-    bar.append(dots, sep, mb);
-    lg.insertBefore(bar, lg.firstChild);
-    paintLoginBar();
-  }
   function mount() {
     var so = d.getElementById('so'); if (!so || d.getElementById('ap-mode')) return;
     var b = d.createElement('button'); b.type = 'button'; b.id = 'ap-mode'; b.className = 'ap-mode';
     so.parentNode.insertBefore(b, so); paint();
   }
   mount();
-  mountLoginBar();
-  var r0 = window.render; if (typeof r0 === 'function') window.render = function () { var r = r0.apply(this, arguments); mount(); mountLoginBar(); paint(); paintLoginBar(); return r; };
-  try { new MutationObserver(function () { paint(); paintLoginBar(); }).observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-pro-theme'] }); } catch (e) {}
-  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { paint(); paintLoginBar(); }); } catch (e) {}
+  var r0 = window.render; if (typeof r0 === 'function') window.render = function () { var r = r0.apply(this, arguments); mount(); paint(); return r; };
+  try { new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme', 'data-pro-theme'] }); } catch (e) {}
+  try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint); } catch (e) {}
 })();
