@@ -117,7 +117,8 @@ test('repAnnualPage() dynamically renders desktop dashboard and mobile milestone
 
   const out = sandbox.repAnnualPage();
   assert.ok(out.includes('class="ap-wrap"'), 'Wraps report in .ap-wrap');
-  assert.ok(out.includes('id="gpp-sel"'), 'Includes inline client switcher in .ap-head');
+  assert.ok(!out.includes('id="gpp-sel"') && !out.includes('ap-head-client'), 'Does not render Client dropdown in .ap-head');
+  assert.ok(out.includes('class="ap-brand"') && out.includes('class="ap-horizon-pill"') && out.includes('class="ap-head-acts"'), 'Keeps brand, horizon pill, and action controls in .ap-head');
   assert.ok(!out.includes('ap-kpis-host') && !out.includes('class="ap-kpis"') && !out.includes('class="ap-kpi '), 'Does not render desktop KPI grid host');
   assert.ok(!out.includes('Current Baseline') && !out.includes('Retirement Goal') && !out.includes('Long-Term Horizon') && !out.includes('</span>Yearly Inflow<'), 'Does not render removed KPI cards');
   assert.ok(out.includes('Jump to retirement (2030)'), 'Labels Jump button with live retirement year');

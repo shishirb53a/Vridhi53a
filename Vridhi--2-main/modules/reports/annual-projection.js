@@ -525,9 +525,7 @@
     var A = m.A;
     var so = isStrictMob ? [] : sortOptionsFor(m);
 
-    var clientSel = typeof window.gppDashClient === 'function' ? window.gppDashClient() : '';
     var horizonYrs = Math.max(1, (S.end || m.end.year) - (S.start || m.first.year) + 1);
-    var clientIc = '<span class="ap-head-client-ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></span>';
     var brandLogo = '<svg width="20" height="20" viewBox="3.5 2 27 27" fill="none" aria-hidden="true" focusable="false"><rect x="5.5" y="20" width="4.6" height="7" rx="2.3" fill="currentColor" opacity=".6"/><rect x="13.7" y="15" width="4.6" height="12" rx="2.3" fill="currentColor" opacity=".82"/><rect x="21.9" y="11" width="4.6" height="16" rx="2.3" fill="currentColor"/><path d="M24.2 9.6C23.6 6 25.6 3.6 29 3.2c.4 3.5-1.5 6-4.8 6.4z" fill="currentColor"/><path d="M24.2 9.6C24.4 7 22.7 5.1 20 4.6c-.3 2.8 1.4 4.8 4.2 5z" fill="currentColor" opacity=".82"/></svg>';
 
     var infoHelp = 'Formula: Closing Balance = (Previous Closing × (1 + Return)) + Yearly Additions · Click a row to highlight it · Retired tag = retirement year · table values in ₹ Lakh (hover for exact amount)';
@@ -552,7 +550,6 @@
       '<header class="ap-head">' +
         '<div class="ap-head-left">' +
           '<div class="ap-brand"><div class="ap-brand-mark">' + brandLogo + '</div><div class="ap-brand-txt"><strong>Vriddhi</strong><span>Portfolio Projections</span></div></div>' +
-          (clientSel ? '<div class="ap-head-client">' + clientIc + clientSel + '</div>' : '') +
           '<div class="ap-horizon-pill"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg><span>Horizon: <b>' + S.start + ' — ' + S.end + ' (' + horizonYrs + 'Y)</b></span><i class="ap-horizon-dot" aria-hidden="true"></i></div>' +
         '</div>' +
         '<div class="ap-head-acts">' +
