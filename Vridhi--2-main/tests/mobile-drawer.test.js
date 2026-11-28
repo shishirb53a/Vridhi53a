@@ -856,4 +856,41 @@ test('mobile drawer preserves and restores page scroll position cleanly across o
   assert.deepStrictEqual(scrollCalls[scrollCalls.length - 1], [0, 180], 'Desktop resize restores prior scroll position');
 });
 
+test('mobile view displays only one theme toggle icon (#vr-mob-theme-btn) and hides desktop #ap-mode across navigation and drawer open/close', () => {
+  // CSS contract: #ap-mode hidden <=960px, #vr-mob-theme-btn hidden >=961px (desktop untouched)
+  const mq960 = css.slice(css.indexOf('@media (max-width: 960px)'));
+  assert.ok(/html:not\(#vrx\)\s+body\s+header\.hd\s+#ap-mode\s*\{\s*display:\s*none\s*!important;/.test(mq960),
+    'mobile-drawer.css must hide desktop #ap-mode inside @media (max-width: 960px)');
+  assert.ok(/#vr-mob-menu-btn,\s*#vr-mob-theme-btn,/.test(css.slice(0, css.indexOf('@media (max-width: 960px)'))),
+    'mobile-drawer.css must keep #vr-mob-theme-btn hidden on desktop (>960px)');
+
+  // Behavioral contract: only one #vr-mob-theme-btn mounted, toggles Dark <-> Light, persists across drawer & navigation
+  const h = makeHarness();
+  const hdi = h.doc.querySelector('header.hd .hdi');
+  assert.strictEqual(hdi.children.filter(c => c.id === 'vr-mob-theme-btn').length, 1,
+    'Exactly one mobile theme toggle button should exist in header');
+
+  const btn = h.doc.getElementById('vr-mob-theme-btn');
+  assert.strictEqual(btn.hidden, false, 'Mobile theme button is visible when signed in');
+  assert.strictEqual(h.doc.documentElement.getAttribute('data-theme'), 'light');
+
+  // Toggle to Dark and verify persistence across drawer open/close and route changes
+  btn.click();
+  assert.strictEqual(h.doc.documentElement.getAttribute('data-theme'), 'dark');
+  assert.strictEqual(h.ctx.S.theme, 'dark');
+
+  h.win.VRMobileDrawer.open();
+  h.win.VRMobileDrawer.navigate('gp:Reports:year');
+  h.win.VRMobileDrawer.open();
+  h.win.VRMobileDrawer.close();
+  assert.strictEqual(h.doc.documentElement.getAttribute('data-theme'), 'dark', 'Dark theme persists across navigation and drawer toggle');
+  assert.strictEqual(hdi.children.filter(c => c.id === 'vr-mob-theme-btn').length, 1,
+    'No duplicate theme button created after drawer open/close and navigation');
+
+  // Toggle back to Light
+  btn.click();
+  assert.strictEqual(h.doc.documentElement.getAttribute('data-theme'), 'light');
+  assert.strictEqual(h.ctx.S.theme, 'light');
+});
+
 console.log(`All ${passed} navigation tests passed.`);

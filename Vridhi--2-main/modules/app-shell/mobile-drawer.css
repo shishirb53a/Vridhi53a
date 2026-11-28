@@ -62,7 +62,8 @@
   /* Hide desktop navigation chrome up to 960px */
   html:not(#vrx) body header.hd nav#nav,
   html:not(#vrx) body header.hd #settings-menu-wrap,
-  html:not(#vrx) body header.hd #so {
+  html:not(#vrx) body header.hd #so,
+  html:not(#vrx) body header.hd #ap-mode {
     display: none !important;
   }
 
