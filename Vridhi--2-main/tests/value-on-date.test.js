@@ -16,7 +16,7 @@ const columns = fs.readFileSync(path.join(root, 'modules', 'report-columns', 're
 const coreStart = app.indexOf('//CALC-START');
 const coreEnd = app.indexOf('//CALC-END', coreStart);
 const moduleTag = '<script src="modules/value-on-date/value-on-date.js?v=3"></script>';
-const styleTag = '<style>@import url("modules/value-on-date/value-on-date.css?v=1");</style>';
+const styleTag = '<style>@import url("modules/value-on-date/value-on-date.css?v=2");</style>';
 const appTag = '<script src="modules/app-core/app.js?v=173"></script>';
 const columnTag = '<script src="modules/report-columns/report-columns.js?v=128"></script>';
 const profileTag = '<script src="modules/goal-planner-clients/goal-planner-clients.js?v=144"></script>';
@@ -107,12 +107,18 @@ context.document.getElementById = () => null;
 const emptyReport = context.window.repValueOnDate();
 assert.ok(emptyReport.includes('shared filters') && emptyReport.includes('Please select at least one investment.'),
   'The report renders shared filters and the existing empty state when no holding is selected');
+assert.ok(!emptyReport.includes('vod-client') && !emptyReport.includes('vod-client-wrap') && !emptyReport.includes('for="vod-client"'),
+  'The Client label and dropdown are removed from the Value on Date top toolbar');
+assert.ok(emptyReport.includes('id="vod-date-slider"') && emptyReport.includes('class="vod-date"'),
+  'Date slider and Date picker remain in the Value on Date top toolbar');
 assert.ok(!emptyReport.includes('Total value on'), 'The empty state does not show unfiltered report totals');
 context.UI.rsel = ['3'];
 const selectedReport = context.window.repValueOnDate();
 assert.ok(selectedReport.includes('<th class="vod-n" data-vod-col="val"') &&
   selectedReport.includes('<th class="vod-n" data-vod-col="pct"'),
   'Value on Date right-aligns numeric column headers with their data');
+assert.ok(!selectedReport.includes('vod-client') && !source.includes("t.id==='vod-client'"),
+  'Removed Client dropdown markup and change listener from Value on Date');
 const selectedCsv = context.window.valueOnDateCSV();
 assert.ok(selectedCsv.includes('Snapshot holding,Debt,30,100.00%,Projected'),
   'CSV exports only selected holdings and calculates their share of the selected total');
