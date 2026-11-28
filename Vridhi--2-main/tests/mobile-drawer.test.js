@@ -73,7 +73,7 @@ test('mobile-drawer.css and nav-sidebar.css match attached GUI specs (circular c
   assert.ok(sideCss.includes('@media (min-width: 961px)'), 'Desktop >=961px sidebar breakpoint missing');
   assert.ok(sideCss.includes('top: 0;\n    bottom: 0;\n    width: 256px;'), 'Full-height 256px desktop sidebar missing');
   assert.ok(sideCss.includes('.vr-side-grp.is-open > .vr-side-trg'), 'Desktop tinted open header missing');
-  assert.ok(sideCss.includes('.vr-side-item[aria-current="page"] {\n    background: var(--ac);\n    color: var(--ac2, #fff);'),
+  assert.ok(sideCss.includes('.vr-side-item[aria-current="page"] {\n    background: var(--ac) !important;\n    color: var(--ac2, #fff) !important;'),
     'Filled active item bar missing in nav-sidebar.css');
 });
 
@@ -829,6 +829,30 @@ test('mobile drawer body isolates <nav#vr-drawer-body> from base.css fixed mobil
     'iOS Safari background scroll lock must fix body position while drawer is open');
   assert.ok(css.includes('box-sizing: border-box;') && css.includes('touch-action: none;'),
     'Drawer shell uses border-box sizing and backdrop blocks touch scroll propagation');
+
+  assert.ok(sideCss.includes('html.vr-side-on:not(#vrx) body .vr-side-nav') &&
+    sideCss.includes('margin: 0;') &&
+    sideCss.includes('border: 0;'),
+    'Desktop sidebar <nav.vr-side-nav> must reset base.css bare nav margin and bottom border');
+  const sideItemMatch = sideCss.match(/html\.vr-side-on:not\(#vrx\)\s+body\s+\.vr-side-item\s*\{([^}]*)\}/);
+  assert.ok(sideItemMatch &&
+    sideItemMatch[1].includes('flex-direction: row;') &&
+    sideItemMatch[1].includes('justify-content: flex-start;') &&
+    sideItemMatch[1].includes('text-align: left;') &&
+    sideItemMatch[1].includes('text-decoration: none;') &&
+    sideItemMatch[1].includes('padding: 0 12px 0 40px !important;'),
+    'Desktop sidebar submenu items (.vr-side-item) must out-specify base.css enterprise button rules and stay left-aligned');
+  const sideCurMatch = sideCss.match(/html\.vr-side-on:not\(#vrx\)\s+body\s+\.vr-side-item\[aria-current="page"\]\s*\{([^}]*)\}/);
+  assert.ok(sideCurMatch &&
+    sideCurMatch[1].includes('background: var(--ac) !important;') &&
+    sideCurMatch[1].includes('text-decoration: none;'),
+    'Active desktop sidebar submenu item must suppress base.css nav button underline and enforce filled pill');
+  assert.ok(sideCss.includes('.vr-side-trg::before') && sideCss.includes('.vr-side-item::before') &&
+    css.includes('.vr-acc-trigger::before') && css.includes('.vr-nav-item::before'),
+    'Desktop sidebar and mobile drawer buttons must suppress base.css phantom nav button::before boxes');
+  assert.ok(itemMatch[1].includes('justify-content: flex-start !important;') &&
+    itemMatch[1].includes('text-align: left !important;'),
+    'Mobile drawer submenu items (.vr-nav-item) must enforce left alignment');
 });
 
 test('mobile drawer preserves and restores page scroll position cleanly across open/close paths', () => {

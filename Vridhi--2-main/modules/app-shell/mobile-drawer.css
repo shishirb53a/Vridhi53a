@@ -558,6 +558,7 @@
     font-weight: 700;
     letter-spacing: 0.07em;
     text-transform: uppercase;
+    text-align: left;
     color: var(--mu);
     line-height: 1.2;
   }
@@ -574,12 +575,12 @@
     color: var(--tx) !important;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    text-align: left;
+    justify-content: flex-start !important;
+    text-align: left !important;
     font-size: 13.5px;
     font-weight: 500;
     line-height: 1.3;
-    text-decoration: none;
+    text-decoration: none !important;
     cursor: pointer;
     box-shadow: none !important;
     transition: background .14s ease, color .14s ease !important;
@@ -593,6 +594,12 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  html:not(#vrx) body .vr-acc-trigger::before,
+  html:not(#vrx) body .vr-nav-item::before {
+    content: none !important;
+    display: none !important;
   }
 
   /* Solid Filled Pill = Current Page */
