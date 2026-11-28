@@ -188,22 +188,6 @@ html body .ap-hbtn[aria-pressed="true"] {
   color: var(--ap-indigo);
 }
 
-html body .ap-head-av {
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
-  min-height: 36px;
-  padding: 0;
-  border-radius: 10px;
-  border: 0;
-  background: #0f172a;
-  color: #ffffff;
-  display: inline-grid;
-  place-items: center;
-  cursor: pointer;
-  box-shadow: none;
-}
-
 /* --------------------------------------------------------------------------
    2. 2-ROW FILTER & VIEW CONTROLS BAR (.ap-controls)
    -------------------------------------------------------------------------- */
@@ -728,8 +712,7 @@ html body .ap-foot-cta:hover {
     display: none;
   }
 
-  .ap-head-acts .ap-hbtn[data-ap-max],
-  .ap-head-acts .ap-head-av {
+  .ap-head-acts .ap-hbtn[data-ap-max] {
     display: none;
   }
 

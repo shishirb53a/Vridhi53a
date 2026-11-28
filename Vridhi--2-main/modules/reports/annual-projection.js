@@ -556,7 +556,6 @@
           '<button type="button" class="ap-hbtn" data-ap-csv><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><span>Export</span></button>' +
           '<button type="button" class="ap-hbtn ap-hbtn-sq" data-ap-max aria-pressed="' + maxActive + '" title="Maximize / Restore table" aria-label="Maximize / Restore table"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>' +
           '<button type="button" class="ap-hbtn ap-hbtn-sq" data-ap-pdf title="Print / Export PDF" aria-label="Print / Export PDF"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>' +
-          '<button type="button" class="ap-head-av" data-go="Settings" title="Settings & Preferences" aria-label="Settings & Preferences"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 14.5-4 16 0"/></svg></button>' +
         '</div>' +
       '</header>' +
       '<section class="ap-controls" aria-label="Projection filters and view controls">' +

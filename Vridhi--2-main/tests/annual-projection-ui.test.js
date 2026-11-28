@@ -38,7 +38,7 @@ test('index.html wires annual-projection.js after annual-helpers.js and annual-p
   const iHelpers = html.indexOf('modules/reports/annual-helpers.js?v=');
   const iProjJs = html.indexOf('modules/reports/annual-projection.js?v=');
   const iFinCss = html.indexOf('modules/reports/financial-statement.css?v=1');
-  const iProjCss = html.indexOf('modules/reports/annual-projection.css?v=1');
+  const iProjCss = html.indexOf('modules/reports/annual-projection.css?v=');
   const iMaxCss = html.indexOf('modules/report-maximize/report-maximize.css?v=2');
 
   assert.ok(iHelpers > -1 && iProjJs > iHelpers, 'annual-projection.js loads after annual-helpers.js');
@@ -118,7 +118,8 @@ test('repAnnualPage() dynamically renders desktop dashboard and mobile milestone
   const out = sandbox.repAnnualPage();
   assert.ok(out.includes('class="ap-wrap"'), 'Wraps report in .ap-wrap');
   assert.ok(!out.includes('id="gpp-sel"') && !out.includes('ap-head-client'), 'Does not render Client dropdown in .ap-head');
-  assert.ok(out.includes('class="ap-brand"') && out.includes('class="ap-horizon-pill"') && out.includes('class="ap-head-acts"'), 'Keeps brand, horizon pill, and action controls in .ap-head');
+  assert.ok(!out.includes('ap-head-av') && !out.includes('Settings &amp; Preferences') && !out.includes('Settings & Preferences') && !out.includes('data-go="Settings"'), 'Does not render Settings icon button in .ap-head');
+  assert.ok(out.includes('class="ap-brand"') && out.includes('class="ap-horizon-pill"') && out.includes('class="ap-head-acts"') && out.includes('data-ap-max'), 'Keeps brand, horizon pill, and remaining action controls in .ap-head');
   assert.ok(!out.includes('ap-kpis-host') && !out.includes('class="ap-kpis"') && !out.includes('class="ap-kpi '), 'Does not render desktop KPI grid host');
   assert.ok(!out.includes('Current Baseline') && !out.includes('Retirement Goal') && !out.includes('Long-Term Horizon') && !out.includes('</span>Yearly Inflow<'), 'Does not render removed KPI cards');
   assert.ok(out.includes('Jump to retirement (2030)'), 'Labels Jump button with live retirement year');
