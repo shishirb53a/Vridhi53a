@@ -399,15 +399,109 @@ function makeEdgeCaseState() {
   assert.strictEqual(fitCalls, 1, 'Fits report width once');
   assert.strictEqual(desk.dom.holdBtn.textContent, 'Equity MF', 'Updates holdings dropdown label in place');
 
-  // Mobile (<=768px): renders mobile cards including milestone-retirement
+  // Mobile (<=768px): renders mobile cards including milestone-retirement AND skips hidden desktop table
+  repRowsCalls = rcolsApplyCalls = retiredCalls = helperCalls = fitCalls = fullRenderCalls = 0;
   const mob = runInEnv(390);
   const hm = mob.sandbox.repAnnualPage();
   assert(hm.includes('id="milestone-retirement"'), 'Mobile renders retirement milestone card');
+  assert(hm.includes('data-ap-lazy-tbl="1"'), 'Strict mobile marks #rr as lazy desktop table');
+  assert.strictEqual(repRowsCalls, 0, 'Strict mobile skips hidden desktop table repRows() on initial open');
 
-  console.log('PASS: Annual Projection cache hit, desktop lazy mobile skip, and surgical filter update verified');
+  // Mobile surgical filter update skips hidden desktop table rebuild & desktop post-processors
+  mob.dom.rrEl.dataset = { apLazyTbl: '1' };
+  mob.sandbox.UI.rsel = ['a1'];
+  const okMob = mob.sandbox.vrUpdateAnnualFilters('data-rh', 'a1');
+  assert.strictEqual(okMob, true, 'Mobile surgical filter update succeeds');
+  assert.strictEqual(repRowsCalls, 0, 'Mobile filter toggle does NOT rebuild hidden desktop table');
+  assert.strictEqual(rcolsApplyCalls, 0, 'Mobile filter toggle skips desktop RCOLS.apply');
+  assert.strictEqual(fitCalls, 0, 'Mobile filter toggle skips desktop vrReportFit');
+  assert.strictEqual(fullRenderCalls, 0, 'Mobile filter toggle does NOT trigger full render()');
+  assert(mob.dom.mobEl.innerHTML.includes('id="milestone-retirement"'), 'Mobile filter toggle updates mobile milestone cards');
+
+  console.log('PASS: Annual Projection cache hit, desktop lazy mobile skip, mobile lazy desktop skip, and surgical filter update verified');
 })();
 
-// 3. Lazy client switcher drawer in goal-planner-clients.js
+// 3. Mobile checkbox rAF coalescing & Select All / Clear synchronous paint in report-filters.js
+(function testMobileCheckboxBatching() {
+  const rfSrc = read('modules/report-filters/report-filters.js');
+  const selSrc = read('modules/reports/report-selection.js');
+  const S = makeEdgeCaseState();
+  const UI = { tab: 'Reports', rv: 'year', rq: '', rk: 'a', rd: 1, sel: null, rsel: null, rcl: null, msd: 'hold' };
+  const listeners = {};
+  const rafQueue = new Map();
+  let nextRafId = 1;
+  let annualUpdateCalls = 0;
+  let fullRenderCalls = 0;
+
+  const holdBtnLabel = { textContent: 'All holdings' };
+  const clsBtnLabel = { textContent: 'All asset classes' };
+  const holdCbs = S.assets.map(a => ({ dataset: { rh: a.id }, checked: true }));
+  const clsCbs = ['Equity', 'PF/PPF/SUK', 'Fixed Deposit', 'Gratuity', 'Saving AC'].map(c => ({ dataset: { rcls: c }, checked: true }));
+  const holdDd = {
+    dataset: { msd: 'hold' },
+    querySelector: sel => sel === '.msd-b b' ? holdBtnLabel : null,
+    querySelectorAll: sel => sel === 'input[data-rh]' ? holdCbs : []
+  };
+  const clsDd = {
+    dataset: { msd: 'cls' },
+    querySelector: sel => sel === '.msd-b b' ? clsBtnLabel : null,
+    querySelectorAll: sel => sel === 'input[data-rcls]' ? clsCbs : []
+  };
+
+  const sandbox = {
+    console, Math, Number, String, Array, Object, Date, JSON, RegExp, Set, Map,
+    S, UI,
+    CATS: ['Equity', 'PF/PPF/SUK', 'Fixed Deposit', 'Gratuity', 'Saving AC'],
+    CC: {}, COL: ['#000'],
+    esc: s => String(s == null ? '' : s),
+    escn: s => String(s == null ? '' : s),
+    f: n => '₹ ' + Math.round(n || 0),
+    render: () => { fullRenderCalls++; },
+    vrUpdateAnnualFilters: () => { annualUpdateCalls++; return true; },
+    requestAnimationFrame: fn => { const id = nextRafId++; rafQueue.set(id, fn); return id; },
+    cancelAnimationFrame: id => { rafQueue.delete(id); },
+    document: {
+      addEventListener: (ev, fn) => { listeners[ev] = fn; },
+      querySelector: sel => sel === '.msd[data-msd="hold"]' ? holdDd : sel === '.msd[data-msd="cls"]' ? clsDd : null,
+      querySelectorAll: () => [],
+      getElementById: () => null
+    }
+  };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(selSrc, sandbox);
+  vm.runInContext(rfSrc, sandbox);
+
+  // 5 rapid consecutive checkbox unchecks must update labels synchronously and coalesce into 1 rAF update
+  for (let i = 0; i < 5; i++) {
+    listeners.change({ target: { dataset: { rh: S.assets[i].id }, checked: false } });
+  }
+  assert.strictEqual(annualUpdateCalls, 0, 'Heavy report update is deferred to rAF so browser paints checkmarks immediately');
+  assert.strictEqual(rafQueue.size, 1, '5 rapid checkbox taps coalesce into exactly 1 pending rAF');
+  assert.strictEqual(holdBtnLabel.textContent, '2 of 7 selected', 'Dropdown summary updates synchronously before rAF');
+
+  // Flush the single coalesced animation frame
+  const callbacks = Array.from(rafQueue.values());
+  rafQueue.clear();
+  callbacks.forEach(fn => fn());
+  assert.strictEqual(annualUpdateCalls, 1, 'Coalesced rAF executes exactly 1 surgical report update');
+  assert.strictEqual(fullRenderCalls, 0, 'Zero full page renders during rapid checkbox burst');
+
+  // Select All updates all checkboxes & label synchronously and coalesces into 1 rAF
+  const selectAllTarget = { closest: sel => sel === '[data-msda]' ? { dataset: { msda: 'hold:all' } } : null };
+  listeners.click({ target: selectAllTarget });
+  assert.strictEqual(UI.rsel, null, 'Select All resets UI.rsel to null');
+  assert.strictEqual(holdBtnLabel.textContent, 'All holdings', 'Select All updates label synchronously');
+  assert(holdCbs.every(cb => cb.checked === true), 'Select All checks every holding checkbox synchronously');
+  assert.strictEqual(rafQueue.size, 1, 'Select All schedules 1 rAF report update');
+  sandbox.vrFlushFilterUpdate();
+  assert.strictEqual(annualUpdateCalls, 2, 'Select All flush runs 1 surgical report update');
+  assert.strictEqual(fullRenderCalls, 0, 'Select All triggers zero full page renders');
+
+  console.log('PASS: Mobile checkbox rAF coalescing and synchronous Select All feedback verified');
+})();
+
+// 4. Lazy client switcher drawer in goal-planner-clients.js
 (function testLazyClientDrawer() {
   const gppSrc = read('modules/goal-planner-clients/goal-planner-clients.js');
   let calcCalls = 0;
@@ -468,7 +562,7 @@ function makeEdgeCaseState() {
   console.log('PASS: Lazy client drawer avoids O(clients) calc() on every render');
 })();
 
-// 4. Static regression checks for refactored DOM post-processors
+// 5. Static regression checks for refactored DOM post-processors & mobile optimizations
 (function testDomPostProcessorContracts() {
   const helpersSrc = read('modules/reports/annual-helpers.js');
   assert(/refresh\s*:\s*work/.test(helpersSrc), 'annual-helpers exposes refresh: work');
@@ -483,6 +577,25 @@ function makeEdgeCaseState() {
 
   const numFmtSrc = read('modules/app-shell/dialog-number-format.js');
   assert(numFmtSrc.indexOf("nv.indexOf('\\u20b9') < 0") < numFmtSrc.indexOf('pe.closest(SKIP_CONT)'), 'dialog-number-format pre-filters text before ancestor closest() walk');
+  assert(numFmtSrc.includes('#ap-mob-host'), 'dialog-number-format skips #ap-mob-host mobile cards');
 
-  console.log('PASS: DOM post-processor contracts verified');
+  const apCss = read('modules/reports/annual-projection.css');
+  assert(/content-visibility\s*:\s*auto/.test(apCss), 'annual-projection.css enables content-visibility on mobile cards');
+  assert(/touch-action\s*:\s*manipulation/.test(apCss), 'annual-projection.css eliminates mobile tap delay on controls');
+
+  const rfCss = read('modules/report-filters/report-filters.css');
+  assert(/touch-action\s*:\s*manipulation/.test(rfCss), 'report-filters.css eliminates mobile tap delay on filter controls');
+  assert(/contain\s*:\s*content/.test(rfCss), 'report-filters.css isolates dropdown list layout');
+
+  const rcSrc = read('modules/report-columns/report-columns.js');
+  assert(rcSrc.includes('assetMap'), 'report-columns uses O(1) assetMap instead of O(H) .some() per card row');
+  assert(rcSrc.includes('apLazyTbl'), 'report-columns skips lazy mobile Annual table');
+
+  const pgSrc = read('modules/ui-pagination/ui-pagination.js');
+  assert(pgSrc.includes("M.querySelector('.ap-wrap')"), 'ui-pagination skips mobile Annual Projection');
+
+  const drSrc = read('modules/app-shell/mobile-drawer.js');
+  assert(drSrc.includes('isInternalReportNoise'), 'mobile-drawer filters internal report DOM mutations');
+
+  console.log('PASS: DOM post-processor & mobile optimization contracts verified');
 })();

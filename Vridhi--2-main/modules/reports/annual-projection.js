@@ -7,11 +7,25 @@
   var HELPERS_KEY = 'vr-annual-helpers';
   var COLS_GRID_SVG = '<svg class="ap-cols-ic" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg>';
   var mobState = { details: false, chip: 'all', openCards: {} };
-  var lastRenderedMobSig = '';
+  var lastRenderedMobKey = '';
   var syncTimer = 0;
+  var mobHydrateRaf = 0;
+  var pendingMobChunk = null;
 
   function isMobileViewport() {
     return typeof window !== 'undefined' && typeof window.innerWidth === 'number' ? window.innerWidth <= 768 : true;
+  }
+
+  function isStrictMobileViewport() {
+    return typeof window !== 'undefined' && typeof window.innerWidth === 'number' && window.innerWidth <= 768;
+  }
+
+  function cancelMobHydration() {
+    if (mobHydrateRaf && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(mobHydrateRaf);
+    }
+    mobHydrateRaf = 0;
+    pendingMobChunk = null;
   }
 
   function enhanceDropsHtml(html, assetCount) {
@@ -48,6 +62,25 @@
       if (saved.years === 5) out.years = 5;
     } catch (e) { /* storage unavailable */ }
     return out;
+  }
+
+  function computeMobKey(prefs) {
+    var sSig = typeof vrStateSig === 'function' ? vrStateSig(S) : String((S.assets || []).length) + ':' + S.start + ':' + S.end + ':' + S.ret;
+    var rselKey = UI && UI.rsel ? UI.rsel.join(',') : 'ALL';
+    var openKeys = Object.keys(mobState.openCards);
+    var openStr = openKeys.length ? openKeys.filter(function (k) { return mobState.openCards[k]; }).join(',') : '';
+    return [
+      sSig,
+      rselKey,
+      (UI && UI.rq) || '',
+      (UI && UI.rk) || 'a',
+      (UI && UI.rd) || 1,
+      UI ? UI.sel : '',
+      prefs ? prefs.years : 1,
+      mobState.details ? '1' : '0',
+      mobState.chip,
+      openStr
+    ].join('|');
   }
 
   function computeModel() {
@@ -164,13 +197,23 @@
   function filteredSortedRows(m) {
     var rows = m.rows;
     var q = (UI && UI.rq ? UI.rq : '').trim().toLowerCase();
+    var rc = m.D && m.D._repCache;
+    if (q && m.D && !rc) {
+      rc = { cellInner: new Array(rows.length + 1), vAll: new Array(rows.length + 1), hay: new Array(rows.length + 1), hin: new Array(rows.length + 1), roiT: new Array(rows.length + 1) };
+      try { Object.defineProperty(m.D, '_repCache', { value: rc, enumerable: false, configurable: true }); } catch (e) {}
+    }
     var L = q ? rows.filter(function (r) {
-      var fyTxt = typeof fyl === 'function' ? fyl(r.year) : '';
-      var totTxt = typeof f === 'function' ? f(r.tot) : String(r.tot);
-      var hinTxt = typeof hin === 'function' ? hin(r.tot) : '';
-      var roiTxt = typeof rowRoiTxt === 'function' ? rowRoiTxt(r) : '';
-      var vs = r.v.map(function (v) { return typeof f === 'function' ? f(v) : String(v); });
-      return [r.a, r.year, fyTxt, r.age.join(' '), r.st.join(' '), r.tot, totTxt, hinTxt, roiTxt].concat(vs).join(' ').toLowerCase().indexOf(q) > -1;
+      var hay = rc && rc.hay ? rc.hay[r.a] : undefined;
+      if (hay === undefined) {
+        var fyTxt = typeof fyl === 'function' ? fyl(r.year) : '';
+        var totTxt = typeof f === 'function' ? f(r.tot) : String(r.tot);
+        var hinTxt = typeof hin === 'function' ? hin(r.tot) : '';
+        var roiTxt = typeof rowRoiTxt === 'function' ? rowRoiTxt(r) : '';
+        var vs = r.v.map(function (v) { return typeof f === 'function' ? f(v) : String(v); });
+        hay = [r.a, r.year, fyTxt, r.age.join(' '), r.st.join(' '), r.tot, totTxt, hinTxt, roiTxt].concat(vs).join(' ').toLowerCase();
+        if (rc && rc.hay) rc.hay[r.a] = hay;
+      }
+      return hay.indexOf(q) > -1;
     }) : rows.slice();
     var rk = (UI && UI.rk) || 'a';
     var rd = (UI && UI.rd) || 1;
@@ -197,17 +240,28 @@
     return L;
   }
 
-  function mobBreakdownItems(m, r, expandAll) {
+  function buildEscAssetNames(A) {
+    var out = new Array(A.length);
+    for (var i = 0; i < A.length; i++) {
+      out[i] = A[i] ? safeEscName(A[i].name) : '';
+    }
+    return out;
+  }
+
+  function mobBreakdownItems(m, r, expandAll, escNames) {
     if (m.SEL.none || !expandAll) return '';
-    var parts = new Array(m.idx.length);
-    for (var k = 0; k < m.idx.length; k++) {
-      var i = m.idx[k], asset = m.A[i];
-      parts[k] = asset ? '<div class="ap-mc-det-item"><span>' + safeEscName(asset.name) + '</span><b>' + safeEsc(fmtCr(r.v[i] || 0)) + '</b></div>' : '';
+    var idx = m.idx, len = idx.length, A = m.A;
+    var parts = new Array(len);
+    for (var k = 0; k < len; k++) {
+      var i = idx[k], asset = A[i];
+      if (!asset) { parts[k] = ''; continue; }
+      var nm = escNames ? escNames[i] : safeEscName(asset.name);
+      parts[k] = '<div class="ap-mc-det-item"><span>' + nm + '</span><b>' + safeEsc(fmtCr(r.v[i] || 0)) + '</b></div>';
     }
     return parts.join('');
   }
 
-  function mobCardHtml(m, r, prefs) {
+  function mobCardHtml(m, r, prefs, escNames, escMemNames) {
     var isToday = r.a === 1;
     var isRet = r === m.ret || r.year === m.ret.year;
     var isEnd = r === m.end || r.year === m.end.year;
@@ -218,10 +272,13 @@
       : isEnd ? '<span class="ap-mc-badge b-term">Terminal Milestone</span>'
       : '<span class="ap-mc-badge b-phase">Year ' + r.a + '</span>';
 
-    var agesText = m.Ms.map(function (mem, k) {
-      var st = mem.role === 'Child' && r.st[k] ? ' · ' + safeEsc(r.st[k]) : '';
-      return safeEscName(mem.name) + ' ' + r.age[k] + (mobState.chip === 'ages' ? st : '');
-    }).join(' · ');
+    var agesParts = new Array(m.Ms.length);
+    for (var mk = 0; mk < m.Ms.length; mk++) {
+      var mem = m.Ms[mk];
+      var st = mem.role === 'Child' && r.st[mk] && mobState.chip === 'ages' ? ' · ' + safeEsc(r.st[mk]) : '';
+      agesParts[mk] = (escMemNames ? escMemNames[mk] : safeEscName(mem.name)) + ' ' + r.age[mk] + st;
+    }
+    var agesText = agesParts.join(' · ');
 
     var totVal = m.totOf(r);
     var roiVal = m.roiOf(r, totVal);
@@ -245,8 +302,8 @@
     } else if (isToday && m.idx.length > 0) {
       var sortedIdx = m.idx.slice().sort(function (a, b) { return (r.v[b] || 0) - (r.v[a] || 0); }).slice(0, 3);
       bodyExtra = '<div class="ap-mc-mix">' + sortedIdx.map(function (i) {
-        var asset = m.A[i];
-        return '<span>' + safeEscName(asset.name) + ': <b>' + safeEsc(fmtCr(r.v[i] || 0)) + '</b></span>';
+        var nm = escNames ? escNames[i] : safeEscName(m.A[i].name);
+        return '<span>' + nm + ': <b>' + safeEsc(fmtCr(r.v[i] || 0)) + '</b></span>';
       }).join('') + '</div>';
     } else {
       bodyExtra = '<div class="ap-mc-foot">' +
@@ -256,7 +313,7 @@
     }
 
     var expandAll = mobState.details || mobState.chip === 'holdings' || !!mobState.openCards[r.a];
-    var detItems = mobBreakdownItems(m, r, expandAll);
+    var detItems = mobBreakdownItems(m, r, expandAll, escNames);
     var detBlock = detItems ? '<div class="ap-mc-det"' + (expandAll ? '' : ' hidden') + '><div class="ap-mc-det-ttl">Asset Holdings Breakdown</div><div class="ap-mc-det-grid">' + detItems + '</div></div>' : '';
 
     return '<article' + idAttr + ' class="' + cls + '" data-r="' + r.a + '">' +
@@ -272,7 +329,49 @@
     '</article>';
   }
 
-  function mobHtml(m, prefs) {
+  function pumpMobHydration() {
+    mobHydrateRaf = 0;
+    var job = pendingMobChunk;
+    if (!job) return;
+    var host = document.getElementById('ap-mob-cards');
+    if (!host) { pendingMobChunk = null; return; }
+    var end = Math.min(job.rows.length, job.offset + job.batchSize);
+    var parts = new Array(end - job.offset);
+    for (var i = job.offset; i < end; i++) {
+      parts[i - job.offset] = mobCardHtml(job.m, job.rows[i], job.prefs, job.escNames, job.escMemNames);
+    }
+    if (parts.length && typeof host.insertAdjacentHTML === 'function') {
+      host.insertAdjacentHTML('beforeend', parts.join(''));
+    }
+    job.offset = end;
+    if (job.offset < job.rows.length) {
+      mobHydrateRaf = requestAnimationFrame(pumpMobHydration);
+    } else {
+      pendingMobChunk = null;
+    }
+  }
+
+  function flushMobCards() {
+    if (!pendingMobChunk) return;
+    if (mobHydrateRaf && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(mobHydrateRaf);
+      mobHydrateRaf = 0;
+    }
+    var job = pendingMobChunk;
+    pendingMobChunk = null;
+    var host = document.getElementById('ap-mob-cards');
+    if (!host || job.offset >= job.rows.length) return;
+    var parts = new Array(job.rows.length - job.offset);
+    for (var i = job.offset; i < job.rows.length; i++) {
+      parts[i - job.offset] = mobCardHtml(job.m, job.rows[i], job.prefs, job.escNames, job.escMemNames);
+    }
+    if (parts.length && typeof host.insertAdjacentHTML === 'function') {
+      host.insertAdjacentHTML('beforeend', parts.join(''));
+    }
+  }
+
+  function mobHtml(m, prefs, allowProgressive) {
+    cancelMobHydration();
     var rows = filteredSortedRows(m);
     var helperKeep = window.VRAnnualHelpers && typeof window.VRAnnualHelpers.keepRow === 'function'
       ? window.VRAnnualHelpers.keepRow
@@ -280,8 +379,10 @@
     var visibleRows = rows.filter(function (r) {
       return helperKeep(r.year, r.a === 1, r === m.ret || r.year === m.ret.year, UI.sel === r.a, prefs.years);
     });
+    var escNames = buildEscAssetNames(m.A);
+    var escMemNames = m.Ms.map(function (mem) { return safeEscName(mem.name); });
     var agesHorizon = m.Ms.map(function (mem, k) {
-      return safeEscName(mem.name) + ' (' + m.first.age[k] + '→' + m.end.age[k] + ')';
+      return escMemNames[k] + ' (' + m.first.age[k] + '→' + m.end.age[k] + ')';
     }).join(', ');
     var hasPol = typeof VRPolicy !== 'undefined' && VRPolicy && VRPolicy.hasPayouts && VRPolicy.hasPayouts('goal');
     var noteTxt = 'Projections use per-holding compounding schedules from your active portfolio holdings. Portfolio blended ROI shifts from ' +
@@ -292,6 +393,27 @@
     var chipBtn = function (id, label) {
       return '<button type="button" class="ap-chip" data-ap-chip="' + id + '" aria-pressed="' + (mobState.chip === id) + '">' + label + '</button>';
     };
+
+    var heavyCards = mobState.details || mobState.chip === 'holdings';
+    var batchSize = heavyCards ? 6 : 14;
+    var canChunk = !!allowProgressive && isStrictMobileViewport() && typeof requestAnimationFrame === 'function' && visibleRows.length > batchSize;
+    var firstCount = canChunk ? batchSize : visibleRows.length;
+    var cardParts = new Array(firstCount);
+    for (var ci = 0; ci < firstCount; ci++) {
+      cardParts[ci] = mobCardHtml(m, visibleRows[ci], prefs, escNames, escMemNames);
+    }
+    if (canChunk) {
+      pendingMobChunk = {
+        m: m,
+        prefs: prefs,
+        rows: visibleRows,
+        offset: firstCount,
+        escNames: escNames,
+        escMemNames: escMemNames,
+        batchSize: batchSize
+      };
+      mobHydrateRaf = requestAnimationFrame(pumpMobHydration);
+    }
 
     return '<div class="ap-mob">' +
       '<section class="ap-mob-hero" aria-label="Portfolio trajectory baseline">' +
@@ -326,7 +448,7 @@
         '</div>' +
       '</div>' +
       '<div class="ap-mob-cards" id="ap-mob-cards">' +
-        (visibleRows.length ? visibleRows.map(function (r) { return mobCardHtml(m, r, prefs); }).join('') : '<div class="em">No milestones match your search or selection.</div>') +
+        (visibleRows.length ? cardParts.join('') : '<div class="em">No milestones match your search or selection.</div>') +
       '</div>' +
       '<section class="ap-mob-notes" aria-label="Projection notes">' +
         '<div class="ap-mob-notes-hd"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Projection Notes</span></div>' +
@@ -366,9 +488,11 @@
   window.repAnnualPage = function () {
     var prefs = readAnnualPrefs();
     var isMob = isMobileViewport();
+    var isStrictMob = isStrictMobileViewport();
     var maxActive = false;
     try { maxActive = localStorage.getItem('vr-rep-max') !== '0'; } catch (e) {}
     var activeClient = typeof window.gppActiveName === 'function' ? window.gppActiveName() : '';
+    var mobKey = isMob ? computeMobKey(prefs) : '';
     var key = [
       typeof vrStateSig === 'function' ? vrStateSig(S) : JSON.stringify(S),
       activeClient,
@@ -378,19 +502,19 @@
       UI.rsel ? UI.rsel.join(',') : 'ALL',
       prefs.cols,
       prefs.years,
-      isMob ? ('m:' + mobState.details + ':' + mobState.chip + ':' + JSON.stringify(mobState.openCards)) : 'd',
+      isStrictMob ? ('sm:' + mobKey) : isMob ? ('m:' + mobKey) : 'd',
       UI.sel,
       UI.msd || '',
       maxActive
     ].join('|');
 
-    if (cachedAnnualHtml && cachedAnnualKey === key) {
+    if (cachedAnnualHtml && cachedAnnualKey === key && !isStrictMob) {
       return cachedAnnualHtml;
     }
 
     var m = computeModel();
     var A = m.A;
-    var so = sortOptionsFor(m);
+    var so = isStrictMob ? [] : sortOptionsFor(m);
 
     var clientSel = typeof window.gppDashClient === 'function' ? window.gppDashClient() : '';
     var horizonYrs = Math.max(1, (S.end || m.end.year) - (S.start || m.first.year) + 1);
@@ -404,7 +528,15 @@
       ? 'Retirement capital covers ' + m.goalPct.toFixed(1) + '% of ' + safeEsc(fmtCr(m.goalVal)) + ' target goal'
       : 'Portfolio grows ' + safeEsc(m.multEnd) + ' across ' + m.spanYrs + ' projection years';
 
-    var mobMarkup = isMob ? (lastRenderedMobSig = mobHtml(m, prefs)) : (lastRenderedMobSig = '');
+    var mobMarkup = '';
+    if (isMob) {
+      lastRenderedMobKey = mobKey;
+      mobMarkup = mobHtml(m, prefs, isStrictMob);
+    } else {
+      lastRenderedMobKey = '';
+    }
+
+    var rrMarkup = isStrictMob ? '<div id="rr" data-ap-lazy-tbl="1"></div>' : '<div id="rr">' + renderAnnualRowsHtml() + '</div>';
 
     cachedAnnualKey = key;
     cachedAnnualHtml = '<div class="ap-wrap">' +
@@ -446,7 +578,7 @@
           '<span class="ap-units">Values in <b>₹ Lakhs</b> (individual holdings) &amp; <b>₹ Full Currency</b> (Totals)</span>' +
           csvBtnHtml +
         '</div>' +
-        '<div id="rr">' + renderAnnualRowsHtml() + '</div>' +
+        rrMarkup +
         '<footer class="ap-tbl-foot">' +
           '<div class="ap-foot-info"><span>Displaying <b id="ap-snap-n">' + m.rows.length + ' milestone snapshots</b> across a ' + m.spanYrs + '-year trajectory</span><span aria-hidden="true">•</span><span class="ap-foot-health">' + goalHealth + '</span></div>' +
           '<div class="ap-foot-acts">' +
@@ -459,6 +591,36 @@
     '</div>';
     return cachedAnnualHtml;
   };
+
+  function ensureDesktopTableHydrated() {
+    var rr = document.getElementById('rr');
+    if (!rr) return false;
+    var needsTbl = (rr.dataset && rr.dataset.apLazyTbl === '1') || !rr.querySelector(':scope > table.rt');
+    if (!needsTbl) return false;
+    if (rr.dataset) delete rr.dataset.apLazyTbl;
+    rr.innerHTML = renderAnnualRowsHtml();
+    var rsf = document.getElementById('rsf');
+    if (rsf && !rsf.innerHTML) {
+      var m = computeModel();
+      var so = sortOptionsFor(m);
+      var optsHtml = so.map(function (pair) { return '<option value="' + safeEsc(pair[0]) + '"' + (UI.rk === pair[0] ? ' selected' : '') + '>Sort: ' + safeEsc(pair[1]) + '</option>'; }).join('');
+      rsf.__apOpts = optsHtml;
+      rsf.innerHTML = optsHtml;
+    }
+    if (typeof RCOLS !== 'undefined' && RCOLS && typeof RCOLS.apply === 'function') {
+      RCOLS.apply(rr, 'year');
+    }
+    if (typeof window.vrMarkRetired === 'function') {
+      window.vrMarkRetired(false);
+    }
+    if (window.VRAnnualHelpers && typeof window.VRAnnualHelpers.refresh === 'function') {
+      window.VRAnnualHelpers.refresh();
+    }
+    if (typeof window.vrReportFit === 'function') {
+      window.vrReportFit();
+    }
+    return true;
+  }
 
   function highlightPrimaryHoldingCol(t, A, D) {
     if (!t || !t.rows || !t.rows.length || !A || A.length < 2) return;
@@ -487,65 +649,88 @@
     }
   }
 
-  function syncAnnualProjection() {
+  function syncAnnualProjection(preModel) {
     var wrap = document.querySelector('#m .ap-wrap');
     if (!wrap) return;
     var rr = document.getElementById('rr');
-    var t = rr && rr.querySelector(':scope > table.rt');
-    var D = window.vrReportCalc ? window.vrReportCalc() : calc(S);
+    var isStrictMob = isStrictMobileViewport();
+    var t = (!isStrictMob && rr) ? rr.querySelector(':scope > table.rt') : null;
     var A = S.assets || [];
 
-    if (t) highlightPrimaryHoldingCol(t, A, D);
-
-    var snapEl = document.getElementById('ap-snap-n');
-    if (snapEl && t) {
-      var visCount = t.querySelectorAll('tr[data-r]:not(.vr-skip)').length;
-      var snapTxt = visCount + ' milestone snapshot' + (visCount === 1 ? '' : 's');
-      if (snapEl.textContent !== snapTxt) snapEl.textContent = snapTxt;
-    }
-
-    var holdBtnTxt = wrap.querySelector('.msd[data-msd="hold"] .msd-b b');
-    if (holdBtnTxt && holdBtnTxt.textContent === 'All holdings') {
-      holdBtnTxt.textContent = 'All holdings (' + A.length + ')';
-    }
-    var colsBtn = wrap.querySelector('.msd[data-msd="cols"] .msd-b');
-    if (colsBtn && !colsBtn.querySelector('.ap-cols-ic')) {
-      var oldSvg = colsBtn.querySelector('svg');
-      if (oldSvg) oldSvg.outerHTML = COLS_GRID_SVG;
-    }
-    syncFreezeLabel();
-
-    var mNode = document.getElementById('m');
-    var maxBtn = wrap.querySelector('[data-ap-max]');
-    if (maxBtn && mNode) {
-      var maxStr = String(mNode.classList.contains('vr-rmax'));
-      if (maxBtn.getAttribute('aria-pressed') !== maxStr) maxBtn.setAttribute('aria-pressed', maxStr);
+    if (t) {
+      var D = preModel ? preModel.D : (window.vrReportCalc ? window.vrReportCalc() : calc(S));
+      highlightPrimaryHoldingCol(t, A, D);
+      var snapEl = document.getElementById('ap-snap-n');
+      if (snapEl) {
+        var visCount = t.querySelectorAll('tr[data-r]:not(.vr-skip)').length;
+        var snapTxt = visCount + ' milestone snapshot' + (visCount === 1 ? '' : 's');
+        if (snapEl.textContent !== snapTxt) snapEl.textContent = snapTxt;
+      }
+      var holdBtnTxt = wrap.querySelector('.msd[data-msd="hold"] .msd-b b');
+      if (holdBtnTxt && holdBtnTxt.textContent === 'All holdings') {
+        holdBtnTxt.textContent = 'All holdings (' + A.length + ')';
+      }
+      var colsBtn = wrap.querySelector('.msd[data-msd="cols"] .msd-b');
+      if (colsBtn && !colsBtn.querySelector('.ap-cols-ic')) {
+        var oldSvg = colsBtn.querySelector('svg');
+        if (oldSvg) oldSvg.outerHTML = COLS_GRID_SVG;
+      }
+      syncFreezeLabel();
+      var mNode = document.getElementById('m');
+      var maxBtn = wrap.querySelector('[data-ap-max]');
+      if (maxBtn && mNode) {
+        var maxStr = String(mNode.classList.contains('vr-rmax'));
+        if (maxBtn.getAttribute('aria-pressed') !== maxStr) maxBtn.setAttribute('aria-pressed', maxStr);
+      }
     }
 
     var mobHost = document.getElementById('ap-mob-host');
     if (mobHost && isMobileViewport()) {
       var prefs = readAnnualPrefs();
-      var m = computeModel();
-      var nextMob = mobHtml(m, prefs);
-      if (mobHost.__apSig == null && mobHost.firstElementChild && nextMob === lastRenderedMobSig) {
-        mobHost.__apSig = nextMob;
-      } else if (mobHost.__apSig !== nextMob) {
-        mobHost.__apSig = nextMob;
-        mobHost.innerHTML = nextMob;
+      var mobKey = computeMobKey(prefs);
+      if (mobHost.__apKey === mobKey && mobHost.firstElementChild) return;
+      if (mobHost.__apKey == null && mobHost.firstElementChild && mobKey === lastRenderedMobKey) {
+        mobHost.__apKey = mobKey;
+        return;
       }
+      var m = preModel || computeModel();
+      mobHost.__apKey = mobKey;
+      lastRenderedMobKey = mobKey;
+      mobHost.innerHTML = mobHtml(m, prefs, isStrictMob);
     }
   }
 
   function syncDropdownsInPlace(wrap) {
     var A = S.assets || [];
-    if (!A.length) return;
+    var nA = A.length;
+    if (!nA) return;
     var SEL = repSel();
-    var selSet = {};
-    for (var k = 0; k < SEL.idx.length; k++) selSet[String(A[SEL.idx[k]].id)] = true;
-    var selLen = SEL.idx.length;
+    var idx = SEL.idx || [];
+    var selLen = idx.length;
+    var selSet = Object.create(null);
+    for (var k = 0; k < selLen; k++) selSet[String(A[idx[k]].id)] = true;
 
-    var cs = typeof CATS !== 'undefined' ? CATS.filter(function (c) { return A.some(function (x) { return x.cat === c; }); }) : [];
-    var con = cs.filter(function (c) { return A.every(function (x) { return x.cat !== c || selSet[String(x.id)]; }); });
+    var catTotal = Object.create(null);
+    var catSel = Object.create(null);
+    for (var i = 0; i < nA; i++) {
+      var a = A[i], c = a.cat;
+      catTotal[c] = (catTotal[c] || 0) + 1;
+      if (selSet[String(a.id)]) catSel[c] = (catSel[c] || 0) + 1;
+    }
+
+    var cs = [];
+    var con = [];
+    var conMap = Object.create(null);
+    var catList = typeof CATS !== 'undefined' ? CATS : Object.keys(catTotal);
+    for (var ci0 = 0; ci0 < catList.length; ci0++) {
+      var cat0 = catList[ci0];
+      if (!catTotal[cat0]) continue;
+      cs.push(cat0);
+      if (catSel[cat0] === catTotal[cat0]) {
+        con.push(cat0);
+        conMap[cat0] = true;
+      }
+    }
 
     var clsBtn = wrap.querySelector('.msd[data-msd="cls"] .msd-b b');
     if (clsBtn) {
@@ -554,15 +739,15 @@
     }
     var holdBtn = wrap.querySelector('.msd[data-msd="hold"] .msd-b b');
     if (holdBtn) {
-      var firstName = selLen === 1 && A[SEL.idx[0]] ? A[SEL.idx[0]].name : '';
-      var holdLabel = selLen === A.length ? 'All holdings (' + A.length + ')' : selLen === 0 ? 'None selected' : selLen === 1 ? firstName : selLen + ' of ' + A.length + ' selected';
+      var firstName = selLen === 1 && A[idx[0]] ? A[idx[0]].name : '';
+      var holdLabel = selLen === nA ? 'All holdings (' + nA + ')' : selLen === 0 ? 'None selected' : selLen === 1 ? firstName : selLen + ' of ' + nA + ' selected';
       if (holdBtn.textContent !== holdLabel) holdBtn.textContent = holdLabel;
     }
 
     var clsInputs = wrap.querySelectorAll('input[data-rcls]');
     for (var ci = 0; ci < clsInputs.length; ci++) {
       var cb = clsInputs[ci], catName = cb.dataset.rcls;
-      var want = con.indexOf(catName) > -1;
+      var want = !!conMap[catName];
       if (cb.checked !== want) cb.checked = want;
     }
     var holdInputs = wrap.querySelectorAll('input[data-rh]');
@@ -592,43 +777,52 @@
     cachedAnnualHtml = null;
     cachedAnnualKey = '';
 
-    rr.innerHTML = renderAnnualRowsHtml();
-    rr.scrollLeft = 0;
-    rr.scrollTop = 0;
-
+    var isStrictMob = isStrictMobileViewport();
     syncDropdownsInPlace(wrap);
 
-    var rsf = document.getElementById('rsf');
-    if (rsf && typeof sortOptionsFor === 'function') {
-      var m = computeModel();
-      var so = sortOptionsFor(m);
-      var optsHtml = so.map(function (pair) { return '<option value="' + safeEsc(pair[0]) + '"' + (UI.rk === pair[0] ? ' selected' : '') + '>Sort: ' + safeEsc(pair[1]) + '</option>'; }).join('');
-      if (rsf.__apOpts !== optsHtml) {
-        rsf.__apOpts = optsHtml;
-        rsf.innerHTML = optsHtml;
-      }
-      var footHealth = wrap.querySelector('.ap-foot-health');
-      if (footHealth) {
-        var goalHealth = m.goalVal > 0
-          ? 'Retirement capital covers ' + m.goalPct.toFixed(1) + '% of ' + fmtCr(m.goalVal) + ' target goal'
-          : 'Portfolio grows ' + m.multEnd + ' across ' + m.spanYrs + ' projection years';
-        if (footHealth.textContent !== goalHealth) footHealth.textContent = goalHealth;
-      }
-    }
-
-    if (typeof RCOLS !== 'undefined' && RCOLS && typeof RCOLS.apply === 'function') {
-      RCOLS.apply(rr, 'year');
-    }
-    if (typeof window.vrMarkRetired === 'function') {
-      window.vrMarkRetired(false);
-    }
-    if (window.VRAnnualHelpers && typeof window.VRAnnualHelpers.refresh === 'function') {
-      window.VRAnnualHelpers.refresh();
+    if (isStrictMob) {
+      if (rr.dataset) rr.dataset.apLazyTbl = '1';
+      if (rr.innerHTML) rr.innerHTML = '';
+      var mMob = computeModel();
+      syncAnnualProjection(mMob);
     } else {
-      syncAnnualProjection();
-    }
-    if (typeof window.vrReportFit === 'function') {
-      window.vrReportFit();
+      if (rr.dataset) delete rr.dataset.apLazyTbl;
+      rr.innerHTML = renderAnnualRowsHtml();
+      rr.scrollLeft = 0;
+      rr.scrollTop = 0;
+
+      var m = computeModel();
+      var rsf = document.getElementById('rsf');
+      if (rsf && typeof sortOptionsFor === 'function') {
+        var so = sortOptionsFor(m);
+        var optsHtml = so.map(function (pair) { return '<option value="' + safeEsc(pair[0]) + '"' + (UI.rk === pair[0] ? ' selected' : '') + '>Sort: ' + safeEsc(pair[1]) + '</option>'; }).join('');
+        if (rsf.__apOpts !== optsHtml) {
+          rsf.__apOpts = optsHtml;
+          rsf.innerHTML = optsHtml;
+        }
+        var footHealth = wrap.querySelector('.ap-foot-health');
+        if (footHealth) {
+          var goalHealth = m.goalVal > 0
+            ? 'Retirement capital covers ' + m.goalPct.toFixed(1) + '% of ' + fmtCr(m.goalVal) + ' target goal'
+            : 'Portfolio grows ' + m.multEnd + ' across ' + m.spanYrs + ' projection years';
+          if (footHealth.textContent !== goalHealth) footHealth.textContent = goalHealth;
+        }
+      }
+
+      if (typeof RCOLS !== 'undefined' && RCOLS && typeof RCOLS.apply === 'function') {
+        RCOLS.apply(rr, 'year');
+      }
+      if (typeof window.vrMarkRetired === 'function') {
+        window.vrMarkRetired(false);
+      }
+      if (window.VRAnnualHelpers && typeof window.VRAnnualHelpers.refresh === 'function') {
+        window.VRAnnualHelpers.refresh();
+      } else {
+        syncAnnualProjection(m);
+      }
+      if (typeof window.vrReportFit === 'function') {
+        window.vrReportFit();
+      }
     }
 
     if (focusAttr && focusVal != null) {
@@ -654,6 +848,7 @@
   function triggerPdfWithVisibleTable() {
     var mEl = document.getElementById('m');
     if (!mEl || typeof window.vrExportReportPDF !== 'function') return;
+    ensureDesktopTableHydrated();
     var tblCard = mEl.querySelector('.ap-tbl-card');
     var wasHidden = false;
     try {
@@ -698,6 +893,7 @@
       } else if (b.hasAttribute('data-ap-pdf')) {
         triggerPdfWithVisibleTable();
       } else if (b.hasAttribute('data-ap-mob-jump')) {
+        flushMobCards();
         var retCard = document.getElementById('milestone-retirement');
         if (retCard && typeof retCard.scrollIntoView === 'function') {
           retCard.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -725,14 +921,19 @@
 
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
       window.addEventListener('resize', function () {
+        if (!document.querySelector('#m .ap-wrap')) return;
         if (isMobileViewport()) {
           var mobHost = document.getElementById('ap-mob-host');
           if (mobHost && !mobHost.firstElementChild) scheduleSync(30);
+        } else {
+          ensureDesktopTableHydrated();
         }
       });
     }
   }
 
   window.vrSyncAnnualProjection = syncAnnualProjection;
+  window.vrEnsureAnnualDesktopTable = ensureDesktopTableHydrated;
+  window.vrFlushAnnualMobCards = flushMobCards;
   if (typeof document !== 'undefined') bindEvents();
 })();

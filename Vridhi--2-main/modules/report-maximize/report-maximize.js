@@ -113,6 +113,7 @@ function fitTable(tbl){
 function fitContainer(root,active){
  if(!root)return;
  if(!active){clearContainer(root);return}
+ if(typeof root.querySelector==='function'&&typeof window!=='undefined'&&typeof window.innerWidth==='number'&&window.innerWidth<=768&&root.querySelector('.ap-wrap'))return;
  if(typeof root.querySelectorAll!=='function')return;
  var tables=root.querySelectorAll(FIT_SEL);
  for(var i=0;i<tables.length;i++)fitTable(tables[i]);
@@ -483,7 +484,19 @@ function syncPopup(){
  fitContainer(d,pref)}
 function sync(){raf=0;syncRetirement();syncPage();syncPopup()}
 function queue(){if(!raf)raf=requestAnimationFrame(sync)}
-function toggle(){pref=!pref;try{localStorage.setItem(KEY,pref?'1':'0')}catch(x){}sync()}
+function toggle(){
+ pref=!pref;
+ try{localStorage.setItem(KEY,pref?'1':'0')}catch(x){}
+ sync();
+ if(!pref&&typeof document!=='undefined'){
+  var m=document.getElementById('m'),rr=document.getElementById('rr');
+  if(m&&rr&&!m.querySelector('.ap-wrap')&&rr.querySelector('table.rt')&&!rr.querySelector('.rc')&&typeof window.repRows==='function'){
+   rr.innerHTML=window.repRows();
+   if(window.RCOLS&&typeof window.RCOLS.apply==='function'&&typeof UI!=='undefined')window.RCOLS.apply(rr,UI.rv||'year');
+   if(typeof window.vrMarkRetired==='function')window.vrMarkRetired(rr);
+  }
+ }
+}
 document.addEventListener('click',function(e){
  var pdfBtn=e.target&&e.target.closest&&e.target.closest('#rp-pdf,#hy-pdf,#fh-pdf');
  if(pdfBtn){

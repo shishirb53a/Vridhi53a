@@ -17,6 +17,7 @@
   }
 
   function api() { return window.VRMobileDrawer; }
+  function isMobileViewport() { return typeof window.innerWidth === "number" && window.innerWidth <= 960; }
 
   function signedIn() {
     var lg = document.getElementById("lg");
@@ -145,6 +146,7 @@
   }
 
   function scheduleRender() {
+    if (isMobileViewport()) return;
     if (scheduled) return;
     scheduled = true;
     var run = function () { scheduled = false; render(); };
@@ -181,7 +183,23 @@
     ensure();
     render();
     if (typeof MutationObserver === "function") {
-      var mo = new MutationObserver(scheduleRender);
+      var IGNORE = "#rr,#ap-mob-host,.msd-p,.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#fzs,#rp-max,#rp-pdf";
+      var mo = new MutationObserver(function (recs) {
+        if (isMobileViewport()) return;
+        if (Array.isArray(recs) && recs.length) {
+          var allNoise = true;
+          for (var i = 0; i < recs.length; i++) {
+            var r = recs[i], t = r.target;
+            if (t && t.nodeType === 3) t = t.parentElement;
+            if (t && t.closest && t.closest(IGNORE)) continue;
+            if (r.addedNodes && r.addedNodes.length === 1 && r.removedNodes && r.removedNodes.length === 0 && r.addedNodes[0].nodeType === 1 && r.addedNodes[0].matches && r.addedNodes[0].matches(IGNORE)) continue;
+            allNoise = false;
+            break;
+          }
+          if (allNoise) return;
+        }
+        scheduleRender();
+      });
       ["nav", "m", "who"].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) mo.observe(el, {
@@ -198,6 +216,11 @@
       });
     }
     document.addEventListener("vr:accesschange", scheduleRender);
+    if (window.addEventListener) {
+      window.addEventListener("resize", function () {
+        if (!isMobileViewport()) scheduleRender();
+      });
+    }
   }
 
   window.VRNavSidebar = {

@@ -906,8 +906,24 @@
       else setTimeout(run, 16);
     }
 
+    var IGNORE = "#rr,#ap-mob-host,.msd-p,.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#fzs,#rp-max,#rp-pdf";
+    function isInternalReportNoise(recs) {
+      if (!Array.isArray(recs) || !recs.length) return false;
+      for (var i = 0; i < recs.length; i++) {
+        var r = recs[i], t = r.target;
+        if (t && t.nodeType === 3) t = t.parentElement;
+        if (t && t.closest && t.closest(IGNORE)) continue;
+        if (r.addedNodes && r.addedNodes.length === 1 && r.removedNodes && r.removedNodes.length === 0 && r.addedNodes[0].nodeType === 1 && r.addedNodes[0].matches && r.addedNodes[0].matches(IGNORE)) continue;
+        return false;
+      }
+      return true;
+    }
+
     if (typeof MutationObserver === "function") {
-      var mo = new MutationObserver(syncSoon);
+      var mo = new MutationObserver(function (recs) {
+        if (isInternalReportNoise(recs)) return;
+        syncSoon();
+      });
       ["nav", "m", "who"].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) mo.observe(el, { childList: true, subtree: id !== "m", attributes: true, attributeFilter: ["hidden", "aria-selected", "aria-current", "aria-pressed"] });

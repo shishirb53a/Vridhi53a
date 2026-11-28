@@ -3,7 +3,7 @@
 (function () {
   var RX = /(\u20b9\s?-?\d[\d,]*(?:\.\d+)?) (L|Cr)(?![A-Za-z])/g, SKIP = /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION|SELECT|TITLE|NOSCRIPT)$/;
   var PLAIN_PAR = /^(TD|TH|TR|P|B|STRONG|EM|SMALL|SPAN|LI|DD|DT|H1|H2|H3|H4|A|TIME|LABEL|CAPTION|I|U|CODE)$/;
-  var SKIP_CONT = '#vr-side,#vr-drawer,#vr-drawer-backdrop,#vr-side-bc,#toast,#vr-pdf-frame,.nb';
+  var SKIP_CONT = '#vr-side,#vr-drawer,#vr-drawer-backdrop,#vr-side-bc,#toast,#vr-pdf-frame,#ap-mob-host,.nb';
   var busy = false, queued = false, obs, pendingRoots = [];
   function fix(root, flexCache) {
     if (!root || (root.nodeType === 1 && ((root.matches && root.matches(SKIP_CONT)) || (root.closest && root.closest(SKIP_CONT))))) return;

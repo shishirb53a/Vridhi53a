@@ -51,15 +51,15 @@ function reorderTable(t,v){if(!DEFORD[v])return;var n=t.rows[0]?t.rows[0].cells.
 var ks=Array.prototype.map.call(t.rows[0].cells,function(c){var b=c.querySelector('button[data-rk]');return b?grp(b.dataset.rk):''});
 var seq=reorderBlocks(blocksOf(ks),v);if(!seq)return;var perm=[];seq.forEach(function(b){b.idx.forEach(function(i){perm.push(i)})});
 Array.prototype.forEach.call(t.rows,function(r){if(r.cells.length!==n)return;var cs=Array.prototype.slice.call(r.cells);perm.forEach(function(i){r.appendChild(cs[i])})})}
-function pairKey(v,lab,val){var k=CL[v][lab]||null;if(!k&&v==='int'&&/ interest$/.test(lab))k='v';if(!k&&v!=='int'&&/^Age\b/.test(val))k='age';
-if(!k&&v!=='int'&&(S.assets||[]).some(function(a){return a.name===lab}))k='v';return k}
-function reorderCard(d,v){if(!DEFORD[v])return;var kv=d.querySelector('.kv');if(!kv)return;var ch=Array.prototype.slice.call(kv.children),pr=[];
-for(var i=0;i<ch.length-1;i+=2)pr.push({sp:ch[i],bv:ch[i+1],k:pairKey(v,ch[i].textContent.trim(),ch[i+1].textContent.trim())});
+function pairKey(v,lab,val,assetMap){var k=CL[v][lab]||null;if(!k&&v==='int'&&/ interest$/.test(lab))k='v';if(!k&&v!=='int'&&/^Age\b/.test(val))k='age';
+if(!k&&v!=='int'&&(assetMap?assetMap[lab]:(S.assets||[]).some(function(a){return a.name===lab})))k='v';return k}
+function reorderCard(d,v,assetMap){if(!DEFORD[v])return;var kv=d.querySelector('.kv');if(!kv)return;var ch=Array.prototype.slice.call(kv.children),pr=[];
+for(var i=0;i<ch.length-1;i+=2)pr.push({sp:ch[i],bv:ch[i+1],k:pairKey(v,ch[i].textContent.trim(),ch[i+1].textContent.trim(),assetMap)});
 var seq=reorderBlocks(blocksOf(pr.map(function(x){return x.k})),v);if(!seq)return;
 seq.forEach(function(b){b.idx.forEach(function(i){kv.appendChild(pr[i].sp);kv.appendChild(pr[i].bv)})})}
 /* remove hidden columns from a report table and its phone cards (idempotent per rendered table) */
 function apply(root,v){
-if(!root||!CFG[v])return;
+if(!root||!CFG[v]||(root.dataset&&root.dataset.apLazyTbl==='1'))return;
 var t=root.querySelector('table.rt');
 if(t&&!t.dataset.rc){t.dataset.rc=v;
 var r0=t.rows[0],hs=[];
@@ -69,6 +69,8 @@ if(rm.length){var rows=t.rows,rl=rows.length,rml=rm.length;for(var ri=0;ri<rl;ri
 t.classList.toggle('nsn',!(hs[0]==='a'&&vis(v,'a')));reorderTable(t,v)}
 var rc=root.querySelector('.rc');
 if(rc&&!rc.dataset.rc){rc.dataset.rc=v;
+var assetMap=Object.create(null),as=S.assets||[];
+for(var ai=0;ai<as.length;ai++)assetMap[as[ai].name]=1;
 rc.querySelectorAll('details.yc').forEach(function(d){
 var kv=d.querySelector('.kv');
 if(kv){var ch=Array.prototype.slice.call(kv.children);
@@ -79,7 +81,7 @@ if(k==='age'){var parts=val.split(' \u00b7 '),aOn=vis(v,'age'),sOn=vis(v,'s');
 if(!aOn&&(!sOn||parts.length<2)){sp.remove();bv.remove()}else if(!aOn)bv.textContent=parts.slice(1).join(' \u00b7 ');else if(!sOn&&parts.length>1)bv.textContent=parts[0]}
 else if(k&&!vis(v,k)){sp.remove();bv.remove()}}}
 var sm=d.querySelector('summary>div.mu');
-if(sm&&(v==='int'?!vis(v,'mi'):!vis(v,'hi')))sm.remove();reorderCard(d,v)})}}
+if(sm&&(v==='int'?!vis(v,'mi'):!vis(v,'hi')))sm.remove();reorderCard(d,v,assetMap)})}}
 /* Columns dropdown on the Reports tab */
 var dropSig='';
 function fillDrop(dd,v){

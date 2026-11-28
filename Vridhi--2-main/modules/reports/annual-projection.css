@@ -1015,6 +1015,19 @@ html body .ap-foot-cta:hover {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    contain: layout style;
+  }
+
+  .ap-mob button,
+  .ap-head button {
+    touch-action: manipulation;
+  }
+
+  .ap-mob-big,
+  .ap-mc-kv,
+  .ap-mc-det-item b,
+  .ap-mc-cf b {
+    white-space: nowrap;
   }
 
   .ap-mc {
@@ -1024,6 +1037,8 @@ html body .ap-foot-cta:hover {
     padding: 15px 16px;
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
     scroll-margin-top: 72px;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 195px;
   }
 
   .ap-mc.is-today {
@@ -1232,6 +1247,7 @@ html body .ap-foot-cta:hover {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+    contain: layout style;
   }
 
   .ap-mc-det-item {

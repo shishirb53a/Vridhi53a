@@ -1,17 +1,29 @@
 (function(){
-window.repSel=function(){const A=S.assets,ids=UI.rsel;const all=A.map(function(x,i){return i});
-if(!ids)return{all:true,min:false,none:false,idx:all};
-const idx=all.filter(function(i){return ids.indexOf(String(A[i].id))>-1});
-if(idx.length===A.length)return{all:true,min:false,none:false,idx:idx};
+function isMaximizedReport(){
+  if(typeof document==='undefined'||!document.getElementById)return false;
+  var m=document.getElementById('m');
+  return !!(m&&m.classList&&m.classList.contains('vr-rmax'));
+}
+window.repSel=function(){const A=S.assets,n=A.length,ids=UI.rsel;
+if(!ids){const all=new Array(n);for(let i=0;i<n;i++)all[i]=i;return{all:true,min:false,none:false,idx:all}}
+const map=Object.create(null);for(let i=0;i<ids.length;i++)map[String(ids[i])]=1;
+const idx=[];for(let i=0;i<n;i++){if(map[String(A[i].id)])idx.push(i)}
+if(idx.length===n)return{all:true,min:false,none:false,idx:idx};
 if(!idx.length)return{all:false,min:false,none:true,idx:[]};
 return{all:false,min:true,none:false,idx:idx}};
 window.repNone=function(){return'<div class="em">Please select at least one investment.</div>'};
-window.rsPanel=function(){const A=S.assets,SEL=repSel();
-const msg=SEL.all?'All investments shown. Pick one or more to see only those.':SEL.none?'No investment selected.':SEL.idx.length+' of '+A.length+' selected, showing only their values.';
-const cb=CATS.filter(function(c){return A.some(function(x){return x.cat===c})}).map(function(c){const ids=A.map(function(x,i){return x.cat===c?i:-1}).filter(function(i){return i>-1}),on=ids.every(function(i){return SEL.idx.indexOf(i)>-1});return'<button type="button" class="lgb" data-rcat="'+esc(c)+'" aria-pressed="'+on+'"><b>'+esc(c)+'</b><span class="mu">'+ids.length+'</span></button>'}).join('');
+window.rsPanel=function(){const A=S.assets,n=A.length,SEL=repSel();
+const selSet=Object.create(null);for(let i=0;i<SEL.idx.length;i++)selSet[SEL.idx[i]]=1;
+const catTot=Object.create(null),catOn=Object.create(null);
+for(let i=0;i<n;i++){const c=A[i].cat;catTot[c]=(catTot[c]||0)+1;if(selSet[i])catOn[c]=(catOn[c]||0)+1}
+const msg=SEL.all?'All investments shown. Pick one or more to see only those.':SEL.none?'No investment selected.':SEL.idx.length+' of '+n+' selected, showing only their values.';
+const cbParts=[];
+for(let i=0;i<CATS.length;i++){const c=CATS[i];if(catTot[c]>0){const on=catOn[c]===catTot[c];cbParts.push('<button type="button" class="lgb" data-rcat="'+esc(c)+'" aria-pressed="'+on+'"><b>'+esc(c)+'</b><span class="mu">'+catTot[c]+'</span></button>')}}
+const hbParts=new Array(n);
+for(let i=0;i<n;i++){const x=A[i],on=!!selSet[i];hbParts[i]='<button type="button" class="lgb" data-rsel="'+esc(String(x.id))+'" aria-pressed="'+on+'" title="'+escn(x.name)+' · '+(x.ret*100).toFixed(2)+'%'+(x.type||!(x.add>0)?'':' · '+f(x.add)+' / year')+'"><i style="background:'+COL[i%10]+'"></i><b>'+escn(x.name)+'</b><span class="mu">'+(x.ret*100).toFixed(2)+'%</span></button>'}
 return'<div class="rsel" role="group" aria-label="Choose which investments to show"><div class="rsh"><b class="rpft">Filter Asset Classes</b><span class="sr-only">'+msg+'</span><span class="rsa"><button type="button" data-rsel="all">Select All</button><button type="button" data-rsel="none">Clear</button></span></div>'
-+'<div class="lg">'+cb+'</div><div class="rsh" style="margin:12px 0 8px"><b class="rpft">Filter Holdings</b></div>'
-+'<div class="lg">'+A.map(function(x,i){const on=SEL.idx.indexOf(i)>-1;return'<button type="button" class="lgb" data-rsel="'+esc(String(x.id))+'" aria-pressed="'+on+'" title="'+escn(x.name)+' · '+(x.ret*100).toFixed(2)+'%'+(x.type||!(x.add>0)?'':' · '+f(x.add)+' / year')+'"><i style="background:'+COL[i%10]+'"></i><b>'+escn(x.name)+'</b><span class="mu">'+(x.ret*100).toFixed(2)+'%</span></button>'}).join('')+'</div></div>'};
++'<div class="lg">'+cbParts.join('')+'</div><div class="rsh" style="margin:12px 0 8px"><b class="rpft">Filter Holdings</b></div>'
++'<div class="lg">'+hbParts.join('')+'</div></div>'};
 window.selDI=function(r,mon,idx,rows){const A=S.assets;let dep=0;
 if(mon){for(let k=0;k<idx.length;k++){const i=idx[k];dep+=(r.ad?r.ad[i]:0)}let c=0,any=false;for(let k=0;k<idx.length;k++){const i=idx[k];if(r.v[i]!=null&&r.pv&&r.pv[i]!=null){c+=r.v[i]-r.pv[i];any=true}}return[dep,any?c-dep:null]}
 if(r.a>1){
@@ -84,7 +96,7 @@ if(rk!=='a'||UI.rd<0)L.sort(function(x,y){const a=key(x),b=key(y);return(a>b?1:a
 if(!L.length)return'<div class="em">No '+o.noun+' match your search.</div>';
 const th=function(k,t){return'<th class="'+(k!=='year'&&k!=='hi'&&k[0]!=='s'?'rt-num':'')+'" aria-sort="'+(rk===k?(UI.rd>0?'ascending':'descending'):'none')+'"><button data-rk="'+k+'">'+t+(rk===k?(UI.rd>0?' ▲':' ▼'):'')+'</button></th>'};
 const hasPol=YR&&VRPolicy.hasPayouts('goal');
-const skipRc=!!window.__apSkipRc;
+const skipRc=!!window.__apSkipRc||isMaximizedReport();
 let cellCache=null;
 if(YR&&D0){
   let rc0=D0._repCache;
@@ -129,7 +141,28 @@ window.repSelCSV=function(){const yl=function(r){return'1 Apr '+r.year};const q=
 const st=function(r){var any=false,t=0;for(let k=0;k<idx.length;k++){const v=r.v[idx[k]];if(v!=null){any=true;t+=v}}return any?t:null};
 const rate=function(r,t){if(!(t>0))return'';let rs=0;for(let k=0;k<idx.length;k++)rs+=r.v[idx[k]]*A[idx[k]].ret;return(rs/t*100).toFixed(2)};
 return[['S.No',mon?'Month':'As on'].concat(idx.map(function(i){return A[i].name}),(multi?[mon?'Month end balance':'Year end balance','Blended ROI %','Amount deposited','Interest earned'].concat(mon?[]:['Monthly income']):(mon?[]:['Yearly income','Monthly income']),hasPol?['Policy payouts','Total income']:[])).map(q).join(',')].concat(rows.map(function(r){const di=window.selDI(r,mon,idx,rows),si=di[1],mi=mon?null:RCOLS.annualMonthlyIncome(si,r.pay,allMat(idx,r,false)),stV=st(r),base=[r.a,mon?q(r.label):q(yl(r))].concat(idx.map(function(i){return r.v[i]==null?'—':Math.round(r.v[i])}),multi?[stV==null?'—':Math.round(stV),stV==null?'—':rate(r,stV),Math.round(mon?di[0]:depShow(r.a,idx,rows.length)),si==null?'—':Math.round(si)].concat(mon?[]:[mi==null?(si==null?'—':'-'):Math.round(mi)]):(mon?[]:[si==null?'—':Math.round(si),mi==null?(si==null?'—':'-'):Math.round(mi)]));if(hasPol)base.push(Math.round(r.pay||0),Math.round(polTiVal(si,r.pay)));return base.join(',')})).join('\n')};
-document.addEventListener('click',function(e){const b=e.target.closest&&e.target.closest('[data-rsel]');if(!b)return;
+/* Surgical in-place filter update for Monthly Projection and Interest & Income reports (avoids full page re-render) */
+window.vrUpdateReportFilters=function(focusAttr,focusVal){
+  if(typeof UI==='undefined'||UI.tab!=='Reports'||(UI.rv!=='month'&&UI.rv!=='int'))return false;
+  if(typeof document==='undefined'||!document.getElementById)return false;
+  if(document.querySelector&&document.querySelector('#m .ap-wrap'))return false;
+  const rr=document.getElementById('rr');
+  if(!rr||typeof window.repRows!=='function')return false;
+  rr.innerHTML=window.repRows();
+  if(UI.rv==='int'&&typeof window.intTiles==='function'&&document.querySelector){
+    const rpk=document.querySelector('#m .rpk');
+    if(rpk){const tmp=document.createElement('div');tmp.innerHTML=window.intTiles();if(tmp.firstElementChild&&rpk.parentNode)rpk.parentNode.replaceChild(tmp.firstElementChild,rpk)}
+  }
+  if(window.RCOLS&&typeof window.RCOLS.apply==='function')window.RCOLS.apply(rr,UI.rv);
+  if(typeof window.vrMarkRetired==='function')window.vrMarkRetired(rr);
+  if(typeof window.vrReportFit==='function')window.vrReportFit(false);
+  if(focusAttr&&focusVal&&document.querySelectorAll){
+    const n=Array.prototype.filter.call(document.querySelectorAll('['+focusAttr+']'),function(x){return x.getAttribute(focusAttr)===focusVal})[0];
+    if(n&&typeof n.focus==='function')n.focus();
+  }
+  return true;
+};
+document.addEventListener('click',function(e){const b=e.target&&e.target.closest&&e.target.closest('[data-rsel]');if(!b)return;
 const v=b.dataset.rsel,A=S.assets,cur=repSel();
 UI.rcl=null;
 if(v==='all')UI.rsel=null;
@@ -137,12 +170,14 @@ else if(v==='none')UI.rsel=[];
 else if(cur.all)UI.rsel=[v];
 else{const s=(UI.rsel||[]).map(String),k=s.indexOf(v);if(k>-1)s.splice(k,1);else s.push(v);UI.rsel=(s.length===A.length||s.length===0)?null:s}
 if(typeof window.vrUpdateAnnualFilters==='function'&&window.vrUpdateAnnualFilters('data-rsel',v))return;
+if(window.vrUpdateReportFilters('data-rsel',v))return;
 render();const rr=document.getElementById('rr');if(rr){rr.scrollLeft=0;rr.scrollTop=0}const n=document.querySelector('[data-rsel="'+v+'"]');if(n)n.focus()});
-document.addEventListener('click',function(e){const b=e.target.closest&&e.target.closest('[data-rcat]');if(!b)return;
+document.addEventListener('click',function(e){const b=e.target&&e.target.closest&&e.target.closest('[data-rcat]');if(!b)return;
 const c=b.dataset.rcat,A=S.assets,cur=repSel(),ids=A.filter(function(x){return x.cat===c}).map(function(x){return String(x.id)});let s;
-if(cur.all)s=ids.slice();else{s=(UI.rsel||[]).map(String);const on=ids.every(function(i){return s.indexOf(i)>-1});s=on?s.filter(function(i){return ids.indexOf(i)<0}):s.concat(ids.filter(function(i){return s.indexOf(i)<0}))}
+if(cur.all)s=ids.slice();else{s=(UI.rsel||[]).map(String);const sMap=Object.create(null);for(let i=0;i<s.length;i++)sMap[s[i]]=1;const idMap=Object.create(null);let on=true;for(let i=0;i<ids.length;i++){idMap[ids[i]]=1;if(!sMap[ids[i]])on=false}s=on?s.filter(function(i){return !idMap[i]}):s.concat(ids.filter(function(i){return !sMap[i]}))}
 {const wasAll=cur.all,rc=UI.rcl;UI.rcl=wasAll?[c]:(rc?(rc.indexOf(c)>-1?rc.filter(function(z){return z!==c}):rc.concat([c])):null)}
 UI.rsel=(s.length===A.length||s.length===0)?null:s;
 if(typeof window.vrUpdateAnnualFilters==='function'&&window.vrUpdateAnnualFilters('data-rcat',c))return;
+if(window.vrUpdateReportFilters('data-rcat',c))return;
 render();const rr=document.getElementById('rr');if(rr){rr.scrollLeft=0;rr.scrollTop=0}const nb=Array.prototype.find.call(document.querySelectorAll('[data-rcat]'),function(x){return x.dataset.rcat===c});if(nb)nb.focus()});
 })();
