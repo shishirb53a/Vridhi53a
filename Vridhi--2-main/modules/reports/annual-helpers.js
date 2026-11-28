@@ -67,6 +67,7 @@
     });
     var yi = keys.indexOf('year'); t.dataset.aphYear = String(yi);
     var first = firstYear(t);     /* Today = the earliest year in the table (the row for the start of the plan) */
+    t.dataset.aphFirst = String(first);
     Array.prototype.forEach.call(t.querySelectorAll('tr[data-r]'), function (r) {
       if (yi >= 0 && r.cells[yi] && yearOf(r.cells[yi]) === first && !r.cells[yi].querySelector('.vr-tdy')) r.cells[yi].insertAdjacentHTML('beforeend', '<span class="vr-tdy">Today</span>');
     });
@@ -81,7 +82,7 @@
     t.classList.toggle('vr-view-hold', st.cols === 'hold');
     t.classList.toggle('vr-view-inc', st.cols === 'inc');
     var yi = +t.dataset.aphYear;
-    var first = firstYear(t);
+    var first = +t.dataset.aphFirst || firstYear(t);
     Array.prototype.forEach.call(t.querySelectorAll('tr[data-r]:not(.t)'), function (r) {
       var year = yi >= 0 && r.cells[yi] ? yearOf(r.cells[yi]) : 0;
       var keep = !year || keepRow(year, year === first, !!r.querySelector('.rtg'), r.getAttribute('aria-selected') === 'true', st.years);
@@ -91,8 +92,16 @@
   function syncBar(bar, t) {
     if (!bar) return;
     var root = document.getElementById('m') || bar;
-    Array.prototype.forEach.call(root.querySelectorAll('[data-aph-cols]'), function (b) { b.classList.toggle('on', b.dataset.aphCols === st.cols); b.setAttribute('aria-pressed', String(b.dataset.aphCols === st.cols)); });
-    Array.prototype.forEach.call(root.querySelectorAll('[data-aph-years]'), function (b) { b.classList.toggle('on', +b.dataset.aphYears === st.years); b.setAttribute('aria-pressed', String(+b.dataset.aphYears === st.years)); });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-aph-cols]'), function (b) {
+      var on = b.dataset.aphCols === st.cols;
+      if (b.classList.contains('on') !== on) b.classList.toggle('on', on);
+      if (b.getAttribute('aria-pressed') !== String(on)) b.setAttribute('aria-pressed', String(on));
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-aph-years]'), function (b) {
+      var on = +b.dataset.aphYears === st.years;
+      if (b.classList.contains('on') !== on) b.classList.toggle('on', on);
+      if (b.getAttribute('aria-pressed') !== String(on)) b.setAttribute('aria-pressed', String(on));
+    });
     var ctl = bar.querySelector('.vr-ctl'); if (ctl) ctl.hidden = !(t && t.getClientRects().length);     /* phones show year cards instead of the table: keep the summary, drop the table controls */
   }
 
@@ -116,10 +125,28 @@
       syncBar(bar, t);
       if (typeof window.vrSyncAnnualProjection === 'function') window.vrSyncAnnualProjection();
     } finally {
+      if (obs && obs.takeRecords) obs.takeRecords();
       var mm = document.getElementById('m'); if (mm && obs) obs.observe(mm, { childList: true, subtree: true });
     }
   }
-  function schedule() { clearTimeout(timer); timer = setTimeout(work, 30); }   /* after the Columns feature has finished with the new table */
+  function isHelperMutation(recs) {
+    if (!recs || !recs.length) return false;
+    var IGNORE = '.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#ap-mob-host,#fzs';
+    for (var i = 0; i < recs.length; i++) {
+      var rec = recs[i], t = rec.target && rec.target.nodeType === 3 ? rec.target.parentElement : rec.target;
+      if (t && t.closest && t.closest(IGNORE)) continue;
+      if (rec.addedNodes && rec.addedNodes.length === 1 && rec.removedNodes && rec.removedNodes.length === 0) {
+        var an = rec.addedNodes[0];
+        if (an.nodeType === 1 && an.matches && an.matches(IGNORE)) continue;
+      }
+      return false;
+    }
+    return true;
+  }
+  function schedule(recs) {
+    if (Array.isArray(recs) && isHelperMutation(recs)) return;
+    clearTimeout(timer); timer = setTimeout(work, 30);
+  }   /* after the Columns feature has finished with the new table */
 
   var hotTable = null, hotIndex = -1;
   function clearHot() { if (hotTable) Array.prototype.forEach.call(hotTable.querySelectorAll('.vr-col'), function (c) { c.classList.remove('vr-col'); }); hotTable = null; hotIndex = -1; }

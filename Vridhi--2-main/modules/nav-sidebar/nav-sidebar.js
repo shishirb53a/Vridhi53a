@@ -182,14 +182,19 @@
     render();
     if (typeof MutationObserver === "function") {
       var mo = new MutationObserver(scheduleRender);
-      ["nav", "m", "who", "lg"].forEach(function (id) {
+      ["nav", "m", "who"].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) mo.observe(el, {
           childList: true,
-          subtree: true,
+          subtree: id !== "m",
           attributes: true,
-          attributeFilter: ["hidden", "class", "aria-selected", "aria-current", "aria-pressed"]
+          attributeFilter: ["hidden", "aria-selected", "aria-current", "aria-pressed"]
         });
+      });
+      var lgEl = document.getElementById("lg");
+      if (lgEl) mo.observe(lgEl, {
+        attributes: true,
+        attributeFilter: ["hidden", "class"]
       });
     }
     document.addEventListener("vr:accesschange", scheduleRender);

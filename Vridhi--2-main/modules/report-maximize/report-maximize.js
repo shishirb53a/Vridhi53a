@@ -5,7 +5,7 @@
    When maximized, all visible report columns are fitted into a single-page width without horizontal scrolling,
    and an "Export to PDF" button lets users save the report in a clean printable landscape format. */
 (function(){
-var KEY='vr-rep-max',pref=true,raf=0,fitTimer=0,fitting=false;
+var KEY='vr-rep-max',pref=true,raf=0,fitTimer=0,fitting=false,forceRefit=false;
 var FIT_SEL='table.rt,table.vp-t,table.sx-t';
 try{pref=localStorage.getItem(KEY)!=='0'}catch(e){}
 var IC={
@@ -52,6 +52,7 @@ function resetTable(tbl){
   delete wrap.dataset.vrFitH;
  }
  if(tbl.dataset&&tbl.dataset.vrFit)delete tbl.dataset.vrFit;
+ delete tbl.__vrFitSig;
 }
 function clearContainer(root){
  if(!root||typeof root.querySelectorAll!=='function')return;
@@ -62,13 +63,21 @@ function measureWidth(tbl){
  var sw=tbl.scrollWidth||0,ow=tbl.offsetWidth||0;
  return sw>ow?sw:ow;
 }
+function fitSig(tbl,avail){
+ var rc=tbl.rows?tbl.rows.length:0,cc=rc&&tbl.rows[0]&&tbl.rows[0].cells?tbl.rows[0].cells.length:0;
+ var vw=tbl.classList?(tbl.classList.contains('vr-view-hold')?'h':tbl.classList.contains('vr-view-inc')?'i':'a'):'';
+ return avail+'|'+rc+'|'+cc+'|'+vw+'|'+(tbl.dataset&&tbl.dataset.rc||'')+'|'+(tbl.dataset&&tbl.dataset.aph||'');
+}
 function fitTable(tbl){
  if(!tbl||!tbl.parentElement||!tbl.style)return;
- resetTable(tbl);
  var wrap=tbl.parentElement;
  if(wrap.scrollLeft)wrap.scrollLeft=0;
  var avail=wrap.clientWidth||0;
  if(avail<=0)return;
+ var sig=fitSig(tbl,avail);
+ if(!forceRefit&&tbl.__vrFitSig===sig&&tbl.dataset&&tbl.dataset.vrFit)return;
+ resetTable(tbl);
+ tbl.__vrFitSig=sig;
  var need=measureWidth(tbl);
  if(need<=avail+1){if(tbl.dataset)tbl.dataset.vrFit='1';return}
  if(tbl.classList)tbl.classList.add('vr-fit-tight');
@@ -111,6 +120,7 @@ function fitContainer(root,active){
 function fitAll(){
  if(fitting)return;
  fitting=true;
+ var prevForce=forceRefit;forceRefit=true;
  try{
   var m=document.getElementById('m');
   if(m)fitContainer(m,!!(m.classList&&m.classList.contains('vr-rmax')));
@@ -119,6 +129,7 @@ function fitAll(){
   var dg=document.getElementById('dg');
   if(dg)fitContainer(dg,!!(dg.open&&dg.classList&&dg.classList.contains('fh-full')));
  }finally{
+  forceRefit=prevForce;
   fitting=false;
  }
 }
@@ -447,14 +458,17 @@ function syncRetirement(){
  if(!btn){var ed=document.getElementById('fh-hedit');btn=mk('fh-max',((ed&&ed.className)||add.className||'').trim()+' vr-ib vr-ib-max');var hx=document.getElementById('fh-hx');if(hx&&hx.parentNode)hx.parentNode.insertBefore(btn,hx);else add.insertAdjacentElement('afterend',btn)}
  btn.hidden=!rep;paint(btn,rep&&pref);
  syncPdfBtn('fh-pdf','vr-ib vr-ib-pdf fh-pdf',btn.parentNode,btn,rep&&pref)}
+var lastBgTheme='',lastBgVal='';
 function syncPage(){
  var m=document.getElementById('m'),host=m&&m.querySelector('[data-rpx]'),btn=document.getElementById('rp-max');
  if(!m)return;
- if(!host){m.classList.remove('vr-rmax');clearContainer(m);syncPdfBtn('rp-pdf','',null,null,false);return}
+ if(!host){if(m.classList.contains('vr-rmax'))m.classList.remove('vr-rmax');clearContainer(m);syncPdfBtn('rp-pdf','',null,null,false);return}
  if(btn&&!host.contains(btn)){btn.remove();btn=null}
  if(!btn){btn=mk('rp-max','vr-ib vr-ib-max rp-max');host.appendChild(btn)}
- m.classList.toggle('vr-rmax',pref);
- var bg=getComputedStyle(document.body).backgroundColor;if(m.style.getPropertyValue('--vr-bg')!==bg)m.style.setProperty('--vr-bg',bg);
+ if(m.classList.contains('vr-rmax')!==pref)m.classList.toggle('vr-rmax',pref);
+ var thKey=(document.documentElement.getAttribute('data-theme')||'')+'|'+(document.documentElement.dataset.pal||'');
+ if(!lastBgVal||thKey!==lastBgTheme){lastBgTheme=thKey;lastBgVal=getComputedStyle(document.body).backgroundColor}
+ if(m.style.getPropertyValue('--vr-bg')!==lastBgVal)m.style.setProperty('--vr-bg',lastBgVal);
  paint(btn,pref);
  syncPdfBtn('rp-pdf','vr-ib vr-ib-pdf rp-pdf',host,btn,pref);
  fitContainer(m,pref)}
@@ -466,7 +480,7 @@ function syncPopup(){
  paint(btn,pref);
  syncPdfBtn('hy-pdf','vr-ib vr-ib-pdf hy-pdf',btn.parentNode,btn,pref);
  fitContainer(d,pref)}
-function sync(){raf=0;syncRetirement();syncPage();syncPopup();if(pref)scheduleFit(70)}
+function sync(){raf=0;syncRetirement();syncPage();syncPopup()}
 function queue(){if(!raf)raf=requestAnimationFrame(sync)}
 function toggle(){pref=!pref;try{localStorage.setItem(KEY,pref?'1':'0')}catch(x){}sync()}
 document.addEventListener('click',function(e){
@@ -485,10 +499,12 @@ document.addEventListener('keydown',function(e){if(e.key!=='Escape'||!pref)retur
  if(!m||!m.classList.contains('vr-rmax')||document.querySelector('dialog[open]')||document.querySelector('.msd-p:not([hidden])'))return;
  e.preventDefault();toggle()});
 new MutationObserver(function(recs){
+ var IGNORE='#vr-side,#vr-drawer,#vr-drawer-backdrop,#vr-side-bc,#toast,#vr-pdf-frame,.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,#ap-mob-host,.vr-aph,#fzs,#rp-max,#rp-pdf,#fh-max,#fh-pdf,#hy-max,#hy-pdf';
  for(var i=0;i<recs.length;i++){
-  var t=recs[i].target;
+  var r=recs[i],t=r.target;
   if(t&&t.nodeType===3)t=t.parentElement;
-  if(t&&t.closest&&t.closest('#vr-side,#vr-drawer,#vr-drawer-backdrop,#vr-side-bc,#toast,#vr-pdf-frame'))continue;
+  if(t&&t.closest&&t.closest(IGNORE))continue;
+  if(r.addedNodes&&r.addedNodes.length===1&&r.removedNodes&&r.removedNodes.length===0&&r.addedNodes[0].nodeType===1&&r.addedNodes[0].matches&&r.addedNodes[0].matches(IGNORE))continue;
   queue();break;
  }
 }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','open']});

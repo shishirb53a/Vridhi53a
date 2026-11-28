@@ -49,16 +49,23 @@ function reportsFit(){var rr=M.querySelector('#rr'),card=rr&&rr.closest('.card')
 if(card){card.classList.toggle('vf-open',FIT.fo);var h=card.querySelector('.rph2');
 if(h&&innerWidth<=720){var b=document.createElement('button');b.type='button';b.className='vflt';b.dataset.vflt='1';b.textContent=FIT.fo?'Hide filters':'Filters';h.insertBefore(b,h.lastElementChild)}}
 lst('rep',rr)}
-function run(){busy=true;try{var t=tab();document.documentElement.dataset.vt=t;
+function run(){busy=true;try{var t=tab();if(document.documentElement.dataset.vt!==t)document.documentElement.dataset.vt=t;
+if(t!=='Holdings'&&t!=='Reports'&&t!=='Users'&&t!=='Settings'&&t!=='Help'){if(M.querySelector('.vpg,.vsub,.vflt'))rm('.vpg,.vsub,.vflt');return}
 rm('.vpg');rm('.vsub');rm('.vflt');M.querySelectorAll('.vh').forEach(function(e){e.classList.remove('vh')});
 if(t==='Holdings')lst('hold',M.querySelector('#hr'));
 else if(t==='Reports')reportsFit();
 else if(t==='Users'){var u=M.querySelector('.ut');if(u){var tw=u.querySelector('.tw');fitList('usr',tw,[].slice.call(u.querySelectorAll('tbody tr')))}}
 else if(t==='Settings')settingsFit();
 else if(t==='Help')helpFit()}finally{obs.takeRecords();busy=false}}
-function sched(){if(busy)return;cancelAnimationFrame(raf);raf=requestAnimationFrame(run)}
+function isNoise(recs){if(!Array.isArray(recs)||!recs.length)return false;
+var IGN='.vpg,.vsub,.vflt,.nb,.rtg,#ap-mob-host,.vr-aph,#fzs';
+for(var i=0;i<recs.length;i++){var r=recs[i],t=r.target&&r.target.nodeType===3?r.target.parentElement:r.target;
+if(t&&t.closest&&t.closest(IGN))continue;
+if(r.addedNodes&&r.addedNodes.length===1&&r.removedNodes&&r.removedNodes.length===0&&r.addedNodes[0].nodeType===1&&r.addedNodes[0].matches&&r.addedNodes[0].matches(IGN))continue;
+return false}return true}
+function sched(recs){if(busy||isNoise(recs))return;cancelAnimationFrame(raf);raf=requestAnimationFrame(run)}
 var obs=new MutationObserver(sched);obs.observe(M,{childList:true,subtree:true});
-addEventListener('resize',sched);
+addEventListener('resize',function(){sched()});
 document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.vpg button,.vsub button,.vflt');if(!t)return;
 var k=t.closest('.vpg');if(k){FIT.pg[k.dataset.k]=(FIT.pg[k.dataset.k]||0)+(+t.dataset.pg);e.stopPropagation();run();return}
 if(t.dataset.vsp!=null){FIT.sp=SP[+t.dataset.vsp][0];e.stopPropagation();run();return}

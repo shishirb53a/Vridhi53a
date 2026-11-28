@@ -91,8 +91,7 @@ function policyState(plan){
 function model(plan){
  var signature=JSON.stringify(plan.state),cached=ST.models[plan.id];
  if(cached&&cached.signature===signature)return cached;
- var copy=JSON.parse(signature||'{}');
- var md=window.monthData(copy),next={signature:signature,rows:md.rows||[],assets:plan.state.assets||[],result:md};
+ var md=window.monthData(plan.state),next={signature:signature,rows:md.rows||[],assets:plan.state.assets||[],result:md};
  ST.models[plan.id]=next;return next
 }
 function planRows(plan,date,allowSnapshots,snapshotAsOf,selectedIds){
@@ -207,7 +206,7 @@ function syncSlider(){
 function reportMarkup(plans){
  var selected=rangePlan(plans),
  clientOpts='<option value="all"'+(ST.client==='all'?' selected':'')+'>All clients</option>'+planList().map(function(p){return'<option value="'+escape(p.id)+'"'+(ST.client===p.id?' selected':'')+'>'+escape(p.name)+(p.active?' (current)':'')+'</option>'}).join('');
- setTimeout(function(){drawBody()},0);
+ setTimeout(function(){if(window.RCOLS&&document.getElementById('rr'))window.RCOLS.apply(document.getElementById('rr'),'vdate')},0);
  return'<div class="card vod-page"><div class="rph2" data-rpx><div class="rpt"><h2>Value on Date</h2>'+(window.rptInfo?window.rptInfo('Portfolio value on a selected date. Future dates use the Monthly Portfolio Projection engine. On or before today, the nearest saved holding snapshot on or before that date is used when available; otherwise the projection engine is used. A holding added after the date is excluded. Daily values between monthly projection rows are accrued from the engine values; the first of each month matches the Monthly Portfolio Projection report.','About this report'):'')+'</div>'+(window.rptCsv?window.rptCsv('csv'):'<button type="button" id="csv" class="vr-ib vr-ib-csv" title="Copy as CSV" aria-label="Copy as CSV"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>')+'</div><div class="tb vod-toolbar"><div class="vod-client-wrap"><label class="vod-select-label" for="vod-client">Client</label><select id="vod-client" aria-label="Client">'+clientOpts+'</select></div>'+sliderMarkup(selected)+'<div class="vod-date-wrap"><span class="vod-select-label">Date</span><button type="button" class="vod-date" data-vod="toggle" aria-haspopup="dialog" aria-label="Choose report date, '+escape(displayDate(ST.date))+'" aria-expanded="'+ST.open+'">'+escape(displayDate(ST.date))+' <span aria-hidden="true">▾</span></button>'+calendarMarkup(plans)+'</div></div>'+window.rsDrops()+'<div class="tb vod-tools"><input id="vod-q" type="search" aria-label="Search holdings" placeholder="Search holding, category, basis…" value="'+escape(ST.query)+'"></div><div id="rr"><div id="vod-body">'+bodyHTML(plans)+'</div></div></div>'
 }
 function drawBody(skipSnapshots){

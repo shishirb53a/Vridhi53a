@@ -87,50 +87,108 @@
   function calculate(s, dependencies) {
     const stage = dependencies.stage, policy = dependencies.policy, yearsOf = dependencies.yearsOf;
     const rows = [], N = Math.max(2, Math.min(61, s.end - s.start + 1));
-    s.assets.forEach(x => { if (x.type !== 'gratuity') x.yrs = yearsOf(x, s); });
+    const assets = s.assets;
+    const meta = new Array(assets.length);
+    for (let i = 0; i < assets.length; i++) {
+      const x = assets[i];
+      if (x.type !== 'gratuity') x.yrs = yearsOf(x, s);
+      const e = x.type === 'gratuity' ? null : entry(x, s);
+      const mt = x.type === 'gratuity' ? null : matOf(x, s);
+      meta[i] = {
+        e: e, mt: mt,
+        ek: e ? FYM(e.mo) : -1,
+        f0: x.type === 'gratuity' ? null : mIx(x.mfrom),
+        t0: x.type === 'gratuity' ? null : mIx(x.mto),
+        yf: x.type === 'gratuity' ? null : mIx(x.yfrom),
+        yt: x.type === 'gratuity' ? null : mIx(x.yto),
+        amon: x.amon || 4,
+        amk: FYM(x.amon || 4),
+        rem: 12 - FYM(x.amon || 4),
+        firstDays: e ? Math.min(365, Math.round((Date.UTC(e.fy + 1, 2, 31) - Date.UTC(e.y, e.mo - 1, e.d)) / 864e5) + 1) : 365
+      };
+    }
+    const members = s.members;
+    const memAges = members.map(m => m.age);
+    const isChild = members.map(m => m.role === 'Child');
     for (let a = 1; a <= N; a++) {
       const p = a > 1 ? rows[a - 2] : null;
-      const v = s.assets.map((x, i) => {
-        if (x.type === 'gratuity') return (a - 1 <= s.grat.rem) ? gratuity(s, a) : p.v[i] * (1 + x.ret);
-        if (a === 1) return x.value;
-        const o = p.v[i], q = fyInfo(x, s, a);
-        if (a < q.e.a0) return o;
-        const mt = matOf(x, s);
-        if (mt && a > mt.row) return o;
-        const mm = x.madd || 0, ay = q.act && q.yp ? x.add : 0, am = q.act ? mm * q.n : 0;
-        if (mt && a === mt.row) {
-          if (x.cmp === 'oa') return o + ay + am + (o + ay + am) * x.ret;
-          if (x.cmp === 'monthly') {
-            const ou = mcm(o, x, q);
-            return (mt.km > 0 ? ou[mt.km - 1] : o) * Math.pow(1 + x.ret / 12, mt.d / mt.dim);
+      const fyy = s.start + a - 2;
+      const v = new Array(assets.length);
+      let totSum = 0, rowAdd = 0;
+      for (let i = 0; i < assets.length; i++) {
+        const x = assets[i], md = meta[i];
+        let val;
+        if (x.type === 'gratuity') {
+          val = (a - 1 <= s.grat.rem) ? gratuity(s, a) : p.v[i] * (1 + x.ret);
+        } else if (a === 1) {
+          val = x.value;
+        } else {
+          const o = p.v[i], e = md.e, mt = md.mt;
+          const first = a === e.a0, act = a >= e.a0 && a <= x.yrs;
+          const ek = md.ek, f0 = md.f0, t0 = md.t0;
+          const ms = new Array(12);
+          let n = 0, w = 0;
+          for (let k = 0; k < 12; k++) {
+            const ix = (k <= 8 ? fyy : fyy + 1) * 12 + (k + 3) % 12;
+            const on = !!(act && (!first || k >= ek) && (f0 == null || ix >= f0) && (t0 == null || ix <= t0) && (!mt || ix < mt.ix));
+            ms[k] = on;
+            if (on) { n++; w += 12 - k; }
           }
-          if (!x.icr) return o * (1 + x.ret * mt.days / 365) + ay + am;
-          const w2 = q.ms.reduce((t, c, k) => t + (c ? mt.km - k : 0), 0);
-          const r2 = ay ? Math.max(0, mt.km - FYM(x.amon || 4)) : 0;
-          return o + ay + am + o * x.ret * mt.days / 365 + (mm * w2 + ay * r2) * x.ret / 12;
+          const amIx = (md.amon >= 4 ? fyy : fyy + 1) * 12 + md.amon - 1;
+          const yp = (a > e.a0 || md.amk >= ek) &&
+            (md.yf == null || amIx >= md.yf) &&
+            (md.yt == null || amIx <= md.yt) &&
+            (!mt || amIx < mt.ix);
+          const mm = x.madd || 0, ay = act && yp ? x.add : 0, am = act ? mm * n : 0;
+          rowAdd += ay + am;
+          if (a < e.a0 || (mt && a > mt.row)) {
+            val = o;
+          } else {
+            const q = { e: e, first: first, act: act, ms: ms, n: n, w: w, yp: yp, rem: md.rem, days: first ? md.firstDays : 365 };
+            if (mt && a === mt.row) {
+              if (x.cmp === 'oa') val = o + ay + am + (o + ay + am) * x.ret;
+              else if (x.cmp === 'monthly') {
+                const ou = mcm(o, x, q);
+                val = (mt.km > 0 ? ou[mt.km - 1] : o) * Math.pow(1 + x.ret / 12, mt.d / mt.dim);
+              } else if (!x.icr) {
+                val = o * (1 + x.ret * mt.days / 365) + ay + am;
+              } else {
+                let w2 = 0;
+                for (let k = 0; k < 12; k++) if (ms[k]) w2 += mt.km - k;
+                const r2 = ay ? Math.max(0, mt.km - md.amk) : 0;
+                val = o + ay + am + o * x.ret * mt.days / 365 + (mm * w2 + ay * r2) * x.ret / 12;
+              }
+            } else if (x.cmp === 'oa') {
+              val = o + ay + am + (o + ay + am) * x.ret;
+            } else if (x.cmp === 'monthly') {
+              val = mcm(o, x, q)[11];
+            } else if (!x.icr) {
+              val = o * (1 + x.ret * q.days / 365) + ay + am;
+            } else {
+              val = o + ay + am + o * x.ret * q.days / 365 + (mm * w + ay * md.rem) * x.ret / 12;
+            }
+          }
         }
-        if (x.cmp === 'oa') return o + ay + am + (o + ay + am) * x.ret;
-        if (x.cmp === 'monthly') return mcm(o, x, q)[11];
-        if (!x.icr) return o * (1 + x.ret * q.days / 365) + ay + am;
-        return o + ay + am + o * x.ret * q.days / 365 + (mm * q.w + ay * q.rem) * x.ret / 12;
-      });
-      const tot = Math.round(v.reduce((q, c) => q + c, 0));
+        v[i] = val;
+        totSum += val;
+      }
+      const tot = Math.round(totSum);
+      const ages = new Array(members.length), sts = new Array(members.length);
+      for (let mi = 0; mi < members.length; mi++) {
+        ages[mi] = memAges[mi] + a - 1;
+        sts[mi] = isChild[mi] ? stage(members[mi], a) : '';
+      }
       rows.push({
-        a: a, year: s.start + a - 1, age: s.members.map(m => m.age + a - 1),
-        st: s.members.map(m => m.role === 'Child' ? stage(m, a) : ''), v: v, tot: tot,
-        add: a > 1 ? s.assets.reduce((q, x) => {
-          if (x.type === 'gratuity') return q;
-          const k = fyInfo(x, s, a);
-          return q + (k.act ? (k.yp ? x.add : 0) + (x.madd || 0) * k.n : 0);
-        }, 0) : 0,
+        a: a, year: s.start + a - 1, age: ages, st: sts, v: v, tot: tot,
+        add: a > 1 ? rowAdd : 0,
         chg: p ? tot - p.tot : 0
       });
     }
     policy.applyToRows(s, rows);
     const cl = n => Math.min(N, Math.max(1, n));
     const ri = cl(s.ret - s.members[0].age + 1) - 1, hi = ri;
-    const inc = s.assets.map((x, i) => {
-      const mt = matOf(x, s);
+    const inc = assets.map((x, i) => {
+      const mt = meta[i].mt;
       return rows[ri].v[i] * (mt && ri + 1 >= mt.row ? 0 : x.ret);
     });
     const nx = rows[ri + 1];

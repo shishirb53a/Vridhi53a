@@ -10,7 +10,8 @@
   "use strict";
   const ST = window.StressTest;
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+  const INR_FMT = new Intl.NumberFormat("en-IN");
+  const inr = n => "₹" + INR_FMT.format(Math.round(n) || 0);
   const cr = n => {
     const abs = Math.abs(n);
     if (abs >= 1e7) return (n < 0 ? "−" : "") + "₹" + (abs / 1e7).toFixed(2) + " Cr";
@@ -628,13 +629,13 @@
       const tipEl = tip ? infoBtn(tip, `How ${label} is calculated`) : "";
       return `<th data-st-colk="${k}"${extraCls ? ` class="${extraCls}"` : ""} aria-sort="${ariaSort}"><div class="st-thw"><button type="button" data-st-eng-rk="${k}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(label)}${arrow}</button>${tipEl}</div>${colResizer("eng", k, label)}</th>`;
     }
-    function engineTableHTML(R) {
-      const idx = engActiveScenIdx(R);
+    function engineTableHTML(R, preIdx, preRows) {
+      const idx = preIdx || engActiveScenIdx(R);
       const noneSelected = (!st.engOutcomes.ok && !st.engOutcomes.short) || (st.engScens && Object.keys(st.engScens).every(k => !st.engScens[k])) || !idx.length;
       if (noneSelected) {
         return `<div class="em st-empty-box">Please select at least one scenario or outcome.</div>`;
       }
-      const engRows = engFilteredRows(R, idx);
+      const engRows = preRows || engFilteredRows(R, idx);
       if (!engRows.length) {
         return `<div class="em st-empty-box">No years match your search.</div>`;
       }
@@ -724,7 +725,7 @@
         `<p class="st-note st-scen-sub">${esc(clientName)} · <span data-st-eng-count>${rows.length} of ${R.engine.length} years shown</span> · Plan horizon: ${R.base.planYears} yrs (age ${R.base.age + R.base.planYears}) · Negative balance = money has run out.</p>` +
         engDrops(R) +
         `<div class="tb st-tb-bar"><input id="st-eng-q" type="search" placeholder="Search year, age, amount…" aria-label="Search calculation engine" value="${esc(st.engQ)}"><select id="st-eng-rsf" aria-label="Sort by">${sortOptHTML}</select><button type="button" id="st-eng-rsd" aria-label="Toggle sort direction" title="Toggle sort direction">${st.engSortDir > 0 ? "▲" : "▼"}</button></div>` +
-        `<div id="st-eng-rr">${engineTableHTML(R)}</div>` +
+        `<div id="st-eng-rr">${engineTableHTML(R, idx, rows)}</div>` +
         `</div></div>`;
     }
     const notes = () => `<section class="st-card st-notes-card" aria-label="Notes: how the numbers are worked out"><div class="rph2 st-scen-head"><div class="rpt"><h2>Notes: how the numbers are worked out</h2></div></div><ul class="st-notes-list">${NOTES.map(n => `<li>${esc(n)}</li>`).join("")}</ul></section>`;
@@ -787,14 +788,12 @@
     }
     function updateEngBody() {
       const R = st.result; if (!R) return;
+      const idx = engActiveScenIdx(R);
+      const engRows = idx.length ? engFilteredRows(R, idx) : [];
       const rr = host.querySelector("#st-eng-rr");
-      if (rr) rr.innerHTML = engineTableHTML(R);
+      if (rr) rr.innerHTML = engineTableHTML(R, idx, engRows);
       const cnt = host.querySelector("[data-st-eng-count]");
-      if (cnt) {
-        const idx = engActiveScenIdx(R);
-        const shown = idx.length ? engFilteredRows(R, idx).length : 0;
-        cnt.textContent = `${shown} of ${R.engine.length} years shown`;
-      }
+      if (cnt) cnt.textContent = `${engRows.length} of ${R.engine.length} years shown`;
       applyAllTableWidths();
       if (st.engMax) fitMaxTable();
     }
@@ -1224,30 +1223,52 @@
         e.preventDefault(); P.saveSettings(st.client, readSettings()); render();
       }
     });
+    if (document.__stDestroy) { try { document.__stDestroy(); } catch (e) {} }
+    const onDocClick = e => {
+      if (!host.isConnected) { if (document.__stDestroy) document.__stDestroy(); return; }
+      if (st.msd && !e.target.closest("[data-st-msd]")) {
+        st.msd = null;
+        syncMsd();
+      }
+    };
+    const onDocKeydown = e => {
+      if (!host.isConnected) { if (document.__stDestroy) document.__stDestroy(); return; }
+      if (e.key === "Escape") {
+        if (st.msd) { e.preventDefault(); st.msd = null; syncMsd(); return; }
+        if (st.max) { e.preventDefault(); toggleMax(false); return; }
+        if (st.engMax) { e.preventDefault(); toggleEngMax(false); }
+      }
+    };
+    const onWinResize = () => { if ((st.max || st.engMax) && host.isConnected) fitMaxTable(); };
     if (document.addEventListener) {
       document.addEventListener("pointermove", moveResize);
       document.addEventListener("mousemove", moveResize);
       document.addEventListener("pointerup", endResize);
       document.addEventListener("pointercancel", endResize);
       document.addEventListener("mouseup", endResize);
-      document.addEventListener("click", e => {
-        if (st.msd && host.isConnected && !e.target.closest("[data-st-msd]")) {
-          st.msd = null;
-          syncMsd();
-        }
-      });
-      document.addEventListener("keydown", e => {
-        if (e.key === "Escape" && host.isConnected) {
-          if (st.msd) { e.preventDefault(); st.msd = null; syncMsd(); return; }
-          if (st.max) { e.preventDefault(); toggleMax(false); return; }
-          if (st.engMax) { e.preventDefault(); toggleEngMax(false); }
-        }
-      });
+      document.addEventListener("click", onDocClick);
+      document.addEventListener("keydown", onDocKeydown);
     }
     if (typeof window !== "undefined" && window.addEventListener) {
       window.addEventListener("blur", endResize);
-      window.addEventListener("resize", () => { if ((st.max || st.engMax) && host.isConnected) fitMaxTable(); });
+      window.addEventListener("resize", onWinResize);
     }
+    document.__stDestroy = () => {
+      if (document.removeEventListener) {
+        document.removeEventListener("pointermove", moveResize);
+        document.removeEventListener("mousemove", moveResize);
+        document.removeEventListener("pointerup", endResize);
+        document.removeEventListener("pointercancel", endResize);
+        document.removeEventListener("mouseup", endResize);
+        document.removeEventListener("click", onDocClick);
+        document.removeEventListener("keydown", onDocKeydown);
+      }
+      if (typeof window !== "undefined" && window.removeEventListener) {
+        window.removeEventListener("blur", endResize);
+        window.removeEventListener("resize", onWinResize);
+      }
+      if (document.__stDestroy) document.__stDestroy = null;
+    };
     render();
     return { refresh: render, state: st, switchTab, toggleMax, toggleEngMax, fitMaxTable, applyAllTableWidths };
   }
@@ -1261,6 +1282,8 @@
     nav: function () { return ""; }
   }]);
   const fill = () => { const h = document.querySelector("[data-st-host]"); if (h && !h.firstChild) mount(h); };
-  new MutationObserver(fill).observe(document.documentElement, { childList: true, subtree: true });
+  const mRoot = document.getElementById("m");
+  if (mRoot) new MutationObserver(fill).observe(mRoot, { childList: true });
+  else new MutationObserver(fill).observe(document.documentElement, { childList: true, subtree: true });
   window.StressTestUI = { mount, appProvider, open: function (tab) { if (tab && TABS.some(t => t[0] === tab)) lastTab = tab; if (typeof UI !== "undefined" && typeof render === "function") { UI.tab = "Stress Test"; render(); } } };
 })();

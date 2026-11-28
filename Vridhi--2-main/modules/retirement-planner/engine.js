@@ -128,8 +128,9 @@
       for (const part of LUMP_PARTS) fields.push(lumpSumField(part, k));
     return fields;
   };
+  const INR_FMT = new Intl.NumberFormat("en-IN");
   const currency = x => Number.isFinite(x)
-    ? (x < -0.5 ? "−₹" + Math.round(-x).toLocaleString("en-IN") : "₹" + Math.round(x).toLocaleString("en-IN")) : "—";
+    ? (x < -0.5 ? "−₹" + INR_FMT.format(Math.round(-x) || 0) : "₹" + INR_FMT.format(Math.round(x) || 0)) : "—";
   const stepsFor = kids => kids
     ? ["family", "planning", "buckets", "household", "college", "weddings"]
     : ["family", "planning", "buckets", "household"];
@@ -237,7 +238,24 @@
      sub-tabs that are not currently showing. Cross-field rules and timing checks need valid
      numbers, so they only run once no field problem or rule violation precedes them. Timing
      problems never block each other, so every education / wedding timing violation is reported. */
+  const FH_CACHE_MAX = 8;
+  const _valCache = new Map(), _simCache = new Map(), _calcCache = new Map(), _hzCache = new Map();
+  function fhInpSig(inp) {
+    if (!inp || typeof inp !== "object") return "";
+    const ks = Object.keys(inp).sort();
+    let s = "";
+    for (let i = 0; i < ks.length; i++) s += ks[i] + "=" + String(inp[ks[i]]) + "\x1f";
+    return s;
+  }
+  function fhPut(map, key, val) {
+    if (map.size >= FH_CACHE_MAX) map.delete(map.keys().next().value);
+    map.set(key, val);
+    return val;
+  }
   function validateAll(inp) {
+    const inpSig = fhInpSig(inp), vKey = nowYear() + "|" + inpSig;
+    const hit = _valCache.get(vKey);
+    if (hit) return hit.slice();
     const kids = childCount(inp);
     const fields = fieldsFor(inp);
     const issues = [];
@@ -267,7 +285,8 @@
       }
     }
     issues.push(...lumpSumTimingIssues(inp));
-    return issues;
+    fhPut(_valCache, vKey, issues);
+    return issues.slice();
   }
   const validateStep = (inp, step) => validateAll(inp).filter(i => i.step === step);
 
@@ -491,30 +510,62 @@
   /* One simulation behind plan(), schedule(), horizonReport() and the earning credit, so they cannot disagree.
      Row y (1..years): spending parts, income, lump-sum receipts/outflows, reserve interest, the pool (P) and savings fund (S). */
   function simulate(inp, noEarn) {
+    const cy = nowYear(), extra = extraStreams(cy);
+    const simKey = cy + "|" + (noEarn ? 1 : 0) + "|" + (noExtra ? 1 : 0) + "|" + JSON.stringify(extra) + "|" + fhInpSig(inp);
+    const hit = _simCache.get(simKey);
+    if (hit) return hit;
     const years = num(inp, "until") - num(inp, "age"), rate = num(inp, "roi") / 100, reserve = num(inp, "buffer"), kids = childCount(inp);
-    const cy = nowYear(), extra = extraStreams(cy), sources = incomeStreams(inp), streams = sources.concat(extra);
+    const sources = incomeStreams(inp), streams = sources.concat(extra);
     const lumpSums = lumpSumStreams(inp);
     const R = noEarn ? 0 : earningYears(inp), E = R ? num(inp, "preEarn") : 0, g = R ? num(inp, "preRoi") / 100 : 0, age = num(inp, "age");
+    const reduceAge = num(inp, "reduceAge"), reduceMult = 1 - num(inp, "reducePercent") / 100;
+    const monthlyBase = 12 * num(inp, "monthly"), houseRate = 1 + num(inp, "houseInflation") / 100;
+    const reserveYield = reserve * num(inp, "bufferRoi") / 100;
+    const eduRate = 1 + num(inp, "educationInflation") / 100, wedRate = 1 + num(inp, "weddingInflation") / 100;
+    const childNA = [], childFeeY = [], childFeeAmt = [], childWedY = [], childWedCost = [];
+    for (let c = 1; c <= kids; c++) {
+      childNA[c] = isNA(inp, c);
+      childFeeY[c] = num(inp, "feeYears" + c);
+      childFeeAmt[c] = num(inp, "annualFee" + c);
+      childWedY[c] = num(inp, "weddingYears" + c);
+      childWedCost[c] = num(inp, "weddingCost" + c);
+    }
     let P = num(inp, "corpus") - reserve, S = 0;
     const today = []; let todayTotal = 0;
-    for (let c = 1; c <= kids; c++) if (num(inp, "weddingYears" + c) === 0) { today[c] = num(inp, "weddingCost" + c); todayTotal += today[c]; P -= today[c]; }
+    for (let c = 1; c <= kids; c++) if (childWedY[c] === 0) { today[c] = childWedCost[c]; todayTotal += today[c]; P -= today[c]; }
     const startPool = P, rows = [];
     for (let year = 1; year <= years; year++) {
-      const reduction = age + year > num(inp, "reduceAge") ? 1 - num(inp, "reducePercent") / 100 : 1;
-      const house = 12 * num(inp, "monthly") * (1 + num(inp, "houseInflation") / 100) ** (year - 1 + FIRST_YEAR_INFLATION) * reduction;
+      const reduction = age + year > reduceAge ? reduceMult : 1;
+      const house = monthlyBase * houseRate ** (year - 1 + FIRST_YEAR_INFLATION) * reduction;
       const lump = lumpSumCashFlow(lumpSums, year, cy);
-      const income = incomeIn(streams, year, cy) + lump.income, policy = incomeIn(extra, year, cy);   // policy = the part of income that is policy payouts
-      const incomeBySource = Object.fromEntries(sources.map(s => [s.k, incomeIn([s], year, cy)]));
-      const policyBySource = Object.fromEntries(extra.map(s => [s.k, incomeIn([s], year, cy)]));
-      const reserveYield = reserve * num(inp, "bufferRoi") / 100;
-      const fee = new Array(kids + 1).fill(0), wed = new Array(kids + 1).fill(0);
-      for (let c = 1; c <= kids; c++) {
-        if (!isNA(inp, c) && year <= num(inp, "feeYears" + c))
-          fee[c] = num(inp, "annualFee" + c) * (1 + num(inp, "educationInflation") / 100) ** (year - 1 + FIRST_YEAR_INFLATION);
-        if (year === num(inp, "weddingYears" + c))
-          wed[c] = num(inp, "weddingCost" + c) * (1 + num(inp, "weddingInflation") / 100) ** year;
+      let streamsInc = 0;
+      const incomeBySource = {}, policyBySource = {};
+      for (let i = 0; i < sources.length; i++) {
+        const s = sources[i], label = cy + year;
+        const amt = (label >= s.fromY && label <= s.toY) ? (s.byYear ? (s.byYear[label] || 0) : s.amount * (1 + s.g) ** (year - 1 + FIRST_YEAR_INFLATION)) : 0;
+        incomeBySource[s.k] = amt;
+        streamsInc += amt;
       }
-      const O = house + fee.reduce((t, x) => t + x, 0) + wed.reduce((t, x) => t + x, 0);
+      let policy = 0;
+      for (let i = 0; i < extra.length; i++) {
+        const s = extra[i], label = cy + year;
+        const amt = (label >= s.fromY && label <= s.toY) ? (s.byYear ? (s.byYear[label] || 0) : s.amount * (1 + s.g) ** (year - 1 + FIRST_YEAR_INFLATION)) : 0;
+        policyBySource[s.k] = amt;
+        policy += amt;
+      }
+      const income = streamsInc + policy + lump.income;
+      const fee = new Array(kids + 1).fill(0), wed = new Array(kids + 1).fill(0);
+      let O = house;
+      for (let c = 1; c <= kids; c++) {
+        if (!childNA[c] && year <= childFeeY[c]) {
+          fee[c] = childFeeAmt[c] * eduRate ** (year - 1 + FIRST_YEAR_INFLATION);
+          O += fee[c];
+        }
+        if (year === childWedY[c]) {
+          wed[c] = childWedCost[c] * wedRate ** year;
+          O += wed[c];
+        }
+      }
       const earning = year <= R, earn = earning ? E : 0;
       const startP = P, startS = S, interestP = P * rate, interestS = S * g;
       const cash = S + interestS + earn, used = earning ? Math.min(cash, O) : 0;   // spending paid by earnings + savings fund
@@ -529,7 +580,7 @@
         lumpReceived: lump.received, lumpSpent: lump.spent, lumpHeld: lump.held, lumpAdded, policyBySource, policy, reserveYield, earn, used, draw, startP, interestP, endP: P,
         startS, interestS, endS: earning && merged ? merged : endS, merged, total: P + S, reduction });
     }
-    return { rows, startPool, today, todayTotal, R, reserve };
+    return fhPut(_simCache, simKey, { rows, startPool, today, todayTotal, R, reserve });
   }
 
   /* ---------- annual cash-flow plan (year-end timing, as in the original) ----------
@@ -622,8 +673,12 @@
      A "Today" row is added only when a wedding falls due today. Child columns are arrays indexed by child (1..kids). */
   function horizonReport(inp, opts) {
     const currentYear = (opts && opts.currentYear) || new Date().getFullYear();
+    const cy = nowYear(), extra = extraStreams(cy);
+    const hzKey = cy + "|" + currentYear + "|" + (noExtra ? 1 : 0) + "|" + JSON.stringify(extra) + "|" + fhInpSig(inp);
+    const hit = _hzCache.get(hzKey);
+    if (hit) return hit.map(r => Object.assign({}, r));
     const age = num(inp, "age"), years = num(inp, "until") - age, kids = childCount(inp), cutP = num(inp, "reducePercent");
-    const streams = incomeStreams(inp).concat(extraStreams(nowYear())), lumpSums = lumpSumStreams(inp), sim = simulate(inp), R = sim.R, retireAge = R > 0 ? num(inp, "retire") : null;
+    const streams = incomeStreams(inp).concat(extra), lumpSums = lumpSumStreams(inp), sim = simulate(inp), R = sim.R, retireAge = R > 0 ? num(inp, "retire") : null;
     let pool = sim.startPool, seenNeg = false;
     const status = bal => { if (bal >= 0) return "Funded"; const s = seenNeg ? "Shortfall" : "Runs out"; seenNeg = true; return s; };
     const rows = [], zero = () => new Array(kids + 1).fill(0);
@@ -666,12 +721,17 @@
         earn: r.earn, netSaved: r.earning ? r.earn - r.O : 0, startS: r.startS, interestS: r.interestS, endS: r.merged ? r.merged : r.endS, merged: r.merged,
         paidByEarn: r.used, fromCorpus: r.draw });
     }
-    return rows;
+    fhPut(_hzCache, hzKey, rows);
+    return rows.map(r => Object.assign({}, r));
   }
 
   /* ---------- full result ---------- */
   function calculate(inp, opts) {
     const currentYear = (opts && opts.currentYear) || new Date().getFullYear();
+    const cy = nowYear(), extra = extraStreams(cy);
+    const cKey = cy + "|" + currentYear + "|" + (noExtra ? 1 : 0) + "|" + JSON.stringify(extra) + "|" + fhInpSig(inp);
+    const hit = _calcCache.get(cKey);
+    if (hit) return hit;
     const issues = validateAll(inp);
     if (issues.length) {
       const first = issues[0];
@@ -715,10 +775,10 @@
       (est.runout === null
         ? `The modeled spendable money remains positive through age ${until}.`
         : `The modeled spendable balance first turns negative around age ${est.runout}.`);
-    return { ok: true, issues: [], status: "", needed, available, surplus,
+    return fhPut(_calcCache, cKey, { ok: true, issues: [], status: "", needed, available, surplus,
       runout: est.runout, runoutText: est.runout === null
         ? `Does not run out by age ${until}` : `Around age ${est.runout}`,
-      rows, explanation, plan: est };
+      rows, explanation, plan: est });
   }
 
   root.FreedomHorizon = { defaultAllocation, defaultAllocationPercents, schedule, bucketsAt, horizonReport, FIELDS, BY_ID, STEP_LABELS, defaults, stepsFor, isBlank, currency,

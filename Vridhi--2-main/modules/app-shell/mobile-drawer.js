@@ -259,8 +259,8 @@
         if (typeof S !== "undefined" && S && Array.isArray(S.assets)) {
           if (S.assets.length === 0) {
             totalVal = 0;
-          } else if (typeof calc === "function") {
-            var res = calc(S);
+          } else if (typeof window.vrReportCalc === "function" || typeof calc === "function") {
+            var res = typeof window.vrReportCalc === "function" ? window.vrReportCalc() : calc(S);
             if (res && res.rows && res.rows[0] && typeof res.rows[0].tot === "number") {
               totalVal = res.rows[0].tot;
             }
@@ -353,7 +353,7 @@
     var cur = currentRoute();
     var groups = buildGroups();
 
-    body.innerHTML = groups.map(function (g) {
+    var bodyHtml = groups.map(function (g) {
       var hasActive = g.items.some(function (it) { return it.id === cur.id; });
       var isOpen = openGroup === g.id;
       var panelId = "vr-acc-panel-" + g.id;
@@ -379,13 +379,14 @@
         "</div>" +
       "</section>";
     }).join("");
+    if (body.__vrHtml !== bodyHtml) { body.__vrHtml = bodyHtml; body.innerHTML = bodyHtml; }
 
     var fundsBtn = document.getElementById("vr-drawer-funds");
     if (fundsBtn) {
       var summary = computeFundsSummary();
-      fundsBtn.disabled = !summary.interactive;
+      if (fundsBtn.disabled !== !summary.interactive) fundsBtn.disabled = !summary.interactive;
       var vlEl = fundsBtn.querySelector(".vr-funds-val");
-      if (vlEl) vlEl.textContent = summary.formatted;
+      if (vlEl && vlEl.textContent !== summary.formatted) vlEl.textContent = summary.formatted;
     }
 
     var helpLink = document.getElementById("vr-drawer-help");
@@ -478,6 +479,7 @@
     closeDrawer(false);
     try {
       if (kind === "gp") {
+        if (val === "Holdings" && typeof UI !== "undefined") UI.hv = null;
         var gpBtn = document.querySelector('#m [data-gptab="' + val + '"]');
         if (gpBtn) { gpBtn.click(); return; }
         if (typeof UI !== "undefined" && typeof render === "function") {
@@ -904,17 +906,14 @@
       else setTimeout(run, 16);
     }
 
-    var targets = [
-      document.getElementById("nav"),
-      document.getElementById("m"),
-      document.getElementById("who"),
-      document.getElementById("lg")
-    ].filter(Boolean);
     if (typeof MutationObserver === "function") {
       var mo = new MutationObserver(syncSoon);
-      targets.forEach(function (el) {
-        mo.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "class", "aria-selected", "aria-current", "aria-pressed"] });
+      ["nav", "m", "who"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) mo.observe(el, { childList: true, subtree: id !== "m", attributes: true, attributeFilter: ["hidden", "aria-selected", "aria-current", "aria-pressed"] });
       });
+      var lgEl = document.getElementById("lg");
+      if (lgEl) mo.observe(lgEl, { attributes: true, attributeFilter: ["hidden", "class"] });
       mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-uic"] });
     }
     document.addEventListener("vr:accesschange", syncSoon);

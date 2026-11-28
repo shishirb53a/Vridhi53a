@@ -38,19 +38,32 @@ function dup(id){const P=ensure();if(!P||!P.profiles[id]||Object.keys(P.profiles
 function del(id){const P=ensure();if(!P||!P.profiles[id]||Object.keys(P.profiles).length<2)return null;window.gppSync();const snapP=P.profiles[id],was=P.active===id;delete P.profiles[id];if(was)sw(Object.keys(P.profiles)[0]);else{save();render()}return{id,snap:snapP,was}}
 function restore(x){const P=ensure();if(!P||!x||P.profiles[x.id])return;P.profiles[x.id]=x.snap;if(x.was)sw(x.id);else{save();render()}}
 
+const METRICS_CACHE=new Map();
+function metricsSig(p){
+  if(!p||!p.d)return'';
+  let pol='';
+  if(typeof S!=='undefined'&&S){
+    try{pol=S.polGp===false?'off':JSON.stringify(S.polClients||null)+'|'+JSON.stringify(S.policies||null)}catch(e){pol=''}
+  }
+  return p.id+'|'+(p.active?'1':'0')+'|'+pol+'|'+JSON.stringify(p.d);
+}
+function setPortalHTML(portal){
+  const html=window.gppDrawerHTML();
+  if(portal.__gppHtml!==html){portal.__gppHtml=html;portal.innerHTML=html}
+}
 window.gppBarHTML=function(top){
   const clients=list(),active=clients.find(p=>p.active),label=active?displayName(active.name):translate('Add your first client');
   if(!top)return'';
   let portal=document.getElementById('gpp-drawer-portal');
   if(!portal){portal=document.createElement('div');portal.id='gpp-drawer-portal';document.body.appendChild(portal)}
-  portal.innerHTML=window.gppDrawerHTML();
+  setPortalHTML(portal);
   return'<span class="fhp-l">'+esc(translate('Client'))+'</span><button type="button" class="client-trigger gpp-client-trigger" id="gpp-sel" data-gpp-drawer-trigger aria-expanded="'+drawerOpen+'" aria-controls="gpp-drawer" title="'+esc(label)+'"><span class="client-trigger-value">'+esc(label)+'</span><svg class="client-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m3 6 5 5 5-5"/></svg></button>'
 };
 window.gppDashClient=function(){
   const clients=list(),active=clients.find(p=>p.active),label=active?displayName(active.name):translate('Add your first client');
   let portal=document.getElementById('gpp-drawer-portal');
   if(!portal){portal=document.createElement('div');portal.id='gpp-drawer-portal';document.body.appendChild(portal)}
-  portal.innerHTML=window.gppDrawerHTML();
+  setPortalHTML(portal);
   return'<div class="dz-client"><span class="dz-client-l">'+esc(translate('Client'))+'</span><button type="button" class="client-trigger gpp-client-trigger" id="gpp-sel" data-gpp-drawer-trigger aria-expanded="'+drawerOpen+'" aria-controls="gpp-drawer" title="'+esc(label)+'"><span class="client-trigger-value">'+esc(label)+'</span><svg class="client-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="m3 6 5 5 5-5"/></svg></button></div>'
 };
 window.gppHeroInner=function(){const P=ensure();if(!P)return'';const p=P.profiles[P.active],m=S.members&&S.members[0],M0=typeof cr==='function'?cr:null,nm=displayName(p.name||'');if(!nm)return'';
@@ -61,13 +74,15 @@ window.gppMBar=function(){return''};
 window.gppHoldingList=function(){/* read-only: every Goal Planner client with today's value of each holding (the same numbers as Current Corpus on the Goal Planner summary) */
   const P=ensure();if(!P)return[];window.gppSync();
   return Object.keys(P.profiles).map(function(id){const p=P.profiles[id];let items=[];
-    try{const d=JSON.parse(JSON.stringify(p.d)),D=calc(d);items=(d.assets||[]).map(function(x,i){return{id:String(x.id),name:String(x.name||'Holding'),cat:String(x.cat||''),val:Math.round(+D.rows[0].v[i]||0),ca:String(x.ca||''),ma:String(x.ma||'')}})}catch(e){items=[]}
+    try{const active=id===P.active&&typeof vrReportCalc==='function',d=active?S:JSON.parse(JSON.stringify(p.d)),D=active?vrReportCalc():calc(d);items=(d.assets||[]).map(function(x,i){return{id:String(x.id),name:String(x.name||'Holding'),cat:String(x.cat||''),val:Math.round(+D.rows[0].v[i]||0),ca:String(x.ca||''),ma:String(x.ma||'')}})}catch(e){items=[]}
     return{id:id,name:p.name,active:id===P.active,items:items}})};
 
 function metrics(p){
   if(!p.d.assets.length)return null;
+  const sig=metricsSig(p),hit=METRICS_CACHE.get(p.id);
+  if(hit&&hit.sig===sig)return hit.val;
   const keep=snap(S);
-  try{Object.assign(S,JSON.parse(JSON.stringify(p.d)));const c=ctx();let sv=0,fy='';/* savings per year = yearly + monthly additions in the first financial year, same rule as Reports > Annual Savings Schedule */let sn=0,s1=0,f1='',f2='';try{const D=calc(S),lab=i=>'FY '+(S.start+i-1)+'-'+String(S.start+i).slice(2);let tot=0;for(let i=1;i<D.rows.length;i++){const v=D.rows[i].add||0;if(v>0){tot+=v;sn++;if(sn===1){s1=Math.round(v);f1=lab(i)}f2=lab(i)}}sv=sn?Math.round(tot/sn):0;fy=f1&&f1+' to '+f2}catch(e){sv=0}/* Monthly income at retirement = the Dashboard's 'Income at Retirement' (D.incT / 12); expected return = value-weighted average of the holdings' own return rates */let inc=0,er=0;try{const D2=c.D;inc=Math.round((D2.incT||0)/12);const L=S.assets.filter(x=>x.type!=='gratuity'),tv=L.reduce((q,x)=>q+(+x.value||0),0);er=tv>0?L.reduce((q,x)=>q+(+x.value||0)*(+x.ret||0),0)/tv*100:(L.length?L.reduce((q,x)=>q+(+x.ret||0),0)/L.length*100:0)}catch(e){inc=0;er=0}return{today:c.r0.tot,atRet:c.rr.tot,goal:c.G,yr:c.yr,tm:c.tm,ret:S.ret,sav:sv,fy:fy,sn:sn,s1:s1,inc:inc,er:er}}
+  try{Object.assign(S,JSON.parse(JSON.stringify(p.d)));const c=ctx();let sv=0,fy='';/* savings per year = yearly + monthly additions in the first financial year, same rule as Reports > Annual Savings Schedule */let sn=0,s1=0,f1='',f2='';try{const D=(c&&c.D)?c.D:calc(S),lab=i=>'FY '+(S.start+i-1)+'-'+String(S.start+i).slice(2);let tot=0;for(let i=1;i<D.rows.length;i++){const v=D.rows[i].add||0;if(v>0){tot+=v;sn++;if(sn===1){s1=Math.round(v);f1=lab(i)}f2=lab(i)}}sv=sn?Math.round(tot/sn):0;fy=f1&&f1+' to '+f2}catch(e){sv=0}/* Monthly income at retirement = the Dashboard's 'Income at Retirement' (D.incT / 12); expected return = value-weighted average of the holdings' own return rates */let inc=0,er=0;try{const D2=c.D;inc=Math.round((D2.incT||0)/12);const L=S.assets.filter(x=>x.type!=='gratuity'),tv=L.reduce((q,x)=>q+(+x.value||0),0);er=tv>0?L.reduce((q,x)=>q+(+x.value||0)*(+x.ret||0),0)/tv*100:(L.length?L.reduce((q,x)=>q+(+x.ret||0),0)/L.length*100:0)}catch(e){inc=0;er=0}const val={today:c.r0.tot,atRet:c.rr.tot,goal:c.G,yr:c.yr,tm:c.tm,ret:S.ret,sav:sv,fy:fy,sn:sn,s1:s1,inc:inc,er:er};if(METRICS_CACHE.size>24)METRICS_CACHE.clear();METRICS_CACHE.set(p.id,{sig:sig,val:val});return val}
   catch(e){return null}
   finally{Object.assign(S,keep)}}
 window.gppActiveName=function(){const P=ensure();return P&&P.profiles[P.active]?displayName(P.profiles[P.active].name||''):''};
@@ -192,7 +207,7 @@ document.addEventListener('click',e=>{
   else if(act==='dup'){const n=dup(id);if(n)toast('Duplicated as '+n)}
   else if(act==='del'){if(Object.keys(P.profiles).length<2){toast('Keep at least one person');return}
     confirmBox('Delete \u201c'+displayName(P.profiles[id].name)+'\u201d and their saved holdings? This cannot be undone.',()=>{const x=del(id);if(x)toast('Deleted '+displayName(x.snap.name),()=>restore(x))})}});
-function redrawDrawer(){const portal=document.getElementById('gpp-drawer-portal');if(!portal)return;const list0=portal.querySelector('[data-gpp-client-list]'),top=list0?list0.scrollTop:0;portal.innerHTML=window.gppDrawerHTML();const l=portal.querySelector('[data-gpp-client-list]');if(l)l.scrollTop=top;applyFilter()}
+function redrawDrawer(){const portal=document.getElementById('gpp-drawer-portal');if(!portal)return;const list0=portal.querySelector('[data-gpp-client-list]'),top=list0?list0.scrollTop:0;const html=window.gppDrawerHTML();portal.__gppHtml=html;portal.innerHTML=html;const l=portal.querySelector('[data-gpp-client-list]');if(l)l.scrollTop=top;applyFilter()}
 function applyFilter(){const q=cmpQuery.trim().toLowerCase();let shown=0;document.querySelectorAll('[data-gpp-card]').forEach(row=>{const hit=row.dataset.gppCardName.includes(q);row.hidden=!hit;if(hit)shown++;const d=document.querySelector('[data-gpp-card-detail="'+row.dataset.gppCard+'"]');if(d)d.hidden=!hit});const n=document.querySelector('[data-gpp-none]');if(n)n.hidden=shown>0||!q}
 document.addEventListener('change',e=>{const c=e.target&&e.target.matches&&e.target.matches('[data-gpp-sel]')?e.target:null;if(!c)return;const id=c.dataset.gppSel,at=cmpSel.indexOf(id);
   if(c.checked){if(at<0){if(cmpSel.length>=MAXC){c.checked=false;toast(translate('You can compare up to 5 plans'));return}cmpSel.push(id)}}else if(at>-1)cmpSel.splice(at,1);

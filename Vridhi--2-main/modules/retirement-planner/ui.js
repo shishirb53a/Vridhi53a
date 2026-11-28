@@ -1804,7 +1804,8 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
     simAge = Math.min(b.max, Math.max(b.age, Math.round(a)));
     const $s = id => document.getElementById(id), ua = $s("fh-ua");
     if (!ua) return;
-    ua.value = simAge; ua.style.background = simFill(simAge, b.age, b.max, sv.v); const st0 = simSt(sv.v, simAge); ua.setAttribute("data-st", st0); const ul0 = $s("fh-ul"); if (ul0) ul0.setAttribute("data-st", st0);
+    const st0 = simSt(sv.v, simAge), pc = b.max > b.age ? (simAge - b.age) / (b.max - b.age) * 100 : 0;
+    ua.value = simAge; ua.style.background = `linear-gradient(to right,var(--sl-${st0}) 0%,var(--sl-${st0}) ${pc}%,var(--bd) ${pc}%,var(--bd) 100%)`; ua.setAttribute("data-st", st0); const ul0 = $s("fh-ul"); if (ul0) ul0.setAttribute("data-st", st0);
     $s("fh-ul").textContent = `Age ${simAge} \u00b7 ${simAge - b.age} yrs`; const ex0 = $s("fh-exp"); if (ex0) ex0.innerHTML = simTr(simExpHTML(sv.v, simAge));
     $s("fh-um").disabled = simAge <= b.age; $s("fh-up").disabled = simAge >= b.max;
     const t = $s("fh-sim-tbl"), h = $s("fh-sim-house"), ys = $s("rp2-yy-s");
@@ -1966,8 +1967,8 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
     return RP.hide;
   };
   const hzGroupNames = () => { try { const sv = savedState(); if (!sv || FHE.validateAll(sv.v).length) return []; return hzColumns(hzKids(sv.v), hzEarn(sv.v), sv.v).map(g => g.title).filter(t => t !== HZ_PIN); } catch (e) { return []; } };
-  function hzColsDropdown(v, earn) {
-    const all = hzColumns(hzKids(v), earn, v).filter(g => g.title !== HZ_PIN), hide = hzHide(), open = !!RP.cm;
+  function hzColsDropdown(v, earn, allCols) {
+    const all = (allCols || hzColumns(hzKids(v), earn, v)).filter(g => g.title !== HZ_PIN), hide = hzHide(), open = !!RP.cm;
     const shown = all.filter(g => !hide.includes(g.title)).length;
     const label = shown === all.length ? "All columns" : shown === 0 ? "Only year and age" : `${shown} of ${all.length} groups`;
     const chev = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
@@ -1978,7 +1979,7 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
   function hzView() {
     const sv = savedState();
     if (!sv || FHE.validateAll(sv.v).length) return null;
-    const v = sv.v, earn = hzEarn(v), vis = hzVisible(hzColumns(hzKids(v), earn, v), hzHide()), flat = [].concat(...vis.map(g => g.cols));
+    const v = sv.v, earn = hzEarn(v), allCols = hzColumns(hzKids(v), earn, v), vis = hzVisible(allCols, hzHide()), flat = [].concat(...vis.map(g => g.cols));
     const allRows = FHE.horizonReport(v).map((r, i) => (r.__i = i, r));
     let rows = allRows.slice();
     if (earn && (RP.ph === "Earning" || RP.ph === "Retired")) rows = rows.filter(r => r.phase === RP.ph);
@@ -1989,7 +1990,7 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
       const g = flat[k].get, n = x => (isFinite(Number(x)) && String(x).trim() !== "" ? Number(x) : null);
       rows = rows.slice().sort((a, b) => { const x = g(a), y = g(b), nx = n(x), ny = n(y); return (nx !== null && ny !== null ? nx - ny : String(x).localeCompare(String(y))) * RP.d || a.__i - b.__i; });
     } else if (RP.d < 0) rows = rows.slice().reverse();
-    return { v, flat, rows, allRows, cols: vis };
+    return { v, flat, rows, allRows, cols: vis, allCols };
   }
   const hzC = x => { const a = Math.abs(x), n = a >= 1e7 ? (a / 1e7).toFixed(2) + " Cr" : a >= 1e5 ? (a / 1e5).toFixed(2) + " L" : null; return n ? (x < 0 ? "(₹" + n + ")" : "₹" + n) : hzMoney(x); };
   function hzPhaseBar(v, shown, allRows) {
@@ -2004,46 +2005,52 @@ ${status}${ptHTML(v)}${simHTML(v)}${insights}${ms}${alloc}${table}</div>`;
     if (!w) return "";
     const { flat, rows } = w, sel = Number(RP.sel);
     if (!rows.length) return `<div class="mu" style="padding:14px">No rows match your search.</div>`;
-    const h = flat.map(c => { const i = flat.indexOf(c), on = Number(RP.k) === i; return `<th scope="col"${c.wide ? ' class="hz-w"' : ""} aria-sort="${on ? (RP.d > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-hzk="${i}">${esc(c.label)}${on ? (RP.d > 0 ? " ▲" : " ▼") : ""}</button></th>`; }).join("");
-    const val = (c, r) => { const v = c.get(r); return c.txt || c.status ? esc(v) : c.zero && v === 0 ? "—" : hzC(v); };
-    const cell = (c, r) => {
+    const h = flat.map((c, i) => { const on = Number(RP.k) === i; return `<th scope="col"${c.wide ? ' class="hz-w"' : ""} aria-sort="${on ? (RP.d > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-hzk="${i}">${esc(c.label)}${on ? (RP.d > 0 ? " ▲" : " ▼") : ""}</button></th>`; }).join("");
+    const fmtVal = (c, v) => (c.txt || c.status ? esc(v) : c.zero && v === 0 ? "—" : hzC(v));
+    const retBlank = FHE.isBlank(w.v.retire), retNum = retBlank ? NaN : Number(w.v.retire);
+    const isRet = r => !r.today && !retBlank && Number(r.age) === retNum ? " ret" : "";   // the year you retire: highlighted yellow
+    const cell = (c, r, retCls) => {
       const v = c.get(r);
       const tone = c.tone ? ` hz-${c.tone}` : "";
       if (c.status) return `<td class="hz-s ${v === "Funded" ? "dz-o" : v === "Runs out" ? "dz-w" : "dz-b"}">${esc(v)}</td>`;
-      if (c.txt) return `<td class="${c.wide ? "hz-w" : "hz-c"}${tone}">${c.wide ? hzWhat(v) : esc(v) + (c.label === "Age at Year-End" && isRet(r) ? '<span class="rtg">Retired</span>' : "")}</td>`;
-      return `<td class="${v < 0 ? "dz-b" : ""}${tone}" title="${esc(hzMoney(v, false))}">${val(c, r)}</td>`;
+      if (c.txt) return `<td class="${c.wide ? "hz-w" : "hz-c"}${tone}">${c.wide ? hzWhat(v) : esc(v) + (c.label === "Age at Year-End" && retCls ? '<span class="rtg">Retired</span>' : "")}</td>`;
+      return `<td class="${v < 0 ? "dz-b" : ""}${tone}" title="${esc(hzMoney(v, false))}">${fmtVal(c, v)}</td>`;
     };
-    const on = r => r.__i === sel ? " sel" : "";
-    const isRet = r => !r.today && !FHE.isBlank(w.v.retire) && Number(r.age) === Number(w.v.retire) ? " ret" : "";   // the year you retire: highlighted yellow
-    const body = rows.map(r => `<tr data-hzr="${r.__i}" tabindex="0" class="${(on(r) + isRet(r)).trim()}">${flat.map(c => cell(c, r)).join("")}</tr>`).join("");
-    const sum = c => rows.reduce((t, r) => t + c.get(r), 0);
-    const tot = `<tr class="hz-tot">${flat.map((c, i) => i === 0 ? '<td class="hz-c"></td>' : i === 1 ? '<td class="hz-c">Total</td>' : c.sum ? `<td class="${c.tone ? `hz-${c.tone}` : ""}" title="${esc(hzMoney(sum(c), false))}">${hzC(sum(c))}</td>` : "<td></td>").join("")}</tr>`;
+    const body = rows.map(r => {
+      const retCls = isRet(r), onCls = r.__i === sel ? " sel" : "";
+      return `<tr data-hzr="${r.__i}" tabindex="0" class="${(onCls + retCls).trim()}">${flat.map(c => cell(c, r, retCls)).join("")}</tr>`;
+    }).join("");
+    const sumMap = new Map();
+    const sum = c => { if (sumMap.has(c)) return sumMap.get(c); let t = 0; for (let j = 0; j < rows.length; j++) t += c.get(rows[j]); sumMap.set(c, t); return t; };
+    const tot = `<tr class="hz-tot">${flat.map((c, i) => { if (i === 0) return '<td class="hz-c"></td>'; if (i === 1) return '<td class="hz-c">Total</td>'; if (!c.sum) return "<td></td>"; const s = sum(c); return `<td class="${c.tone ? `hz-${c.tone}` : ""}" title="${esc(hzMoney(s, false))}">${hzC(s)}</td>`; }).join("")}</tr>`;
     const skip = c => c.sno || c.wide || /^(Year|Age)/.test(c.label);
     const [cs, cy, ca] = [flat[0], flat[1], flat[2]], wide = flat.find(c => c.wide);
     // Phone cards: year, age and status up top, three key amounts, everything else under a tap-to-open "Breakdown".
     const byLabel = t => flat.find(c => c.label.indexOf(t) === 0), cSp = byLabel("Total Expenses"), cIn = byLabel("Total Income"), cEn = byLabel("Closing Corpus"), cSt = flat.find(c => c.status);
     const stCls = v => v === "Funded" ? "dz-o" : v === "Runs out" ? "dz-w" : "dz-b";
     const km = (l, x, neg, tone) => `<div><small>${l}</small><b class="${neg ? "dz-b" : tone ? `hz-${tone}` : ""}">${x}</b></div>`;
+    const detailCols = flat.filter(c => !skip(c) && c !== cSp && c !== cIn && c !== cEn && c !== cSt);
     const cards = rows.map(r => {
-      const rest = flat.filter(c => !skip(c) && c !== cSp && c !== cIn && c !== cEn && c !== cSt && !(c.zero && c.get(r) === 0));
-      return `<div class="hz-card${on(r)}${isRet(r)}" data-hzr="${r.__i}"><div class="hz-chd"><div class="hz-ct">${esc(cy.get(r))} \u00b7 Age ${esc(ca.get(r))}${isRet(r) ? ' <span class="rtg">Retired</span>' : ""}</div>${cSt ? `<span class="hz-chip ${stCls(cSt.get(r))}">${esc(cSt.get(r))}</span>` : ""}</div>${wide ? `<div class="hz-cn">${hzWhat(wide.get(r))}</div>` : ""}
-<div class="hz-km">${cSp ? km("Expenses", hzC(cSp.get(r)), false, "expense") : ""}${cIn ? km("Income", hzC(cIn.get(r)), false, "income") : ""}${cEn ? km("Closing Corpus", hzC(cEn.get(r)), cEn.get(r) < 0) : ""}</div>
-<details class="hz-dt"><summary>Breakdown</summary>${rest.map(c => `<div class="hz-cr${c.bold ? " hz-b" : ""}"><span>${esc(c.label)}</span><span class="${c.get(r) < 0 ? "dz-b" : c.tone ? `hz-${c.tone}` : ""}">${val(c, r)}</span></div>`).join("")}</details></div>`;
+      const retCls = isRet(r), onCls = r.__i === sel ? " sel" : "";
+      const stVal = cSt ? cSt.get(r) : "", enVal = cEn ? cEn.get(r) : 0;
+      return `<div class="hz-card${onCls}${retCls}" data-hzr="${r.__i}"><div class="hz-chd"><div class="hz-ct">${esc(cy.get(r))} \u00b7 Age ${esc(ca.get(r))}${retCls ? ' <span class="rtg">Retired</span>' : ""}</div>${cSt ? `<span class="hz-chip ${stCls(stVal)}">${esc(stVal)}</span>` : ""}</div>${wide ? `<div class="hz-cn">${hzWhat(wide.get(r))}</div>` : ""}
+<div class="hz-km">${cSp ? km("Expenses", hzC(cSp.get(r)), false, "expense") : ""}${cIn ? km("Income", hzC(cIn.get(r)), false, "income") : ""}${cEn ? km("Closing Corpus", hzC(enVal), enVal < 0) : ""}</div>
+<details class="hz-dt"><summary>Breakdown</summary>${detailCols.map(c => { const cv = c.get(r); return c.zero && cv === 0 ? "" : `<div class="hz-cr${c.bold ? " hz-b" : ""}"><span>${esc(c.label)}</span><span class="${cv < 0 ? "dz-b" : c.tone ? `hz-${c.tone}` : ""}">${fmtVal(c, cv)}</span></div>`; }).join("")}</details></div>`;
     }).join("")
       + `<div class="hz-card hz-ctot"><div class="hz-chd"><div class="hz-ct">Total</div></div><div class="hz-km">${cSp ? km("Expenses", hzC(sum(cSp)), false, "expense") : ""}${cIn ? km("Income", hzC(sum(cIn)), false, "income") : ""}</div><details class="hz-dt"><summary>Breakdown</summary>${flat.filter(c => c.sum && c !== cSp && c !== cIn).map(c => `<div class="hz-cr"><span>${esc(c.label)}</span><span class="${c.tone ? `hz-${c.tone}` : ""}">${hzC(sum(c))}</span></div>`).join("")}</details></div>`;
     return `<div class="hz-wrap"><table class="rt hz-t"><thead><tr>${h}</tr></thead><tbody>${body}</tbody><tfoot>${tot}</tfoot></table></div><div class="hz-cards">${cards}</div>`;
   }
-  function hzFilters(v) {
+  function hzFilters(v, allCols) {
     const earn = hzEarn(v), ph = [["all", "All years"], ["Earning", "Earning phase only"], ["Retired", "Retirement only"]];
     const phase = earn ? `<div class="msd"><span class="msd-t">Phase</span><select id="hzp" class="hz-ph" aria-label="Show phase">${ph.map(o => `<option value="${o[0]}"${(RP.ph || "all") === o[0] ? " selected" : ""}>${o[1]}</option>`).join("")}</select></div>` : "";
-    return `<div class="msds hz-fr">${phase}${hzColsDropdown(v, earn)}</div>`;
+    return `<div class="msds hz-fr">${phase}${hzColsDropdown(v, earn, allCols)}</div>`;
   }
   window.hzReport = function () {
     const w = hzView();
     if (!w) return "";
     const opt = (val, cur, t) => `<option value="${val}"${String(cur) === String(val) ? " selected" : ""}>${t}</option>`;
     return `<div class="card"><div class="rph2" data-rpx><div class="rpt"><h2>Year-by-year plan</h2>${window.rptInfo("Click or tap a row to highlight it · click a column heading to sort · Freeze keeps the first columns in view while you scroll · amounts in ₹ Lakh / Crore (hover for the exact amount)", "About this table")}</div>${window.rptCsv ? window.rptCsv("hzcsv") : '<button type="button" id="hzcsv" class="vr-ib vr-ib-csv" title="Copy as CSV" aria-label="Copy as CSV"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>'}</div>
-${hzFilters(w.v)}
+${hzFilters(w.v, w.allCols)}
 <div class="tb hz-tb"><input id="hzq" type="search" placeholder="Search year, age, amount…" aria-label="Search year by year plan" value="${esc(RP.q || "")}"><select id="hzs" aria-label="Sort by">${opt(-1, RP.k, "Sort: S.No")}${w.flat.map((c, i) => opt(i, RP.k, "Sort: " + esc(c.label))).join("")}</select><select id="fzs" aria-label="Freeze columns">${[["0", "Freeze: none"], ["2", "Freeze: Year"], ["3", "Freeze: Year + Ages"]].map(o => `<option value="${o[0]}"${(document.body.dataset.fz || "2") === o[0] ? " selected" : ""}>${o[1]}</option>`).join("")}</select><button type="button" id="hzd" aria-label="Toggle sort direction">${RP.d > 0 ? "▲" : "▼"}</button></div>
 ${hzPhaseBar(w.v, w.rows, w.allRows)}
 
@@ -2182,7 +2189,8 @@ ${hzPhaseBar(w.v, w.rows, w.allRows)}
 
     const fundRows = r.rows.map(x => { const g = x.setAside - x.needed, tot = x.name === "TOTAL"; return `<tr${tot ? ' class="rp2-tot"' : ""}><td>${esc(tot ? "Total" : x.name)}</td><td>${sh(x.setAside)}</td><td>${sh(x.needed)}</td><td class="${tot && x.needed === undefined ? "" : g < -0.5 ? "sx-lo" : "sx-hi"}">${tot ? sgn(r.surplus) : (g < 0 ? "\u2212" : "+") + sh(Math.abs(g))}</td></tr>`; }).join("");
     const acc = (id, title, sub, body, open) => `<details class="rp2-ac" id="rp2-ac-${id}"${open ? " open" : ""}><summary><span>${title}</span><small${id === "yy" ? ' id="rp2-yy-s"' : ""}>${sub}</small></summary><div class="rp2-ab">${body}</div></details>`;
-    const slider = `<div class="rp2-sl"><button type="button" id="fh-um" aria-label="Decrease age by one year"${simAge <= b.age ? " disabled" : ""}>\u2212</button><input id="fh-ua" type="range" min="${b.age}" max="${b.max}" step="1" value="${simAge}" data-st="${simSt(v, simAge)}" style="background:${simFill(simAge, b.age, b.max, v)}" aria-label="Show the plan up to this age"><button type="button" id="fh-up" aria-label="Increase age by one year"${simAge >= b.max ? " disabled" : ""}>+</button></div><output id="fh-ul" for="fh-ua" class="rp2-ol" data-st="${simSt(v, simAge)}">Age ${simAge} \u00b7 ${simAge - b.age} yrs</output><div class="fh-exp" id="fh-exp" aria-live="polite">${simExpHTML(v, simAge)}</div>`;
+    const stSim = simSt(v, simAge), pcSim = b.max > b.age ? (simAge - b.age) / (b.max - b.age) * 100 : 0;
+    const slider = `<div class="rp2-sl"><button type="button" id="fh-um" aria-label="Decrease age by one year"${simAge <= b.age ? " disabled" : ""}>\u2212</button><input id="fh-ua" type="range" min="${b.age}" max="${b.max}" step="1" value="${simAge}" data-st="${stSim}" style="background:linear-gradient(to right,var(--sl-${stSim}) 0%,var(--sl-${stSim}) ${pcSim}%,var(--bd) ${pcSim}%,var(--bd) 100%)" aria-label="Show the plan up to this age"><button type="button" id="fh-up" aria-label="Increase age by one year"${simAge >= b.max ? " disabled" : ""}>+</button></div><output id="fh-ul" for="fh-ua" class="rp2-ol" data-st="${stSim}">Age ${simAge} \u00b7 ${simAge - b.age} yrs</output><div class="fh-exp" id="fh-exp" aria-live="polite">${simExpHTML(v, simAge)}</div>`;
     const explore = `<section aria-label="Explore the plan"><h3 class="rp2-h">Explore</h3><div class="rp2-chips" role="group" aria-label="Show plan up to age">${rp2Chips(v)}</div>${slider}
 ${acc("yy", "Year by year", `to age ${simAge}`, `<div id="fh-sim-tbl" aria-live="polite">${simTableHTML(v, simAge)}</div><div class="rp2-hs" id="fh-sim-house" aria-live="polite">${simHouseHTML(v, simAge)}</div>`)}
 ${acc("kids", "Kids goals", n ? `${sh(kSet)} set aside` : "none", P.kids)}

@@ -7,6 +7,7 @@
   var HELPERS_KEY = 'vr-annual-helpers';
   var COLS_GRID_SVG = '<svg class="ap-cols-ic" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg>';
   var mobState = { details: false, chip: 'all', openCards: {} };
+  var lastRenderedMobSig = '';
 
   function enhanceDropsHtml(html, assetCount) {
     if (!html) return '';
@@ -382,7 +383,7 @@
           '</div>' +
         '</footer>' +
       '</div>' +
-      '<div id="ap-mob-host">' + mobHtml(m, prefs) + '</div>' +
+      '<div id="ap-mob-host">' + (lastRenderedMobSig = mobHtml(m, prefs)) + '</div>' +
     '</div>';
   };
 
@@ -402,6 +403,8 @@
       var btn = cells[i].querySelector && cells[i].querySelector('button[data-rk]');
       if (btn && btn.dataset.rk === targetKey) { colIdx = i; break; }
     }
+    if (t.dataset && t.dataset.apHlCol === String(colIdx)) return;
+    if (t.dataset) t.dataset.apHlCol = String(colIdx);
     Array.prototype.forEach.call(t.querySelectorAll('.ap-hl-col'), function (el) { el.classList.remove('ap-hl-col'); });
     if (colIdx > -1) {
       Array.prototype.forEach.call(t.rows, function (r) {
@@ -423,7 +426,8 @@
     var snapEl = document.getElementById('ap-snap-n');
     if (snapEl && t) {
       var visCount = t.querySelectorAll('tr[data-r]:not(.vr-skip)').length;
-      snapEl.textContent = visCount + ' milestone snapshot' + (visCount === 1 ? '' : 's');
+      var snapTxt = visCount + ' milestone snapshot' + (visCount === 1 ? '' : 's');
+      if (snapEl.textContent !== snapTxt) snapEl.textContent = snapTxt;
     }
 
     var holdBtnTxt = wrap.querySelector('.msd[data-msd="hold"] .msd-b b');
@@ -439,10 +443,21 @@
 
     var mNode = document.getElementById('m');
     var maxBtn = wrap.querySelector('[data-ap-max]');
-    if (maxBtn && mNode) maxBtn.setAttribute('aria-pressed', String(mNode.classList.contains('vr-rmax')));
+    if (maxBtn && mNode) {
+      var maxStr = String(mNode.classList.contains('vr-rmax'));
+      if (maxBtn.getAttribute('aria-pressed') !== maxStr) maxBtn.setAttribute('aria-pressed', maxStr);
+    }
 
     var mobHost = document.getElementById('ap-mob-host');
-    if (mobHost) mobHost.innerHTML = mobHtml(m, prefs);
+    if (mobHost) {
+      var nextMob = mobHtml(m, prefs);
+      if (mobHost.__apSig == null && mobHost.firstElementChild && nextMob === lastRenderedMobSig) {
+        mobHost.__apSig = nextMob;
+      } else if (mobHost.__apSig !== nextMob) {
+        mobHost.__apSig = nextMob;
+        mobHost.innerHTML = nextMob;
+      }
+    }
   }
 
   function triggerPdfWithVisibleTable() {
@@ -516,15 +531,6 @@
         setTimeout(syncAnnualProjection, 20);
       }
     });
-
-    if (typeof MutationObserver === 'function' && typeof document.getElementById === 'function') {
-      var mRoot = document.getElementById('m');
-      if (mRoot) {
-        new MutationObserver(function () {
-          if (mRoot.querySelector('.ap-wrap')) syncFreezeLabel();
-        }).observe(mRoot, { childList: true, subtree: true });
-      }
-    }
   }
 
   window.vrSyncAnnualProjection = syncAnnualProjection;

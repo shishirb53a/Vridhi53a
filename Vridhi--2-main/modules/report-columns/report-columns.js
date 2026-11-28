@@ -80,14 +80,17 @@ else if(k&&!vis(v,k)){sp.remove();bv.remove()}}}
 var sm=d.querySelector('summary>div.mu');
 if(sm&&(v==='int'?!vis(v,'mi'):!vis(v,'hi')))sm.remove();reorderCard(d,v)})}}
 /* Columns dropdown on the Reports tab */
+var dropSig='';
 function fillDrop(dd,v){
 var list=dd.querySelector('.msd-l'),lab=LAB[v];if(!list||!lab)return;
-list.innerHTML=groups(v).filter(function(g){return DEFORD[v].indexOf(g)<0}).concat(effShown(v)).map(function(g){var t=tier(v,g);
+var nextHtml=groups(v).filter(function(g){return DEFORD[v].indexOf(g)<0}).concat(effShown(v)).map(function(g){var t=tier(v,g);
 return t==='fixed'?'<label class="msd-i"><input type="checkbox" checked disabled><span>'+esc(lab[g])+'</span><em>Fixed \ud83d\udd12</em></label>'
 :'<label class="msd-i"><input type="checkbox" data-rck="'+g+'"'+(vis(v,g)?' checked':'')+'><span>'+esc(lab[g])+'</span><em>'+(t==='dv'?'Default':'Optional')+'</em></label>'}).join('');
-var a=dd.querySelector('.msd-a');if(a)a.innerHTML='<button type="button" data-msda="cols:reset">Reset to default</button><button type="button" data-msda="cols:all">Show all</button>';
+if(dd.__rcSig!==nextHtml){dd.__rcSig=nextHtml;list.innerHTML=nextHtml;
+var a=dd.querySelector('.msd-a');if(a)a.innerHTML='<button type="button" data-msda="cols:reset">Reset to default</button><button type="button" data-msda="cols:all">Show all</button>';}
 var all=groups(v),n=all.filter(function(g){return vis(v,g)}).length,b=dd.querySelector('.msd-b b');
-if(b)b.textContent=!P[v]&&!O[v]?'Default columns':n===all.length?'All columns ('+n+')':n+' of '+all.length+' shown'}
+var bTxt=!P[v]&&!O[v]?'Default columns':n===all.length?'All columns ('+n+')':n+' of '+all.length+' shown';
+if(b&&b.textContent!==bTxt)b.textContent=bTxt}
 var last=null;
 function refresh(){var v=view(),dd=document.querySelector('.msd[data-msd="cols"]');if(dd)fillDrop(dd,v);
 var host=document.getElementById('rr');if(!host)return;apply(host,v);last=host.querySelector('table.rt')}
@@ -122,5 +125,5 @@ render();var all=[].slice.call(document.querySelectorAll('[data-rcmv]')),n=all.f
 window.RCOLS={apply:apply,vis:vis,annualMonthlyIncome:annualMonthlyIncome,cfg:CFG,catOrder:catOrder,hzOrder:hzOrder};
 var r1=window.render;window.render=function(){var r=r1.apply(this,arguments);refresh();return r};
 var m=document.getElementById('m');
-if(m)new MutationObserver(function(){var t=document.querySelector('#rr>table.rt');if(t&&t!==last)refresh()}).observe(m,{childList:true,subtree:true});
+if(m)new MutationObserver(function(){var t=document.querySelector('#rr>table.rt');if(t&&t!==last&&!t.dataset.rc)refresh()}).observe(m,{childList:true,subtree:true});
 })();

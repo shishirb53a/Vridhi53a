@@ -20,7 +20,7 @@ st.textContent='';const m=document.getElementById('m');if(!m)return;
 let bar=m.querySelector(':scope>.ordbar');if(!bar){bar=document.createElement('div');bar.className='ordbar';bar.innerHTML=tr('<button type="button" id="ordb">Reorder sections</button>',1);m.insertBefore(bar,m.firstChild)}
 const els=[...m.children].filter(x=>x!==bar).map(x=>({x,k:sig(t,x)}));const rank=k=>k==null?-1:o.indexOf(k);
 const known=els.filter(e=>e.k!=null).sort((a,b)=>rank(a.k)-rank(b.k)),rest=els.filter(e=>e.k==null);
-const gp=rest.filter(e=>e.x.classList&&e.x.classList.contains('gpb')),rest2=rest.filter(e=>!gp.includes(e));gp.concat(known,rest2).forEach(e=>m.appendChild(e.x))};/* the Goal Planner sub-tab bar always stays on top */
+const gp=rest.filter(e=>e.x.classList&&e.x.classList.contains('gpb')),rest2=rest.filter(e=>!gp.includes(e));const ordered=gp.concat(known,rest2);let idx=0,same=true;for(let ci=0;ci<m.children.length;ci++){if(m.children[ci]===bar)continue;if(m.children[ci]!==(ordered[idx]&&ordered[idx].x)){same=false;break}idx++}if(!same||idx!==ordered.length)ordered.forEach(e=>m.appendChild(e.x))};/* the Goal Planner sub-tab bar always stays on top */
 const nm=()=>Object.fromEntries(T[UI.tab].s);
 const html=()=>{const t=UI.tab,o=get(t),n=nm();return'<h2>Reorder '+T[t].n+' sections</h2><p class="mu">Use the arrows to move a section up or down. Your order is remembered on this device.</p><ul class="ordl">'+o.map((k,i)=>'<li><span class="ix">'+(i+1)+'</span><span class="n">'+n[k]+'</span><button type="button" data-mv="'+k+':-1" aria-label="Move '+n[k]+' up"'+(i?'':' disabled')+'>▲</button><button type="button" data-mv="'+k+':1" aria-label="Move '+n[k]+' down"'+(i<o.length-1?'':' disabled')+'>▼</button></li>').join('')+'</ul><div class="tb"><button type="button" data-mv="reset">Reset to default</button><button type="button" class="p" data-mv="done">Done</button></div>'};
 const r0=window.render;window.render=function(){const r=r0.apply(this,arguments);apply();return r};
@@ -34,7 +34,8 @@ apply();dg.innerHTML=tr(html(),1);const f=dg.querySelector('[data-mv="'+v+'"]:no
 (function(){const K='fwt2-fz';let v='2';try{v=localStorage.getItem(K)||'2'}catch(e){}
 const set=x=>{v=x;document.body.dataset.fz=x;try{localStorage.setItem(K,x)}catch(e){}};set(['0','2','3'].includes(v)?v:'2');
 const inj=()=>{const s=document.getElementById('rsf');if(s&&!document.getElementById('fzs')){const f=document.createElement('select');f.id='fzs';f.setAttribute('aria-label','Freeze columns');f.innerHTML='<option value="0">Freeze: none</option><option value="2">Freeze: Year</option><option value="3">Freeze: Year + Ages</option>';f.value=v;s.after(f)}};
-new MutationObserver(inj).observe(document.documentElement,{childList:true,subtree:true});inj();
+const mEl=document.getElementById('m');
+if(mEl)new MutationObserver(inj).observe(mEl,{childList:true,subtree:true});else new MutationObserver(inj).observe(document.documentElement,{childList:true,subtree:true});inj();
 document.addEventListener('change',e=>{if(e.target.id==='fzs')set(e.target.value)});})();
 (function(){
 const FN=[['inter','Inter','Clean & modern'],['poppins','Poppins','Friendly & round'],['nunito','Nunito Sans','Soft & readable'],['plex','IBM Plex Sans','Corporate'],['lora','Lora','Elegant serif'],['system','System','Your device font']];
