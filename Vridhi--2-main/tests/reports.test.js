@@ -193,9 +193,10 @@ assert.deepStrictEqual(
 assert.strictEqual(typeof window.repIRows, 'function', 'Interest report renderer interface is preserved');
 assert.strictEqual(typeof window.intCSV, 'function', 'Interest report CSV interface is preserved');
 assert.ok(window.repIRows().includes('Interest<br>earned'), 'Interest report renders the statement columns');
-assert.ok(window.repIRows().includes('<span class="rt-sub">Interest</span>') &&
+assert.ok(window.repIRows().includes('data-rk="v0">PPF</button>') &&
+  !window.repIRows().includes('<span class="rt-sub">Interest</span>') &&
   window.repIRows().includes('<td class="rt-num">') && !window.repIRows().includes('₹ L'),
-  'Interest report uses a muted sub-label, right-aligns numeric identifiers, and omits repeated lakh units');
+  'Interest report displays original holding column names without Interest postfix, right-aligns numeric identifiers, and omits repeated lakh units');
 assert.ok(!/<td\b[^>]*>[^<]*₹/.test(window.repIRows()), 'Interest report row amounts omit currency symbols');
 assert.ok(window.intCSV().includes('"Interest earned"'), 'Interest statement CSV retains its column headers');
 

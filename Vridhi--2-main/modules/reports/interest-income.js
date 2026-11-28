@@ -37,7 +37,7 @@ let tbl='';
 if(!skipTbl){
   const th=function(k,t){return'<th class="'+(k!=='year'?'rt-num':'')+'" aria-sort="'+(UI.rk===k?(UI.rd>0?'ascending':'descending'):'none')+'"><button data-rk="'+k+'">'+t+(UI.rk===k?(UI.rd>0?' ▲':' ▼'):'')+'</button></th>'};
   const tot=L.reduce(function(t,r){t.add+=r.m.add;t.intr+=r.m.intr;t.pay+=r.pay;idx.forEach(function(i){t.it[i]=(t.it[i]||0)+r.it[i]});return t},{add:0,intr:0,pay:0,it:{}});
-  const hdCols=visIdx.map(function(i){return th('v'+i,escn(A[i].name)+'<br><span class="rt-sub">Interest</span>')}).join('');
+  const hdCols=visIdx.map(function(i){return th('v'+i,escn(A[i].name))}).join('');
   tbl='<table class="rt rs"><tr>'+th('a','S.No')+th('year','Financial<br>year')+th('age','Age<br>(end)')+th('open','Opening')+th('add',"Add'ns")
   +hdCols+th('int','Interest<br>earned (₹)')+th('mi','Monthly<br>income (₹)')+th('roi','Yield on<br>opening')+th('close','Year end<br>balance')+'</tr>\n'
   +L.map(function(r){return'<tr data-r="'+r.a+'" class="'+cls(r)+'" tabindex="0" aria-selected="'+(UI.sel===r.a)+'"><td class="rt-num">'+r.a+'</td><td class="nw">'+r.fy+'</td><td class="nw rt-num">'+r.age.join(' / ')+'</td><td title="'+rf(r.m.open)+'">'+lk(r.m.open)+'</td><td>'+lk(r.m.add)+'</td>'
