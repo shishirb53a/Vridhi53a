@@ -1,4 +1,8 @@
 (function(){var M={'family':'users','general assumptions':'sliders','appearance & backup':'palette','users':'users','year-by-year plan':'table','year by year status':'cal'};
-function tag(){document.querySelectorAll('h1,h2').forEach(function(h){if(h.closest('dialog'))return;var k=M[h.textContent.trim().toLowerCase()];if(k){if(h.dataset.hic!==k)h.dataset.hic=k}else if(h.dataset.hic)delete h.dataset.hic})}
-var t=0;function q(){clearTimeout(t);t=setTimeout(tag,60)}
+var IGN='#rr,#ap-mob-host,.msd-p,.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#fzs,#rp-max,#rp-pdf,#fh-max,#fh-pdf,#hy-max,#hy-pdf,#vr-side,#vr-drawer,#toast';
+function allMatch(list){if(!list||!list.length)return true;for(var j=0;j<list.length;j++){var n=list[j];if(!n||n.nodeType!==1||!n.matches||!n.matches(IGN))return false}return true}
+function isNoise(recs){if(!Array.isArray(recs)||!recs.length)return false;for(var i=0;i<recs.length;i++){var r=recs[i],tg=r.target&&r.target.nodeType===3?r.target.parentElement:r.target;if(tg&&tg.closest&&tg.closest(IGN))continue;if(r.type==='childList'&&((r.addedNodes&&r.addedNodes.length)||(r.removedNodes&&r.removedNodes.length))&&allMatch(r.addedNodes)&&allMatch(r.removedNodes))continue;return false}return true}
+function walkHeadings(node){for(var c=node&&node.firstElementChild;c;c=c.nextElementSibling){var tn=c.tagName;if(tn==='DIALOG'||tn==='SCRIPT'||tn==='STYLE'||tn==='SVG'||c.id==='rr'||c.id==='ap-mob-host'||(tn==='TABLE'&&c.classList&&c.classList.contains('rt'))||(c.classList&&(c.classList.contains('rc')||c.classList.contains('msd-p'))))continue;if(tn==='H1'||tn==='H2'){var k=M[c.textContent.trim().toLowerCase()];if(k){if(c.dataset.hic!==k)c.dataset.hic=k}else if(c.dataset.hic)delete c.dataset.hic}else walkHeadings(c)}}
+function tag(){walkHeadings(document.body)}
+var t=0;function q(recs){if(window.__vrStashingRr||isNoise(recs))return;clearTimeout(t);t=setTimeout(tag,60)}
 new MutationObserver(q).observe(document.body,{childList:true,subtree:true});tag()})();

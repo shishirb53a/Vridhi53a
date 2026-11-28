@@ -906,14 +906,22 @@
       else setTimeout(run, 16);
     }
 
-    var IGNORE = "#rr,#ap-mob-host,.msd-p,.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#fzs,#rp-max,#rp-pdf";
+    var IGNORE = "#rr,#ap-mob-host,.msd-p,.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#fzs,#rp-max,#rp-pdf,.kv";
+    function allNodesMatch(list) {
+      if (!list || !list.length) return true;
+      for (var j = 0; j < list.length; j++) {
+        var n = list[j];
+        if (!n || n.nodeType !== 1 || !n.matches || !n.matches(IGNORE)) return false;
+      }
+      return true;
+    }
     function isInternalReportNoise(recs) {
       if (!Array.isArray(recs) || !recs.length) return false;
       for (var i = 0; i < recs.length; i++) {
         var r = recs[i], t = r.target;
         if (t && t.nodeType === 3) t = t.parentElement;
         if (t && t.closest && t.closest(IGNORE)) continue;
-        if (r.addedNodes && r.addedNodes.length === 1 && r.removedNodes && r.removedNodes.length === 0 && r.addedNodes[0].nodeType === 1 && r.addedNodes[0].matches && r.addedNodes[0].matches(IGNORE)) continue;
+        if (r.type === "childList" && ((r.addedNodes && r.addedNodes.length) || (r.removedNodes && r.removedNodes.length)) && allNodesMatch(r.addedNodes) && allNodesMatch(r.removedNodes)) continue;
         return false;
       }
       return true;

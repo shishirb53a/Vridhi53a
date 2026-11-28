@@ -452,7 +452,7 @@ var hasPolData=(s.policies&&s.policies.length)||s.polClients;
 var pol=hasPolData&&typeof VRPolicy!=='undefined'&&VRPolicy&&VRPolicy.forState?JSON.stringify(VRPolicy.forState(s,'goal')):'';
 return [s.start,s.end,s.ret,s.retP,g.basic,g.svc,g.rem,g.cap,ms,as,pol].join('#')}
 window.vrReportCalc=function(){var sig=vrStateSig(S),c=window.__vrReportCalcCache;if(c&&c.state===S&&c.sig===sig)return c.value;var value=calc(S);window.__vrReportCalcCache={state:S,sig:vrStateSig(S),value:value};return value};
-function repRows(){if(UI.rv==='sav')return window.repSavRows();if(UI.rv==='int')return window.repIRows();if(UI.rv==='month')return window.repMRows();const SEL=repSel();if(SEL.none)return window.repNone();if(SEL.min){const D0=window.vrReportCalc();return window.repMin(D0.rows,{label:'As on',noun:'years',yr:true,lab:r=>'1 Apr '+r.year,hl:r=>r.a-1===D0.ri})}const D=window.vrReportCalc(),A=S.assets,Ms=S.members,kids=Ms.map((m,i)=>m.role==='Child'?i:-1).filter(i=>i>=0),q=UI.rq.trim().toLowerCase(),nf=A.length===1||(UI.rcl&&UI.rcl.length===1),hideDupPF=A.length===1&&/pf\s*-?\s*post|pf\s*post\s*office/i.test(A[0].name),allIdx=A.map((x,i)=>i),N=D.rows.length,mt=D._meta,depAll=mt&&mt.N===N&&mt.len===A.length?mt.depShowAll:null;
+function repRows(){const mode=arguments[0];if(UI.rv==='sav')return window.repSavRows();if(UI.rv==='int')return window.repIRows(mode);if(UI.rv==='month')return window.repMRows(mode);const SEL=repSel();if(SEL.none)return window.repNone();if(SEL.min){const D0=window.vrReportCalc();return window.repMin(D0.rows,{label:'As on',noun:'years',yr:true,lab:r=>'1 Apr '+r.year,hl:r=>r.a-1===D0.ri},mode)}const D=window.vrReportCalc(),A=S.assets,Ms=S.members,kids=Ms.map((m,i)=>m.role==='Child'?i:-1).filter(i=>i>=0),q=UI.rq.trim().toLowerCase(),nf=A.length===1||(UI.rcl&&UI.rcl.length===1),hideDupPF=A.length===1&&/pf\s*-?\s*post|pf\s*post\s*office/i.test(A[0].name),allIdx=A.map((x,i)=>i),N=D.rows.length,mt=D._meta,depAll=mt&&mt.N===N&&mt.len===A.length?mt.depShowAll:null;
 let rc=D._repCache;
 if(!rc){rc={cellInner:new Array(N+1),vAll:new Array(N+1),hay:new Array(N+1),hin:new Array(N+1),roiT:new Array(N+1)};Object.defineProperty(D,'_repCache',{value:rc,enumerable:false,configurable:true})}
 const getDep=r=>depAll?(depAll[r.a]||0):depShow(r.a,null,N);
@@ -496,6 +496,72 @@ if(skipRc)return tbl;
 return tbl+'\n<div class="rc">'+metaL.map(({r,yInt,am,mi,dep,roiT,hinT})=>`<details class="yc ${r.a-1===D.ri?'a':''}${UI.sel===r.a?' sel':''}" data-r="${r.a}"><summary><b>As on 1 Apr ${r.year}</b>${nf?'':' · '+fyl(r.year)} · Age ${r.age[0]}<br><span class="mu">Year end balance</span> <b>${f(r.tot)}</b><div class="mu">${hinT}</div></summary><div class="kv">
 ${Ms.map((m,k)=>`<span>${escn(m.name)}</span><b>Age ${r.age[k]}${m.role==='Child'?' · '+sh(r.st[k]):''}</b>`).join('')}
 ${hideDupPF?'':A.map((x,i)=>`<span>${escn(x.name)}</span><b>${rf(r.v[i])}</b>`).join('')}<span>Blended ROI</span><b>${roiT}</b><span>Yearly income</span><b>${r.a>1?(am?'-':rf(yInt)):'—'}</b><span>Monthly income</span><b>${r.a>1?(mi==null?'-':rf(mi)):'—'}</b>${hasPol?'<span>Policy payouts</span><b>'+(r.pay>0?rf(r.pay):'—')+'</b><span>Total income</span><b>'+polTiTxt(yInt,am,r.pay)+'</b>':''}<span>Amount deposited</span><b>${rf(dep)}</b><span>Yearly change</span><b>${r.a>1?rf(r.chg):'—'}</b></div></details>`).join('')+'</div>'}
+const __vrRrDomCache=Object.create(null);
+function vrRrDomKey(rv){
+ if(rv!=='month'&&rv!=='int')return '';
+ const rsel=UI.rsel?UI.rsel.join(','):'all';
+ const rcl=UI.rcl?UI.rcl.join(','):'';
+ const cSig=window.RCOLS&&typeof window.RCOLS.sig==='function'?window.RCOLS.sig(rv):'';
+ const wide=typeof window!=='undefined'&&typeof window.innerWidth==='number'&&window.innerWidth>1040?'d':'m';
+ return[rv,vrStateSig(S),rsel,rcl,UI.rq.trim().toLowerCase(),UI.rk,UI.rd,cSig,S.lang||'en',wide].join('||');
+}
+window.vrRrDomKey=vrRrDomKey;
+window.vrClearRrDomCache=function(){delete __vrRrDomCache.month;delete __vrRrDomCache.int};
+function stashRrDom(){
+ const cur=typeof document!=='undefined'&&document.getElementById?document.getElementById('rr'):null;
+ if(!cur||!cur.dataset||!cur.dataset.vrDomRv||!cur.dataset.vrDomKey||!cur.firstChild)return;
+ const rv=cur.dataset.vrDomRv;
+ if(rv!=='month'&&rv!=='int')return;
+ const nodes=[];
+ window.__vrStashingRr=true;
+ try{while(cur.firstChild){const n=cur.firstChild;cur.removeChild(n);nodes.push(n)}}finally{window.__vrStashingRr=false}
+ __vrRrDomCache[rv]={key:cur.dataset.vrDomKey,nodes:nodes,rv:rv};
+}
+function restoreRrDom(){
+ const next=typeof document!=='undefined'&&document.getElementById?document.getElementById('rr'):null;
+ if(!next||!next.dataset||!next.dataset.vrDomHit)return;
+ const rv=next.dataset.vrDomHit;
+ delete next.dataset.vrDomHit;
+ const ent=__vrRrDomCache[rv];
+ if(!ent||!ent.nodes||!ent.nodes.length||ent.key!==next.dataset.vrDomKey){
+  next.innerHTML=tr(repRows());
+  return;
+ }
+ for(let i=0;i<ent.nodes.length;i++)next.appendChild(ent.nodes[i]);
+ ent.nodes.length=0;
+ let hasTbl=false,hasRc=false;
+ const ch=next.children;
+ for(let i=0;i<ch.length;i++){
+  const el=ch[i];
+  if(el.tagName==='TABLE'&&el.classList&&el.classList.contains('rt')){
+   hasTbl=true;
+   const rs=el.rows;
+   for(let ri=1;ri<rs.length;ri++){
+    const row=rs[ri],want=UI.sel!=null&&+row.dataset.r===UI.sel;
+    if(row.classList.contains('sel')!==want){row.classList.toggle('sel',want);row.setAttribute('aria-selected',String(want))}
+   }
+  }else if(el.classList&&el.classList.contains('rc')){
+   hasRc=true;
+   const ds=el.children;
+   for(let di=0;di<ds.length;di++){
+    const det=ds[di],want=UI.sel!=null&&+det.dataset.r===UI.sel;
+    if(det.classList&&det.classList.contains('sel')!==want)det.classList.toggle('sel',want);
+   }
+  }
+ }
+ const wide=typeof window!=='undefined'&&typeof window.innerWidth==='number'&&window.innerWidth>1040;
+ const mEl=document.getElementById('m');
+ const isMax=!!(mEl&&mEl.classList&&mEl.classList.contains('vr-rmax'));
+ if((wide||isMax)&&!hasTbl){
+  const th=repRows('table');
+  if(th)next.insertAdjacentHTML('afterbegin',tr(th));
+ }else if(!wide&&!isMax&&!hasRc){
+  const rh=repRows('rc');
+  if(rh)next.insertAdjacentHTML('beforeend',tr(rh));
+ }
+}
+window.vrStashRrDom=stashRrDom;
+window.vrRestoreRrDom=restoreRrDom;
 function rep(){const MV=UI.rv==='month',IV=UI.rv==='int',A=S.assets,yr=x=>x.yrs;
 if(UI.rv==='vdate'&&window.repValueOnDate)return window.repValueOnDate();
 if(UI.rv==='ent'&&window.repEnt)return window.repEnt();
@@ -503,12 +569,15 @@ if(UI.rv==='sav'&&window.repSav)return window.repSav();
 if(!A.length)return gpEmpty();
 if(!MV&&!IV&&window.repAnnualPage)return window.repAnnualPage();
 const SEL=repSel(),so=IV?window.repISort():SEL.min?[['a','S.No'],['year',MV?'Month':'As on'],...SEL.idx.map(i=>['v'+i,A[i].name]),...(MV?[['tot','Month end balance'],['roi','Blended ROI'],['add','Amount deposited'],['int','Interest earned']]:[['age','Age'],['tot','Year end balance'],['roi','Blended ROI'],['add','Amount deposited'],['int','Yearly income'],['mi','Monthly income'],['chg','Yearly change']])]:[['a','S.No'],['year',MV?'Month':'As on'],['age','Age'],['tot',MV?'Month end balance':'Year end balance'],['roi','Blended ROI'],['add','Amount deposited'],['int',MV?'Interest earned':'Yearly income'],...(MV?[]:[['mi','Monthly income']]),...(VRPolicy.hasPayouts('goal')?[['pay',MV?'Policy payout':'Policy payouts'],['ti','Total income']]:[]),['chg',MV?'Monthly change':'Yearly change'],...A.map((x,i)=>['v'+i,x.name])];
+const domKey=(MV||IV)?vrRrDomKey(UI.rv):'';
+const domHit=!!(domKey&&__vrRrDomCache[UI.rv]&&__vrRrDomCache[UI.rv].key===domKey&&__vrRrDomCache[UI.rv].nodes&&__vrRrDomCache[UI.rv].nodes.length);
+const rrAttrs=(MV?' class="mw"':'')+(domKey?' data-vr-dom-rv="'+UI.rv+'" data-vr-dom-key="'+esc(domKey)+'"':'')+(domHit?' data-vr-dom-hit="'+UI.rv+'"':'');
 return`
 
 <div class="card"><div class="rph2" data-rpx><div class="rpt"><h2>${IV?'Interest &amp; Income Statement':MV?'Monthly Portfolio Projection':'Annual Portfolio Projection'}</h2>${window.rptInfo((IV?'Interest = Closing Balance − Opening Balance − Additions · Monthly Income = Interest ÷ 12 · ':'Formula: Closing Balance = (Previous Closing × (1 + Return)) + Yearly Additions · ')+(MV&&!IV?'Months run April to March. Holdings marked "Interest credited on 1 April" show deposits month by month and the interest in the March row (as on 1 April). Other holdings grow monthly. March always matches the Year-by-year report. ':'')+(IV?'Click a row to highlight it · Retired tag = year ending at your retirement age · interest = closing − opening − additions · monthly income = interest ÷ 12 · values in ₹ Lakh (hover for exact amount)':MV?'Click a row to highlight it · Retired tag = March (as on 1 Apr) of your retirement year · header stays frozen while you scroll · table values in ₹ Lakh (hover for exact amount)':'Click a row to highlight it · Retired tag = retirement year · table values in ₹ Lakh (hover for exact amount)'),'About this table')}</div>${window.rptCsv?window.rptCsv('csv'):'<button type="button" id="csv" class="vr-ib vr-ib-csv" title="Copy as CSV" aria-label="Copy as CSV"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>'}</div>
 ${window.rsDrops()}
 <div class="tb"><input id="rq" type="search" placeholder="${MV?'Search month, year, age, amount…':'Search year, age, amount…'}" aria-label="Search forecast" value="${esc(UI.rq)}"><select id="rsf" aria-label="Sort by">${so.map(([k,t])=>`<option value="${k}" ${UI.rk===k?'selected':''}>Sort: ${esc(t)}</option>`).join('')}</select><button id="rsd" aria-label="Toggle sort direction">${UI.rd>0?'▲':'▼'}</button></div>
-<div id="rr"${MV?' class="mw"':''}>${repRows()}</div>
+<div id="rr"${rrAttrs}>${domHit?'':repRows()}</div>
 </div>`}
 window.fyl=function(y){return'FY '+(y-1)+'-'+String(y).slice(-2)};
 const familyView=()=>({state:S,ui:UI,roles:ROLES,escape:esc,escapeName:escn,stage:stg});
@@ -517,7 +586,7 @@ function pageBar(){
 return UI.tab==='Holdings'&&UI.hv!=null&&S.assets.some(x=>String(x.id)===String(UI.hv))?'':`<div class="pb"><h1 class="pt">${UI.tab==='RP Reports'?'Reports':UI.tab}</h1></div>`}
 function render(){if(window.VR_PROD&&window.VRSB&&window.VR_ACCESS&&window.VR_ACCESS.error){$('#nav').innerHTML='';$('#m').innerHTML='<div class="card"><h2>Account access unavailable</h2><p class="er" role="alert">'+esc(window.VR_ACCESS.error)+'</p><p class="mu">Apply the latest supabase/schema.sql and deploy the manage-users Edge Function, then reload.</p></div>';return}
 if(window.VR_PROD&&window.VR_ACCESS&&!canReadData()){if(canManageUsers())UI.tab='Users';else{$('#nav').innerHTML='';$('#m').innerHTML='<div class="card"><h2>Application access unavailable</h2><p class="mu">Your assigned user type does not include access to application data.</p></div>';return}}
-const allowed=accessibleTabs();if(!allowed.includes(UI.tab)){if(!allowed.length){$('#nav').innerHTML='';$('#m').innerHTML='<div class="card"><h2>No sections available</h2><p class="mu">Your assigned user type does not have access to any application sections. Ask an administrator to update its permissions.</p></div>';return}UI.tab=allowed[0]}window.syncCats&&syncCats();nav();TRD++;let h;try{const MOD=MODS().find(m=>m.tab===UI.tab);h=(MOD?MOD.bar():GP.includes(UI.tab)?(window.gppMBar?gppMBar():''):SET.includes(UI.tab)?setBar():pageBar())+(MOD?MOD.page():({Dashboard:dash,Holdings:hold,Reports:rep,Settings:()=>window.VRSettings.render({state:S,family:window.VRFamily.page(familyView()),languages:LANGS,reportColumns:()=>window.rcolsUI?window.rcolsUI():'',snapshots:()=>window.snapUI?window.snapUI():'',colourTheme:()=>window.ccUI?window.ccUI():'',appearance:()=>window.lookUI?window.lookUI():''}),Help:()=>window.VRHelp.page(UI,esc,escn),'Retirement planner':()=>window.fhPage?fhPage():'','RP Reports':()=>window.fhReportTab?window.fhReportTab():'',Users:()=>window.usersTab?window.usersTab():''})[UI.tab]())+(MOD?MOD.nav():GP.includes(UI.tab)&&S.assets.length?gpNav():'')}finally{TRD--}$('#m').innerHTML=tr(h);setLang();theme();window.fhpBar&&fhpBar();const reportTab=$('#m .report-view-picker [aria-selected="true"]');if(reportTab&&reportTab.scrollIntoView)reportTab.scrollIntoView({block:'nearest',inline:'nearest'})}
+const allowed=accessibleTabs();if(!allowed.includes(UI.tab)){if(!allowed.length){$('#nav').innerHTML='';$('#m').innerHTML='<div class="card"><h2>No sections available</h2><p class="mu">Your assigned user type does not have access to any application sections. Ask an administrator to update its permissions.</p></div>';return}UI.tab=allowed[0]}window.syncCats&&syncCats();stashRrDom();nav();TRD++;let h;try{const MOD=MODS().find(m=>m.tab===UI.tab);h=(MOD?MOD.bar():GP.includes(UI.tab)?(window.gppMBar?gppMBar():''):SET.includes(UI.tab)?setBar():pageBar())+(MOD?MOD.page():({Dashboard:dash,Holdings:hold,Reports:rep,Settings:()=>window.VRSettings.render({state:S,family:window.VRFamily.page(familyView()),languages:LANGS,reportColumns:()=>window.rcolsUI?window.rcolsUI():'',snapshots:()=>window.snapUI?window.snapUI():'',colourTheme:()=>window.ccUI?window.ccUI():'',appearance:()=>window.lookUI?window.lookUI():''}),Help:()=>window.VRHelp.page(UI,esc,escn),'Retirement planner':()=>window.fhPage?fhPage():'','RP Reports':()=>window.fhReportTab?window.fhReportTab():'',Users:()=>window.usersTab?window.usersTab():''})[UI.tab]())+(MOD?MOD.nav():GP.includes(UI.tab)&&S.assets.length?gpNav():'')}finally{TRD--}$('#m').innerHTML=tr(h);restoreRrDom();setLang();theme();window.fhpBar&&fhpBar();const reportTab=$('#m .report-view-picker [aria-selected="true"]');if(reportTab&&reportTab.scrollIntoView)reportTab.scrollIntoView({block:'nearest',inline:'nearest'})}
 function open(h){dg.className='';dg.innerHTML=tr(h,1);dg.showModal()}
 const fld=(id,l,v,t='number',ex='')=>`<p><label for="${id}">${l}</label><input id="${id}" type="${t}" value="${esc(v)}" ${ex}></p>`;
 const CI={'Equity':'🟢','Fixed income':'🔵','Retirement':'🟣','Gold / Metal':'🟡','Cash':'⚪','Other':'➕'};

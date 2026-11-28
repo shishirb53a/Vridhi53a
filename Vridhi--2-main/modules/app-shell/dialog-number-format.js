@@ -3,8 +3,23 @@
 (function () {
   var RX = /(\u20b9\s?-?\d[\d,]*(?:\.\d+)?) (L|Cr)(?![A-Za-z])/g, SKIP = /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION|SELECT|TITLE|NOSCRIPT)$/;
   var PLAIN_PAR = /^(TD|TH|TR|P|B|STRONG|EM|SMALL|SPAN|LI|DD|DT|H1|H2|H3|H4|A|TIME|LABEL|CAPTION|I|U|CODE)$/;
-  var SKIP_CONT = '#vr-side,#vr-drawer,#vr-drawer-backdrop,#vr-side-bc,#toast,#vr-pdf-frame,#ap-mob-host,.nb';
+  var SKIP_CONT = '#vr-side,#vr-drawer,#vr-drawer-backdrop,#vr-side-bc,#toast,#vr-pdf-frame,#ap-mob-host,#rr table.rt,#rr .rc,#rp-max,#rp-pdf,#fh-max,#fh-pdf,#hy-max,#hy-pdf,.nb';
   var busy = false, queued = false, obs, pendingRoots = [];
+  function walk(node, hits) {
+    for (var c = node.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType === 3) {
+        var nv = c.nodeValue;
+        if (!nv || nv.indexOf('\u20b9') < 0 || (nv.indexOf(' L') < 0 && nv.indexOf(' Cr') < 0)) continue;
+        var pe = c.parentElement; if (!pe || SKIP.test(pe.tagName) || (pe.closest && pe.closest(SKIP_CONT))) continue;
+        RX.lastIndex = 0; if (RX.test(nv)) hits.push(c);
+      } else if (c.nodeType === 1) {
+        if (SKIP.test(c.tagName)) continue;
+        if (c.classList && ((c.tagName === 'TABLE' && c.classList.contains('rt')) || c.classList.contains('rc') || c.classList.contains('nb'))) continue;
+        if (c.id === 'ap-mob-host' || (c.matches && c.matches(SKIP_CONT))) continue;
+        walk(c, hits);
+      }
+    }
+  }
   function fix(root, flexCache) {
     if (!root || (root.nodeType === 1 && ((root.matches && root.matches(SKIP_CONT)) || (root.closest && root.closest(SKIP_CONT))))) return;
     if (root.nodeType === 3) {
@@ -15,12 +30,8 @@
       wrapNodes([root], flexCache);
       return;
     }
-    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, hits = [];
-    while ((n = w.nextNode())) {
-      var nv = n.nodeValue; if (!nv || nv.indexOf('\u20b9') < 0 || (nv.indexOf(' L') < 0 && nv.indexOf(' Cr') < 0)) continue;
-      var pe = n.parentElement; if (!pe || SKIP.test(pe.tagName) || (pe.closest && pe.closest(SKIP_CONT))) continue;
-      RX.lastIndex = 0; if (RX.test(nv)) hits.push(n);
-    }
+    var hits = [];
+    walk(root, hits);
     if (hits.length) wrapNodes(hits, flexCache);
   }
   function wrapNodes(hits, flexCache) {
@@ -66,7 +77,7 @@
   }
   function watch() {
     if (!obs) obs = new MutationObserver(function (recs) {
-      if (busy) return;
+      if (busy || window.__vrStashingRr) return;
       for (var i = 0; i < recs.length; i++) {
         var rec = recs[i];
         if (rec.type === "characterData") {

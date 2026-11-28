@@ -165,22 +165,29 @@
       var mm = document.getElementById('m'); if (mm && obs) obs.observe(mm, { childList: true, subtree: true });
     }
   }
+  function allNodesMatch(list, sel) {
+    if (!list || !list.length) return true;
+    for (var j = 0; j < list.length; j++) {
+      var n = list[j];
+      if (!n || n.nodeType !== 1 || !n.matches || !n.matches(sel)) return false;
+    }
+    return true;
+  }
   function isHelperMutation(recs) {
     if (!recs || !recs.length) return false;
-    var IGNORE = '.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#ap-mob-host,#fzs,#rp-max,#rp-pdf';
+    var IGNORE = '.nb,.rtg,.vr-i,.vr-tdy,.vpg,.vsub,.vflt,.vr-aph,#ap-mob-host,#fzs,#rp-max,#rp-pdf,.kv';
     for (var i = 0; i < recs.length; i++) {
       var rec = recs[i], t = rec.target && rec.target.nodeType === 3 ? rec.target.parentElement : rec.target;
       if (t && t.closest && t.closest(IGNORE)) continue;
-      if (rec.addedNodes && rec.addedNodes.length === 1 && rec.removedNodes && rec.removedNodes.length === 0) {
-        var an = rec.addedNodes[0];
-        if (an.nodeType === 1 && an.matches && an.matches(IGNORE)) continue;
-      }
+      if (rec.type === 'childList' && ((rec.addedNodes && rec.addedNodes.length) || (rec.removedNodes && rec.removedNodes.length)) && allNodesMatch(rec.addedNodes, IGNORE) && allNodesMatch(rec.removedNodes, IGNORE)) continue;
       return false;
     }
     return true;
   }
   function schedule(recs) {
+    if (window.__vrStashingRr) return;
     if (Array.isArray(recs) && isHelperMutation(recs)) return;
+    if (!onAnnualPage()) { clearTimeout(timer); timer = 0; return; }
     clearTimeout(timer); timer = setTimeout(work, 30);
   }   /* after the Columns feature has finished with the new table */
 

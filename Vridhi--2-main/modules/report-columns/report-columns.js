@@ -57,31 +57,51 @@ function reorderCard(d,v,assetMap){if(!DEFORD[v])return;var kv=d.querySelector('
 for(var i=0;i<ch.length-1;i+=2)pr.push({sp:ch[i],bv:ch[i+1],k:pairKey(v,ch[i].textContent.trim(),ch[i+1].textContent.trim(),assetMap)});
 var seq=reorderBlocks(blocksOf(pr.map(function(x){return x.k})),v);if(!seq)return;
 seq.forEach(function(b){b.idx.forEach(function(i){kv.appendChild(pr[i].sp);kv.appendChild(pr[i].bv)})})}
+function applyCard(d,v,assetMap){
+if(!d||!CFG[v])return;
+if(!assetMap){assetMap=Object.create(null);var as=S.assets||[];for(var ai=0;ai<as.length;ai++)assetMap[as[ai].name]=1}
+var kv=d.querySelector('.kv');
+if(kv&&!(kv.dataset&&kv.dataset.lazyKv)){var ch=Array.prototype.slice.call(kv.children);
+for(var i=0;i<ch.length-1;i+=2){var sp=ch[i],bv=ch[i+1],lab=sp.textContent.trim(),val=bv.textContent.trim(),k=CL[v][lab]||null;
+if(!k&&v==='int'&&/ interest$/.test(lab))k='v';
+if(!k&&v!=='int'&&/^Age\b/.test(val))k='age';
+if(k==='age'){var parts=val.split(' \u00b7 '),aOn=vis(v,'age'),sOn=vis(v,'s');
+if(!aOn&&(!sOn||parts.length<2)){sp.remove();bv.remove()}else if(!aOn)bv.textContent=parts.slice(1).join(' \u00b7 ');else if(!sOn&&parts.length>1)bv.textContent=parts[0]}
+else if(k&&!vis(v,k)){sp.remove();bv.remove()}}
+reorderCard(d,v,assetMap)}
+var sm=d.querySelector('summary>div.mu');
+if(sm&&(v==='int'?!vis(v,'mi'):!vis(v,'hi')))sm.remove()}
+function findDirectOrQuery(root,tag,cls,sel){
+var ch=root&&root.children;
+if(ch&&ch.length){for(var i=0;i<ch.length;i++){var el=ch[i];if((!tag||el.tagName===tag)&&el.classList&&el.classList.contains(cls))return el}}
+return typeof root.querySelector==='function'?root.querySelector(sel):null}
+function sig(v){return JSON.stringify([P[v]||null,O[v]||null])}
 /* remove hidden columns from a report table and its phone cards (idempotent per rendered table) */
 function apply(root,v){
 if(!root||!CFG[v]||(root.dataset&&root.dataset.apLazyTbl==='1'))return;
-var t=root.querySelector('table.rt');
+var t=findDirectOrQuery(root,'TABLE','rt','table.rt');
 if(t&&!t.dataset.rc){t.dataset.rc=v;
 var r0=t.rows[0],hs=[];
 if(r0){var hc=r0.cells;for(var ci=0;ci<hc.length;ci++){var b=hc[ci].querySelector('button[data-rk]');hs.push(b?b.dataset.rk:'')}}
 var rm=[];for(var hi=0;hi<hs.length;hi++){if(hs[hi]&&!vis(v,hs[hi]))rm.push(hi)}
 if(rm.length){var rows=t.rows,rl=rows.length,rml=rm.length;for(var ri=0;ri<rl;ri++){var row=rows[ri],cells=row.cells;for(var j=rml-1;j>=0;j--){var c=cells[rm[j]];if(c)row.removeChild(c)}}}
 t.classList.toggle('nsn',!(hs[0]==='a'&&vis(v,'a')));reorderTable(t,v)}
-var rc=root.querySelector('.rc');
+var rc=findDirectOrQuery(root,'DIV','rc','.rc');
 if(rc&&!rc.dataset.rc){rc.dataset.rc=v;
 var assetMap=Object.create(null),as=S.assets||[];
 for(var ai=0;ai<as.length;ai++)assetMap[as[ai].name]=1;
-rc.querySelectorAll('details.yc').forEach(function(d){
-var kv=d.querySelector('.kv');
-if(kv){var ch=Array.prototype.slice.call(kv.children);
-for(var i=0;i<ch.length-1;i+=2){var sp=ch[i],bv=ch[i+1],lab=sp.textContent.trim(),val=bv.textContent.trim(),k=CL[v][lab]||null;
-if(!k&&v==='int'&&/ interest$/.test(lab))k='v';
-if(!k&&v!=='int'&&/^Age\b/.test(val))k='age';
-if(k==='age'){var parts=val.split(' \u00b7 '),aOn=vis(v,'age'),sOn=vis(v,'s');
-if(!aOn&&(!sOn||parts.length<2)){sp.remove();bv.remove()}else if(!aOn)bv.textContent=parts.slice(1).join(' \u00b7 ');else if(!sOn&&parts.length>1)bv.textContent=parts[0]}
-else if(k&&!vis(v,k)){sp.remove();bv.remove()}}}
-var sm=d.querySelector('summary>div.mu');
-if(sm&&(v==='int'?!vis(v,'mi'):!vis(v,'hi')))sm.remove();reorderCard(d,v,assetMap)})}}
+var hideSub=(v==='int'?!vis(v,'mi'):!vis(v,'hi'));
+var cards=rc.children&&rc.children.length?rc.children:rc.querySelectorAll('details.yc');
+for(var di=0;di<cards.length;di++){
+ var d=cards[di];
+ if(!d||d.tagName!=='DETAILS')continue;
+ var kv=d.querySelector('.kv');
+ if(kv&&kv.dataset&&kv.dataset.lazyKv){
+  if(hideSub){var sm=d.querySelector('summary>div.mu');if(sm)sm.remove()}
+  continue;
+ }
+ applyCard(d,v,assetMap);
+}}}
 /* Columns dropdown on the Reports tab */
 var dropSig='';
 function fillDrop(dd,v){
@@ -129,8 +149,8 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
 var s0=b.dataset.rcmv,i=s0.indexOf(':'),j=s0.lastIndexOf(':'),v=s0.slice(0,i),g=s0.slice(i+1,j),d=+s0.slice(j+1);
 if(v==='sav'||v==='hz'){var cur=v==='sav'?catsBase():(hzTitles()||[]),t=cur[cur.indexOf(g)+d];if(!t)return;O[v]=moveTo(cur.slice(),g,t);persistO()}else move(v,g,d);
 render();var all=[].slice.call(document.querySelectorAll('[data-rcmv]')),n=all.filter(function(x){return x.dataset.rcmv===s0&&!x.disabled})[0]||all.filter(function(x){return x.dataset.rcmv===s0.slice(0,j+1)+(-d)})[0];if(n)n.focus()});
-window.RCOLS={apply:apply,vis:vis,annualMonthlyIncome:annualMonthlyIncome,cfg:CFG,catOrder:catOrder,hzOrder:hzOrder};
+window.RCOLS={apply:apply,applyCard:applyCard,vis:vis,sig:sig,annualMonthlyIncome:annualMonthlyIncome,cfg:CFG,catOrder:catOrder,hzOrder:hzOrder};
 var r1=window.render;window.render=function(){var r=r1.apply(this,arguments);refresh();return r};
 var m=document.getElementById('m');
-if(m)new MutationObserver(function(){var t=document.querySelector('#rr>table.rt');if(t&&t!==last&&!t.dataset.rc)refresh()}).observe(m,{childList:true,subtree:true});
+if(m)new MutationObserver(function(){if(window.__vrStashingRr)return;var rr=document.getElementById('rr');var t=rr?findDirectOrQuery(rr,'TABLE','rt','table.rt'):null;if(t&&t!==last&&!t.dataset.rc)refresh()}).observe(m,{childList:true,subtree:true});
 })();

@@ -599,3 +599,116 @@ function makeEdgeCaseState() {
 
   console.log('PASS: DOM post-processor & mobile optimization contracts verified');
 })();
+
+// 6. Maximize/Minimize fit caching, observer removal guards, Monthly column pre-filtering, lazy cards & #rr DOM cache
+(function testMaximizeMinimizeAndReportSwitching() {
+  const rmSrc = read('modules/report-maximize/report-maximize.js');
+  const mpSrc = read('modules/reports/monthly-projection.js');
+  const apSrc = read('modules/reports/annual-projection.js');
+  const iiSrc = read('modules/reports/interest-income.js');
+  const pgSrc = read('modules/ui-pagination/ui-pagination.js');
+  const rtSrc = read('modules/reports/retired-row-tags.js');
+  const ahSrc = read('modules/reports/annual-helpers.js');
+  const hiSrc = read('modules/app-shell/heading-icons-init.js');
+  const nfSrc = read('modules/app-shell/dialog-number-format.js');
+  const rcSrc = read('modules/report-columns/report-columns.js');
+  const appSrc = read('modules/app-core/app.js');
+
+  // Contract checks: observer removedNodes filtering & __vrStashingRr guard
+  assert(rmSrc.includes('__vrFitCache') && rmSrc.includes('applyCachedFit'), 'report-maximize caches fit geometry across minimize/maximize');
+  assert(rmSrc.includes('findFitTables') && rmSrc.includes('hydrateReportPart'), 'report-maximize uses O(1) table lookup and non-destructive mobile partial hydration');
+  assert(rmSrc.includes('allNodesMatch(r.removedNodes,IGNORE)'), 'report-maximize ignores #rp-pdf removal mutations');
+  assert(pgSrc.includes('allNodesMatch(r.removedNodes,IGN)') && pgSrc.includes('clearTrackedUi'), 'ui-pagination ignores removedNodes noise and avoids 4x full-DOM scans');
+  assert(rtSrc.includes('allNodesMatch(r.removedNodes,IGNORE)') && rtSrc.includes('dataset.agselKey'), 'retired-row-tags ignores removedNodes noise and avoids rescanning cached tables');
+  assert(ahSrc.includes('allNodesMatch(rec.removedNodes, IGNORE)') && ahSrc.includes('!onAnnualPage()'), 'annual-helpers ignores removedNodes noise and cancels timers off Annual page');
+  assert(hiSrc.includes('walkHeadings') && hiSrc.includes('__vrStashingRr'), 'heading-icons-init prunes #rr/table subtrees and skips stashing mutations');
+  assert(nfSrc.includes('function walk(node, hits)') && nfSrc.includes('#rr table.rt'), 'dialog-number-format prunes table.rt/.rc subtrees without walking 80k text nodes');
+  assert(apSrc.includes('cleanupBackgroundWork') && apSrc.includes('cachedModel'), 'annual-projection memoizes computeModel() and cleans up background timers on view switch');
+  assert(rcSrc.includes('applyCard:applyCard') && rcSrc.includes('sig:sig'), 'report-columns exports applyCard and sig for lazy card hydration and cache keys');
+  assert(appSrc.includes('stashRrDom') && appSrc.includes('restoreRrDom') && appSrc.includes('__vrStashingRr'), 'app.js preserves detached #rr DOM across Monthly/Interest report switches');
+  assert(iiSrc.includes('data-lazy-kv="int"') && iiSrc.includes('_htmlKey'), 'interest-income caches HTML and uses lazy mobile cards');
+
+  // Functional test: repMRows() skips .rc on desktop, skips hidden table on mobile minimized, pre-filters RCOLS columns, and supports partial mode=('table'|'rc')
+  const S = makeEdgeCaseState();
+  const UI = { tab: 'Reports', rv: 'month', rq: '', rk: 'a', rd: 1, sel: null, rsel: null, rcl: null, age: 42 };
+  const hiddenCols = new Set(['a', 'fy', 's', 'chg', 'hi']);
+  let hinCalls = 0;
+
+  function makeMonthlyEnv(innerWidth, isMax) {
+    const mEl = { id: 'm', classList: { contains: c => c === 'vr-rmax' && isMax } };
+    const sandbox = {
+      console, Math, Number, String, Array, Object, Date, JSON, RegExp, Intl, Set, Map,
+      S, UI: Object.assign({}, UI),
+      innerWidth,
+      esc: s => String(s == null ? '' : s),
+      escn: s => String(s == null ? '' : s),
+      fyl: y => `FY ${y - 1}-${String(y).slice(-2)}`,
+      sh: s => s || '—',
+      f: n => n == null ? '—' : '₹ ' + Math.round(n),
+      rf: n => n == null ? '—' : String(Math.round(n)),
+      lk: n => n == null ? '—' : (n / 1e5).toFixed(2),
+      hin: n => { hinCalls++; return 'Hindi ' + Math.round(n || 0); },
+      FYM: m => ((m || 4) + 8) % 12,
+      rowRoi: () => 0.08,
+      rowRoiTxt: () => '8.00%',
+      rowRoiPct: () => '8.00',
+      allMat: () => false,
+      polTiVal: (i, p) => (i || 0) + (p || 0),
+      polTiTxt: (i, am, p) => String(Math.round((i || 0) + (p || 0))),
+      RCOLS: { vis: (v, k) => !hiddenCols.has(k), apply: () => {}, applyCard: () => {}, sig: () => 'def' },
+      VRPolicy: { hasPayouts: () => false, monthPayout: () => 0, forState: () => [] },
+      addEventListener: () => {},
+      document: {
+        getElementById: id => id === 'm' ? mEl : null,
+        addEventListener: () => {},
+        querySelector: () => null
+      },
+      render: () => {}
+    };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    const engSrc = read('modules/portfolio-calculations/engine.js');
+    const selSrc = read('modules/reports/report-selection.js');
+    vm.runInContext(engSrc, sandbox);
+    vm.runInContext(`
+      var fyInfo = (x, st, a) => window.VRCalcCore.fyInfo(x, st, a);
+      var matOf = (x, st) => window.VRCalcCore.matOf(x, st);
+      var mcm = (s, x, q) => window.VRCalcCore.mcm(s, x, q);
+      var calc = st => window.VRCalcCore.calculate(st, { stage: (a, r) => r === 'Child' ? 'School' : '—', yearsOf: window.VRCalcCore.yrsOf, policy: { applyToRows: () => {} } });
+    `, sandbox);
+    vm.runInContext(selSrc, sandbox);
+    vm.runInContext(mpSrc, sandbox);
+    return sandbox;
+  }
+
+  // Desktop wide: omits .rc, pre-filters optional columns, and avoids 660 hin() calls when hi is hidden
+  hinCalls = 0;
+  const deskEnv = makeMonthlyEnv(1440, false);
+  const deskHtml1 = deskEnv.repMRows();
+  assert(deskHtml1.includes('<table class="rt">'), 'Desktop Monthly renders table.rt');
+  assert(!deskHtml1.includes('<div class="rc">'), 'Desktop Monthly omits hidden mobile .rc cards');
+  assert(!deskHtml1.includes('data-rk="a"') && !deskHtml1.includes('data-rk="hi"') && !deskHtml1.includes('data-rk="fy"'), 'Desktop Monthly pre-filters hidden optional columns');
+  assert.strictEqual(hinCalls, 0, 'Desktop Monthly skips hin() computation when hi column is hidden');
+  const deskHtml2 = deskEnv.repMRows();
+  assert.strictEqual(deskHtml2, deskHtml1, 'Repeated repMRows() returns cached HTML');
+
+  // Enabling optional column invalidates colMask cache and includes column
+  hiddenCols.delete('hi');
+  const deskHtmlWithHi = deskEnv.repMRows();
+  assert(deskHtmlWithHi.includes('data-rk="hi"'), 'Enabling hi column updates cacheKey and renders hi column');
+  assert(hinCalls > 0, 'Enabling hi column computes hin() on demand');
+  hiddenCols.add('hi');
+
+  // Mobile minimized: skips hidden table.rt, emits lazy .kv cards; mode='table' emits only table.rt
+  const mobEnv = makeMonthlyEnv(390, false);
+  const mobMinHtml = mobEnv.repMRows();
+  assert(!mobMinHtml.includes('<table class="rt">'), 'Mobile minimized Monthly skips hidden table.rt');
+  assert(mobMinHtml.includes('data-lazy-kv="month"'), 'Mobile minimized Monthly uses lazy .kv cards');
+  const mobTblPart = mobEnv.repMRows('table');
+  assert(mobTblPart.includes('<table class="rt">') && !mobTblPart.includes('<div class="rc">'), 'repMRows("table") returns only table.rt for non-destructive mobile maximize');
+  const mobRcPart = mobEnv.repMRows('rc');
+  assert(!mobRcPart.includes('<table class="rt">') && mobRcPart.includes('<div class="rc">'), 'repMRows("rc") returns only .rc for non-destructive mobile minimize');
+
+  console.log('PASS: Maximize/Minimize caching, observer guards, Monthly pre-filtering & partial hydration verified');
+})();
+

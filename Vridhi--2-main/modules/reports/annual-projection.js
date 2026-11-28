@@ -83,8 +83,15 @@
     ].join('|');
   }
 
+  var cachedModelRef = null;
+  var cachedModelKey = '';
+
   function computeModel() {
     var D = window.vrReportCalc ? window.vrReportCalc() : calc(S);
+    var rselKey = UI && UI.rsel ? UI.rsel.join(',') : 'ALL';
+    if (cachedModelRef && cachedModelRef.D === D && cachedModelKey === rselKey && cachedModelRef.goalVal === (S.goal || 0)) {
+      return cachedModelRef;
+    }
     var A = S.assets || [];
     var Ms = S.members || [];
     var SEL = repSel();
@@ -181,7 +188,7 @@
     var goalVal = S.goal || 0;
     var goalPct = goalVal > 0 ? (retTot / goalVal * 100) : 0;
 
-    return {
+    var model = {
       D: D, A: A, Ms: Ms, SEL: SEL, idx: idx, rows: rows,
       first: first, ret: ret, end: end, spanYrs: spanYrs, yToRet: yToRet,
       baseTot: baseTot, retTot: retTot, endTot: endTot,
@@ -192,6 +199,9 @@
       goalVal: goalVal, goalPct: goalPct,
       totOf: totOf, roiOf: roiOf, yearlyIntOf: yearlyIntOf, monthlyIntOf: monthlyIntOf, addOf: addOf
     };
+    cachedModelRef = model;
+    cachedModelKey = rselKey;
+    return model;
   }
 
   function filteredSortedRows(m) {
@@ -504,8 +514,7 @@
       prefs.years,
       isStrictMob ? ('sm:' + mobKey) : isMob ? ('m:' + mobKey) : 'd',
       UI.sel,
-      UI.msd || '',
-      maxActive
+      UI.msd || ''
     ].join('|');
 
     if (cachedAnnualHtml && cachedAnnualKey === key && !isStrictMob) {
@@ -889,7 +898,8 @@
       } else if (b.hasAttribute('data-ap-max')) {
         var rpMax = document.getElementById('rp-max');
         if (rpMax) rpMax.click();
-        scheduleSync(40);
+        var mNode = document.getElementById('m');
+        if (mNode) b.setAttribute('aria-pressed', String(mNode.classList.contains('vr-rmax')));
       } else if (b.hasAttribute('data-ap-pdf')) {
         triggerPdfWithVisibleTable();
       } else if (b.hasAttribute('data-ap-mob-jump')) {
@@ -932,8 +942,28 @@
     }
   }
 
+  function cleanupBackgroundWork() {
+    if (syncTimer) {
+      clearTimeout(syncTimer);
+      syncTimer = 0;
+    }
+    cancelMobHydration();
+  }
+
+  if (typeof window !== 'undefined' && typeof window.render === 'function' && !window.__apRenderCleanupWrapped) {
+    window.__apRenderCleanupWrapped = true;
+    var prevRender = window.render;
+    window.render = function () {
+      if (typeof UI === 'undefined' || UI.tab !== 'Reports' || (UI.rv && UI.rv !== 'year')) {
+        cleanupBackgroundWork();
+      }
+      return prevRender.apply(this, arguments);
+    };
+  }
+
   window.vrSyncAnnualProjection = syncAnnualProjection;
   window.vrEnsureAnnualDesktopTable = ensureDesktopTableHydrated;
   window.vrFlushAnnualMobCards = flushMobCards;
+  window.vrCleanupAnnualBackground = cleanupBackgroundWork;
   if (typeof document !== 'undefined') bindEvents();
 })();
