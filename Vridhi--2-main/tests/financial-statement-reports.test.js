@@ -84,6 +84,27 @@ test('Copy as CSV and Export to PDF are consistent icon-only buttons across all 
   assert.ok(css.includes('button.vr-ib-csv') && css.includes('button.vr-ib-pdf') && css.includes('width: 34px !important'), 'financial-statement.css enforces uniform 34x34 square icon sizing for CSV and PDF buttons');
 });
 
+test('financial-statement.css and PDF export left-align headings, values, and flex cells across all report tables', () => {
+  const leftBlock = css.slice(css.indexOf('/* Unified Left Alignment Across All Report Tables'));
+  assert.ok(leftBlock.length > 0, 'Unified left-alignment CSS block missing in financial-statement.css');
+  assert.ok(leftBlock.includes('text-align: left !important;'), 'Report table cells/headers must enforce text-align: left !important');
+  assert.ok(leftBlock.includes('justify-content: flex-start !important;'), 'Sortable header buttons and flex cells (.st-thw, .st-sv) must left-align');
+
+  const expectedTables = [
+    'table.rt', 'table.rs', 'table.hz-t', 'table.vp-t', 'table.st-t',
+    'table.ent-t', 'table.vod-table', 'table.sx-t', 'table.hw-t',
+    'table.fh-tbl', '.fh-tblw table', 'table.gpp-table', 'table.gpp-cmp-table',
+    'table.vr-sn-t', 'table.vw-tb', 'dialog.hyd table'
+  ];
+  for (const tbl of expectedTables) {
+    assert.ok(leftBlock.includes(tbl), `Missing left-alignment coverage for ${tbl}`);
+  }
+
+  assert.ok(maxJs.includes('font-weight:700;text-align:left;vertical-align:bottom;'), 'PDF print th must be left-aligned');
+  assert.ok(maxJs.includes('border:1px solid var(--bd);text-align:left;vertical-align:top;'), 'PDF print td must be left-aligned');
+  assert.ok(maxJs.includes('.st-sv{display:flex;align-items:center;justify-content:flex-start;gap:4px}'), 'PDF print .st-sv must be left-aligned');
+});
+
 test('financial-statement.css has balanced braces', () => {
   const opens = (css.match(/\{/g) || []).length;
   const closes = (css.match(/\}/g) || []).length;

@@ -607,6 +607,55 @@ html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body :is(
   opacity: 0.8;
 }
 
+/* Unified Left Alignment Across All Report Tables (All Skins/Themes · Desktop & Mobile) */
+html:not(#vrx):not(#vry) body :is(
+  table.rt,
+  table.rs,
+  table.hz-t,
+  table.vp-t,
+  table.st-t,
+  table.ent-t,
+  table.vod-table,
+  table.sx-t,
+  table.hw-t,
+  table.fh-tbl,
+  .fh-tblw table,
+  table.gpp-table,
+  table.gpp-cmp-table,
+  table.vr-sn-t,
+  table.vw-tb,
+  dialog.hyd table
+) :is(th, td):not(.st-empty) {
+  text-align: left !important;
+}
+
+html:not(#vrx):not(#vry) body :is(
+  table.rt,
+  table.rs,
+  table.hz-t,
+  table.vp-t,
+  table.st-t,
+  table.ent-t,
+  table.vod-table,
+  table.sx-t,
+  table.hw-t,
+  table.fh-tbl,
+  .fh-tblw table,
+  table.gpp-table,
+  table.gpp-cmp-table,
+  table.vr-sn-t,
+  table.vw-tb,
+  dialog.hyd table
+) :is(th button, .st-thw, .st-sv) {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+html:not(#vrx):not(#vry) body table.hz-t td > .rtg {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
 /* Clean Sticky Column Right-Edge Separator Shadow (Normal scrollable view) */
 html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body[data-fz="2"] :is(#rr, .hz-wrap) table.rt :is(th, td):nth-child(2),
 html[data-skin="enterprise"][lang][data-font]:not(.x):not(.x):not(.x) body[data-fz="3"] :is(#rr, .hz-wrap) table.rt :is(th, td):nth-child(3),
