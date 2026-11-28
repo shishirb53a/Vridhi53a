@@ -168,8 +168,8 @@
     return L;
   }
 
-  function mobBreakdownItems(m, r) {
-    if (m.SEL.none) return '';
+  function mobBreakdownItems(m, r, expandAll) {
+    if (m.SEL.none || !expandAll) return '';
     return m.idx.map(function (i) {
       var asset = m.A[i];
       if (!asset) return '';
@@ -225,7 +225,7 @@
     }
 
     var expandAll = mobState.details || mobState.chip === 'holdings' || !!mobState.openCards[r.a];
-    var detItems = mobBreakdownItems(m, r);
+    var detItems = mobBreakdownItems(m, r, expandAll);
     var detBlock = detItems ? '<div class="ap-mc-det"' + (expandAll ? '' : ' hidden') + '><div class="ap-mc-det-ttl">Asset Holdings Breakdown</div><div class="ap-mc-det-grid">' + detItems + '</div></div>' : '';
 
     return '<article' + idAttr + ' class="' + cls + '" data-r="' + r.a + '">' +
@@ -308,9 +308,34 @@
     '</div>';
   }
 
+  var cachedAnnualHtml = null;
+  var cachedAnnualKey = '';
+
   window.repAnnualPage = function () {
-    var m = computeModel();
     var prefs = readAnnualPrefs();
+    var maxActive = false;
+    try { maxActive = localStorage.getItem('vr-rep-max') !== '0'; } catch (e) {}
+    var key = [
+      typeof vrStateSig === 'function' ? vrStateSig(S) : JSON.stringify(S),
+      UI.rq || '',
+      UI.rk || 'a',
+      UI.rd || 1,
+      JSON.stringify(UI.rsel || null),
+      prefs.cols,
+      prefs.years,
+      mobState.details,
+      mobState.chip,
+      JSON.stringify(mobState.openCards),
+      UI.sel,
+      maxActive
+    ].join('|');
+
+    var m = computeModel();
+    if (cachedAnnualHtml && cachedAnnualKey === key) {
+      lastRenderedMobSig = mobHtml(m, prefs);
+      return cachedAnnualHtml;
+    }
+
     var SEL = m.SEL, A = m.A;
     var so = SEL.min
       ? [['a', 'S.No'], ['year', 'As on']].concat(m.idx.map(function (i) { return ['v' + i, A[i].name]; }), [['age', 'Age'], ['tot', 'Year end balance'], ['roi', 'Blended ROI'], ['add', 'Amount deposited'], ['int', 'Yearly income'], ['mi', 'Monthly income'], ['chg', 'Yearly change']])
@@ -332,10 +357,8 @@
       ? 'Retirement capital covers ' + m.goalPct.toFixed(1) + '% of ' + safeEsc(fmtCr(m.goalVal)) + ' target goal'
       : 'Portfolio grows ' + safeEsc(m.multEnd) + ' across ' + m.spanYrs + ' projection years';
 
-    var maxActive = false;
-    try { maxActive = localStorage.getItem('vr-rep-max') !== '0'; } catch (e) {}
-
-    return '<div class="ap-wrap">' +
+    cachedAnnualKey = key;
+    cachedAnnualHtml = '<div class="ap-wrap">' +
       '<header class="ap-head">' +
         '<div class="ap-head-left">' +
           '<div class="ap-brand"><div class="ap-brand-mark">' + brandLogo + '</div><div class="ap-brand-txt"><strong>Vriddhi</strong><span>Portfolio Projections</span></div></div>' +
@@ -385,6 +408,7 @@
       '</div>' +
       '<div id="ap-mob-host">' + (lastRenderedMobSig = mobHtml(m, prefs)) + '</div>' +
     '</div>';
+    return cachedAnnualHtml;
   };
 
   function highlightPrimaryHoldingCol(t, A, D) {
